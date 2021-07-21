@@ -473,6 +473,10 @@ class MindMeldALClassifier(ALClassifier):
                         )
                     )
                 else:
+                    # In case of missing test files, ic_eval_test object is a NoneType. In that case
+                    # we have no predictions to evaluate the intent level classifiers. Domain 
+                    # classifier can have atleast one test file across intents, hence is better suited
+                    # for such applications.
                     raise ValueError(
                         "Missing test files in domain '{!s}', use domain level tuning instead.".format(
                             domain

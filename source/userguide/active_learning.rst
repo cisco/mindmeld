@@ -1,7 +1,7 @@
 Active Learning in MindMeld
 ===========================
 
-Once a conversational application is deployed, capturing user logs can be highly beneficial to understand new trends and diversity of how users are phrasing their queries for different intents. These logs can improve the quality of the training data and overall classifier performance. However, manually analyzing these logs and annotating them with the correct domain, intent and entity labels is costly and time consuming. Moreover, as the number of users of the system increase, the number of logs to be annotated also increases by many folds. This reduces the scalability of the manual annotation process. In such scenarios, we can use Active Learning.
+Once a conversational application is deployed, capturing user logs can be highly beneficial to understand new trends and diversity of how users are phrasing their queries for different intents. These logs can improve the quality of the training data and overall classifier performance. However, manually analyzing these logs and annotating them with the correct domain, intent and entity labels is costly and time consuming. Moreover, as the number of users of the system increase, the number of logs to be annotated also increases by many folds. This reduces the scalability of the manual annotation process. In such scenarios, we can use active learning.
 
 
 What is Active Learning?
@@ -75,7 +75,8 @@ Modifying the configuration file is the first step towards customizing the activ
 +---------------------------+------------+----------------------------------------------------------------------------------+
 | log_usage_pct             | float      | Percentage of the log data to use for selection                                  |
 +---------------------------+------------+----------------------------------------------------------------------------------+
-| labeled_logs_pattern      | str        | Regex pattern to match log files if already labeled. For example, ".*log.*.txt"  |
+| labeled_logs_pattern      | str        | Regex pattern to match log files if already labeled correctly into the domain and|
+|                           |            | intent hierarchy of the MindMeld app. For example, ".*log.*.txt"                 |
 +---------------------------+------------+----------------------------------------------------------------------------------+
 | unlabeled_logs_path       | str        | Path to text file containing unlabeled queries from user logs or other resources |
 +---------------------------+------------+----------------------------------------------------------------------------------+
@@ -122,7 +123,9 @@ If there is no configuration defined in the ``config.py`` file or if fields are 
 
 .. note::
 
-    The default batch size is 100. For large applications, this number may be too small and we encourage developers to update it accordingly. We recommend setting 1-2% of total training data size as the batch size.
+    * The default batch size is 100. For large applications, this number may be too small and we encourage developers to update it accordingly. We recommend setting 1-2% of total training data size as the batch size.
+
+    * If the application consists of a single domain, choose 'intent' as the tuning level. If any domain consists of a single intent or any intent has no test files available, choose 'domain' as the tuning level.
 
 
 .. _al_strategy_tuning:
@@ -149,7 +152,7 @@ The following command can be used to run tuning using the settings defined in th
 
     mindmeld active_learning --tune --app-path '<PATH>/app_name/' --output_folder '<PATH>'
 
-Flags for application path and output folder are required and overwrite the default configuration settings for active learning. In addition to the aforementioned required flags, the following optional flags can be used - tuning_level, batch_size, n_epochs, train_seed_pct, and plot (default ``True``). These are described in detail in AL config section above.
+Flags for application path and output folder are required. In addition to the aforementioned required flags, the following optional flags can be used - tuning_level, batch_size, n_epochs, train_seed_pct, and plot (default True). These are described in detail in AL config section above. These flags overwrite the default configuration settings for active learning.
 
 At the end of the tuning process, results are stored in the ``output_folder``. The ``accuracy.json`` file in the directory ``output_folder/results`` consist of strategy performance on the application's test/evaluation data for every iteration and epoch. ``selected_queries.json`` consists of the same information but instead of evaluation performance, this file records the queries selected for that iteration. The ``output_folder/plots`` directory consists of the same quantitative information in a visual format. The plots record performance of all chosen strategies across iterations and give a sense of which strategy is best suited for your application. The same information can be gauged from these results and plots about the best ``tuning_level`` for your application.
 
@@ -232,7 +235,7 @@ Alternatively, path to unlabeled logs text file (``unlabeled_logs_path``) can be
     mindmeld active_learning --select --app-path "<PATH>/app_name/" --output_folder '<PATH>' --unlabeled_logs_path "<PATH>/logs.txt"
 
 
-Also, if your log data is labelled and included in your MindMeld application you can specify the pattern for your log data using the following flag:
+Also, if your log data is labeled and included in your MindMeld application you can specify the pattern for your log data using the following flag:
 
 .. code-block:: console 
 
@@ -243,7 +246,7 @@ Optional flags that can be used for selection include: ``batch_size``, ``log_usa
 
 .. note::
 
-    When selecting from labelled logs, ensure that the regex pattern provided in log pattern (``labeled_logs_pattern``) do not have an overlap with the regex patterns for train and test files in (``train_pattern`` and ``test_pattern``). In other words, ensure that the same files are not chosen by the system for train, test and log data.
+    When selecting from labeled logs, ensure that the regex pattern provided in log pattern (``labeled_logs_pattern``) do not have an overlap with the regex patterns for train and test files in (``train_pattern`` and ``test_pattern``). In other words, ensure that the same files are not chosen by the system for train, test and log data.
 
 
 Quick Reference
