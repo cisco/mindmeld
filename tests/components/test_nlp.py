@@ -455,12 +455,15 @@ def test_process_verbose_long_tokens(kwik_e_mart_nlp):
     text = "Is the Kwik-E-Mart open tomorrow?"
     response = kwik_e_mart_nlp.process(text, verbose=True)
 
-    tokenizer = kwik_e_mart_nlp.resource_loader.query_factory.tokenizer
-    raw_tokens = [t["text"] for t in tokenizer._tokenizer.tokenize(text)]
-    normalized_tokens = [t["entity"] for t in tokenizer.tokenize(text)]
+    text_preparation_pipeline = kwik_e_mart_nlp.resource_loader.query_factory.text_preparation_pipeline
 
-    assert raw_tokens == ["Is", "the", "Kwik-E-Mart", "open", "tomorrow?"]
-    assert normalized_tokens == ["is", "the", "kwik", "e", "mart", "open", "tomorrow"]
+    raw_tokens = text_preparation_pipeline.tokenize(text)
+    raw_tokens_text = [t["text"] for t in text_preparation_pipeline.tokenize(text)]
+    assert raw_tokens_text == ["Is", "the", "Kwik-E-Mart", "open", "tomorrow?"]
+
+    normalized_tokens = text_preparation_pipeline._normalize_tokens(raw_tokens)
+    normalized_tokens_text = [t["entity"] for t in normalized_tokens]
+    assert normalized_tokens_text == ["is", "the", "kwik", "e", "mart", "open", "tomorrow"]
 
     assert response["domain"] == "store_info"
     assert response["intent"] == "get_store_hours"
@@ -475,12 +478,15 @@ def test_process_verbose_short_tokens(kwik_e_mart_nlp):
     text = "when ** open -- tomorrow?"
     response = kwik_e_mart_nlp.process(text, verbose=True)
 
-    tokenizer = kwik_e_mart_nlp.resource_loader.query_factory.tokenizer
-    raw_tokens = [t["text"] for t in tokenizer._tokenizer.tokenize(text)]
-    normalized_tokens = [t["entity"] for t in tokenizer.tokenize(text)]
+    text_preparation_pipeline = kwik_e_mart_nlp.resource_loader.query_factory.text_preparation_pipeline
 
-    assert raw_tokens == ["when", "**", "open", "--", "tomorrow?"]
-    assert normalized_tokens == ["when", "open", "tomorrow"]
+    raw_tokens = text_preparation_pipeline.tokenize(text)
+    raw_tokens_text = [t["text"] for t in text_preparation_pipeline.tokenize(text)]
+    assert raw_tokens_text == ["when", "**", "open", "--", "tomorrow?"]
+
+    normalized_tokens = text_preparation_pipeline._normalize_tokens(raw_tokens)
+    normalized_tokens_text = [t["entity"] for t in normalized_tokens]
+    assert normalized_tokens_text == ["when", "open", "tomorrow"]
 
     assert response["domain"] == "store_info"
     assert response["intent"] == "get_store_hours"
@@ -760,7 +766,8 @@ def test_nlp_hierarchy_using_dynamic_gazetteer_and_allowed_intents(
         dynamic_resource=dyn_gaz,
         allowed_nlp_classes={"store_info": {"get_store_hours": {}}},
     )
-
+    print("Query", query)
+    print("RESPONSE", response)
     if dyn_gaz:
         assert (
             query

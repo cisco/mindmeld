@@ -1507,8 +1507,9 @@ class IntentProcessor(Processor):
         # We extract the `entity` key from each token since that represents the normalized text of
         # each token which we will compare against the normalized text of the query
         def tokenize_to_tuples(text):
-            return tuple([token["entity"] for token in
-                          self.resource_loader.query_factory.tokenizer.tokenize(text)])
+            return tuple(
+                self.resource_loader.query_factory.text_preparation_pipeline.normalize(text).split()
+            )
 
         dynamic_gazetteer = dynamic_resource.get(GAZETTEER_RSC, {}) if dynamic_resource else {}
         n_best_entities = [[] for _ in range(len(query))]

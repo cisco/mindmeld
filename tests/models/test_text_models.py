@@ -26,18 +26,6 @@ APP_PATH = os.path.join(
 
 
 @pytest.fixture
-def tokenizer():
-    """A tokenizer for normalizing text"""
-    return WhiteSpaceTokenizer()
-
-
-@pytest.fixture
-def query_factory(tokenizer):
-    """For creating queries"""
-    return QueryFactory(tokenizer)
-
-
-@pytest.fixture
 def resource_loader(query_factory):
     """A resource loader"""
     return ResourceLoader(APP_PATH, query_factory)
