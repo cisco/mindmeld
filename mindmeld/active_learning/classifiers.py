@@ -393,6 +393,11 @@ class MindMeldALClassifier(ALClassifier):
             dc_eval_test (mindmeld.models.model.StandardModelEvaluation): Mindmeld evaluation
                 object for the domain classifier.
         """
+        # Check for domain classifier edge case
+        if len(domain2id) == 1:
+            raise ValueError(
+                "Only one domain present, use intent level tuning instead.",
+            )
         dc = self.nlp.domain_classifier
         dc.fit(queries=sampled_queries)
         dc_eval_test = dc.evaluate(queries=test_queries)
@@ -458,12 +463,26 @@ class MindMeldALClassifier(ALClassifier):
             ic.fit(queries=filtered_sampled_queries)
             # Evaluate Test Queries
             ic_eval_test = ic.evaluate(queries=filtered_test_queries)
+
             if not ic_eval_test:
-                unsampled_idx_preds_pairs.extend(
-                    (i, np.zeros(len(self.intent2idx)))
-                    for i in filtered_unsampled_queries_indices
-                )
-                continue
+                # Check for intent classifier edge cases
+                if len(domain_to_intent2id[domain]) == 1:
+                    raise ValueError(
+                        "Only one intent in domain '{!s}', use domain level tuning instead.".format(
+                            domain
+                        )
+                    )
+                else:
+                    # In case of missing test files, ic_eval_test object is a NoneType. In that case
+                    # we have no predictions to evaluate the intent level classifiers. Domain 
+                    # classifier can have atleast one test file across intents, hence is better suited
+                    # for such applications.
+                    raise ValueError(
+                        "Missing test files in domain '{!s}', use domain level tuning instead.".format(
+                            domain
+                        )
+                    )
+
             ic_eval_test_dict[domain] = ic_eval_test
             # Get Probability Vectors
             ic_queries_prob_vectors = MindMeldALClassifier._get_probs(
@@ -485,6 +504,7 @@ class MindMeldALClassifier(ALClassifier):
                         padded_ic_queries_prob_vectors[i],
                     )
                 )
+
         unsampled_idx_preds_pairs.sort(key=lambda x: x[0])
         padded_ic_queries_prob_vectors = [x[1] for x in unsampled_idx_preds_pairs]
         return padded_ic_queries_prob_vectors, ic_eval_test_dict
