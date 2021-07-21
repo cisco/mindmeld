@@ -235,6 +235,8 @@ class RegexNormalizer(Normalizer):
         Returns:
             normalized_text (str): Normalized Text.
         """
+        # TODO: Handle case if the "pattern" or "replacement" is none
+
         for regex_norm_rule in self.regex_norm_rules:
             pattern = regex_norm_rule.get("pattern")
             replacement = regex_norm_rule.get("replacement")
@@ -252,12 +254,12 @@ class NormalizerFactory:
         Args:
             normalizer (str): Name of the desired Normalizer class
             regex_norm_rules (List[Dict], optional): List of regex normalization rules represented as
-            dictionaries. The example rule below removes any text in parentheses.
-            {
-                "description": "remove_text_in_parantheses",
-                "pattern": "\(.+?\)",
-                "replacement": ""
-            }
+                dictionaries. The example rule below removes any text in parentheses.
+                {
+                    "description": "remove_text_in_parantheses",
+                    "pattern": "\(.+?\)",
+                    "replacement": ""
+                }
         Returns:
             (Normalizer): Normalizer Class
         """

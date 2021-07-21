@@ -16,6 +16,7 @@ import warnings
 
 import pytest
 
+from mindmeld.constants import DEFAULT_REGEX_NORM_RULES
 from mindmeld.converter.rasa import RasaConverter
 from mindmeld.converter.dialogflow import DialogflowConverter
 from mindmeld.components import NaturalLanguageProcessor, QuestionAnswerer
@@ -201,44 +202,7 @@ def duckling():
 
 @pytest.fixture
 def regex_normalizer():
-    regex_norm_rules = [
-        {
-            "description": "Remove apostrophe at the end of possessive form",
-            "pattern": "^'(?=\S)|(?<=\S)'$",
-            "replacement": ""
-        },
-        {
-            "description": "Remove Apostrophes and Spaces Preceding or Proceding",
-            "pattern": " '|' ",
-            "replacement": "" 
-        },
-        {
-            "description": "Remove Beginning Spaces",
-            "pattern": "^\s+",
-            "replacement": "" 
-        },
-        {
-            "description": "Remove Trailing Spaces",
-            "pattern": "\s+$",
-            "replacement": "" 
-        },
-        {
-            "description": "Remove All Spaces",
-            "pattern": "\s+",
-            "replacement": "" 
-        },
-        {
-            "description": "Remove Underscores",
-            "pattern": "_",
-            "replacement": "" 
-        },
-        {
-            "description": "Separate 's to a separate word'",
-            "pattern": "(?<=[^\\s])'[sS]",
-            "replacement": " 's" 
-        }
-    ]
-    return RegexNormalizer(regex_norm_rules)
+    return RegexNormalizer(DEFAULT_REGEX_NORM_RULES)
 
 
 @pytest.fixture

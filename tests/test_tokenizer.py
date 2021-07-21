@@ -27,8 +27,9 @@ def custom_tokenizer():
     return WhiteSpaceTokenizer()
 
 
-def test_tokenize(tokenizer):
-    tokens = tokenizer.tokenize("Test: Query for $500,000. Chyea!")
+def test_tokenize(text_preparation_pipeline):
+    raw_tokens = text_preparation_pipeline.tokenize("Test: Query for $500,000. Chyea!")
+    tokens = text_preparation_pipeline._normalize_tokens(raw_tokens)
 
     assert len(tokens)
     assert tokens[0]["entity"] == "test"
@@ -42,61 +43,60 @@ def test_tokenize(tokenizer):
     assert tokens[4]["raw_start"] == 26
 
 
-def test_normalize(tokenizer):
-    normalized_text = tokenizer.normalize("Test: Query for $500,000.", False)
-
+def test_normalize(text_preparation_pipeline):
+    normalized_text = text_preparation_pipeline.normalize("Test: Query for $500,000.")
     assert normalized_text == "test query for $500,000"
 
 
-def test_normalize_2(tokenizer):
-    normalized_text = tokenizer.normalize(
-        "Test: Query for test.12.345..test,test", False
+def test_normalize_2(text_preparation_pipeline):
+    normalized_text = text_preparation_pipeline.normalize(
+        "Test: Query for test.12.345..test,test"
     )
 
     assert normalized_text == "test query for test 12.345 test test"
 
 
-def test_normalize_3(tokenizer):
-    normalized_text = tokenizer.normalize("Test: awesome band sigur rós.", False)
+def test_normalize_3(text_preparation_pipeline):
+    normalized_text = text_preparation_pipeline.normalize("Test: awesome band sigur rós.")
 
     assert normalized_text == "test awesome band sigur ros"
 
 
-def test_normalize_4(tokenizer):
-    normalized_text = tokenizer.normalize("D'Angelo's new album", False)
+def test_normalize_4(text_preparation_pipeline):
+    normalized_text = text_preparation_pipeline.normalize("D'Angelo's new album")
 
-    assert normalized_text == "d angelo s new album"
+    assert normalized_text == "d'angelo 's new album"
 
 
-def test_normalize_5(tokenizer):
+def test_normalize_5(text_preparation_pipeline):
     raw = "is s.o.b. ,, gonna be on at 8 p.m.?"
-    normalized = tokenizer.normalize(raw, False)
+    normalized = text_preparation_pipeline.normalize(raw)
 
     assert normalized == "is s o b gonna be on at 8 p m"
 
 
-def test_normalize_apos(tokenizer):
+def test_normalize_apos(text_preparation_pipeline):
 
     # verify that apostrophe at the end of a possessive form is removed
     raw = "join Dennis' pmr"
-    normalized = tokenizer.normalize(raw, True)
+    normalized = text_preparation_pipeline.normalize(raw)
 
     assert normalized == "join dennis pmr"
 
     # verify that apostrophe in the middle of an entity is not removed
     raw = "join O'reilly's pmr"
-    normalized = tokenizer.normalize(raw, True)
+    normalized = text_preparation_pipeline.normalize(raw)
 
     assert normalized == "join o'reilly 's pmr"
 
 
-def test_mapping(tokenizer):
+def test_mapping(text_preparation_pipeline):
     raw = "Test: 1. 2. 3."
-    normalized = tokenizer.normalize(raw)
+    normalized = text_preparation_pipeline.normalize(raw)
 
     assert normalized == "test 1 2 3"
 
-    forward, backward = tokenizer.get_char_index_map(raw, normalized)
+    forward, backward = text_preparation_pipeline.get_char_index_map(raw, normalized)
 
     assert forward == {
         0: 0,
@@ -129,13 +129,13 @@ def test_mapping(tokenizer):
     }
 
 
-def test_mapping_2(tokenizer):
+def test_mapping_2(text_preparation_pipeline):
     raw = "is s.o.b. ,, gonna be on at 8 p.m.?"
-    normalized = tokenizer.normalize(raw, False)
+    normalized = text_preparation_pipeline.normalize(raw)
 
     assert normalized == "is s o b gonna be on at 8 p m"
 
-    forward, backward = tokenizer.get_char_index_map(raw, normalized)
+    forward, backward = text_preparation_pipeline.get_char_index_map(raw, normalized)
 
     assert forward == {
         0: 0,
@@ -206,28 +206,3 @@ def test_mapping_2(tokenizer):
         27: 31,
         28: 32,
     }
-
-
-def test_custom_tokenizer(tokenizer, custom_tokenizer):
-    """Compares behavior across custom and default tokenizers"""
-    raw = "is s.o.b. ,, gonna be on at 8 p.m.?"
-    normalized = tokenizer.normalize(raw, False)
-    custom_normalized = custom_tokenizer.normalize(raw, True)
-
-    assert normalized == "is s o b gonna be on at 8 p m"
-    assert custom_normalized == "is s.o.b. gonna be on at 8 p.m."
-
-
-def test_custom_tokenizer_extra_special_chars(tokenizer, custom_tokenizer):
-    """Compares behavior across custom and default tokenizers for special characters
-    that have not been allowed in config"""
-    raw = "join O'reilly's pmr."
-    normalized = tokenizer.normalize(raw, True)
-    custom_normalized = custom_tokenizer.normalize(raw, True)
-
-    # Default MM behavior retains apos in the middle of words but doesn't recognize
-    # periods at the end.
-    # The custom tokenizer config defined accepts tokens ending with period but no apos
-    # as part of the tokens.
-    assert normalized == "join o'reilly 's pmr"
-    assert custom_normalized == 'join o reilly s pmr.'

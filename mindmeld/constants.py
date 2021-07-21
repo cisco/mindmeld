@@ -325,5 +325,80 @@ ASCII_CUTOFF = ord("\u0080")
 UNICODE_NON_LATIN_CATEGORY = "Lo"
 UNICODE_SPACE_CATEGORY = "Zs"
 
-
 SYSTEM_ENTITY_PREFIX = "sys_"
+
+# TEXT PREPRATION CONSTANTS
+EXCEPTION_CHARS = "\@\[\]\|\{\}'"
+
+DEFAULT_REGEX_NORM_RULES = [
+    {
+        "description": "Remove apostrophe at the end of possessive form",
+        "pattern": "^'(?=\S)|(?<=\S)'$",
+        "replacement": ""
+    },
+    {
+        "description": "Remove Apostrophes and Spaces Preceding or Proceding",
+        "pattern": " '|' ",
+        "replacement": "" 
+    },
+    {
+        "description": "Remove Beginning Spaces",
+        "pattern": "^\s+",
+        "replacement": "" 
+    },
+    {
+        "description": "Remove Trailing Spaces",
+        "pattern": "\s+$",
+        "replacement": ""
+    },
+    {
+        "description": "Replace Multiple Spaces with Single Space",
+        "pattern": "\s+",
+        "replacement": " "
+    },
+    {
+        "description": "Remove Underscores",
+        "pattern": "_",
+        "replacement": " " 
+    },
+    {
+        "description": "Separate s to a separate word",
+        "pattern": "(?<=[^\\s])'[sS]",
+        "replacement": " 's" 
+    },
+    {
+        "description": "Remove Punction at Start of Word Skip Exclude From Norm",
+        "pattern": "^[^\w\d&" + CURRENCY_SYMBOLS + EXCEPTION_CHARS + "]+",
+        "replacement": " " 
+    },
+    {
+        "description": "Remove Punction at End of Word Skip Exclude From Norm",
+        "pattern": "[^\w\d&" + CURRENCY_SYMBOLS + EXCEPTION_CHARS + "]+$",
+        "replacement": " "
+    },
+    {
+        "description": "Remove Special Characters Between Word and Digits",
+        "pattern": "(?<=[^\W\d_])[^\w\d\s&" + EXCEPTION_CHARS + "]+(?=[\d]+)",
+        "replacement": " "
+    },
+    {
+        "description": "Remove Special Characters Between Digits and Word",
+        "pattern": "(?<=[\d])[^\w\d\s&" + EXCEPTION_CHARS + "]+(?=[^\W\d_]+)",
+        "replacement": " "
+    },
+    {
+        "description": "Remove Special Characters Between Words",
+        "pattern": "(?<=[^\W\d_])[^\w\d\s&" + EXCEPTION_CHARS + "]+(?=[^\W\d_]+)",
+        "replacement": " "
+    },
+    {
+        "description": "Remove Special Characters Between Words/Digits and Pipe Character",
+        "pattern": "(?<=[\w\d])[^\w\d\s" + EXCEPTION_CHARS + "]+(?=\|)",
+        "replacement": ""
+    },
+    {
+        "description": "Replace Special Characters Between ']' or '}' and 's' with Space",
+        "pattern": "(?<=[\w\d])[^\w\d\s" + EXCEPTION_CHARS + "]+(?=\|)",
+        "replacement": " "
+    },
+]

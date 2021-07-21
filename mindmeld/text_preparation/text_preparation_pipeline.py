@@ -86,10 +86,22 @@ class TextPreparationPipeline:
             )
         return preprocessed_text
 
-    def normalize(self, raw_tokens):
-        """
+
+    def normalize(self, text):
+        """ Normalize Text.
         Args:
-            text (str): Input text.
+            text (str): Text to normalize.
+        """
+        raw_tokens = self.tokenizer.tokenize(text)
+        normalized_tokens = self._normalize_tokens(raw_tokens)
+        normalized_text = " ".join([t["entity"] for t in normalized_tokens])
+        return normalized_text
+
+
+    def _normalize_tokens(self, raw_tokens):
+        """ Normalize individual token dicts produced by Tokenizers.
+        Args:
+            raw_tokens (List(str)): List of raw tokens.
         Returns:
             normalized_text (str): Normalized Text.
             forward_map (Dict): Mapping from raw text to modified text
@@ -103,12 +115,10 @@ class TextPreparationPipeline:
             return raw_tokens
 
         normalized_tokens = []
-        print("Raw tokens", raw_tokens)
         for i, raw_token in enumerate(raw_tokens):
-            print("Raw token", raw_token)
             if not raw_token["text"] or len(raw_token["text"]) == 0:
                 continue
-            normalized_text = self._normalize_text(raw_token["text"])
+            normalized_text = self._normalize_single_token(raw_token["text"])
             if len(normalized_text) > 0:
                 for token in normalized_text.split():
                     norm_token = {}
@@ -120,7 +130,7 @@ class TextPreparationPipeline:
         return normalized_tokens
 
 
-    def _normalize_text(self, text):
+    def _normalize_single_token(self, text):
         normalized_text = text
         for normalizer in self.normalizers:
             normalized_text = (
@@ -453,7 +463,7 @@ class TextPreparationPipelineFactory:
             regex_normalizer = NormalizerFactory.get_normalizer(
                 normalizer=RegexNormalizer.__name__, regex_norm_rules=regex_norm_rules
             )
-            # Add the Regex Normalizer as the First Normalizer by Default
+            # Adds the Regex Normalizer as the First Normalizer by Default
             normalizers.insert(0, regex_normalizer)
 
         tokenizer = (

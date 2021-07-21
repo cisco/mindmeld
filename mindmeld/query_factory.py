@@ -102,14 +102,12 @@ class QueryFactory:
             processed_text = raw_text
 
         # Step 2: Tokenization
-        print("Processed Text", processed_text)
-        print(self.text_preparation_pipeline.tokenizer)
         raw_tokens = self.text_preparation_pipeline.tokenize(
             processed_text
         )
 
         # Step 3: Normalization
-        normalized_tokens = self.text_preparation_pipeline.normalize(raw_tokens)
+        normalized_tokens = self.text_preparation_pipeline._normalize_tokens(raw_tokens)
 
         # TODO: Implement a function to rejoin normalized tokens into text (Not Space Based)
         normalized_text = " ".join([t["entity"] for t in normalized_tokens])
