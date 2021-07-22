@@ -16,7 +16,6 @@ import warnings
 
 import pytest
 
-from mindmeld.constants import DEFAULT_REGEX_NORM_RULES
 from mindmeld.converter.rasa import RasaConverter
 from mindmeld.converter.dialogflow import DialogflowConverter
 from mindmeld.components import NaturalLanguageProcessor, QuestionAnswerer
@@ -27,7 +26,7 @@ from mindmeld.system_entity_recognizer import DucklingRecognizer
 from mindmeld.text_preparation.preprocessor import Preprocessor
 from mindmeld.text_preparation.stemmers import EnglishNLTKStemmer
 from mindmeld.text_preparation.tokenizers import WhiteSpaceTokenizer
-from mindmeld.text_preparation.normalizers import RegexNormalizer, Lowercase, ASCIIFold
+from mindmeld.text_preparation.normalizers import MindMeldRegexNormalizer, Lowercase, ASCIIFold
 from mindmeld.text_preparation.text_preparation_pipeline import TextPreparationPipeline
 
 warnings.filterwarnings(
@@ -202,15 +201,15 @@ def duckling():
 
 @pytest.fixture
 def regex_normalizer():
-    return RegexNormalizer(DEFAULT_REGEX_NORM_RULES)
+    return MindMeldRegexNormalizer()
 
 
 @pytest.fixture
-def text_preparation_pipeline(preprocessor, tokenizer, stemmer, regex_normalizer):
+def text_preparation_pipeline(preprocessor, tokenizer, stemmer):
     """The Text Preparation Pipeline Object"""
     return TextPreparationPipeline(
         preprocessors=[preprocessor],
-        normalizers=[regex_normalizer, Lowercase(), ASCIIFold()],
+        normalizers=[MindMeldRegexNormalizer(), Lowercase(), ASCIIFold()],
         tokenizer=tokenizer,
         stemmer=stemmer
     )

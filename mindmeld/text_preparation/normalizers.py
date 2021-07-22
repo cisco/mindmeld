@@ -18,7 +18,7 @@ import logging
 import re
 import unicodedata
 
-from ..constants import ASCII_CUTOFF
+from ..constants import ASCII_CUTOFF, DEFAULT_REGEX_NORM_RULES
 from ..path import ASCII_FOLDING_DICT_PATH
 
 logger = logging.getLogger(__name__)
@@ -244,6 +244,25 @@ class RegexNormalizer(Normalizer):
         return text
 
 
+class MindMeldRegexNormalizer(RegexNormalizer):
+    """Normalization class that substitutes regex matches with either an empty string or a
+    replacement string."""
+
+    def __init__(self):
+        """Creates a Regex Normalizer instance.
+
+        Args:
+            regex_norm_rules (List[Dict]): List of regex normalization rules represented as
+                dictionaries. The example rule below removes any text in parentheses.
+                {
+                    "description": "remove_text_in_parantheses",
+                    "pattern": "\(.+?\)",
+                    "replacement": ""
+                }
+        """
+        super().__init__(DEFAULT_REGEX_NORM_RULES)
+
+
 class NormalizerFactory:
     """Normalizer Factory Class"""
 
@@ -271,6 +290,7 @@ class NormalizerFactory:
             NFKC,
             NFKD,
             Lowercase,
+            MindMeldRegexNormalizer
         ]
         for normalizer_class in normalizer_classes:
             if normalizer == normalizer_class.__name__:

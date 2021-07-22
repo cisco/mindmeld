@@ -106,7 +106,10 @@ TEST_ENTITY_RECOGNIZER_CONFIG = {
     "test_label_set": "testtrain.*\.txt",  # noqa: W605
 }
 
-TOKENIZER_CONFIG = {"tokenizer": "WhiteSpaceTokenizer", "normalizer": "ASCIIFold"}
+TEXT_PREPARATION_CONFIG = {
+    "normalizers": ["MindMeldRegexNormalizer", "Lowercase", "ASCIIFold"],
+    "tokenizer": "WhiteSpaceTokenizer",
+}
 
 
 def get_entity_recognizer_config(domain, intent):
