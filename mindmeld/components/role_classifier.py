@@ -197,8 +197,8 @@ class RoleClassifier(Classifier):
                 self._model.config.resolve_config(self._get_model_config())
 
             gazetteers = self._resource_loader.get_gazetteers()
-            tokenizer = self._resource_loader.get_tokenizer()
-            self._model.register_resources(gazetteers=gazetteers, tokenizer=tokenizer)
+            text_preparation_pipeline = self._resource_loader.get_text_preparation_pipeline()
+            self._model.register_resources(gazetteers=gazetteers, text_preparation_pipeline=text_preparation_pipeline)
             self.config = ClassifierConfig.from_model_config(self._model.config)
 
         self.hash = self._load_hash(model_path)
@@ -227,8 +227,8 @@ class RoleClassifier(Classifier):
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query)
         gazetteers = self._resource_loader.get_gazetteers()
-        tokenizer = self._resource_loader.get_tokenizer()
-        self._model.register_resources(gazetteers=gazetteers, tokenizer=tokenizer)
+        text_preparation_pipeline = self._resource_loader.get_text_preparation_pipeline()
+        self._model.register_resources(gazetteers=gazetteers, text_preparation_pipeline=text_preparation_pipeline)
         return self._model.predict([(query, entities, entity_index)])[0]
 
     def predict_proba(
@@ -253,8 +253,8 @@ class RoleClassifier(Classifier):
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query)
         gazetteers = self._resource_loader.get_gazetteers()
-        tokenizer = self._resource_loader.get_tokenizer()
-        self._model.register_resources(gazetteers=gazetteers, tokenizer=tokenizer)
+        text_preparation_pipeline = self._resource_loader.get_text_preparation_pipeline()
+        self._model.register_resources(gazetteers=gazetteers, text_preparation_pipeline=text_preparation_pipeline)
 
         predict_proba_result = self._model.predict_proba(
             [(query, entities, entity_index)]
@@ -281,8 +281,8 @@ class RoleClassifier(Classifier):
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query)
         gazetteers = self._resource_loader.get_gazetteers()
-        tokenizer = self._resource_loader.get_tokenizer()
-        self._model.register_resources(gazetteers=gazetteers, tokenizer=tokenizer)
+        text_preparation_pipeline = self._resource_loader.get_text_preparation_pipeline()
+        self._model.register_resources(gazetteers=gazetteers, text_preparation_pipeline=text_preparation_pipeline)
         return self._model._extract_features((query, entities, entity_index))
 
     def _get_queries_from_label_set(self, label_set=DEFAULT_TRAIN_SET_REGEX):

@@ -18,16 +18,16 @@ import re
 import unicodedata
 
 from .preprocessor import Preprocessor, PreprocessorFactory
-from .normalizers import Normalizer, NoOpNormalizer, NormalizerFactory, RegexNormalizer
-from .tokenizers import Tokenizer, TokenizerFactory
-from .stemmers import Stemmer, StemmerFactory
+from .normalizers import Normalizer, NoOpNormalizer, NormalizerFactory, RegexNormalizer, Lowercase, ASCIIFold
+from .tokenizers import Tokenizer, TokenizerFactory, WhiteSpaceTokenizer
+from .stemmers import Stemmer, StemmerFactory, EnglishNLTKStemmer
 
 from ..components._config import (
     get_text_preparation_config,
     get_language_config,
     ENGLISH_LANGUAGE_CODE,
 )
-from ..constants import UNICODE_SPACE_CATEGORY
+from ..constants import UNICODE_SPACE_CATEGORY, DEFAULT_REGEX_NORM_RULES
 
 logger = logging.getLogger(__name__)
 
@@ -91,21 +91,45 @@ class TextPreparationPipeline:
         """ Normalize Text.
         Args:
             text (str): Text to normalize.
+        Returns:
+            normalized_text (str): Normalized text.
         """
-        raw_tokens = self.tokenizer.tokenize(text)
-        normalized_tokens = self._normalize_tokens(raw_tokens)
+        normalized_tokens = self.get_normalized_tokens_from_text(text)
         normalized_text = " ".join([t["entity"] for t in normalized_tokens])
         return normalized_text
+
+
+    def get_normalized_tokens_from_text(self, text):
+        """
+        Args:
+            text (str): Text to normalize.
+        Returns:
+            normalized_tokens (List[Dict]): Normalized tokens represented as dictionaries.
+                For Example: 
+                    norm_token = {
+                        "entity": "order",
+                        "raw_entity": "order",
+                        "raw_token_index": 1,
+                        "raw_start": 1
+                    }
+        """
+        raw_tokens = self.tokenizer.tokenize(text)
+        return self._normalize_tokens(raw_tokens)
 
 
     def _normalize_tokens(self, raw_tokens):
         """ Normalize individual token dicts produced by Tokenizers.
         Args:
-            raw_tokens (List(str)): List of raw tokens.
+            raw_tokens (List(Dict)): List of raw tokens represented as dictionaries.
         Returns:
-            normalized_text (str): Normalized Text.
-            forward_map (Dict): Mapping from raw text to modified text
-            backward_map (Dict): Reverse mapping from modified text to raw text
+            normalized_tokens (List[Dict]): Normalized tokens represented as dictionaries.
+                For Example: 
+                    norm_token = {
+                        "entity": "order",
+                        "raw_entity": "order",
+                        "raw_token_index": 1,
+                        "raw_start": 1
+                    }`
         """
         if not self.normalizers:
             logger.warning(
@@ -131,6 +155,13 @@ class TextPreparationPipeline:
 
 
     def _normalize_single_token(self, text):
+        """ Normalize an individual token by processing text with all normalizers.
+
+        Args:
+            text (str): Text to normalize.
+        Returns:
+            normalized_text (str): Text to normalize.
+        """
         normalized_text = text
         for normalizer in self.normalizers:
             normalized_text = (
@@ -271,9 +302,7 @@ class TextPreparationPipeline:
             )
             tokens.extend(tokens_after_last_entity)
 
-        print("Tokens pre filter", tokens)
         tokens = TextPreparationPipeline.filter_out_space_text_tokens(tokens)
-        print("Tokens post filter", tokens)
         return tokens
 
     @staticmethod
@@ -482,4 +511,13 @@ class TextPreparationPipelineFactory:
             normalizers=normalizers,
             tokenizer=tokenizer,
             stemmer=stemmer,
+        )
+
+    @staticmethod
+    def create_default_text_preparation_pipeline():
+        return TextPreparationPipeline(
+            preprocessors=None,
+            normalizers=[RegexNormalizer(DEFAULT_REGEX_NORM_RULES), Lowercase(), ASCIIFold()],
+            tokenizer=WhiteSpaceTokenizer(),
+            stemmer=EnglishNLTKStemmer()
         )

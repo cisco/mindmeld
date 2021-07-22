@@ -306,6 +306,14 @@ class ResourceLoader:
         """
         return self.query_factory.text_preparation_pipeline.tokenizer
 
+    def get_text_preparation_pipeline(self):
+        """Get the tokenizer from the query_factory attribute
+
+        Returns:
+            tokenizer (Tokenizer): The resource loaders tokenizer
+        """
+        return self.query_factory.text_preparation_pipeline
+
     @staticmethod
     def get_sentiment_analyzer():
         """
@@ -368,7 +376,7 @@ class ResourceLoader:
         logger.info("Building gazetteer '%s'", gaz_name)
 
         # TODO: support role gazetteers
-        gaz = Gazetteer(gaz_name, self.get_tokenizer(), exclude_ngrams)
+        gaz = Gazetteer(gaz_name, self.get_text_preparation_pipeline(), exclude_ngrams)
 
         entity_data_path = path.get_entity_gaz_path(self.app_path, gaz_name)
         gaz.update_with_entity_data_file(
@@ -394,7 +402,7 @@ class ResourceLoader:
         Args:
             gaz_name (str): The name of the entity the gazetteer corresponds to
         """
-        gaz = Gazetteer(gaz_name, self.get_tokenizer())
+        gaz = Gazetteer(gaz_name, self.get_text_preparation_pipeline())
         gaz_path = path.get_gazetteer_data_path(self.app_path, gaz_name)
         gaz.load(gaz_path)
         self._entity_files[gaz_name]["gazetteer"]["data"] = gaz.to_dict()

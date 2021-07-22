@@ -177,7 +177,7 @@ class TaggerModel(Model):
             list: A list of dictionaries of extracted features and their weights
         """
         workspace_resource = ingest_dynamic_gazetteer(
-            self._resources, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer
+            self._resources, dynamic_resource=dynamic_resource, text_preparation_pipeline=self.text_preparation_pipeline
         )
         return self._clf.extract_example_features(
             query, self.config, workspace_resource
@@ -220,7 +220,7 @@ class TaggerModel(Model):
             return [()]
 
         workspace_resource = ingest_dynamic_gazetteer(
-            self._resources, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer
+            self._resources, dynamic_resource=dynamic_resource, text_preparation_pipeline=self.text_preparation_pipeline
         )
         predicted_tags = self._clf.extract_and_predict(
             examples, self.config, workspace_resource
@@ -246,7 +246,7 @@ class TaggerModel(Model):
             return []
 
         workspace_resource = ingest_dynamic_gazetteer(
-            self._resources, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer
+            self._resources, dynamic_resource=dynamic_resource, text_preparation_pipeline=self.text_preparation_pipeline
         )
         predicted_tags_probas = self._clf.predict_proba(
             examples, self.config, workspace_resource

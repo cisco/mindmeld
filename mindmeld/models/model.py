@@ -33,7 +33,7 @@ from sklearn.model_selection import (
 )
 
 from .._version import get_mm_version
-from ..text_preparation.tokenizers import Tokenizer
+from ..text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
 from .helpers import (
     CHAR_NGRAM_FREQ_RSC,
     ENABLE_STEMMING,
@@ -852,15 +852,18 @@ class Model:
         raise NotImplementedError
 
     @property
-    def tokenizer(self):
-        tokenizer = self._resources.get("tokenizer")
-        if not tokenizer:
+    def text_preparation_pipeline(self):
+
+        text_preparation_pipeline = self._resources.get("text_preparation_pipeline")
+
+        if not text_preparation_pipeline:
             logger.error(
-                "The tokenizer resource has not been registered "
-                "to the model. Using default tokenizer."
+                "The text_preparation_pipeline resource has not been registered "
+                "to the model. Using default text_preparation_pipeline."
             )
-            tokenizer = Tokenizer()
-        return tokenizer
+            return TextPreparationPipelineFactory.create_default_text_preparation_pipeline()
+
+        return text_preparation_pipeline
 
     def _fit_cv(self, examples, labels, groups=None, selection_settings=None):
         """Called by the fit method when cross validation parameters are passed in. Runs cross
@@ -1070,13 +1073,12 @@ class Model:
     def get_feature_matrix(self, examples, y=None, fit=False):
         raise NotImplementedError
 
-    def _extract_features(self, example, dynamic_resource=None, tokenizer=None):
+    def _extract_features(self, example, dynamic_resource=None, text_preparation_pipeline=None):
         """Gets all features from an example.
 
         Args:
             example: An example object.
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
-            tokenizer (Tokenizer): The component used to normalize entities in dynamic_resource
 
         Returns:
             (dict of str: number): A dict of feature names to their values.
@@ -1084,7 +1086,7 @@ class Model:
         example_type = self.config.example_type
         feat_set = {}
         workspace_resource = ingest_dynamic_gazetteer(
-            self._resources, dynamic_resource, tokenizer
+            self._resources, dynamic_resource, text_preparation_pipeline
         )
         workspace_features = copy.deepcopy(self.config.features)
         enable_stemming = workspace_features.pop(ENABLE_STEMMING, False)
@@ -1220,7 +1222,7 @@ class Model:
 
         # Always initialize the global resource for tokenization, which is not a
         # feature-specific resource
-        self._resources["tokenizer"] = resource_loader.get_tokenizer()
+        self._resources["text_preparation_pipeline"] = resource_loader.get_text_preparation_pipeline()
 
 
 class LabelEncoder:

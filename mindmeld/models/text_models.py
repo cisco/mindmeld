@@ -224,7 +224,7 @@ class TextModel(Model):
 
     def view_extracted_features(self, example, dynamic_resource=None):
         return self._extract_features(
-            example, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer
+            example, dynamic_resource=dynamic_resource, text_preparation_pipeline=self.text_preparation_pipeline
         )
 
     def _get_feature_weight(self, feat_name, label_class):
@@ -276,7 +276,7 @@ class TextModel(Model):
         pred_label = self.predict([example], dynamic_resource=dynamic_resource)[0]
         pred_class = self._class_encoder.transform([pred_label])
         features = self._extract_features(
-            example, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer
+            example, dynamic_resource=dynamic_resource, text_preparation_pipeline=self.text_preparation_pipeline
         )
 
         logging.info("Predicted: %s.", pred_label)
@@ -370,7 +370,7 @@ class TextModel(Model):
         feats = []
         for idx, example in enumerate(examples):
             feats.append(
-                self._extract_features(example, dynamic_resource, self.tokenizer)
+                self._extract_features(example, dynamic_resource, self.text_preparation_pipeline)
             )
             groups.append(idx)
 

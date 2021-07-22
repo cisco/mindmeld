@@ -210,7 +210,7 @@ class EntityRecognizer(Classifier):
                 self._model.config.resolve_config(self._get_model_config())
 
             gazetteers = self._resource_loader.get_gazetteers()
-            tokenizer = self._resource_loader.get_tokenizer()
+            text_preparation_pipeline = self._resource_loader.get_text_preparation_pipeline()
             sys_types = set(
                 (t for t in self.entity_types if Entity.is_system_entity(t))
             )
@@ -223,7 +223,7 @@ class EntityRecognizer(Classifier):
                 sys_types=sys_types,
                 w_ngram_freq=w_ngram_freq,
                 c_ngram_freq=c_ngram_freq,
-                tokenizer=tokenizer,
+                text_preparation_pipeline=text_preparation_pipeline,
             )
             self.config = ClassifierConfig.from_model_config(self._model.config)
 
