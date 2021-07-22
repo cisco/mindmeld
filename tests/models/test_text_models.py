@@ -166,7 +166,7 @@ class TestTextModel:
 
         expected_features = {
             "bag_of_words|length:1|ngram:hi": 1,
-            "bag_of_words|length:1|ngram:there": 1,
+            "bag_of_words|length:1|ngram:OOV": 1,
         }
         extracted_features = model.view_extracted_features(
             markup.load_query("hi there").query

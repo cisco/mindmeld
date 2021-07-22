@@ -20,8 +20,12 @@ import logging
 import os
 import warnings
 
-from .. import path
 from .schemas import validate_language_code, validate_locale_code
+<<<<<<< HEAD
+=======
+from .. import path
+from ..constants import CURRENCY_SYMBOLS
+>>>>>>> master
 
 logger = logging.getLogger(__name__)
 
@@ -103,10 +107,30 @@ DEFAULT_ENTITY_RECOGNIZER_CONFIG = {
 
 DEFAULT_ENTITY_RESOLVER_CONFIG = {
     "model_type": "resolver",
-    "model_settings": {"resolver_type": "text_relevance",},
+    "model_settings": {"resolver_type": "text_relevance", },
 }
 
-DEFAULT_QUESTION_ANSWERER_CONFIG = {"model_type": "keyword"}
+DEFAULT_ROLE_CLASSIFIER_CONFIG = {
+    "model_type": "text",
+    "model_settings": {"classifier_type": "logreg"},
+    "params": {"C": 100, "penalty": "l1"},
+    "features": {
+        "bag-of-words-before": {
+            "ngram_lengths_to_start_positions": {1: [-2, -1], 2: [-2, -1]}
+        },
+        "bag-of-words-after": {
+            "ngram_lengths_to_start_positions": {1: [0, 1], 2: [0, 1]}
+        },
+        "other-entities": {},
+    },
+}
+
+DEFAULT_QUESTION_ANSWERER_CONFIG = {
+    "model_type": "elasticsearch",
+    "model_settings": {
+        "query_type": "keyword"
+    }
+}
 
 ENGLISH_LANGUAGE_CODE = "en"
 ENGLISH_US_LOCALE = "en_US"
@@ -114,7 +138,6 @@ DEFAULT_LANGUAGE_CONFIG = {
     "language": ENGLISH_LANGUAGE_CODE,
     "locale": ENGLISH_US_LOCALE,
 }
-
 
 # ElasticSearch mapping to define text analysis settings for text fields.
 # It defines specific index configuration for synonym indices. The common index configuration
@@ -184,7 +207,7 @@ PHONETIC_ES_SYNONYM_MAPPING = {
                         "type": "text",
                         "analyzer": "keyword_match_analyzer",
                     },
-                    "char_ngram": {"type": "text", "analyzer": "char_ngram_analyzer",},
+                    "char_ngram": {"type": "text", "analyzer": "char_ngram_analyzer", },
                     "double_metaphone": {
                         "type": "text",
                         "analyzer": "phonetic_analyzer",
@@ -231,21 +254,6 @@ PHONETIC_ES_SYNONYM_MAPPING = {
     },
 }
 
-DEFAULT_ROLE_CLASSIFIER_CONFIG = {
-    "model_type": "text",
-    "model_settings": {"classifier_type": "logreg"},
-    "params": {"C": 100, "penalty": "l1"},
-    "features": {
-        "bag-of-words-before": {
-            "ngram_lengths_to_start_positions": {1: [-2, -1], 2: [-2, -1]}
-        },
-        "bag-of-words-after": {
-            "ngram_lengths_to_start_positions": {1: [0, 1], 2: [0, 1]}
-        },
-        "other-entities": {},
-    },
-}
-
 DEFAULT_ES_INDEX_TEMPLATE_NAME = "mindmeld_default"
 
 # Default ES index template that contains the base index configuration shared across different
@@ -270,7 +278,7 @@ DEFAULT_ES_INDEX_TEMPLATE = {
                                 "type": "text",
                                 "analyzer": "keyword_match_analyzer",
                             },
-                            "processed_text": {"type": "text", "analyzer": "english",},
+                            "processed_text": {"type": "text", "analyzer": "english", },
                             "char_ngram": {
                                 "type": "text",
                                 "analyzer": "char_ngram_analyzer",
@@ -399,7 +407,6 @@ DEFAULT_ES_INDEX_TEMPLATE = {
     },
 }
 
-
 # Elasticsearch mapping to define knowledge base index specific configuration:
 # - dynamic field mapping to index all synonym whitelist in fields with "$whitelist" suffix.
 # - location field
@@ -461,7 +468,7 @@ DEFAULT_NLP_CONFIG = {
 DEFAULT_AUGMENTATION_CONFIG = {
     "augmentor_class": "EnglishParaphraser",
     "batch_size": 8,
-    "paths": [{"domains": ".*", "intents": ".*", "files": ".*",}],
+    "paths": [{"domains": ".*", "intents": ".*", "files": ".*", }],
     "path_suffix": "-augment.txt",
 }
 
@@ -469,7 +476,7 @@ DEFAULT_AUTO_ANNOTATOR_CONFIG = {
     "annotator_class": "MultiLingualAnnotator",
     "overwrite": False,
     "annotation_rules": [
-        {"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*",}
+        {"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*", }
     ],
     "unannotate_supported_entities_only": True,
     "unannotation_rules": None,
@@ -678,7 +685,7 @@ def get_classifier_config(
     try:
         module_conf = _get_config_module(app_path)
 
-    except (OSError, IOError):
+    except (TypeError, OSError, IOError):
         logger.info(
             "No app configuration file found. Using default %s model configuration",
             clf_type,
@@ -957,7 +964,7 @@ def get_nlp_config(app_path=None, config=None):
     try:
         module_conf = _get_config_module(app_path)
     except (OSError, IOError):
-        logger.info("No app configuration file found.")
+        logger.info("No app configuration file found. Using default nlp config.")
         return _get_default_nlp_config()
 
     # Try provider first
@@ -1064,5 +1071,5 @@ def get_text_preparation_config(app_path=None):
         )
         return tokenizer_config
     except (OSError, IOError, AttributeError):
-        logger.info("No app configuration file found.")
+        logger.info("No app configuration file found. Using default text_preparation_config.")
         return DEFAULT_TEXT_PREPARATION_CONFIG

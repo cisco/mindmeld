@@ -13,6 +13,7 @@ from mindmeld.active_learning.plot_manager import PlotManager
 data_dict = {"a": {"b": {"c": 2021}}}
 
 
+@pytest.mark.extras
 @pytest.mark.parametrize(
     "selected_keys, expected_value",
     [

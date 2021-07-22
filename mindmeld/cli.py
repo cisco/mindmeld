@@ -50,7 +50,7 @@ from .components._config import (
 )
 from .constants import BINARIES_URL, DUCKLING_VERSION, UNANNOTATE_ALL_RULE
 from .converter import DialogflowConverter, RasaConverter
-from .exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError, MindMeldError
+from .exceptions import ElasticsearchKnowledgeBaseConnectionError, KnowledgeBaseError, MindMeldError
 from .models.helpers import create_annotator
 from .path import (
     MODEL_CACHE_PATH,
@@ -72,7 +72,7 @@ if sys.version_info < (3, 6):
         " official support for Python 3.5 in the next release. Please consider migrating"
         " your application to Python 3.6 and above."
     )
-    logger.warning(deprecation_msg)
+    warnings.warn(deprecation_msg)
 
 DVC_INIT_ERROR_MESSAGE = "you are not inside of a DVC repository"
 DVC_ADD_DOES_NOT_EXIST_MESSAGE = "does not exist"
@@ -631,7 +631,7 @@ def load_index(ctx, es_host, app_namespace, index_name, data_file, app_path):
             es_host,
             app_path=app_path,
         )
-    except (KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
+    except (ElasticsearchKnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
         logger.error(ex.message)
         ctx.exit(1)
 
@@ -946,7 +946,7 @@ def setup_blueprint(ctx, es_host, skip_kb, blueprint_name, app_path):
     except ValueError as ex:
         logger.error(ex)
         ctx.exit(1)
-    except (KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
+    except (ElasticsearchKnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
         logger.error(ex.message)
         ctx.exit(1)
 

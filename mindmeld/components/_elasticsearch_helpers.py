@@ -15,25 +15,331 @@
 import logging
 import os
 
-from elasticsearch import ConnectionError as EsConnectionError
-from elasticsearch import (
-    Elasticsearch,
-    ElasticsearchException,
-    ImproperlyConfigured,
-    TransportError,
-)
-from elasticsearch.helpers import streaming_bulk
+from tqdm.auto import tqdm
 
-from tqdm import tqdm
-
-from ..exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError
-from ._config import DEFAULT_ES_INDEX_TEMPLATE, DEFAULT_ES_INDEX_TEMPLATE_NAME
+from ._util import _get_module_or_attr as _getattr
+from ..exceptions import ElasticsearchKnowledgeBaseConnectionError, KnowledgeBaseError
 
 logger = logging.getLogger(__name__)
 
 INDEX_TYPE_SYNONYM = "syn"
 INDEX_TYPE_KB = "kb"
 DOC_TYPE = "document"
+
+# ElasticSearch mapping to define text analysis settings for text fields.
+# It defines specific index configuration for synonym indices. The common index configuration
+# is in default index template.
+DEFAULT_ES_SYNONYM_MAPPING = {
+    "mappings": {
+        "properties": {
+            "sort_factor": {"type": "double"},
+            "whitelist": {
+                "type": "nested",
+                "properties": {
+                    "name": {
+                        "type": "text",
+                        "fields": {
+                            "raw": {"type": "keyword", "ignore_above": 256},
+                            "normalized_keyword": {
+                                "type": "text",
+                                "analyzer": "keyword_match_analyzer",
+                            },
+                            "char_ngram": {
+                                "type": "text",
+                                "analyzer": "char_ngram_analyzer",
+                            },
+                        },
+                        "analyzer": "default_analyzer",
+                    }
+                },
+            },
+        }
+    }
+}
+
+PHONETIC_ES_SYNONYM_MAPPING = {
+    "mappings": {
+        "properties": {
+            "sort_factor": {"type": "double"},
+            "whitelist": {
+                "type": "nested",
+                "properties": {
+                    "name": {
+                        "type": "text",
+                        "fields": {
+                            "raw": {"type": "keyword", "ignore_above": 256},
+                            "normalized_keyword": {
+                                "type": "text",
+                                "analyzer": "keyword_match_analyzer",
+                            },
+                            "char_ngram": {
+                                "type": "text",
+                                "analyzer": "char_ngram_analyzer",
+                            },
+                            "double_metaphone": {
+                                "type": "text",
+                                "analyzer": "phonetic_analyzer",
+                            },
+                        },
+                        "analyzer": "default_analyzer",
+                    }
+                },
+            },
+            "cname": {
+                "type": "text",
+                "analyzer": "default_analyzer",
+                "fields": {
+                    "raw": {"type": "keyword", "ignore_above": 256},
+                    "normalized_keyword": {
+                        "type": "text",
+                        "analyzer": "keyword_match_analyzer",
+                    },
+                    "char_ngram": {
+                        "type": "text",
+                        "analyzer": "char_ngram_analyzer",
+                    },
+                    "double_metaphone": {
+                        "type": "text",
+                        "analyzer": "phonetic_analyzer",
+                    },
+                },
+            },
+        }
+    },
+    "settings": {
+        "analysis": {
+            "filter": {
+                "phonetic_filter": {
+                    "type": "phonetic",
+                    "encoder": "doublemetaphone",
+                    "replace": True,
+                    "max_code_len": 7,
+                }
+            },
+            "analyzer": {
+                "phonetic_analyzer": {
+                    "filter": [
+                        "lowercase",
+                        "asciifolding",
+                        "token_shingle",
+                        "phonetic_filter",
+                    ],
+                    "char_filter": [
+                        "remove_comma",
+                        "remove_tm_and_r",
+                        "remove_loose_apostrophes",
+                        "space_possessive_apostrophes",
+                        "remove_special_beginning",
+                        "remove_special_end",
+                        "remove_special1",
+                        "remove_special2",
+                        "remove_special3",
+                        "remove_dot",
+                    ],
+                    "type": "custom",
+                    "tokenizer": "whitespace",
+                }
+            },
+        }
+    },
+}
+
+DEFAULT_ES_INDEX_TEMPLATE_NAME = "mindmeld_default"
+
+# Default ES index template that contains the base index configuration shared across different
+# types of indices. Currently all ES indices will be created using this template.
+# - custom text analysis settings such as custom analyzers, token filters and character filters.
+# - dynamic field mapping template for text fields
+# - common fields, e.g. id.
+DEFAULT_ES_INDEX_TEMPLATE = {
+    "template": "*",
+    "mappings": {
+        "dynamic_templates": [
+            {
+                "default_text": {
+                    "match": "*",
+                    "match_mapping_type": "string",
+                    "mapping": {
+                        "type": "text",
+                        "analyzer": "default_analyzer",
+                        "fields": {
+                            "raw": {"type": "keyword", "ignore_above": 256},
+                            "normalized_keyword": {
+                                "type": "text",
+                                "analyzer": "keyword_match_analyzer",
+                            },
+                            "processed_text": {
+                                "type": "text",
+                                "analyzer": "english",
+                            },
+                            "char_ngram": {
+                                "type": "text",
+                                "analyzer": "char_ngram_analyzer",
+                            },
+                        },
+                    },
+                }
+            }
+        ],
+        "properties": {"id": {"type": "keyword"}},
+    },
+    "settings": {
+        "analysis": {
+            "char_filter": {
+                "remove_loose_apostrophes": {
+                    "pattern": " '|' ",
+                    "type": "pattern_replace",
+                    "replacement": "",
+                },
+                "space_possessive_apostrophes": {
+                    "pattern": "([^\\p{N}\\s]+)'s ",
+                    "type": "pattern_replace",
+                    "replacement": "$1 's ",
+                },
+                "remove_special_beginning": {
+                    "pattern": "^[^\\p{L}\\p{N}\\p{Sc}&']+",
+                    "type": "pattern_replace",
+                    "replacement": "",
+                },
+                "remove_special_end": {
+                    "pattern": "[^\\p{L}\\p{N}&']+$",
+                    "type": "pattern_replace",
+                    "replacement": "",
+                },
+                "remove_special1": {
+                    "pattern": "([\\p{L}]+)[^\\p{L}\\p{N}&']+(?=[\\p{N}\\s]+)",
+                    "type": "pattern_replace",
+                    "replacement": "$1 ",
+                },
+                "remove_special2": {
+                    "pattern": "([\\p{N}]+)[^\\p{L}\\p{N}&']+(?=[\\p{L}\\s]+)",
+                    "type": "pattern_replace",
+                    "replacement": "$1 ",
+                },
+                "remove_special3": {
+                    "pattern": "([\\p{L}]+)[^\\p{L}\\p{N}&']+(?=[\\p{L}]+)",
+                    "type": "pattern_replace",
+                    "replacement": "$1 ",
+                },
+                "remove_comma": {
+                    "pattern": ",",
+                    "type": "pattern_replace",
+                    "replacement": "",
+                },
+                "remove_tm_and_r": {
+                    "pattern": "™|®",
+                    "type": "pattern_replace",
+                    "replacement": "",
+                },
+                "remove_dot": {
+                    "pattern": "([\\p{L}]+)[.]+(?=[\\p{L}\\s]+)",
+                    "type": "pattern_replace",
+                    "replacement": "$1",
+                },
+            },
+            "filter": {
+                "token_shingle": {
+                    "max_shingle_size": "4",
+                    "min_shingle_size": "2",
+                    "output_unigrams": "true",
+                    "type": "shingle",
+                },
+                "ngram_filter": {"type": "ngram", "min_gram": "3", "max_gram": "3"},
+            },
+            "analyzer": {
+                "default_analyzer": {
+                    "filter": ["lowercase", "asciifolding", "token_shingle"],
+                    "char_filter": [
+                        "remove_comma",
+                        "remove_tm_and_r",
+                        "remove_loose_apostrophes",
+                        "space_possessive_apostrophes",
+                        "remove_special_beginning",
+                        "remove_special_end",
+                        "remove_special1",
+                        "remove_special2",
+                        "remove_special3",
+                    ],
+                    "type": "custom",
+                    "tokenizer": "whitespace",
+                },
+                "keyword_match_analyzer": {
+                    "filter": ["lowercase", "asciifolding"],
+                    "char_filter": [
+                        "remove_comma",
+                        "remove_tm_and_r",
+                        "remove_loose_apostrophes",
+                        "space_possessive_apostrophes",
+                        "remove_special_beginning",
+                        "remove_special_end",
+                        "remove_special1",
+                        "remove_special2",
+                        "remove_special3",
+                    ],
+                    "type": "custom",
+                    "tokenizer": "keyword",
+                },
+                "char_ngram_analyzer": {
+                    "filter": ["lowercase", "asciifolding", "ngram_filter"],
+                    "char_filter": [
+                        "remove_comma",
+                        "remove_tm_and_r",
+                        "remove_loose_apostrophes",
+                        "space_possessive_apostrophes",
+                        "remove_special_beginning",
+                        "remove_special_end",
+                        "remove_special1",
+                        "remove_special2",
+                        "remove_special3",
+                    ],
+                    "type": "custom",
+                    "tokenizer": "whitespace",
+                },
+            },
+        }
+    },
+}
+
+# Elasticsearch mapping to define knowledge base index specific configuration:
+# - dynamic field mapping to index all synonym whitelist in fields with "$whitelist" suffix.
+# - location field
+#
+# The common configuration is defined in default index template
+DEFAULT_ES_QA_MAPPING = {
+    "mappings": {
+        "dynamic_templates": [
+            {
+                "synonym_whitelist_text": {
+                    "match": "*$whitelist",
+                    "match_mapping_type": "object",
+                    "mapping": {
+                        "type": "nested",
+                        "properties": {
+                            "name": {
+                                "type": "text",
+                                "fields": {
+                                    "raw": {"type": "keyword", "ignore_above": 256},
+                                    "normalized_keyword": {
+                                        "type": "text",
+                                        "analyzer": "keyword_match_analyzer",
+                                    },
+                                    "char_ngram": {
+                                        "type": "text",
+                                        "analyzer": "char_ngram_analyzer",
+                                    },
+                                },
+                                "analyzer": "default_analyzer",
+                            }
+                        },
+                    },
+                }
+            }
+        ],
+        "properties": {"location": {"type": "geo_point"}},
+    }
+}
+
+DEFAULT_ES_RANKING_CONFIG = {"query_clauses_operator": "or"}
 
 
 def get_scoped_index_name(app_namespace, index_name):
@@ -54,11 +360,11 @@ def create_es_client(es_host=None, es_user=None, es_pass=None):
 
     try:
         http_auth = (es_user, es_pass) if es_user and es_pass else None
-        es_client = Elasticsearch(es_host, http_auth=http_auth)
+        es_client = _getattr("elasticsearch", "Elasticsearch")(es_host, http_auth=http_auth)
         return es_client
-    except ElasticsearchException as e:
+    except _getattr("elasticsearch", "ElasticsearchException") as e:
         raise KnowledgeBaseError from e
-    except ImproperlyConfigured as e:
+    except _getattr("elasticsearch", "ImproperlyConfigured") as e:
         raise KnowledgeBaseError from e
 
 
@@ -96,12 +402,12 @@ def does_index_exist(
         # Confirm ES connection with a shorter timeout
         es_client.cluster.health(request_timeout=connect_timeout)
         return es_client.indices.exists(index=scoped_index_name)
-    except EsConnectionError as e:
+    except _getattr("elasticsearch", "ConnectionError") as e:
         logger.debug(
             "Unable to connect to Elasticsearch: %s details: %s", e.error, e.info
         )
-        raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts) from e
-    except TransportError as e:
+        raise ElasticsearchKnowledgeBaseConnectionError(es_host=es_client.transport.hosts) from e
+    except _getattr("elasticsearch", "TransportError") as e:
         logger.error(
             "Unexpected error occurred when sending requests to Elasticsearch: %s "
             "Status code: %s details: %s",
@@ -110,7 +416,7 @@ def does_index_exist(
             e.info,
         )
         raise KnowledgeBaseError from e
-    except ElasticsearchException as e:
+    except _getattr("elasticsearch", "ElasticsearchException") as e:
         raise KnowledgeBaseError from e
 
 
@@ -137,12 +443,12 @@ def get_field_names(
         else:
             all_field_info = res[scoped_index_name]["mappings"][DOC_TYPE]["properties"]
         return all_field_info.keys()
-    except EsConnectionError as e:
+    except _getattr("elasticsearch", "ConnectionError") as e:
         logger.debug(
             "Unable to connect to Elasticsearch: %s details: %s", e.error, e.info
         )
-        raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts) from e
-    except TransportError as e:
+        raise ElasticsearchKnowledgeBaseConnectionError(es_host=es_client.transport.hosts) from e
+    except _getattr("elasticsearch", "TransportError") as e:
         logger.error(
             "Unexpected error occurred when sending requests to Elasticsearch: %s "
             "Status code: %s details: %s",
@@ -151,7 +457,7 @@ def get_field_names(
             e.info,
         )
         raise KnowledgeBaseError from e
-    except ElasticsearchException as e:
+    except _getattr("elasticsearch", "ElasticsearchException") as e:
         raise KnowledgeBaseError from e
 
 
@@ -176,6 +482,7 @@ def create_index(
         if not does_index_exist(
             app_namespace, index_name, es_host, es_client, connect_timeout
         ):
+            # TODO: add support for non-english texts by allowing configurable `langauge` as input
             template = resolve_es_config_for_version(
                 DEFAULT_ES_INDEX_TEMPLATE, es_client
             )
@@ -186,12 +493,12 @@ def create_index(
             es_client.indices.create(scoped_index_name, body=mapping)
         else:
             logger.error("Index %r already exists.", index_name)
-    except EsConnectionError as e:
+    except _getattr("elasticsearch", "ConnectionError") as e:
         logger.debug(
             "Unable to connect to Elasticsearch: %202s details: %s", e.error, e.info
         )
-        raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts) from e
-    except TransportError as e:
+        raise ElasticsearchKnowledgeBaseConnectionError(es_host=es_client.transport.hosts) from e
+    except _getattr("elasticsearch", "TransportError") as e:
         logger.error(
             "Unexpected error occurred when sending requests to Elasticsearch: %s "
             "Status code: %s details: %s",
@@ -204,7 +511,7 @@ def create_index(
             "Elasticsearch: {} Status code: {} details: "
             "{}".format(e.error, e.status_code, e.info)
         ) from e
-    except ElasticsearchException as e:
+    except _getattr("elasticsearch", "ElasticsearchException") as e:
         raise KnowledgeBaseError from e
 
 
@@ -236,12 +543,12 @@ def delete_index(
                     index_name, app_namespace
                 )
             )
-    except EsConnectionError as e:
+    except _getattr("elasticsearch", "ConnectionError") as e:
         logger.debug(
             "Unable to connect to Elasticsearch: %s details: %s", e.error, e.info
         )
-        raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts) from e
-    except TransportError as e:
+        raise ElasticsearchKnowledgeBaseConnectionError(es_host=es_client.transport.hosts) from e
+    except _getattr("elasticsearch", "TransportError") as e:
         logger.error(
             "Unexpected error occurred when sending requests to Elasticsearch: %s "
             "Status code: %s details: %s",
@@ -250,7 +557,7 @@ def delete_index(
             e.info,
         )
         raise KnowledgeBaseError from e
-    except ElasticsearchException as e:
+    except _getattr("elasticsearch", "ElasticsearchException") as e:
         raise KnowledgeBaseError from e
 
 
@@ -274,9 +581,8 @@ def create_index_mapping(base_mapping, mapping_data):
 def version_compatible_streaming_bulk(
     es_client, docs, index, chunk_size, raise_on_error, doc_type
 ):
-
     if is_es_version_7(es_client):
-        return streaming_bulk(
+        return _getattr("elasticsearch.helpers", "streaming_bulk")(
             es_client,
             docs,
             index=index,
@@ -284,7 +590,7 @@ def version_compatible_streaming_bulk(
             raise_on_error=raise_on_error,
         )
     else:
-        return streaming_bulk(
+        return _getattr("elasticsearch.helpers", "streaming_bulk")(
             es_client,
             docs,
             index=index,
@@ -368,12 +674,12 @@ def load_index(
         # Refresh to make sure all data stored is available for search.
         es_client.indices.refresh(index=scoped_index_name)
         logger.info("Loaded %s document%s", count, "" if count == 1 else "s")
-    except EsConnectionError as e:
+    except _getattr("elasticsearch", "ConnectionError") as e:
         logger.debug(
             "Unable to connect to Elasticsearch: %s details: %s", e.error, e.info
         )
-        raise KnowledgeBaseConnectionError(es_host=es_client.transport.hosts) from e
-    except TransportError as e:
+        raise ElasticsearchKnowledgeBaseConnectionError(es_host=es_client.transport.hosts) from e
+    except _getattr("elasticsearch", "TransportError") as e:
         logger.error(
             "Unexpected error occurred when sending requests to Elasticsearch: %s "
             "Status code: %s details: %s",
@@ -382,5 +688,5 @@ def load_index(
             e.info,
         )
         raise KnowledgeBaseError from e
-    except ElasticsearchException as e:
+    except _getattr("elasticsearch", "ElasticsearchException") as e:
         raise KnowledgeBaseError from e
