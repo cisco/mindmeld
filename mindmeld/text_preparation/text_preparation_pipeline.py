@@ -18,7 +18,14 @@ import re
 import unicodedata
 
 from .preprocessor import Preprocessor, PreprocessorFactory
-from .normalizers import Normalizer, NoOpNormalizer, NormalizerFactory, RegexNormalizer, Lowercase, ASCIIFold
+from .normalizers import (
+    Normalizer,
+    NoOpNormalizer,
+    NormalizerFactory,
+    RegexNormalizer,
+    Lowercase,
+    ASCIIFold,
+)
 from .tokenizers import Tokenizer, TokenizerFactory, WhiteSpaceTokenizer
 from .stemmers import Stemmer, StemmerFactory, EnglishNLTKStemmer
 
@@ -86,9 +93,8 @@ class TextPreparationPipeline:
             )
         return preprocessed_text
 
-
     def normalize(self, text):
-        """ Normalize Text.
+        """Normalize Text.
         Args:
             text (str): Text to normalize.
         Returns:
@@ -98,14 +104,13 @@ class TextPreparationPipeline:
         normalized_text = " ".join([t["entity"] for t in normalized_tokens])
         return normalized_text
 
-
     def get_normalized_tokens_from_text(self, text):
         """
         Args:
             text (str): Text to normalize.
         Returns:
             normalized_tokens (List[Dict]): Normalized tokens represented as dictionaries.
-                For Example: 
+                For Example:
                     norm_token = {
                         "entity": "order",
                         "raw_entity": "order",
@@ -116,14 +121,13 @@ class TextPreparationPipeline:
         raw_tokens = self.tokenizer.tokenize(text)
         return self._normalize_tokens(raw_tokens)
 
-
     def _normalize_tokens(self, raw_tokens):
-        """ Normalize individual token dicts produced by Tokenizers.
+        """Normalize individual token dicts produced by Tokenizers.
         Args:
             raw_tokens (List(Dict)): List of raw tokens represented as dictionaries.
         Returns:
             normalized_tokens (List[Dict]): Normalized tokens represented as dictionaries.
-                For Example: 
+                For Example:
                     norm_token = {
                         "entity": "order",
                         "raw_entity": "order",
@@ -153,9 +157,8 @@ class TextPreparationPipeline:
                     normalized_tokens.append(norm_token)
         return normalized_tokens
 
-
     def _normalize_single_token(self, text):
-        """ Normalize an individual token by processing text with all normalizers.
+        """Normalize an individual token by processing text with all normalizers.
 
         Args:
             text (str): Text to normalize.
@@ -517,7 +520,11 @@ class TextPreparationPipelineFactory:
     def create_default_text_preparation_pipeline():
         return TextPreparationPipeline(
             preprocessors=None,
-            normalizers=[RegexNormalizer(DEFAULT_REGEX_NORM_RULES), Lowercase(), ASCIIFold()],
+            normalizers=[
+                RegexNormalizer(DEFAULT_REGEX_NORM_RULES),
+                Lowercase(),
+                ASCIIFold(),
+            ],
             tokenizer=WhiteSpaceTokenizer(),
-            stemmer=EnglishNLTKStemmer()
+            stemmer=EnglishNLTKStemmer(),
         )

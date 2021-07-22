@@ -290,7 +290,7 @@ class NormalizerFactory:
             NFKC,
             NFKD,
             Lowercase,
-            MindMeldRegexNormalizer
+            MindMeldRegexNormalizer,
         ]
         for normalizer_class in normalizer_classes:
             if normalizer == normalizer_class.__name__:

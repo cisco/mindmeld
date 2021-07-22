@@ -21,11 +21,7 @@ import os
 import warnings
 
 from .schemas import validate_language_code, validate_locale_code
-<<<<<<< HEAD
-=======
 from .. import path
-from ..constants import CURRENCY_SYMBOLS
->>>>>>> master
 
 logger = logging.getLogger(__name__)
 
