@@ -101,7 +101,7 @@ class StemmerFactory:
             return EnglishNLTKStemmer()
         if stemmer == SnowballNLTKStemmer.__name__:
             return SnowballNLTKStemmer()
-        raise AssertionError(f" {stemmer} is not a valid 'stemmer'.")
+        raise TypeError(f" {stemmer} is not a valid 'stemmer'.")
 
     @staticmethod
     def get_stemmer_by_language(language_code):

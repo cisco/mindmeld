@@ -332,7 +332,7 @@ EXCEPTION_CHARS = "\@\[\]\|\{\}'"
 
 DEFAULT_REGEX_NORM_RULES = [
     {
-        "description": "Remove apostrophe at the end of possessive form",
+        "description": "Remove Apostrophe at the End of Possessive Form",
         "pattern": "^'(?=\S)|(?<=\S)'$",
         "replacement": ""
     },

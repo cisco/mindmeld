@@ -144,7 +144,7 @@ class TextPreparationPipeline:
 
         normalized_tokens = []
         for i, raw_token in enumerate(raw_tokens):
-            if not raw_token["text"] or len(raw_token["text"]) == 0:
+            if not raw_token["text"]:
                 continue
             normalized_text = self._normalize_single_token(raw_token["text"])
             if len(normalized_text) > 0:
@@ -163,7 +163,7 @@ class TextPreparationPipeline:
         Args:
             text (str): Text to normalize.
         Returns:
-            normalized_text (str): Text to normalize.
+            normalized_text (str): Normalized text.
         """
         normalized_text = text
         for normalizer in self.normalizers:

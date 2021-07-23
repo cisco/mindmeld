@@ -58,7 +58,7 @@ class PreprocessorFactory:
         """A static method to get a Preprocessor
 
         Args:
-            perprocessor (str): Name of the desired Preprocessor class
+            preprocessor (str): Name of the desired Preprocessor class
         Returns:
             (Preprocessor): Preprocessor Class
         """
