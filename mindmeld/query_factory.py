@@ -117,7 +117,6 @@ class QueryFactory:
             self.text_preparation_pipeline.stem_word(t["entity"]) for t in normalized_tokens
         ]
 
-
         # Create Normalized Maps
         (
             normalization_forward_map,

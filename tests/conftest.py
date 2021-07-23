@@ -310,6 +310,7 @@ test_queries = [
     ("domain2", "intent2", "I'd like a processed query please10"),
 ]
 
+
 @pytest.fixture
 def processed_queries(query_factory):
     pq_list = []

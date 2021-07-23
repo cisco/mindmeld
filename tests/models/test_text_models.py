@@ -15,9 +15,7 @@ import pytest
 from mindmeld import markup
 from mindmeld.models import CLASS_LABEL_TYPE, QUERY_EXAMPLE_TYPE, ModelConfig
 from mindmeld.models.text_models import TextModel
-from mindmeld.query_factory import QueryFactory
 from mindmeld.resource_loader import ResourceLoader, ProcessedQueryList
-from mindmeld.text_preparation.tokenizers import WhiteSpaceTokenizer
 
 APP_NAME = "kwik_e_mart"
 APP_PATH = os.path.join(

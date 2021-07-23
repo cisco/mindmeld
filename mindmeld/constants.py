@@ -339,12 +339,12 @@ DEFAULT_REGEX_NORM_RULES = [
     {
         "description": "Remove Apostrophes and Spaces Preceding or Proceding",
         "pattern": " '|' ",
-        "replacement": "" 
+        "replacement": ""
     },
     {
         "description": "Remove Beginning Spaces",
         "pattern": "^\s+",
-        "replacement": "" 
+        "replacement": ""
     },
     {
         "description": "Remove Trailing Spaces",
@@ -359,20 +359,20 @@ DEFAULT_REGEX_NORM_RULES = [
     {
         "description": "Remove Underscores",
         "pattern": "_",
-        "replacement": " " 
+        "replacement": " "
     },
     {
         "description": "Separate s to a separate word",
         "pattern": "(?<=[^\\s])'[sS]",
-        "replacement": " 's" 
+        "replacement": " 's"
     },
     {
-        "description": "Remove Punction at Start of Word Skip Exclude From Norm",
+        "description": "Remove Punctuation at Start of Word Skip Exclude From Norm",
         "pattern": "^[^\w\d&" + CURRENCY_SYMBOLS + EXCEPTION_CHARS + "]+",
-        "replacement": " " 
+        "replacement": " "
     },
     {
-        "description": "Remove Punction at End of Word Skip Exclude From Norm",
+        "description": "Remove Punctuation at End of Word Skip Exclude From Norm",
         "pattern": "[^\w\d&" + CURRENCY_SYMBOLS + EXCEPTION_CHARS + "]+$",
         "replacement": " "
     },

@@ -272,7 +272,7 @@ class NormalizerFactory:
 
         Args:
             normalizer (str): Name of the desired Normalizer class
-            regex_norm_rules (List[Dict], optional): List of regex normalization rules represented as
+            regex_norm_rules (List[Dict], optional): Regex normalization rules represented as
                 dictionaries. The example rule below removes any text in parentheses.
                 {
                     "description": "remove_text_in_parantheses",

@@ -22,7 +22,6 @@ import nltk
 from sklearn.metrics import make_scorer
 
 from ..gazetteer import Gazetteer
-from ..text_preparation.tokenizers import Tokenizer
 
 logger = logging.getLogger(__name__)
 
@@ -428,7 +427,7 @@ def merge_gazetteer_resource(resource, dynamic_resource, text_preparation_pipeli
     Args:
         resource (dict): The original resource built from the app
         dynamic_resource (dict): The dynamic resource passed in
-        text_preparation_pipeline (TextPreparationPipeline): Object for text tokenization and normalization.
+        text_preparation_pipeline (TextPreparationPipeline): For text tokenization and normalization
 
     Returns:
         dict: The merged resource
@@ -470,15 +469,16 @@ def ingest_dynamic_gazetteer(resource, dynamic_resource=None, text_preparation_p
     Args:
         resource (dict): The original resource
         dynamic_resource (dict, optional): The dynamic resource that needs to be ingested
-        text_preparation_pipeline (TextPreparationPipeline): Object for text tokenization and normalization.
+        text_preparation_pipeline (TextPreparationPipeline): For text tokenization and normalization
 
     Returns:
         (dict): A new resource with the ingested dynamic resource
     """
     if not dynamic_resource or GAZETTEER_RSC not in dynamic_resource:
         return resource
-    text_preparation_pipeline = text_preparation_pipeline #or Tokenizer() #TODO: Add Default Text Preparation Pipeline
-    workspace_resource = merge_gazetteer_resource(resource, dynamic_resource, text_preparation_pipeline)
+    workspace_resource = merge_gazetteer_resource(
+        resource, dynamic_resource, text_preparation_pipeline
+    )
     return workspace_resource
 
 

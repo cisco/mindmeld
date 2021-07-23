@@ -1222,7 +1222,9 @@ class Model:
 
         # Always initialize the global resource for tokenization, which is not a
         # feature-specific resource
-        self._resources["text_preparation_pipeline"] = resource_loader.get_text_preparation_pipeline()
+        self._resources[
+            "text_preparation_pipeline"
+        ] = resource_loader.get_text_preparation_pipeline()
 
 
 class LabelEncoder:

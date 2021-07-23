@@ -31,7 +31,7 @@ from .taggers.embeddings import WordSequenceEmbedding
 from .. import path
 from ..core import Bunch
 from ..resource_loader import Hasher
-from ..text_preparation.tokenizers import Tokenizer
+from ..text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
 
 logger = logging.getLogger(__name__)
 
@@ -758,10 +758,14 @@ class GloveEmbedder(Embedder):
 
     def __init__(self, app_path, **kwargs):
         super().__init__(app_path, **kwargs)
-        self.glove_tokenizer = Tokenizer()
+        self.glove_text_preparation_pipeline = (
+            TextPreparationPipelineFactory.create_default_text_preparation_pipeline()
+        )
 
     def tokenize(self, text):
-        tokens = self.glove_tokenizer.tokenize(text, keep_special_chars=False)
+        tokens = self.glove_text_preparation_pipeline.get_normalized_tokens_from_text(
+            text
+        )
         token_list = [t["entity"] for t in tokens]
         return token_list
 

@@ -587,7 +587,9 @@ def test_process_verbose_long_tokens(kwik_e_mart_nlp):
     text = "Is the Kwik-E-Mart open tomorrow?"
     response = kwik_e_mart_nlp.process(text, verbose=True)
 
-    text_preparation_pipeline = kwik_e_mart_nlp.resource_loader.query_factory.text_preparation_pipeline
+    text_preparation_pipeline = (
+        kwik_e_mart_nlp.resource_loader.query_factory.text_preparation_pipeline
+    )
 
     raw_tokens = text_preparation_pipeline.tokenize(text)
     raw_tokens_text = [t["text"] for t in text_preparation_pipeline.tokenize(text)]
@@ -610,7 +612,9 @@ def test_process_verbose_short_tokens(kwik_e_mart_nlp):
     text = "when ** open -- tomorrow?"
     response = kwik_e_mart_nlp.process(text, verbose=True)
 
-    text_preparation_pipeline = kwik_e_mart_nlp.resource_loader.query_factory.text_preparation_pipeline
+    text_preparation_pipeline = (
+        kwik_e_mart_nlp.resource_loader.query_factory.text_preparation_pipeline
+    )
 
     raw_tokens = text_preparation_pipeline.tokenize(text)
     raw_tokens_text = [t["text"] for t in text_preparation_pipeline.tokenize(text)]
