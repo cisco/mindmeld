@@ -20,6 +20,7 @@ import os
 import pickle
 from abc import ABC, abstractmethod
 from inspect import signature
+from typing import Union
 
 from sklearn.externals import joblib
 from sklearn.model_selection import (
@@ -113,16 +114,9 @@ class ModelConfig:
             "model_type": model_type,
             "example_type": example_type,
             "label_type": label_type,
-            "features": features,
         }.items():
             if val is None:
                 raise TypeError("__init__() missing required argument {!r}".format(arg))
-        if params is None and (
-            param_selection is None or param_selection.get("grid") is None
-        ):
-            raise ValueError(
-                "__init__() One of 'params' and 'param_selection' is required"
-            )
         self.model_type = model_type
         self.example_type = example_type
         self.label_type = label_type
@@ -237,6 +231,8 @@ class AbstractModel(ABC):
         self.mindmeld_version = get_mm_version()
         self._resources = {}
 
+        self._validate_model_configs()
+
     @abstractmethod
     def initialize_resources(self, resource_loader, examples=None, labels=None):
         raise NotImplementedError
@@ -264,10 +260,19 @@ class AbstractModel(ABC):
 
     @classmethod
     def load_model_config(cls, path):
+        """
+        Dumps the model's configs. Raises a FileNotFoundError if no configs file is found.
+        For backwards compatability wherein TextModel was serialized and dumped, the textModel file
+        is loaded using joblib and then the config is obtained from its public variables.
+
+        Args:
+            path (str): The path where the model is dumped
+        """
+
         try:
             model_configs_save_path = cls._get_model_config_save_path(path)
             model_config = pickle.load(open(model_configs_save_path, "rb"))
-        except FileNotFoundError as e:  # backwards compatability for sklearn model classes
+        except FileNotFoundError as e:  # backwards compatability for sklearn-based model classes
             metadata = joblib.load(path)
             # metadata here can be a serialized model (eg. TextModel) or a dict (eg. TaggerModel)
             if isinstance(metadata, dict):
@@ -299,15 +304,31 @@ class AbstractModel(ABC):
         return model_config
 
     def dump(self, path) -> None:
+        """
+        Dumps the model's configs and calls the child model's dump method
+
+        Args:
+            path (str): The path to dump the model to
+        """
 
         # every subclass of ABCModel has one .pkl dump file that contains a
         #   dictionary with at least the key 'model_config' whose value is a model configs dict
         #   this pickle file is sought in `load_model_config()` method
+        self._dump_model_config(path)
+
+        # call this subclass-implemeneted method to allow models to dump in their own style
+        # (eg. serialized dump for sklearn-based models, .bin files for pytorch-based models, etc.)
+        self._dump(path)
+
+    def _dump_model_config(self, path) -> None:
+        """
+        Dumps the model's configs
+        """
+
         model_configs_save_path = self._get_model_config_save_path(path)
         pickle.dump(self.config, open(model_configs_save_path, "wb"))
 
-        self._dump(path)
-
+    @abstractmethod
     def _dump(self, path) -> None:
         """
         Dumps the model and calls the underlying algo to dump its state.
@@ -316,13 +337,6 @@ class AbstractModel(ABC):
             path (str): The path to dump the model to
         """
         pass
-
-    @staticmethod
-    def _get_model_config_save_path(path):
-        head, ext = os.path.splitext(path)
-        model_config_save_path = head + ".config" + ext
-        os.makedirs(os.path.dirname(model_config_save_path), exist_ok=True)
-        return model_config_save_path
 
     def view_extracted_features(self, example, dynamic_resource=None):
         # Not implemeneted for deep neural models
@@ -335,6 +349,16 @@ class AbstractModel(ABC):
 
     def get_resource(self, name):
         return self._resources.get(name)
+
+    @staticmethod
+    def _get_model_config_save_path(path):
+        head, ext = os.path.splitext(path)
+        model_config_save_path = head + ".config" + ext
+        os.makedirs(os.path.dirname(model_config_save_path), exist_ok=True)
+        return model_config_save_path
+
+    def _validate_model_configs(self):
+        pass
 
 
 class Model(AbstractModel):
@@ -684,6 +708,19 @@ class Model(AbstractModel):
         # feature-specific resource
         self._resources["tokenizer"] = resource_loader.get_tokenizer()
 
+    def _validate_model_configs(self) -> Union[TypeError, ValueError]:
+
+        for arg, val in {"features": self.config.features, }.items():
+            if val is None:
+                raise TypeError("__init__() missing required argument {!r}".format(arg))
+
+        if self.config.params is None and (
+            self.config.param_selection is None or self.config.param_selection.get("grid") is None
+        ):
+            raise ValueError(
+                "__init__() One of 'params' and 'param_selection' is required"
+            )
+
 
 class PytorchModel(AbstractModel):
 
@@ -707,4 +744,7 @@ class PytorchModel(AbstractModel):
 
     @classmethod
     def load(cls, path):
+        raise NotImplementedError
+
+    def _dump(self, path):
         raise NotImplementedError

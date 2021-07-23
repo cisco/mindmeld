@@ -420,16 +420,6 @@ class Classifier(ABC):
                 model_config.pop("params", None)
         return ModelConfig(**model_config)
 
-    @staticmethod
-    def _get_classifier_resources_save_path(model_path):
-        head, ext = os.path.splitext(model_path)
-        classifier_resources_save_path = head + ".classifier_resources" + ext
-        os.makedirs(os.path.dirname(classifier_resources_save_path), exist_ok=True)
-        return classifier_resources_save_path
-
-    def _create_and_dump_payload(self, path):
-        pass
-
     def dump(self, model_path, incremental_model_path=None):
         """Persists the trained classification model to disk.
 
@@ -443,13 +433,14 @@ class Classifier(ABC):
                 continue
 
             # classifier specific dump
-            self._create_and_dump_payload(path)
+            self._dump(path)
 
             # model specific dump
             if self._model:
                 # sometimes a model might be NoneType, eg. in role classifiers, in which case,
                 # no dumping is required. While loading such models, the model_path (.pkl)
-                # will not be found and the helpers.load_model() will return a NoneType model.
+                # will not be found and the helpers.load_model() will return None, whic makes it
+                # backwards compataible to loading a NoneType model
                 self._model.dump(path)
 
             hash_path = path + ".hash"
@@ -458,6 +449,16 @@ class Classifier(ABC):
 
             if path == model_path:
                 self.dirty = False
+
+    def _dump(self, path):
+        pass
+
+    @staticmethod
+    def _get_classifier_resources_save_path(model_path):
+        head, ext = os.path.splitext(model_path)
+        classifier_resources_save_path = head + ".classifier_resources" + ext
+        os.makedirs(os.path.dirname(classifier_resources_save_path), exist_ok=True)
+        return classifier_resources_save_path
 
     def unload(self):
         """

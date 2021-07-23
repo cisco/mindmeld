@@ -28,21 +28,24 @@ logger = logging.getLogger(__name__)
 
 class AutoModel:
     """Auto class that identifies appropriate text/tagger model from text_models.py/tagger_models.py
-    to load based on the inputted configs or from the loaded configs file.
+    to load one based on the inputted configs or from the loaded configs file.
 
-    The .from_config() methods allows to load the appropriate model when passed in with ModelConfig.
-    The .from_path() method uses AbstractModel's load method to load a dumped config, which is them
+    The .from_config() methods allows to load the appropriate model when a ModelConfig is passed.
+    The .from_path() method uses AbstractModel's load method to load a dumped config, which is then
     used to load appropriate model and return it through a metadata dictionary object.
 
     """
     ALLOWED_MODEL_TYPES = ["text", "tagger"]
 
-    # method for backwards compatability in ./helpers/create_model()
-    def __new__(cls, config: Union[dict, ModelConfig]):
+    def __new__(cls, config: Union[dict, ModelConfig]) -> Type[AbstractModel]:
+        # method for backwards compatability in ./helpers/create_model()
         return cls.from_config(config)
 
     @classmethod
     def from_config(cls, model_config: Union[dict, ModelConfig]) -> Type[AbstractModel]:
+        """
+        Loads a valid model from the specified model configs
+        """
 
         if not (model_config and isinstance(model_config, (ModelConfig, dict))):
             msg = f"Need a valid model config to create a text/tagger model in AutoModel. " \
@@ -62,7 +65,12 @@ class AutoModel:
         return model_class(model_config)
 
     @classmethod
-    def from_path(cls, path: str) -> Type[AbstractModel]:
+    def from_path(cls, path: str) -> Union[None, Type[AbstractModel]]:
+        """
+        Loads a valid model from the specified path wherein the model was previously dumped.
+        Returns None when the specified path is not found or if the model loaded from the
+        specified path is a NoneType.
+        """
 
         if not (path and isinstance(path, str)):
             msg = f"Need a valid path to load a text/tagger model in AutoModel. " \
