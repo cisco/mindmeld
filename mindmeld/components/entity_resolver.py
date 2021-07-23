@@ -125,7 +125,7 @@ class EntityResolverFactory:
                 "to use Elasticsearch based entity resolution.")
 
     @classmethod
-    def create_resolver(cls, app_path, entity_type, **kwargs):
+    def create_resolver(cls, app_path, entity_type, config=None, resource_loader=None, **kwargs):
         """
         Identifies appropriate entity resolver based on input config and
             returns it.
@@ -139,27 +139,22 @@ class EntityResolverFactory:
             es_client (Elasticsearch): The Elasticsearch client.
         """
 
-        er_config = (
-            kwargs.pop("config", {}) or
-            get_classifier_config("entity_resolution", app_path=app_path)
-        )
+        er_config = config or get_classifier_config("entity_resolution", app_path=app_path)
         er_config = cls._correct_deprecated_er_config(er_config)
 
         resolver_type = er_config["model_settings"]["resolver_type"]
         cls._validate_resolver_type(resolver_type)
 
-        resource_loader = kwargs.pop(
-            "resource_loader",
-            ResourceLoader.create_resource_loader(app_path=app_path)
+        resource_loader = (
+            resource_loader or ResourceLoader.create_resource_loader(app_path=app_path)
         )
 
-        kwargs.update({
-            "entity_type": entity_type,
-            "config": er_config,
-            "resource_loader": resource_loader,
-        })
-
-        return ENTITY_RESOLVER_MODEL_MAPPINGS.get(resolver_type)(app_path, **kwargs)
+        return ENTITY_RESOLVER_MODEL_MAPPINGS.get(resolver_type)(
+            app_path,
+            entity_type=entity_type,
+            config=er_config,
+            resource_loader=resource_loader,
+            **kwargs)
 
 
 class BaseEntityResolver(ABC):

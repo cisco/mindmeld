@@ -205,7 +205,7 @@ The labeled data for training our NLP pipeline was created using a combination o
 | | Annotate queries for training the Role Classifier                                     | | The screening blueprint does not use roles.                                                                       |
 | |                                                                                       | | For examples, please visit the home assistant blueprint.                                                          |
 +-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
-| | Generate synonyms for gazetteer generation to improve entity recognition accuracies | | ``unit`` entity: "Enumerate a list of abbreviations for the unit"                                                 |
+| | Generate synonyms for gazetteer generation to improve entity recognition accuracies   | | ``unit`` entity: "Enumerate a list of abbreviations for the unit"                                                 |
 | |                                                                                       | | ``gender`` entity: "What are different ways to indicate gender?"                                                  |
 +-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
 
