@@ -267,7 +267,7 @@ class NormalizerFactory:
     """Normalizer Factory Class"""
 
     @staticmethod
-    def get_normalizer(normalizer, regex_norm_rules=None):
+    def get_normalizer(normalizer: str, regex_norm_rules=None):
         """A static method to get a Normalizer
 
         Args:
@@ -282,19 +282,18 @@ class NormalizerFactory:
         Returns:
             (Normalizer): Normalizer Class
         """
-        normalizer_classes = [
-            NoOpNormalizer,
-            ASCIIFold,
-            NFC,
-            NFD,
-            NFKC,
-            NFKD,
-            Lowercase,
-            MindMeldRegexNormalizer,
-        ]
-        for normalizer_class in normalizer_classes:
-            if normalizer == normalizer_class.__name__:
-                return normalizer_class()
-        if normalizer == RegexNormalizer.__name__:
-            return RegexNormalizer(regex_norm_rules)
-        raise AssertionError(f" {normalizer} is not a valid normalizer.")
+        normalizer_classes = {
+            NoOpNormalizer.__name__: NoOpNormalizer,
+            ASCIIFold.__name__: ASCIIFold,
+            NFC.__name__: NFC,
+            NFD.__name__: NFD,
+            NFKC.__name__: NFKC,
+            NFKD.__name__: NFKD,
+            Lowercase.__name__: Lowercase,
+            RegexNormalizer.__name__: lambda: RegexNormalizer(regex_norm_rules),
+            MindMeldRegexNormalizer.__name__: MindMeldRegexNormalizer,
+        }
+        normalizer_class = normalizer_classes.get(normalizer)
+        if not normalizer_class:
+            raise TypeError(f"{normalizer} is not a valid Normalizer type.")
+        return normalizer_class()

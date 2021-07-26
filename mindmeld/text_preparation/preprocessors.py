@@ -54,7 +54,7 @@ class PreprocessorFactory:
     """Preprocessor Factory Class"""
 
     @staticmethod
-    def get_preprocessor(preprocessor):
+    def get_preprocessor(preprocessor: str):
         """A static method to get a Preprocessor
 
         Args:
@@ -62,6 +62,8 @@ class PreprocessorFactory:
         Returns:
             (Preprocessor): Preprocessor Class
         """
-        if preprocessor == NoOpPreprocessor.__name__:
-            return NoOpPreprocessor()
-        raise AssertionError(f" {preprocessor} is not a valid Preprocessor.")
+        preprocessor_classes = {NoOpPreprocessor.__name__: NoOpPreprocessor}
+        preprocessor_class = preprocessor_classes.get(preprocessor)
+        if not preprocessor_class:
+            raise TypeError(f"{preprocessor} is not a valid Preprocessor type.")
+        return preprocessor_class()

@@ -17,7 +17,7 @@ from typing import List, Dict
 import re
 import unicodedata
 
-from .preprocessor import Preprocessor, PreprocessorFactory
+from .preprocessors import Preprocessor, PreprocessorFactory
 from .normalizers import (
     Normalizer,
     NoOpNormalizer,

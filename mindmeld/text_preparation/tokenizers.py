@@ -250,7 +250,9 @@ class TokenizerFactory:
     """Tokenizer Factory Class"""
 
     @staticmethod
-    def get_tokenizer(tokenizer, language=ENGLISH_LANGUAGE_CODE, spacy_model_size="sm"):
+    def get_tokenizer(
+        tokenizer: str, language=ENGLISH_LANGUAGE_CODE, spacy_model_size="sm"
+    ):
         """A static method to get a tokenizer
 
         Args:
@@ -261,17 +263,17 @@ class TokenizerFactory:
         Returns:
             (Tokenizer): Tokenizer Class
         """
-        if tokenizer == NoOpTokenizer.__name__:
-            return NoOpTokenizer()
-        elif tokenizer == CharacterTokenizer.__name__:
-            return CharacterTokenizer()
-        elif tokenizer == LetterTokenizer.__name__:
-            return LetterTokenizer()
-        elif tokenizer == WhiteSpaceTokenizer.__name__:
-            return WhiteSpaceTokenizer()
-        elif tokenizer == SpacyTokenizer.__name__:
-            return SpacyTokenizer(language, spacy_model_size)
-        raise AssertionError(f" {tokenizer} is not a valid Tokenizer.")
+        tokenizer_classes = {
+            NoOpTokenizer.__name__: NoOpTokenizer,
+            CharacterTokenizer.__name__: CharacterTokenizer,
+            LetterTokenizer.__name__: LetterTokenizer,
+            WhiteSpaceTokenizer.__name__: WhiteSpaceTokenizer,
+            SpacyTokenizer.__name__: lambda: SpacyTokenizer(language, spacy_model_size),
+        }
+        tokenizer_class = tokenizer_classes.get(tokenizer)
+        if not tokenizer_class:
+            raise TypeError(f"{tokenizer} is not a valid Tokenizer type.")
+        return tokenizer_class()
 
     @staticmethod
     def get_tokenizer_by_language(language):

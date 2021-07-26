@@ -89,19 +89,23 @@ class StemmerFactory:
     """Stemmer Factory Class"""
 
     @staticmethod
-    def get_stemmer(stemmer):
+    def get_stemmer(stemmer: str):
         """A static method to get a stemmer.
 
         Args:
-            translator (str): Name of the desired translator class
+            stemmer (str): Name of the desired translator class
         Returns:
-            (Translator): Translator Class
+            (Stemmer): Stemmer Class
         """
-        if stemmer == EnglishNLTKStemmer.__name__:
-            return EnglishNLTKStemmer()
-        if stemmer == SnowballNLTKStemmer.__name__:
-            return SnowballNLTKStemmer()
-        raise TypeError(f" {stemmer} is not a valid 'stemmer'.")
+
+        stemmer_classes = {
+            EnglishNLTKStemmer.__name__: EnglishNLTKStemmer,
+            SnowballNLTKStemmer.__name__: SnowballNLTKStemmer,
+        }
+        stemmer_class = stemmer_classes.get(stemmer)
+        if not stemmer_class:
+            raise TypeError(f"{stemmer} is not a valid Stemmer type.")
+        return stemmer_class()
 
     @staticmethod
     def get_stemmer_by_language(language_code):

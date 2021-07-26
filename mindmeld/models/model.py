@@ -1079,6 +1079,7 @@ class Model:
         Args:
             example: An example object.
             dynamic_resource (dict, optional): A dynamic resource to aid NLP inference
+            text_preparation_pipeline (TextPreparationPipeline): MindMeld text processing object
 
         Returns:
             (dict of str: number): A dict of feature names to their values.

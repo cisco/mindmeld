@@ -20,7 +20,7 @@ from tempfile import mkstemp
 
 import nltk
 from sklearn.metrics import make_scorer
-
+from ..text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
 from ..gazetteer import Gazetteer
 
 logger = logging.getLogger(__name__)
@@ -476,6 +476,10 @@ def ingest_dynamic_gazetteer(resource, dynamic_resource=None, text_preparation_p
     """
     if not dynamic_resource or GAZETTEER_RSC not in dynamic_resource:
         return resource
+    text_preparation_pipeline = (
+        text_preparation_pipeline
+        or TextPreparationPipelineFactory.create_default_text_preparation_pipeline()
+    )
     workspace_resource = merge_gazetteer_resource(
         resource, dynamic_resource, text_preparation_pipeline
     )
