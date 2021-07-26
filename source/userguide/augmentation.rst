@@ -7,7 +7,7 @@ Quick Start
 -----------
 This section briefly explains the use of the ``augment`` command.
 
-The command below can be used to augment data across all training and testing files in the application, given a language code.
+The command below can be used to augment data across all training and testing files in the application, given a language code (specified using the ``--language`` or ``-l`` flags).
 
 Command-line:
 
