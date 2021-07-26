@@ -15,14 +15,15 @@
 This module contains the entity recognizer component of the MindMeld natural language processor.
 """
 import logging
+import pickle
 
 from sklearn.externals import joblib
 
-from ..constants import DEFAULT_TRAIN_SET_REGEX
-from ..core import Entity, Query
-from ..models import ENTITIES_LABEL_TYPE, QUERY_EXAMPLE_TYPE, create_model
 from ._config import get_classifier_config
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
+from ..constants import DEFAULT_TRAIN_SET_REGEX
+from ..core import Entity, Query
+from ..models import ENTITIES_LABEL_TYPE, QUERY_EXAMPLE_TYPE, create_model, load_model
 
 logger = logging.getLogger(__name__)
 
@@ -134,17 +135,6 @@ class EntityRecognizer(Classifier):
         self.dirty = True
         return True
 
-    def _data_dump_payload(self):
-        return {
-            "entity_types": self.entity_types,
-            "w_ngram_freq": self._model.get_resource("w_ngram_freq"),
-            "c_ngram_freq": self._model.get_resource("c_ngram_freq"),
-            "model_config": self._model_config,
-        }
-
-    def _create_and_dump_payload(self, path):
-        self._model.dump(path, self._data_dump_payload())
-
     def dump(self, model_path, incremental_model_path=None):
         """Save the model.
 
@@ -157,6 +147,15 @@ class EntityRecognizer(Classifier):
             "Saving entity classifier: domain=%r, intent=%r", self.domain, self.intent
         )
         super().dump(model_path, incremental_model_path)
+
+    def _dump(self, path):
+        er_data = {
+            "entity_types": self.entity_types,
+            "w_ngram_freq": self._model.get_resource("w_ngram_freq"),
+            "c_ngram_freq": self._model.get_resource("c_ngram_freq"),
+            "model_config": self._model_config,
+        }
+        pickle.dump(er_data, open(self._get_classifier_resources_save_path(path), "wb"))
 
     def unload(self):
         logger.info(
@@ -176,25 +175,19 @@ class EntityRecognizer(Classifier):
         logger.info(
             "Loading entity recognizer: domain=%r, intent=%r", self.domain, self.intent
         )
+
+        # underlying model specific load
+        self._model = load_model(model_path)
+
+        # classifier specific load
         try:
+            er_data = pickle.load(open(self._get_classifier_resources_save_path(model_path), "rb"))
+        except FileNotFoundError:  # backwards compatability for previous version's saved models
             er_data = joblib.load(model_path)
+        self.entity_types = er_data["entity_types"]
+        self._model_config = er_data["model_config"]
 
-            self.entity_types = er_data["entity_types"]
-            self._model_config = er_data.get("model_config")
-
-            # The default is True since < MM 3.2.0 models are serializable by default
-            is_serializable = er_data.get("serializable", True)
-
-            if is_serializable:
-                # Load the model in directly from the dictionary since its serializable
-                self._model = er_data["model"]
-            else:
-                self._model = create_model(self._model_config)
-                self._model.load(model_path, er_data)
-        except (OSError, IOError) as e:
-            msg = "Unable to load {}. Pickle file cannot be read from {!r}"
-            raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path)) from e
-
+        # validate and register resources
         if self._model is not None:
             if not hasattr(self._model, "mindmeld_version"):
                 msg = (
@@ -298,9 +291,10 @@ class EntityRecognizer(Classifier):
         return (queries.queries(), queries.entities())
 
     def _get_examples_and_labels_hash(self, queries):
-        hashable_queries = [
-            self.domain + "###" + self.intent + "###entity###"
-        ] + sorted(list(queries.raw_queries()))
+        hashable_queries = (
+            [self.domain + "###" + self.intent + "###entity###"] +
+            sorted(list(queries.raw_queries()))
+        )
         return self._resource_loader.hash_list(hashable_queries)
 
     def inspect(self, query, gold_label=None, dynamic_resource=None):

@@ -19,12 +19,10 @@ import logging
 import os
 from abc import ABC, abstractmethod
 
-from sklearn.externals import joblib
-
 from ..constants import DEFAULT_TEST_SET_REGEX, DEFAULT_TRAIN_SET_REGEX
 from ..core import Query
 from ..exceptions import ClassifierLoadError
-from ..models import ModelConfig, create_model
+from ..models import ModelConfig, create_model, load_model
 from ..resource_loader import ProcessedQueryList
 
 logger = logging.getLogger(__name__)
@@ -422,12 +420,6 @@ class Classifier(ABC):
                 model_config.pop("params", None)
         return ModelConfig(**model_config)
 
-    def _data_dump_payload(self):
-        return self._model
-
-    def _create_and_dump_payload(self, path):
-        joblib.dump(self._data_dump_payload(), path)
-
     def dump(self, model_path, incremental_model_path=None):
         """Persists the trained classification model to disk.
 
@@ -440,12 +432,16 @@ class Classifier(ABC):
             if not path:
                 continue
 
-            # make directory if necessary
-            folder = os.path.dirname(path)
-            if not os.path.isdir(folder):
-                os.makedirs(folder)
+            # classifier specific dump
+            self._dump(path)
 
-            self._create_and_dump_payload(path)
+            # model specific dump
+            if self._model:
+                # sometimes a model might be NoneType, eg. in role classifiers, in which case,
+                # no dumping is required. While loading such models, the model_path (.pkl)
+                # will not be found and the helpers.load_model() will return None, whic makes it
+                # backwards compataible to loading a NoneType model
+                self._model.dump(path)
 
             hash_path = path + ".hash"
             with open(hash_path, "w") as hash_file:
@@ -453,6 +449,16 @@ class Classifier(ABC):
 
             if path == model_path:
                 self.dirty = False
+
+    def _dump(self, path):
+        pass
+
+    @staticmethod
+    def _get_classifier_resources_save_path(model_path):
+        head, ext = os.path.splitext(model_path)
+        classifier_resources_save_path = head + ".classifier_resources" + ext
+        os.makedirs(os.path.dirname(classifier_resources_save_path), exist_ok=True)
+        return classifier_resources_save_path
 
     def unload(self):
         """
@@ -469,11 +475,10 @@ class Classifier(ABC):
         Args:
             model_path (str): The location on disk where the model is stored
         """
-        try:
-            self._model = joblib.load(model_path)
-        except (OSError, IOError) as e:
-            msg = "Unable to load {}. Pickle at {!r} cannot be read."
-            raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path)) from e
+
+        self._model = load_model(model_path)
+
+        # validate and initialize resources
         if self._model is not None:
             if not hasattr(self._model, "mindmeld_version"):
                 msg = (

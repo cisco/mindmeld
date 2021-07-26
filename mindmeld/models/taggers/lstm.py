@@ -16,9 +16,9 @@ import os
 import re
 
 import numpy as np
+import tensorflow as tf
 from sklearn.externals import joblib
 from sklearn.preprocessing import LabelBinarizer
-import tensorflow as tf
 
 from .embeddings import CharacterSequenceEmbedding, WordSequenceEmbedding
 from .taggers import Tagger, extract_sequence_features
@@ -223,7 +223,7 @@ class LstmModel(Tagger):  # pylint: disable=too-many-instance-attributes
             start_index = 0
             for label_sequence in padded_y:
                 encoded_labels.append(
-                    encoded_labels_flat[start_index : start_index + len(label_sequence)]
+                    encoded_labels_flat[start_index: start_index + len(label_sequence)]
                 )
                 start_index += len(label_sequence)
 
@@ -954,25 +954,34 @@ class LstmModel(Tagger):  # pylint: disable=too-many-instance-attributes
 
         return decoded_queries
 
-    def dump(self, path, config):
+    @property
+    def is_serializable(self):
+        return False
+
+    @staticmethod
+    def _get_tagger_resources_save_path(model_path):
+        tagger_resources_save_path = model_path.split(".pkl")[0] + "_model_files"
+        os.makedirs(os.path.dirname(tagger_resources_save_path), exist_ok=True)
+        return tagger_resources_save_path
+
+    def dump(self, path):
         """
         Saves the Tensorflow model
 
         Args:
             path (str): the folder path for the entity model folder
-            config (dict): The model config
+
+        Returns:
+            path (str): entity model folder
         """
-        path = path.split(".pkl")[0] + "_model_files"
-        config["model"] = path
-        config["serializable"] = False
+        path = self._get_tagger_resources_save_path(path)
 
         if not os.path.isdir(path):
             os.makedirs(path)
 
         if not self.saver:
-            # This conditional happens when there are not entities for the associated
-            # model
-            return
+            # This conditional happens when there are no entities for the associated model
+            return path
 
         self.saver.save(self.session, os.path.join(path, "lstm_model"))
 
@@ -1007,7 +1016,7 @@ class LstmModel(Tagger):  # pylint: disable=too-many-instance-attributes
         Args:
             path (str): the folder path for the entity model folder
         """
-        path = path.split(".pkl")[0] + "_model_files"
+        path = self._get_tagger_resources_save_path(path)
 
         if not os.path.exists(os.path.join(path, "lstm_model.meta")):
             # This conditional is for models with no labels where no TF graph was built

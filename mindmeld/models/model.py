@@ -16,12 +16,13 @@ import copy
 import json
 import logging
 import math
-from collections import namedtuple
+import os
+import pickle
+from abc import ABC, abstractmethod
 from inspect import signature
+from typing import Union
 
-import numpy as np
-from sklearn.metrics import accuracy_score, confusion_matrix, f1_score
-from sklearn.metrics import precision_recall_fscore_support as score
+from sklearn.externals import joblib
 from sklearn.model_selection import (
     GridSearchCV,
     GroupKFold,
@@ -32,38 +33,26 @@ from sklearn.model_selection import (
     StratifiedShuffleSplit,
 )
 
-from .._version import get_mm_version
-from ..tokenizer import Tokenizer
 from .helpers import (
     CHAR_NGRAM_FREQ_RSC,
     ENABLE_STEMMING,
     GAZETTEER_RSC,
-    ENTITIES_LABEL_TYPE,
     WORD_NGRAM_FREQ_RSC,
     QUERY_FREQ_RSC,
     SYS_TYPES_RSC,
     WORD_FREQ_RSC,
     SENTIMENT_ANALYZER,
-    entity_seqs_equal,
     get_feature_extractor,
     get_label_encoder,
     ingest_dynamic_gazetteer,
-    register_label,
 )
-from ..system_entity_recognizer import SystemEntityRecognizer
-from .taggers.taggers import (
-    BoundaryCounts,
-    get_boundary_counts,
-    get_entities_from_tags,
-    get_tags_from_entities,
-)
+from .._version import get_mm_version
+from ..tokenizer import Tokenizer
+
+# for backwards compatability for sklearn models serialized and dumped in previous version
+from .labels import LabelEncoder, EntityLabelEncoder  # pylint: disable=unused-import
 
 logger = logging.getLogger(__name__)
-
-# model scoring type
-LIKELIHOOD_SCORING = "log_loss"
-
-_NEG_INF = -1e10
 
 
 class ModelConfig:
@@ -125,16 +114,9 @@ class ModelConfig:
             "model_type": model_type,
             "example_type": example_type,
             "label_type": label_type,
-            "features": features,
         }.items():
             if val is None:
                 raise TypeError("__init__() missing required argument {!r}".format(arg))
-        if params is None and (
-            param_selection is None or param_selection.get("grid") is None
-        ):
-            raise ValueError(
-                "__init__() One of 'params' and 'param_selection' is required"
-            )
         self.model_type = model_type
         self.example_type = example_type
         self.label_type = label_type
@@ -144,6 +126,12 @@ class ModelConfig:
         self.param_selection = param_selection
         self.train_label_set = train_label_set
         self.test_label_set = test_label_set
+
+    def __repr__(self):
+        args_str = ", ".join(
+            "{}={!r}".format(key, getattr(self, key)) for key in self.__slots__
+        )
+        return "{}({})".format(self.__class__.__name__, args_str)
 
     def to_dict(self):
         """Converts the model config object into a dict
@@ -155,12 +143,6 @@ class ModelConfig:
         for attr in self.__slots__:
             result[attr] = getattr(self, attr)
         return result
-
-    def __repr__(self):
-        args_str = ", ".join(
-            "{}={!r}".format(key, getattr(self, key)) for key in self.__slots__
-        )
-        return "{}({})".format(self.__class__.__name__, args_str)
 
     def to_json(self):
         """Converts the model config object to JSON
@@ -239,613 +221,164 @@ class ModelConfig:
         return required_resources
 
 
-class EvaluatedExample(
-    namedtuple(
-        "EvaluatedExample", ["example", "expected", "predicted", "probas", "label_type"]
-    )
-):
-    """Represents the evaluation of a single example
-
-    Attributes:
-        example: The example being evaluated
-        expected: The expected label for the example
-        predicted: The predicted label for the example
-        proba (dict): Maps labels to their predicted probabilities
-        label_type (str): One of CLASS_LABEL_TYPE or ENTITIES_LABEL_TYPE
+class AbstractModel(ABC):
+    """
+    A minimalistic abstract class upon which all models are based.
     """
 
-    @property
-    def is_correct(self):
-        # For entities compare just the type, span and text for each entity.
-        if self.label_type == ENTITIES_LABEL_TYPE:
-            return entity_seqs_equal(self.expected, self.predicted)
-        # For other label_types compare the full objects
-        else:
-            return self.expected == self.predicted
+    def __init__(self, config: ModelConfig):
+        self.config = config
+        self.mindmeld_version = get_mm_version()
+        self._resources = {}
 
+        self._validate_model_configs()
 
-class RawResults:
-    """Represents the raw results of a set of evaluated examples. Useful for generating
-    stats and graphs.
-
-    Attributes:
-        predicted (list): A list of predictions. For sequences this is a list of lists, and for
-                          standard classifieris this is a 1d array. All classes are in their numeric
-                          representations for ease of use with evaluation libraries and graphing.
-        expected (list): Same as predicted but contains the true or gold values.
-        text_labels (list): A list of all the text label values, the index of the text label in
-                             this array is the numeric label
-        predicted_flat (list): (Optional): For sequence models this is a flattened list of all
-                                predicted tags (1d array)
-        expected_flat (list): (Optional): For sequence models this is a flattened list of all gold
-                              tags
-    """
-
-    def __init__(
-        self, predicted, expected, text_labels, predicted_flat=None, expected_flat=None
-    ):
-        self.predicted = predicted
-        self.expected = expected
-        self.text_labels = text_labels
-        self.predicted_flat = predicted_flat
-        self.expected_flat = expected_flat
-
-
-class ModelEvaluation(namedtuple("ModelEvaluation", ["config", "results"])):
-    """Represents the evaluation of a model at a specific configuration
-    using a collection of examples and labels.
-
-    Attributes:
-        config (ModelConfig): The model config used during evaluation.
-        results (list of EvaluatedExample): A list of the evaluated examples.
-    """
-
-    def __init__(self, config, results):
-        del results
-        self.label_encoder = get_label_encoder(config)
-
-    def get_accuracy(self):
-        """The accuracy represents the share of examples whose predicted labels
-        exactly matched their expected labels.
-
-        Returns:
-            float: The accuracy of the model.
-        """
-        num_examples = len(self.results)
-        num_correct = len([e for e in self.results if e.is_correct])
-        return float(num_correct) / float(num_examples)
-
-    def __repr__(self):
-        num_examples = len(self.results)
-        num_correct = len(list(self.correct_results()))
-        accuracy = self.get_accuracy()
-        msg = "<{} score: {:.2%}, {} of {} example{} correct>"
-        return msg.format(
-            self.__class__.__name__,
-            accuracy,
-            num_correct,
-            num_examples,
-            "" if num_examples == 1 else "s",
-        )
-
-    def correct_results(self):
-        """
-        Returns:
-            iterable: Collection of the examples which were correct
-        """
-        for result in self.results:
-            if result.is_correct:
-                yield result
-
-    def incorrect_results(self):
-        """
-        Returns:
-            iterable: Collection of the examples which were incorrect
-        """
-        for result in self.results:
-            if not result.is_correct:
-                yield result
-
-    def get_stats(self):
-        """
-        Returns a structured stats object for evaluation.
-
-        Returns:
-            dict: Structured dict containing evaluation statistics. Contains precision, \
-                  recall, f scores, support, etc.
-        """
+    @abstractmethod
+    def initialize_resources(self, resource_loader, examples=None, labels=None):
         raise NotImplementedError
 
-    def print_stats(self):
-        """
-        Prints a useful stats table for evaluation.
-
-        Returns:
-            dict: Structured dict containing evaluation statistics. Contains precision, \
-                  recall, f scores, support, etc.
-        """
+    @abstractmethod
+    def fit(self, examples, labels, params=None):
         raise NotImplementedError
 
-    def raw_results(self):
-        """
-        Exposes raw vectors of expected and predicted for data scientists to use for any additional
-        evaluation metrics or to generate graphs of their choice.
-
-        Returns:
-            (tuple): tuple containing:
-
-                * NamedTuple: RawResults named tuple containing
-                * expected: vector of predicted classes (numeric value)
-                * predicted: vector of gold classes (numeric value)
-                * text_labels: a list of all the text label values, the index of the text label in
-                * this array is the numeric label
-        """
+    @abstractmethod
+    def predict(self, examples, dynamic_resource=None):
         raise NotImplementedError
 
-    @staticmethod
-    def _update_raw_result(label, text_labels, vec):
+    @abstractmethod
+    def predict_proba(self, examples):
+        raise NotImplementedError
+
+    @abstractmethod
+    def evaluate(self, examples, labels):
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def load(cls, path):
+        raise NotImplementedError
+
+    @classmethod
+    def load_model_config(cls, path):
         """
-        Helper method for updating the text to numeric label vectors
+        Dumps the model's configs. Raises a FileNotFoundError if no configs file is found.
+        For backwards compatability wherein TextModel was serialized and dumped, the textModel file
+        is loaded using joblib and then the config is obtained from its public variables.
 
-        Returns:
-            (tuple): tuple containing:
-
-                * text_labels: The updated text_labels array
-                * vec: The updated label vector with the given label appended
+        Args:
+            path (str): The path where the model is dumped
         """
-        if label not in text_labels:
-            text_labels.append(label)
-        vec.append(text_labels.index(label))
-        return text_labels, vec
 
-    def _get_common_stats(self, raw_expected, raw_predicted, text_labels):
+        try:
+            model_configs_save_path = cls._get_model_config_save_path(path)
+            model_config = pickle.load(open(model_configs_save_path, "rb"))
+        except FileNotFoundError as e:  # backwards compatability for sklearn-based model classes
+            metadata = joblib.load(path)
+            # metadata here can be a serialized model (eg. TextModel) or a dict (eg. TaggerModel)
+            if isinstance(metadata, dict):
+                # compatability with previously dumped EntityRecognizers and RoleClassifiers
+                try:
+                    # sklearn TaggerModel used by EntityRecognizer
+                    model_config = metadata["model_config"]
+                except KeyError:
+                    try:
+                        # sklearn TextModel used by RoleClassifier (w/ a non-NoneType "model")
+                        model_config = metadata["model"].config
+                    except AttributeError:
+                        # sklearn TextModel used by RoleClassifier (w/ a NoneType "model")
+                        #   in latest version, nothing gets dumped at the dump
+                        #       path: 'path/to/dump/<entity_name>-role.pkl' if the self._model in
+                        #       RoleClassifier is None because of a check in Classifier.dump()
+                        #   in previous version, a dictionary '{'model': None, 'roles': set()}'
+                        #       is dumped at the path: 'path/to/dump/<entity_name>-role.pkl'
+                        #       although the self._model in RoleClassifier is None
+                        msg = f"Model config data cold not be identified from existing dump at " \
+                              f"path: {path}. Assuming that the dumped model is NoneType and " \
+                              f"belongs to a role classifier"
+                        raise FileNotFoundError(msg) from e
+            else:
+                # compatability with previously dumped DomainClassifiers and IntentClassifiers
+                #   in this case, metadata = model which was serialized and dumped
+                model_config = metadata.config
+
+        return model_config
+
+    def dump(self, path) -> None:
         """
-        Prints a useful stats table and returns a structured stats object for evaluation.
+        Dumps the model's configs and calls the child model's dump method
 
-        Returns:
-            dict: Structured dict containing evaluation statistics. Contains precision, \
-                  recall, f scores, support, etc.
+        Args:
+            path (str): The path to dump the model to
         """
-        labels = range(len(text_labels))
 
-        confusion_stats = self._get_confusion_matrix_and_counts(
-            y_true=raw_expected, y_pred=raw_predicted
-        )
-        stats_overall = self._get_overall_stats(
-            y_true=raw_expected, y_pred=raw_predicted, labels=labels
-        )
-        counts_overall = confusion_stats["counts_overall"]
-        stats_overall["tp"] = counts_overall.tp
-        stats_overall["tn"] = counts_overall.tn
-        stats_overall["fp"] = counts_overall.fp
-        stats_overall["fn"] = counts_overall.fn
+        # every subclass of ABCModel has one .pkl dump file that contains a
+        #   dictionary with at least the key 'model_config' whose value is a model configs dict
+        #   this pickle file is sought in `load_model_config()` method
+        self._dump_model_config(path)
 
-        class_stats = self._get_class_stats(
-            y_true=raw_expected, y_pred=raw_predicted, labels=labels
-        )
-        counts_by_class = confusion_stats["counts_by_class"]
+        # call this subclass-implemeneted method to allow models to dump in their own style
+        # (eg. serialized dump for sklearn-based models, .bin files for pytorch-based models, etc.)
+        self._dump(path)
 
-        class_stats["tp"] = counts_by_class.tp
-        class_stats["tn"] = counts_by_class.tn
-        class_stats["fp"] = counts_by_class.fp
-        class_stats["fn"] = counts_by_class.fn
-
-        return {
-            "stats_overall": stats_overall,
-            "class_labels": text_labels,
-            "class_stats": class_stats,
-            "confusion_matrix": confusion_stats["confusion_matrix"],
-        }
-
-    @staticmethod
-    def _get_class_stats(y_true, y_pred, labels):
+    def _dump_model_config(self, path) -> None:
         """
-        Method for getting some basic statistics by class.
-
-        Returns:
-            dict: A structured dictionary containing precision, recall, f_beta, and support \
-                  vectors (1 x number of classes)
+        Dumps the model's configs
         """
-        precision, recall, f_beta, support = score(
-            y_true=y_true, y_pred=y_pred, labels=labels
-        )
 
-        stats = {
-            "precision": precision,
-            "recall": recall,
-            "f_beta": f_beta,
-            "support": support,
-        }
-        return stats
+        model_configs_save_path = self._get_model_config_save_path(path)
+        pickle.dump(self.config, open(model_configs_save_path, "wb"))
 
-    @staticmethod
-    def _get_overall_stats(y_true, y_pred, labels):
+    @abstractmethod
+    def _dump(self, path) -> None:
         """
-        Method for getting some overall statistics.
+        Dumps the model and calls the underlying algo to dump its state.
 
-        Returns:
-            dict: A structured dictionary containing scalar values for f1 scores and overall \
-                  accuracy.
+        Args:
+            path (str): The path to dump the model to
         """
-        f1_weighted = f1_score(
-            y_true=y_true, y_pred=y_pred, labels=labels, average="weighted"
-        )
-        f1_macro = f1_score(
-            y_true=y_true, y_pred=y_pred, labels=labels, average="macro"
-        )
-        f1_micro = f1_score(
-            y_true=y_true, y_pred=y_pred, labels=labels, average="micro"
-        )
-        accuracy = accuracy_score(y_true=y_true, y_pred=y_pred)
+        pass
 
-        stats_overall = {
-            "f1_weighted": f1_weighted,
-            "f1_macro": f1_macro,
-            "f1_micro": f1_micro,
-            "accuracy": accuracy,
-        }
-        return stats_overall
+    def view_extracted_features(self, example, dynamic_resource=None):
+        # Not implemeneted for deep neural models
+        raise NotImplementedError
 
-    @staticmethod
-    def _get_confusion_matrix_and_counts(y_true, y_pred):
-        """
-        Generates the confusion matrix where each element Cij is the number of observations known to
-        be in group i predicted to be in group j
+    def register_resources(self, **kwargs):  # pylint: disable=no-self-use
+        # Resources for feature extractors are not required for deep neural models
+        del kwargs
+        pass
 
-        Returns:
-            dict: Contains 2d array of the confusion matrix, and an array of tp, tn, fp, fn values
-        """
-        confusion_mat = confusion_matrix(y_true=y_true, y_pred=y_pred)
-        tp_arr, tn_arr, fp_arr, fn_arr = [], [], [], []
-
-        num_classes = len(confusion_mat)
-        for class_index in range(num_classes):
-            # tp is C_classindex, classindex
-            tp = confusion_mat[class_index][class_index]
-            tp_arr.append(tp)
-
-            # tn is the sum of Cij where i or j are not class_index
-            mask = np.ones((num_classes, num_classes))
-            mask[:, class_index] = 0
-            mask[class_index, :] = 0
-            tn = np.sum(mask * confusion_mat)
-            tn_arr.append(tn)
-
-            # fp is the sum of Cij where j is class_index but i is not
-            mask = np.zeros((num_classes, num_classes))
-            mask[:, class_index] = 1
-            mask[class_index, class_index] = 0
-            fp = np.sum(mask * confusion_mat)
-            fp_arr.append(fp)
-
-            # fn is the sum of Cij where i is class_index but j is not
-            mask = np.zeros((num_classes, num_classes))
-            mask[class_index, :] = 1
-            mask[class_index, class_index] = 0
-            fn = np.sum(mask * confusion_mat)
-            fn_arr.append(fn)
-
-        Counts = namedtuple("Counts", ["tp", "tn", "fp", "fn"])
-        return {
-            "confusion_matrix": confusion_mat,
-            "counts_by_class": Counts(tp_arr, tn_arr, fp_arr, fn_arr),
-            "counts_overall": Counts(
-                sum(tp_arr), sum(tn_arr), sum(fp_arr), sum(fn_arr)
-            ),
-        }
-
-    def _print_class_stats_table(self, stats, text_labels, title="Statistics by class"):
-        """
-        Helper for printing a human readable table for class statistics
-
-        Returns:
-            None
-        """
-        title_format = "{:>20}" + "{:>12}" * (len(stats))
-        common_stats = [
-            "f_beta",
-            "precision",
-            "recall",
-            "support",
-            "tp",
-            "tn",
-            "fp",
-            "fn",
-        ]
-        stat_row_format = (
-            "{:>20}"
-            + "{:>12.3f}" * 3
-            + "{:>12.0f}" * 5
-            + "{:>12.3f}" * (len(stats) - len(common_stats))
-        )
-        table_titles = common_stats + [
-            stat for stat in stats.keys() if stat not in common_stats
-        ]
-        print(title + ": \n")
-        print(title_format.format("class", *table_titles))
-        for label_index, label in enumerate(text_labels):
-            row = []
-            for stat in table_titles:
-                row.append(stats[stat][label_index])
-            print(stat_row_format.format(self._truncate_label(label, 18), *row))
-        print("\n\n")
-
-    def _print_class_matrix(self, matrix, text_labels):
-        """
-        Helper for printing a human readable class by class table for displaying
-        a confusion matrix
-
-        Returns:
-            None
-        """
-        # Doesn't print if there isn't enough space to display the full matrix.
-        if len(text_labels) > 10:
-            print(
-                "Not printing confusion matrix since it is too large. The full matrix is still"
-                " included in the dictionary returned from get_stats()."
-            )
-            return
-        labels = range(len(text_labels))
-        title_format = "{:>15}" * (len(labels) + 1)
-        stat_row_format = "{:>15}" * (len(labels) + 1)
-        table_titles = [
-            self._truncate_label(text_labels[label], 10) for label in labels
-        ]
-        print("Confusion matrix: \n")
-        print(title_format.format("", *table_titles))
-        for label_index, label in enumerate(text_labels):
-            print(
-                stat_row_format.format(
-                    self._truncate_label(label, 10), *matrix[label_index]
-                )
-            )
-        print("\n\n")
+    def get_resource(self, name):
+        return self._resources.get(name)
 
     @staticmethod
-    def _print_overall_stats_table(stats_overall, title="Overall statistics"):
-        """
-        Helper for printing a human readable table for overall statistics
+    def _get_model_config_save_path(path):
+        head, ext = os.path.splitext(path)
+        model_config_save_path = head + ".config" + ext
+        os.makedirs(os.path.dirname(model_config_save_path), exist_ok=True)
+        return model_config_save_path
 
-        Returns:
-            None
-        """
-        title_format = "{:>12}" * (len(stats_overall))
-        common_stats = ["accuracy", "f1_weighted", "tp", "tn", "fp", "fn"]
-        stat_row_format = (
-            "{:>12.3f}" * 2
-            + "{:>12.0f}" * 4
-            + "{:>12.3f}" * (len(stats_overall) - len(common_stats))
-        )
-        table_titles = common_stats + [
-            stat for stat in stats_overall.keys() if stat not in common_stats
-        ]
-        print(title + ": \n")
-        print(title_format.format(*table_titles))
-        row = []
-        for stat in table_titles:
-            row.append(stats_overall[stat])
-        print(stat_row_format.format(*row))
-        print("\n\n")
-
-    @staticmethod
-    def _truncate_label(label, max_len):
-        return (label[:max_len] + "..") if len(label) > max_len else label
+    def _validate_model_configs(self):
+        pass
 
 
-class StandardModelEvaluation(ModelEvaluation):
-    def raw_results(self):
-        """Returns the raw results of the model evaluation"""
-        text_labels = []
-        predicted, expected = [], []
-
-        for result in self.results:
-            text_labels, predicted = self._update_raw_result(
-                result.predicted, text_labels, predicted
-            )
-            text_labels, expected = self._update_raw_result(
-                result.expected, text_labels, expected
-            )
-
-        return RawResults(
-            predicted=predicted, expected=expected, text_labels=text_labels
-        )
-
-    def get_stats(self):
-        """Prints model evaluation stats in a table to stdout"""
-        raw_results = self.raw_results()
-        stats = self._get_common_stats(
-            raw_results.expected, raw_results.predicted, raw_results.text_labels
-        )
-        # Note can add any stats specific to the standard model to any of the tables here
-
-        return stats
-
-    def print_stats(self):
-        """Prints model evaluation stats to stdout"""
-        raw_results = self.raw_results()
-        stats = self.get_stats()
-
-        self._print_overall_stats_table(stats["stats_overall"])
-        self._print_class_stats_table(stats["class_stats"], raw_results.text_labels)
-        self._print_class_matrix(stats["confusion_matrix"], raw_results.text_labels)
-
-
-class SequenceModelEvaluation(ModelEvaluation):
-    def __init__(self, config, results):
-        self._tag_scheme = config.model_settings.get("tag_scheme", "IOB").upper()
-        super().__init__(config, results)
-
-    def raw_results(self):
-        """Returns the raw results of the model evaluation"""
-        text_labels = []
-        predicted, expected = [], []
-        predicted_flat, expected_flat = [], []
-
-        for result in self.results:
-            raw_predicted = self.label_encoder.encode(
-                [result.predicted], examples=[result.example]
-            )[0]
-            raw_expected = self.label_encoder.encode(
-                [result.expected], examples=[result.example]
-            )[0]
-
-            vec = []
-            for entity in raw_predicted:
-                text_labels, vec = self._update_raw_result(entity, text_labels, vec)
-            predicted.append(vec)
-            predicted_flat.extend(vec)
-            vec = []
-            for entity in raw_expected:
-                text_labels, vec = self._update_raw_result(entity, text_labels, vec)
-            expected.append(vec)
-            expected_flat.extend(vec)
-        return RawResults(
-            predicted=predicted,
-            expected=expected,
-            text_labels=text_labels,
-            predicted_flat=predicted_flat,
-            expected_flat=expected_flat,
-        )
-
-    def _get_sequence_stats(self):
-        """
-        TODO: Generate additional sequence level stats
-        """
-        sequence_accuracy = self.get_accuracy()
-        return {"sequence_accuracy": sequence_accuracy}
-
-    @staticmethod
-    def _print_sequence_stats_table(sequence_stats):
-        """
-        Helper for printing a human readable table for sequence statistics
-
-        Returns:
-            None
-        """
-        title_format = "{:>18}" * (len(sequence_stats))
-        table_titles = ["sequence_accuracy"]
-        stat_row_format = "{:>18.3f}" * (len(sequence_stats))
-        print("Sequence-level statistics: \n")
-        print(title_format.format(*table_titles))
-        row = []
-        for stat in table_titles:
-            row.append(sequence_stats[stat])
-        print(stat_row_format.format(*row))
-        print("\n\n")
-
-    def get_stats(self):
-        """Prints model evaluation stats in a table to stdout"""
-        raw_results = self.raw_results()
-        stats = self._get_common_stats(
-            raw_results.expected_flat,
-            raw_results.predicted_flat,
-            raw_results.text_labels,
-        )
-        sequence_stats = self._get_sequence_stats()
-        stats["sequence_stats"] = sequence_stats
-
-        # Note: can add any stats specific to the sequence model to any of the tables here
-        return stats
-
-    def print_stats(self):
-        """Prints model evaluation stats to stdout"""
-        raw_results = self.raw_results()
-        stats = self.get_stats()
-
-        self._print_overall_stats_table(
-            stats["stats_overall"], "Overall tag-level statistics"
-        )
-        self._print_class_stats_table(
-            stats["class_stats"],
-            raw_results.text_labels,
-            "Tag-level statistics by class",
-        )
-        self._print_class_matrix(stats["confusion_matrix"], raw_results.text_labels)
-        self._print_sequence_stats_table(stats["sequence_stats"])
-
-
-class EntityModelEvaluation(SequenceModelEvaluation):
-    """Generates some statistics specific to entity recognition"""
-
-    def _get_entity_boundary_stats(self):
-        """
-        Calculate le, be, lbe, tp, tn, fp, fn as defined here:
-        https://nlpers.blogspot.com/2006/08/doing-named-entity-recognition-dont.html
-        """
-        boundary_counts = BoundaryCounts()
-        raw_results = self.raw_results()
-        for expected_sequence, predicted_sequence in zip(
-            raw_results.expected, raw_results.predicted
-        ):
-            expected_seq_labels = [
-                raw_results.text_labels[i] for i in expected_sequence
-            ]
-            predicted_seq_labels = [
-                raw_results.text_labels[i] for i in predicted_sequence
-            ]
-            boundary_counts = get_boundary_counts(
-                expected_seq_labels, predicted_seq_labels, boundary_counts
-            )
-        return boundary_counts.to_dict()
-
-    @staticmethod
-    def _print_boundary_stats(boundary_counts):
-        title_format = "{:>12}" * (len(boundary_counts))
-        table_titles = boundary_counts.keys()
-        stat_row_format = "{:>12}" * (len(boundary_counts))
-        print("Segment-level statistics: \n")
-        print(title_format.format(*table_titles))
-        row = []
-        for stat in table_titles:
-            row.append(boundary_counts[stat])
-        print(stat_row_format.format(*row))
-        print("\n\n")
-
-    def get_stats(self):
-        stats = super().get_stats()
-        if self._tag_scheme == "IOB":
-            boundary_stats = self._get_entity_boundary_stats()
-            stats["boundary_stats"] = boundary_stats
-        return stats
-
-    def print_stats(self):
-        raw_results = self.raw_results()
-        stats = self.get_stats()
-
-        self._print_overall_stats_table(
-            stats["stats_overall"], "Overall tag-level statistics"
-        )
-        self._print_class_stats_table(
-            stats["class_stats"],
-            raw_results.text_labels,
-            "Tag-level statistics by class",
-        )
-        self._print_class_matrix(stats["confusion_matrix"], raw_results.text_labels)
-        if self._tag_scheme == "IOB":
-            self._print_boundary_stats(stats["boundary_stats"])
-        self._print_sequence_stats_table(stats["sequence_stats"])
-
-
-class Model:
+class Model(AbstractModel):
     """An abstract class upon which all models are based.
 
     Attributes:
         config (ModelConfig): The configuration for the model
     """
 
+    # model scoring type
+    LIKELIHOOD_SCORING = "log_loss"
+
     def __init__(self, config):
-        self.config = config
-        self.mindmeld_version = get_mm_version()
+        super().__init__(config)
         self._label_encoder = get_label_encoder(self.config)
         self._current_params = None
-        self._resources = {}
         self._clf = None
         self.cv_loss_ = None
 
     def _fit(self, examples, labels, params=None):
-        raise NotImplementedError
-
-    def fit(self, examples, labels, params=None):
         raise NotImplementedError
 
     def _get_model_constructor(self):
@@ -918,14 +451,14 @@ class Model:
                 * model.cv_results_["std_test_score"][idx]
                 / math.sqrt(model.n_splits_)
             )
-            if scoring == LIKELIHOOD_SCORING:
+            if scoring == Model.LIKELIHOOD_SCORING:
                 msg = "Candidate average log likelihood: {:.4} ± {:.4}"
             else:
                 msg = "Candidate average accuracy: {:.2%} ± {:.2%}"
             # pylint: disable=logging-format-interpolation
             logger.debug(msg.format(model.cv_results_["mean_test_score"][idx], std_err))
 
-        if scoring == LIKELIHOOD_SCORING:
+        if scoring == Model.LIKELIHOOD_SCORING:
             msg = "Best log likelihood: {:.4}, params: {}"
             self.cv_loss_ = -model.best_score_
         else:
@@ -1006,46 +539,6 @@ class Model:
         """
         raise NotImplementedError
 
-    def predict(self, examples, dynamic_resource=None):
-        """Predicts a list of class labels for the given list of queries using the trained
-            classification model
-
-        Args:
-            examples (list): A list of queries to predict
-            dynamic_resource (dict): A dictionary containing dynamic resource keys like
-                dynamic gazetteers that is used to bias the NLP classifier
-
-        Returns:
-            list: A list of predicted labels per query
-        """
-        raise NotImplementedError
-
-    def predict_proba(self, examples):
-        """Runs prediction on each of the given queries and generates multiple hypotheses with their
-        associated probabilities using the trained classification model
-
-        Args:
-            examples (list of mindmeld.core.Query): a list of queries to train on
-
-        Returns:
-            list of tuples of (mindmeld.core.QueryEntity): a list of predicted labels \
-                with confidence scores
-        """
-        raise NotImplementedError
-
-    def evaluate(self, examples, labels):
-        """Evaluates the predictions of each query against the labels provided.
-
-        Args:
-            examples (list): A list of queries to predict
-            labels (list): A list of labels corresponding to each query
-
-        Returns:
-            list(ModelEvaluation): an list containing ModelEvaluation information about the \
-                evaluation for each query
-        """
-        raise NotImplementedError
-
     def _get_effective_config(self):
         """Create a model config object for the current effective config (after \
         param selection)
@@ -1063,7 +556,6 @@ class Model:
 
         Args:
             **kwargs: dictionary of resources to register
-
         """
         self._resources.update(kwargs)
 
@@ -1098,9 +590,6 @@ class Model:
                 feat_extractor = get_feature_extractor(example_type, name)(**kwargs)
             feat_set.update(feat_extractor(example, workspace_resource))
         return feat_set
-
-    def view_extracted_features(self, example, dynamic_resource=None):
-        raise NotImplementedError
 
     def _get_cv_iterator(self, settings):
         if not settings:
@@ -1155,9 +644,6 @@ class Model:
         n = settings.get("n", k)
         test_size = 1.0 / k
         return StratifiedShuffleSplit(n_splits=n, test_size=test_size)
-
-    def get_resource(self, name):
-        return self._resources.get(name)
 
     def requires_resource(self, resource):
         example_type = self.config.example_type
@@ -1222,105 +708,43 @@ class Model:
         # feature-specific resource
         self._resources["tokenizer"] = resource_loader.get_tokenizer()
 
+    def _validate_model_configs(self) -> Union[TypeError, ValueError]:
 
-class LabelEncoder:
-    """The label encoder is responsible for converting between rich label
-    objects such as a ProcessedQuery and basic formats a model can interpret.
+        for arg, val in {"features": self.config.features, }.items():
+            if val is None:
+                raise TypeError("__init__() missing required argument {!r}".format(arg))
 
-    A MindMeld model uses its label encoder at fit time to encode labels into a
-    form it can deal with, and at predict time to decode predictions into
-    objects
-    """
-
-    def __init__(self, config):
-        """Initializes an encoder
-
-        Args:
-            config (ModelConfig): The model
-        """
-        self.config = config
-
-    @staticmethod
-    def encode(labels, **kwargs):
-        """Transforms a list of label objects into a vector of classes.
+        if self.config.params is None and (
+            self.config.param_selection is None or self.config.param_selection.get("grid") is None
+        ):
+            raise ValueError(
+                "__init__() One of 'params' and 'param_selection' is required"
+            )
 
 
-        Args:
-            labels (list): A list of labels to encode
-        """
-        del kwargs
-        return labels
+class PytorchModel(AbstractModel):
 
-    @staticmethod
-    def decode(classes, **kwargs):
-        """Decodes a vector of classes into a list of labels
+    def __init__(self, config):  # pylint: disable=useless-super-delegation
+        super().__init__(config)
 
-        Args:
-            classes (list): A list of classes
+    def initialize_resources(self, resource_loader, examples=None, labels=None):
+        raise NotImplementedError
 
-        Returns:
-            list: The decoded labels
-        """
-        del kwargs
-        return classes
+    def fit(self, examples, labels, params=None):
+        raise NotImplementedError
 
+    def predict(self, examples, dynamic_resource=None):
+        raise NotImplementedError
 
-class EntityLabelEncoder(LabelEncoder):
-    def __init__(self, config):
-        """Initializes an encoder
+    def predict_proba(self, examples):
+        raise NotImplementedError
 
-        Args:
-            config (ModelConfig): The model configuration
-        """
-        self.config = config
-        self.system_entity_recognizer = SystemEntityRecognizer.get_instance()
+    def evaluate(self, examples, labels):
+        raise NotImplementedError
 
-    def _get_tag_scheme(self):
-        return self.config.model_settings.get("tag_scheme", "IOB").upper()
+    @classmethod
+    def load(cls, path):
+        raise NotImplementedError
 
-    def encode(self, labels, **kwargs):
-        """Gets a list of joint app and system IOB tags from each query's entities.
-
-        Args:
-            labels (list): A list of labels associated with each query
-            kwargs (dict): A dict containing atleast the "examples" key, which is a
-                list of queries to process
-
-        Returns:
-            list: A list of list of joint app and system IOB tags from each
-                query's entities
-        """
-        examples = kwargs["examples"]
-        scheme = self._get_tag_scheme()
-        # Here each label is a list of entities for the corresponding example
-        all_tags = []
-        for idx, label in enumerate(labels):
-            all_tags.append(get_tags_from_entities(examples[idx], label, scheme))
-        return all_tags
-
-    def decode(self, tags_by_example, **kwargs):
-        """Decodes the labels from the tags passed in for each query
-
-        Args:
-            tags_by_example (list): A list of tags per query
-            kwargs (dict): A dict containing at least the "examples" key, which is a
-                list of queries to process
-
-        Returns:
-            list: A list of decoded labels per query
-        """
-        # TODO: support decoding multiple queries at once
-        if not hasattr(self, "system_entity_recognizer"):
-            # app built with older version of MM (< 4.3) does not save label encoder with system
-            # entity recognizer
-            self.system_entity_recognizer = SystemEntityRecognizer.get_instance()
-        examples = kwargs["examples"]
-        labels = [
-            get_entities_from_tags(examples[idx], tags, self.system_entity_recognizer)
-            for idx, tags in enumerate(tags_by_example)
-        ]
-        return labels
-
-
-register_label("class", LabelEncoder)
-register_label("entities", EntityLabelEncoder)
+    def _dump(self, path):
+        raise NotImplementedError
