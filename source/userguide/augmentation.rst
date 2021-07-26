@@ -13,7 +13,7 @@ Command-line:
 
 .. code-block:: console
 
-    mindmeld augment --app-path <app_path> --lang <lang_code>
+    mindmeld augment --app-path <app_path> --language <lang_code>
 
 The following section explains this in more detail.
 
@@ -68,7 +68,7 @@ Usage
 
 .. code-block:: console
 
-    mindmeld augment --app-path <app_path> --lang "en"
+    mindmeld augment --app-path <app_path> --language "en"
 
 In the config for this paraphraser class, the ``'augmentor_class'`` should be set to :class:`EnglishParaphraser`.
 
@@ -103,7 +103,7 @@ Usage
 
 .. code-block:: console
 
-    mindmeld augment --app-path <app_path> --lang "code"
+    mindmeld augment --app-path <app_path> --language "code"
 
 In the config for this paraphraser class, the ``'augmentor_class'`` should be set to :class:`MultiLingualParaphraser`.
 
