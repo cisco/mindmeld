@@ -27,6 +27,20 @@ Currently, we support data augmentation through paraphrasing for the following l
 
 First, we will discuss the configuration needed to initiate an augmentor and then follow it with detailed descriptions of the paraphrasers.
 
+.. note::
+    
+    Install the additional dependencies for augmentors.
+
+    .. code-block:: console
+
+        pip install mindmeld[augment]
+
+    or in a zsh shell: 
+
+    .. code-block:: console
+        
+        pip install mindmeld"[augment]"
+
 Augmentation Configuration
 --------------------------
 
