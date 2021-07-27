@@ -15,15 +15,16 @@
 This module contains the role classifier component of the MindMeld natural language processor.
 """
 import logging
+import pickle
 
 from sklearn.externals import joblib
 
-from ..constants import DEFAULT_TRAIN_SET_REGEX
-from ..core import Query
-from ..models import CLASS_LABEL_TYPE, ENTITY_EXAMPLE_TYPE, create_model
-from ..resource_loader import ProcessedQueryList
 from ._config import get_classifier_config
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
+from ..constants import DEFAULT_TRAIN_SET_REGEX
+from ..core import Query
+from ..models import CLASS_LABEL_TYPE, ENTITY_EXAMPLE_TYPE, create_model, load_model
+from ..resource_loader import ProcessedQueryList
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +98,6 @@ class RoleClassifier(Classifier):
 
         # create model with given params
         model_config = self._get_model_config(**kwargs)
-        model = create_model(model_config)
 
         label_set = label_set or model_config.train_label_set or DEFAULT_TRAIN_SET_REGEX
         queries = self._resolve_queries(queries, label_set)
@@ -123,6 +123,7 @@ class RoleClassifier(Classifier):
             for label in labels:
                 self.roles.add(label)
 
+            model = create_model(model_config)
             model.initialize_resources(self._resource_loader, examples, labels)
             model.fit(examples, labels)
             self._model = model
@@ -133,9 +134,6 @@ class RoleClassifier(Classifier):
         self.ready = True
         self.dirty = True
         return True
-
-    def _data_dump_payload(self):
-        return {"model": self._model, "roles": self.roles}
 
     def dump(self, model_path, incremental_model_path=None):
         """Persists the trained role classification model to disk.
@@ -152,6 +150,10 @@ class RoleClassifier(Classifier):
             self.entity_type,
         )
         super().dump(model_path, incremental_model_path)
+
+    def _dump(self, path):
+        rc_data = {"roles": self.roles}
+        pickle.dump(rc_data, open(self._get_classifier_resources_save_path(path), "wb"))
 
     def unload(self):
         self._model = None
@@ -170,19 +172,18 @@ class RoleClassifier(Classifier):
             self.intent,
             self.entity_type,
         )
+
+        # underlying model specific load
+        self._model = load_model(model_path)
+
+        # classifier specific load
         try:
+            rc_data = pickle.load(open(self._get_classifier_resources_save_path(model_path), "rb"))
+        except FileNotFoundError:  # backwards compatability for previous version's saved models
             rc_data = joblib.load(model_path)
-            self._model = rc_data["model"]
-            self.roles = rc_data["roles"]
-        except (OSError, IOError):
-            logger.error(
-                "Unable to load %s. Pickle file cannot be read from %r",
-                self.__class__.__name__,
-                model_path,
-            )
-            return
-            # msg = 'Unable to load {}. Pickle file cannot be read from {!r}'
-            # raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
+        self.roles = rc_data["roles"]
+
+        # validate and register resources
         if self._model is not None:
             if not hasattr(self._model, "mindmeld_version"):
                 msg = (
@@ -326,9 +327,10 @@ class RoleClassifier(Classifier):
                 ProcessedQueryList.ListIterator(labels))
 
     def _get_examples_and_labels_hash(self, queries):
-        hashable_queries = [
-            self.domain + "###" + self.intent + "###" + self.entity_type + "###"
-        ] + sorted(list(queries.raw_queries()))
+        hashable_queries = (
+            [self.domain + "###" + self.intent + "###" + self.entity_type + "###"] +
+            sorted(list(queries.raw_queries()))
+        )
         return self._resource_loader.hash_list(hashable_queries)
 
     def inspect(self, query, gold_label=None, dynamic_resource=None):

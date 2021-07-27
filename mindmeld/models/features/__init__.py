@@ -10,13 +10,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-"""Defines mindmeld version information"""
-from __future__ import absolute_import, unicode_literals
-
-current = "4.3.5rc10"
-
-
-def get_mm_version():
-    """Returns the current MindMeld version."""
-    return current

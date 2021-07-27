@@ -118,6 +118,7 @@ Contents
    userguide/custom_features
    userguide/kb
    userguide/dm
+   userguide/active_learning
    userguide/augmentation
    userguide/auto_annotator
    userguide/custom_action
@@ -127,6 +128,14 @@ Contents
    userguide/dvc
    integrations/webex_teams
    integrations/whatsapp
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Walk-Throughs
+   :name: walkthroughs
+
+   walkthroughs/wt_active_learning
 
 
 .. toctree::
