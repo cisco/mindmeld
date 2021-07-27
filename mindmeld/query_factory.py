@@ -89,21 +89,21 @@ class QueryFactory:
 
         # Step 1: Preprocessing
         if self.text_preparation_pipeline.preprocessors:
-            processed_text = self.text_preparation_pipeline.preprocess(raw_text)
+            preprocessed_text = self.text_preparation_pipeline.preprocess(raw_text)
             (
                 forward_map,
                 backward_map,
             ) = self.text_preparation_pipeline.get_char_index_map(
-                raw_text, processed_text
+                raw_text, preprocessed_text
             )
             char_maps[(TEXT_FORM_RAW, TEXT_FORM_PROCESSED)] = forward_map
             char_maps[(TEXT_FORM_PROCESSED, TEXT_FORM_RAW)] = backward_map
         else:
-            processed_text = raw_text
+            preprocessed_text = raw_text
 
         # Step 2: Tokenization
         raw_tokens = self.text_preparation_pipeline.tokenize(
-            processed_text
+            preprocessed_text
         )
 
         # Step 3: Normalization
@@ -122,7 +122,7 @@ class QueryFactory:
             normalization_forward_map,
             normalization_backward_map,
         ) = self.text_preparation_pipeline.get_char_index_map(
-            processed_text, normalized_text
+            preprocessed_text, normalized_text
         )
         char_maps[
             (TEXT_FORM_PROCESSED, TEXT_FORM_NORMALIZED)
@@ -133,7 +133,7 @@ class QueryFactory:
 
         query = Query(
             raw_text,
-            processed_text,
+            preprocessed_text,
             normalized_tokens,
             char_maps,
             locale=locale,

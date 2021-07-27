@@ -146,12 +146,12 @@ class TextPreparationPipeline:
         for i, raw_token in enumerate(raw_tokens):
             if not raw_token["text"]:
                 continue
-            normalized_text = self._normalize_single_token(raw_token["text"])
-            if len(normalized_text) > 0:
-                for token in normalized_text.split():
+            normalized_texts = self._normalize_single_token(raw_token["text"])
+            if len(normalized_texts) > 0:
+                for token_text in normalized_texts:
                     normalized_tokens.append(
                         {
-                            "entity": token,
+                            "entity": token_text,
                             "raw_entity": raw_token["text"],
                             "raw_token_index": i,
                             "raw_start": raw_token["start"]
@@ -165,7 +165,8 @@ class TextPreparationPipeline:
         Args:
             text (str): Text to normalize.
         Returns:
-            normalized_text (str): Normalized text.
+            normalized_texts (List[str]): Normalized texts. We tokenize the post-norm text and
+                split the entity if possible.
         """
         normalized_text = text
         for normalizer in self.normalizers:
@@ -174,7 +175,9 @@ class TextPreparationPipeline:
                     text=normalized_text, function=normalizer.normalize
                 )
             )
-        return normalized_text
+        # We tokenize the post-norm text and split the entity if possible
+        # Ex: normalize("o'clock") -> "o clock" -> ["o", "clock"]
+        return [t["text"] for t in self.tokenize(normalized_text)]
 
     def tokenize(self, text):
         """

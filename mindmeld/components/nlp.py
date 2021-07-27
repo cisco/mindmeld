@@ -1518,7 +1518,7 @@ class IntentProcessor(Processor):
 
         # We extract the `entity` key from each token since that represents the normalized text of
         # each token which we will compare against the normalized text of the query
-        def normalize_and_tokenize_as_tuples(text):
+        def get_normalized_tokens_as_tuples(text):
             return tuple(
                 self.resource_loader.query_factory.text_preparation_pipeline.normalize(text).split()
             )
@@ -1539,7 +1539,7 @@ class IntentProcessor(Processor):
             consolidated_set = set(self.resource_loader.get_gazetteer(entity)['pop_dict'])
             consolidated_set = consolidated_set.union(
                 {
-                    normalize_and_tokenize_as_tuples(key)
+                    get_normalized_tokens_as_tuples(key)
                     for key in dynamic_gazetteer.get(entity, {})
                 }
             )

@@ -125,7 +125,10 @@ class ASCIIFold(Normalizer):
 
 
 class NFD(Normalizer):
-    """Unicode NFD Normalizer Class."""
+    """Unicode NFD Normalizer Class. (Canonical Decomposition)
+
+    For more details: https://unicode.org/reports/tr15/#Norm_Forms
+    """
 
     def __init__(self):
         """Creates a NFD Normalizer instance."""
@@ -143,7 +146,11 @@ class NFD(Normalizer):
 
 
 class NFC(Normalizer):
-    """Unicode NFC Normalizer Class."""
+    """Unicode NFC Normalizer Class.
+    (Canonical Decomposition, followed by Canonical Composition)
+
+    For more details: https://unicode.org/reports/tr15/#Norm_Forms
+    """
 
     def __init__(self):
         """Creates a NFC Normalizer instance."""
@@ -161,7 +168,10 @@ class NFC(Normalizer):
 
 
 class NFKD(Normalizer):
-    """Unicode NFKD Normalizer Class."""
+    """Unicode NFKD Normalizer Class. (Compatibility Decomposition)
+
+    For more details: https://unicode.org/reports/tr15/#Norm_Forms
+    """
 
     def __init__(self):
         """Creates a NFKD Normalizer instance."""
@@ -179,7 +189,11 @@ class NFKD(Normalizer):
 
 
 class NFKC(Normalizer):
-    """Unicode NFKC Normalizer Class."""
+    """Unicode NFKC Normalizer Class.
+    (Compatibility Decomposition, followed by Canonical Composition)
+
+    For more details: https://unicode.org/reports/tr15/#Norm_Forms
+    """
 
     def __init__(self):
         """Creates a NFKC Normalizer instance."""
