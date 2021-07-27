@@ -17,7 +17,7 @@ from typing import List, Dict
 import re
 import unicodedata
 
-from .preprocessors import Preprocessor, PreprocessorFactory
+from .preprocessors import Preprocessor, PreprocessorFactory, NoOpPreprocessor
 from .normalizers import (
     Normalizer,
     NoOpNormalizer,
@@ -27,7 +27,7 @@ from .normalizers import (
     ASCIIFold,
 )
 from .tokenizers import Tokenizer, TokenizerFactory, WhiteSpaceTokenizer
-from .stemmers import Stemmer, StemmerFactory, EnglishNLTKStemmer
+from .stemmers import Stemmer, StemmerFactory, EnglishNLTKStemmer, NoOpStemmer
 
 from ..components._config import (
     get_text_preparation_config,
@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 
 
 # Regex Pattern to capture MindMeld entities ("{entity_text|entity_type|optional_role}")
-MINDMELD_ANNOTATION_PATTERN = r"\{([^\}\|]*)\|[^\{]*\}"
+MINDMELD_ANNOTATION_PATTERN = re.compile(r"\{([^\}\|]*)\|[^\{]*\}")
 
 
 class TextPreparationPipelineError(Exception):
@@ -53,17 +53,17 @@ class TextPreparationPipeline:
     def __init__(
         self,
         tokenizer: Tokenizer,
-        stemmer: Stemmer,
+        stemmer: Stemmer = None,
         preprocessors: List[Preprocessor] = None,
         normalizers: List[Normalizer] = None,
         language: str = ENGLISH_LANGUAGE_CODE,
     ):
         """Creates a Pipeline instance."""
         self.language = language
-        self.preprocessors = preprocessors
+        self.preprocessors = preprocessors or [NoOpPreprocessor()]
         self.normalizers = normalizers or [NoOpNormalizer()]
         self.tokenizer = tokenizer
-        self.stemmer = stemmer
+        self.stemmer = stemmer or NoOpStemmer()
 
         if self.tokenizer is None:
             raise TextPreparationPipelineError("Tokenizer cannot be None.")
@@ -77,13 +77,6 @@ class TextPreparationPipeline:
             forward_map (Dict): Mapping from raw text to modified text.
             backward_map (Dict): Reverse mapping from modified text to raw text.
         """
-        if not self.preprocessors:
-            logger.warning(
-                "This instance of TextPreparationPipeline does not have preprocessors."
-                "Returning the original text."
-            )
-            return text
-
         preprocessed_text = text
         for preprocessor in self.preprocessors:
             preprocessed_text = (
@@ -135,13 +128,6 @@ class TextPreparationPipeline:
                         "raw_start": 1
                     }`
         """
-        if not self.normalizers:
-            logger.warning(
-                "This instance of TextPreparationPipeline does not have normalizers."
-                "Returning raw tokens."
-            )
-            return raw_tokens
-
         normalized_tokens = []
         for i, raw_token in enumerate(raw_tokens):
             if not raw_token["text"]:
@@ -211,8 +197,7 @@ class TextPreparationPipeline:
         Returns:
             matches (List[sre.SRE_Match object]): Regex match objects.
         """
-        COMPILED_MINDMELD_ANNOTATION_PATTERN = re.compile(MINDMELD_ANNOTATION_PATTERN)
-        return list(COMPILED_MINDMELD_ANNOTATION_PATTERN.finditer(text))
+        return list(MINDMELD_ANNOTATION_PATTERN.finditer(text))
 
     @staticmethod
     def modify_around_annotations(text, function):
