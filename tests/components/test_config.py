@@ -161,6 +161,3 @@ def test_max_history_len_config(food_ordering_app_path):
     actual = get_max_history_len(food_ordering_app_path)
 
     assert actual == 5
-
-
-# TODO: Add test_tokenizer_config() function

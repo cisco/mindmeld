@@ -87,7 +87,7 @@ class TextPreparationPipeline:
         preprocessed_text = text
         for preprocessor in self.preprocessors:
             preprocessed_text = (
-                TextPreparationPipeline.modify_around_mindmeld_annotations(
+                TextPreparationPipeline.modify_around_annotations(
                     text=preprocessed_text, function=preprocessor.process
                 )
             )
@@ -149,12 +149,14 @@ class TextPreparationPipeline:
             normalized_text = self._normalize_single_token(raw_token["text"])
             if len(normalized_text) > 0:
                 for token in normalized_text.split():
-                    norm_token = {}
-                    norm_token["entity"] = token
-                    norm_token["raw_entity"] = raw_token["text"]
-                    norm_token["raw_token_index"] = i
-                    norm_token["raw_start"] = raw_token["start"]
-                    normalized_tokens.append(norm_token)
+                    normalized_tokens.append(
+                        {
+                            "entity": token,
+                            "raw_entity": raw_token["text"],
+                            "raw_token_index": i,
+                            "raw_start": raw_token["start"]
+                        }
+                    )
         return normalized_tokens
 
     def _normalize_single_token(self, text):
@@ -168,7 +170,7 @@ class TextPreparationPipeline:
         normalized_text = text
         for normalizer in self.normalizers:
             normalized_text = (
-                TextPreparationPipeline.modify_around_mindmeld_annotations(
+                TextPreparationPipeline.modify_around_annotations(
                     text=normalized_text, function=normalizer.normalize
                 )
             )
@@ -210,7 +212,7 @@ class TextPreparationPipeline:
         return list(COMPILED_MINDMELD_ANNOTATION_PATTERN.finditer(text))
 
     @staticmethod
-    def modify_around_mindmeld_annotations(text, function):
+    def modify_around_annotations(text, function):
         """Applied a function around the mindmeld annotation.
 
         function(pre_entity_text) + { + function(entity_text) + |entity_name}

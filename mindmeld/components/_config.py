@@ -1057,7 +1057,7 @@ def get_text_preparation_config(app_path=None):
         app_path (str, optional): The location of the MindMeld app
 
     Returns:
-        dict: The tokenizer configuration.
+        dict: The text preparation pipeline configuration.
     """
     if not app_path:
         return DEFAULT_TEXT_PREPARATION_CONFIG
