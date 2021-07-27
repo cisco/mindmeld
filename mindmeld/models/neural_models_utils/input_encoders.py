@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 LABEL_PAD_TOKEN_IDX = -1  # value set based on default label padding idx in pytorch
 
 
-# abstract encoder
+# abstract encoder; derives from torch nn.Module
 
 
 class AbstractEncoder(nn_module):
@@ -123,7 +123,7 @@ class AbstractEncoder(nn_module):
 # base encoders
 
 
-class EncoderWithStaticEmbeddings(AbstractEncoder):
+class WordEmbeddingsBasedEncoder(AbstractEncoder):
     """
     A base class for joint tokenization-encoding with the vocab derived from the training data and
     using word-level embedders if required.
@@ -337,7 +337,7 @@ class EncoderWithStaticEmbeddings(AbstractEncoder):
                 target_dict.update({token: len(target_dict)})
 
 
-class EncoderWithPretrainedLMs(AbstractEncoder):
+class PretrainedLangModelBasedEncoder(AbstractEncoder):
     """
     A base class for joint tokenization-encoding with vocab of a Pretrained Language Model
     (aka. PLM embedders), i.e sentence embedders like BERT, Elmo, etc..
@@ -467,7 +467,7 @@ class EncoderWithPretrainedLMs(AbstractEncoder):
 # sub-classes that define a custom `batch_encode` on top of base encoders
 
 
-class SeqClsEncoderForEmbLayer(EncoderWithStaticEmbeddings):
+class SeqClsEncoderForEmbLayer(WordEmbeddingsBasedEncoder):
     """This class produces encoding for the given textual input as a sequence of ids.
     The inputs can be singular or batched.
     """
@@ -515,7 +515,7 @@ class SeqClsEncoderForEmbLayer(EncoderWithStaticEmbeddings):
         return return_dict
 
 
-class TokenClsEncoderForEmbLayer(EncoderWithStaticEmbeddings):
+class TokenClsEncoderForEmbLayer(WordEmbeddingsBasedEncoder):
 
     def _reformat_and_validate(self, examples, labels=None):
         super()._reformat_and_validate(examples, labels)
@@ -597,7 +597,7 @@ class TokenClsEncoderForEmbLayer(EncoderWithStaticEmbeddings):
         return return_dict
 
 
-class SeqClsEncoderWithPlmLayer(EncoderWithPretrainedLMs):
+class SeqClsEncoderWithPlmLayer(PretrainedLangModelBasedEncoder):
 
     def batch_encode(
         self,
@@ -634,9 +634,8 @@ class SeqClsEncoderWithPlmLayer(EncoderWithPretrainedLMs):
         return return_dict
 
 
-class TokenClsEncoderWithPlmLayer(EncoderWithPretrainedLMs):
+class TokenClsEncoderWithPlmLayer(PretrainedLangModelBasedEncoder):
 
-    # method similar to TokenClsEncoderForEmbLayer
     def _reformat_and_validate(self, examples, labels=None):
         super()._reformat_and_validate(examples, labels)
 
@@ -896,8 +895,9 @@ class TokenClsDualEncoderForEmbLayers(TokenClsEncoderForEmbLayer):
             list_of_tokens[:padding_length]
         )
         bounded_list_of_tokens = (
-            [getattr(self, "char_start_token")] + trimmed_list_of_tokens + [
-            getattr(self, "char_end_token")]
+            [getattr(self, "char_start_token")] +
+            trimmed_list_of_tokens +
+            [getattr(self, "char_end_token")]
         ) if add_terminals else trimmed_list_of_tokens
         seq_length = len(bounded_list_of_tokens)
         new_list_of_tokens = (

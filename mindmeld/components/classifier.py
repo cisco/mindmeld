@@ -68,15 +68,9 @@ class ClassifierConfig:
         param_selection=None,
     ):
         """Initializes a classifier configuration"""
-        for arg, val in {"model_type": model_type, "features": features}.items():
+        for arg, val in {"model_type": model_type}.items():
             if val is None:
                 raise TypeError("__init__() missing required argument {!r}".format(arg))
-        if params is None and (
-            param_selection is None or param_selection.get("grid") is None
-        ):
-            raise ValueError(
-                "__init__() One of 'params' and 'param_selection' is required"
-            )
         self.model_type = model_type
         self.features = features
         self.model_settings = model_settings
@@ -420,7 +414,7 @@ class Classifier(ABC):
                 model_config.pop("params", None)
         return ModelConfig(**model_config)
 
-    def dump(self, model_path, incremental_model_path=None, metadata=None):
+    def dump(self, model_path, incremental_model_path=None):
         """Persists the trained classification model to disk.
 
         Args:
@@ -432,7 +426,16 @@ class Classifier(ABC):
             if not path:
                 continue
 
-            self._model.dump(path, metadata=metadata)
+            # classifier specific dump
+            self._dump(path)
+
+            # model specific dump
+            if self._model:
+                # sometimes a model might be NoneType, eg. in role classifiers, in which case,
+                # no dumping is required. While loading such models, the model_path (.pkl)
+                # will not be found and the helpers.load_model() will return None, whic makes it
+                # backwards compataible to loading a NoneType model
+                self._model.dump(path)
 
             hash_path = path + ".hash"
             with open(hash_path, "w") as hash_file:
@@ -440,6 +443,16 @@ class Classifier(ABC):
 
             if path == model_path:
                 self.dirty = False
+
+    def _dump(self, path):
+        pass
+
+    @staticmethod
+    def _get_classifier_resources_save_path(model_path):
+        head, ext = os.path.splitext(model_path)
+        classifier_resources_save_path = head + ".classifier_resources" + ext
+        os.makedirs(os.path.dirname(classifier_resources_save_path), exist_ok=True)
+        return classifier_resources_save_path
 
     def unload(self):
         """
@@ -457,9 +470,9 @@ class Classifier(ABC):
             model_path (str): The location on disk where the model is stored
         """
 
-        metadata = load_model(model_path)
-        self._model = metadata.pop("model")
+        self._model = load_model(model_path)
 
+        # validate and initialize resources
         if self._model is not None:
             if not hasattr(self._model, "mindmeld_version"):
                 msg = (

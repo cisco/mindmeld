@@ -19,12 +19,12 @@ import logging
 from abc import abstractmethod
 from typing import Dict
 
-from ._classification import ClassificationCore
-from ._encoders import (
+from .nn_base_modules import ClassificationBase
+from .input_encoders import (
     SeqClsEncoderForEmbLayer,
     SeqClsEncoderWithPlmLayer
 )
-from ._layers import (
+from .layers import (
     EmbeddingLayer,
     CnnLayer,
     LstmLayer,
@@ -41,7 +41,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-class SequenceClassificationCore(ClassificationCore):
+class SequenceClassificationBase(ClassificationBase):
     """Base Module class that defines all the necessary elements to succesfully train/infer,
      dump/load custom pytorch modules wrapped on top of this base class. Classes derived from
      this base can be trained for sequence classification. The output of a class derived from
@@ -56,7 +56,7 @@ class SequenceClassificationCore(ClassificationCore):
 
     # methods for training
 
-    def fit_encoder_and_update_params(self, examples, **params):
+    def init_encoder(self, examples, **params):
         use_character_embeddings = params.pop("use_character_embeddings", False)
         if use_character_embeddings:
             tokenizer_type = params.get("tokenizer_type", "char-tokenizer")
@@ -78,7 +78,7 @@ class SequenceClassificationCore(ClassificationCore):
 
     def init(self, **params):
 
-        self._init(**params)
+        self._init_core(**params)
 
         # params
         self.num_labels = params.get("num_labels")
@@ -121,7 +121,7 @@ class SequenceClassificationCore(ClassificationCore):
     def forward(self, batch_data_dict):
 
         batch_data_dict = self.inputs_to_device(batch_data_dict)
-        batch_data_dict = self._forward(batch_data_dict)
+        batch_data_dict = self._forward_core(batch_data_dict)
 
         seq_embs = batch_data_dict["seq_embs"]
         seq_embs = self.dense_layer_dropout(seq_embs)
@@ -175,15 +175,15 @@ class SequenceClassificationCore(ClassificationCore):
     # abstract methods definition, to be implemented by sub-classes
 
     @abstractmethod
-    def _init(self, **params) -> None:
+    def _init_core(self, **params) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def _forward(self, batch_data_dict: Dict) -> Dict:
+    def _forward_core(self, batch_data_dict: Dict) -> Dict:
         raise NotImplementedError
 
 
-class EmbedderForSequenceClassification(SequenceClassificationCore):
+class EmbedderForSequenceClassification(SequenceClassificationBase):
     """An embedder pooling module that operates on a batched sequence of token ids. The
     tokens could be characters or words or sub-words. This module finally outputs one 1D
     representation for each instance in the batch (i.e. [BS, EMB_DIM]).
@@ -195,7 +195,7 @@ class EmbedderForSequenceClassification(SequenceClassificationCore):
     matrix (e.g. tf-idf weights).
     """
 
-    def _init(self, **params):
+    def _init_core(self, **params):
         # params
         self.num_tokens = params["num_tokens"]
         self.emb_dim = params["emb_dim"]
@@ -215,7 +215,7 @@ class EmbedderForSequenceClassification(SequenceClassificationCore):
         self.emb_layer_pooling = PoolingLayer(self.embedder_output_pooling_type)
         self.out_dim = self.emb_dim
 
-    def _forward(self, batch_data_dict):
+    def _forward_core(self, batch_data_dict):
         seq_ids = batch_data_dict["seq_ids"]  # [BS, SEQ_LEN]
         seq_lengths = batch_data_dict["seq_lengths"]  # [BS]
 
@@ -227,7 +227,7 @@ class EmbedderForSequenceClassification(SequenceClassificationCore):
         return batch_data_dict
 
 
-class CnnForSequenceClassification(SequenceClassificationCore):
+class CnnForSequenceClassification(SequenceClassificationBase):
     """A CNN module that operates on a batched sequence of token ids. The tokens could be
     characters or words or sub-words. This module finally outputs one 1D representation
     for each instance in the batch (i.e. [BS, EMB_DIM]).
@@ -235,7 +235,7 @@ class CnnForSequenceClassification(SequenceClassificationCore):
     The `forward` method of this module expects only padded token ids as input.
     """
 
-    def _init(self, **params):
+    def _init_core(self, **params):
         # params
         self.num_tokens = params["num_tokens"]
         self.emb_dim = params["emb_dim"]
@@ -259,7 +259,7 @@ class CnnForSequenceClassification(SequenceClassificationCore):
                                    1 - self.cnn_output_keep_prob)
         self.out_dim = sum(self.number_of_windows)
 
-    def _forward(self, batch_data_dict):
+    def _forward_core(self, batch_data_dict):
         seq_ids = batch_data_dict["seq_ids"]  # [BS, SEQ_LEN]
 
         encodings = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, EMD_DIM]
@@ -270,7 +270,7 @@ class CnnForSequenceClassification(SequenceClassificationCore):
         return batch_data_dict
 
 
-class LstmForSequenceClassification(SequenceClassificationCore):
+class LstmForSequenceClassification(SequenceClassificationBase):
     # pylint: disable=too-many-instance-attributes
     """A LSTM module that operates on a batched sequence of token ids. The tokens could be
     characters or words or sub-words. This module finally outputs one 1D representation
@@ -280,7 +280,7 @@ class LstmForSequenceClassification(SequenceClassificationCore):
     per instance in the batch.
     """
 
-    def _init(self, **params):
+    def _init_core(self, **params):
         # params
         self.num_tokens = params["num_tokens"]
         self.emb_dim = params["emb_dim"]
@@ -307,7 +307,7 @@ class LstmForSequenceClassification(SequenceClassificationCore):
         self.lstm_layer_pooling = PoolingLayer(self.lstm_output_pooling_type)
         self.out_dim = self.lstm_hidden_dim * 2 if self.lstm_bidirectional else self.lstm_hidden_dim
 
-    def _forward(self, batch_data_dict):
+    def _forward_core(self, batch_data_dict):
         seq_ids = batch_data_dict["seq_ids"]  # [BS, SEQ_LEN]
         seq_lengths = batch_data_dict["seq_lengths"]  # [BS]
 
@@ -320,7 +320,7 @@ class LstmForSequenceClassification(SequenceClassificationCore):
         return batch_data_dict
 
 
-class BertForSequenceClassification(SequenceClassificationCore):
+class BertForSequenceClassification(SequenceClassificationBase):
 
     def __init__(self):
         super().__init__()
@@ -328,41 +328,32 @@ class BertForSequenceClassification(SequenceClassificationCore):
         # overwrite default encoder
         self.encoder = SeqClsEncoderWithPlmLayer()
 
-    def fit(self, examples, labels, **params):  # overriding base class' method to set params
-        # this class is based only on bert embedder and
-        # hence no embedder info from params is expected in the inputted params
+    def _init_core(self, **params):
+        # params
+        self.emb_dim = params["emb_dim"]
+        self.embedder_output_keep_prob = params.get("embedder_output_keep_prob", 0.2)
+        self.embedder_output_pooling_type = params.get("embedder_output_pooling_type", "start")
+        self.params_keys.update(["emb_dim", "embedder_output_pooling_type"])
 
-        number_of_epochs = params.get("number_of_epochs", 10)
-        patience = params.get("patience", 4)
-        embedder_type = params.get("embedder_type", "bert")
-        if embedder_type != "bert":
-            msg = f"{self.__class__.__name__} can only be used with 'embedder_type': 'bert'. " \
-                  f"Other values passed through config params are not allowed"
-            raise ValueError(msg)
-        optimizer = params.get("optimizer", "AdamW")
-        if optimizer != "AdamW":
-            msg = f"{self.__class__.__name__} can only be used with 'optimizer': 'AdamW'. " \
-                  f"Other values passed through config params are not allowed"
-            raise ValueError(msg)
-        lr = params.get("learning_rate", 2e-5)
-        if lr > 2e-5:
-            msg = f"{self.__class__.__name__} can only be used with 'lr' less than or equal to " \
-                  f"'2e-5'. Other values passed through config params are not allowed"
-            raise ValueError(msg)
+        # core layers
+        if self.embedder_output_pooling_type != "start":
+            self.emb_layer_pooling = PoolingLayer(self.embedder_output_pooling_type)
+        self.dropout = nn.Dropout(1 - self.embedder_output_keep_prob)
+        self.out_dim = self.emb_dim
 
-        # update params
-        params.update({
-            "number_of_epochs": number_of_epochs,
-            "patience": patience,
-            "embedder_type": embedder_type,
-            "optimizer": optimizer,
-            "learning_rate": lr,
-            "batch_size": 16,  # TODO: add ValueError message
-            "gradient_accumulation_steps": 2,  # TODO: add ValueError message
-            "max_grad_norm": 1.0,  # TODO: add ValueError message
-        })
+    def _forward_core(self, batch_data_dict):
 
-        super().fit(examples, labels, **params)
+        if self.embedder_output_pooling_type != "start":
+            seq_lengths = batch_data_dict["seq_lengths"]  # [BS]
+            last_hidden_state = batch_data_dict["last_hidden_state"]  # [BS, SEQ_LEN, EMD_DIM]
+            encodings = self.emb_layer_pooling(last_hidden_state, seq_lengths)  # [BS, self.out_dim]
+        else:
+            encodings = batch_data_dict["pooler_output"]  # [BS, self.out_dim]
+
+        encodings = self.dropout(encodings)
+        batch_data_dict.update({"seq_embs": encodings})
+
+        return batch_data_dict
 
     def _create_optimizer(self):
 
@@ -405,29 +396,38 @@ class BertForSequenceClassification(SequenceClassificationCore):
         scheduler = getattr(torch.optim.lr_scheduler, "LambdaLR")(optimizer, lr_lambda)
         return optimizer, scheduler
 
-    def _init(self, **params):
-        # params
-        self.emb_dim = params["emb_dim"]
-        self.embedder_output_keep_prob = params.get("embedder_output_keep_prob", 0.2)
-        self.embedder_output_pooling_type = params.get("embedder_output_pooling_type", "start")
-        self.params_keys.update(["emb_dim", "embedder_output_pooling_type"])
+    def fit(self, examples, labels, **params):  # overriding base class' method to set params
+        # this class is based only on bert embedder and
+        # hence no embedder info from params is expected in the inputted params
 
-        # core layers
-        if self.embedder_output_pooling_type != "start":
-            self.emb_layer_pooling = PoolingLayer(self.embedder_output_pooling_type)
-        self.dropout = nn.Dropout(1 - self.embedder_output_keep_prob)
-        self.out_dim = self.emb_dim
+        number_of_epochs = params.get("number_of_epochs", 10)
+        patience = params.get("patience", 4)
+        embedder_type = params.get("embedder_type", "bert")
+        if embedder_type != "bert":
+            msg = f"{self.__class__.__name__} can only be used with 'embedder_type': 'bert'. " \
+                  f"Other values passed through config params are not allowed"
+            raise ValueError(msg)
+        optimizer = params.get("optimizer", "AdamW")
+        if optimizer != "AdamW":
+            msg = f"{self.__class__.__name__} can only be used with 'optimizer': 'AdamW'. " \
+                  f"Other values passed through config params are not allowed"
+            raise ValueError(msg)
+        lr = params.get("learning_rate", 2e-5)
+        if lr > 2e-5:
+            msg = f"{self.__class__.__name__} can only be used with 'lr' less than or equal to " \
+                  f"'2e-5'. Other values passed through config params are not allowed"
+            raise ValueError(msg)
 
-    def _forward(self, batch_data_dict):
+        # update params
+        params.update({
+            "number_of_epochs": number_of_epochs,
+            "patience": patience,
+            "embedder_type": embedder_type,
+            "optimizer": optimizer,
+            "learning_rate": lr,
+            "batch_size": 16,  # TODO: add ValueError message
+            "gradient_accumulation_steps": 2,  # TODO: add ValueError message
+            "max_grad_norm": 1.0,  # TODO: add ValueError message
+        })
 
-        if self.embedder_output_pooling_type != "start":
-            seq_lengths = batch_data_dict["seq_lengths"]  # [BS]
-            last_hidden_state = batch_data_dict["last_hidden_state"]  # [BS, SEQ_LEN, EMD_DIM]
-            encodings = self.emb_layer_pooling(last_hidden_state, seq_lengths)  # [BS, self.out_dim]
-        else:
-            encodings = batch_data_dict["pooler_output"]  # [BS, self.out_dim]
-
-        encodings = self.dropout(encodings)
-        batch_data_dict.update({"seq_embs": encodings})
-
-        return batch_data_dict
+        super().fit(examples, labels, **params)

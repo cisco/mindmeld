@@ -19,18 +19,18 @@ import logging
 from abc import abstractmethod
 from typing import Dict
 
-from ._classification import ClassificationCore
-from ._encoders import (
+from .nn_base_modules import ClassificationBase
+from .input_encoders import (
     TokenClsEncoderForEmbLayer,
     TokenClsDualEncoderForEmbLayers,
     TokenClsEncoderWithPlmLayer
 )
-from ._layers import (
+from .layers import (
     EmbeddingLayer,
     CnnLayer,
     LstmLayer,
     PoolingLayer,
-    TokenSpanPoolingLayer
+    SplittingAndPoolingLayer
 )
 
 try:
@@ -44,7 +44,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-class TokenClassificationCore(ClassificationCore):
+class TokenClassificationBase(ClassificationBase):
 
     def __init__(self):
         super().__init__()
@@ -54,7 +54,7 @@ class TokenClassificationCore(ClassificationCore):
 
     # methods for training
 
-    def fit_encoder_and_update_params(self, examples, **params):
+    def init_encoder(self, examples, **params):
         self.encoder.fit(examples=examples, **params)
         params.update({
             "num_tokens": self.encoder.get_num_tokens(),
@@ -67,7 +67,7 @@ class TokenClassificationCore(ClassificationCore):
 
     def init(self, **params):
 
-        self._init(**params)
+        self._init_core(**params)
 
         # params
         self.num_labels = params.get("num_labels")
@@ -119,7 +119,7 @@ class TokenClassificationCore(ClassificationCore):
     def forward(self, batch_data_dict):
 
         batch_data_dict = self.inputs_to_device(batch_data_dict)
-        batch_data_dict = self._forward(batch_data_dict)
+        batch_data_dict = self._forward_core(batch_data_dict)
 
         token_embs = batch_data_dict["token_embs"]
         token_embs = self.dense_layer_dropout(token_embs)
@@ -203,17 +203,17 @@ class TokenClassificationCore(ClassificationCore):
     # abstract methods definition, to be implemented by sub-classes
 
     @abstractmethod
-    def _init(self, **params) -> None:
+    def _init_core(self, **params) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def _forward(self, batch_data_dict: Dict) -> Dict:
+    def _forward_core(self, batch_data_dict: Dict) -> Dict:
         raise NotImplementedError
 
 
-class EmbedderForTokenClassification(TokenClassificationCore):
+class EmbedderForTokenClassification(TokenClassificationBase):
 
-    def _init(self, **params):
+    def _init_core(self, **params):
         # params
         self.num_tokens = params["num_tokens"]
         self.emb_dim = params["emb_dim"]
@@ -231,7 +231,7 @@ class EmbedderForTokenClassification(TokenClassificationCore):
                                         self.update_embeddings, 1 - self.embedder_output_keep_prob)
         self.out_dim = self.emb_dim
 
-    def _forward(self, batch_data_dict):
+    def _forward_core(self, batch_data_dict):
         seq_ids = batch_data_dict["seq_ids"]  # [BS, SEQ_LEN]
 
         encodings = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, self.out_dim]
@@ -241,7 +241,8 @@ class EmbedderForTokenClassification(TokenClassificationCore):
         return batch_data_dict
 
 
-class SequenceLstmForTokenClassification(TokenClassificationCore):
+class SequenceLstmForTokenClassification(TokenClassificationBase):
+    # pylint: disable=too-many-instance-attributes
     """A LSTM module that operates on a batched sequence of token ids. The tokens could be
     characters or words or sub-words. This module uses an additional input that determines
     how the sequence of embeddings obtained after the LSTM layers for each instance in the
@@ -251,7 +252,7 @@ class SequenceLstmForTokenClassification(TokenClassificationCore):
     instance in the batch (i.e. [BS, SEQ_LEN', EMB_DIM]).
     """
 
-    def _init(self, **params):
+    def _init_core(self, **params):
         # params
         self.num_tokens = params["num_tokens"]
         self.emb_dim = params["emb_dim"]
@@ -276,7 +277,7 @@ class SequenceLstmForTokenClassification(TokenClassificationCore):
                                     1 - self.lstm_output_keep_prob, self.lstm_bidirectional)
         self.out_dim = self.lstm_hidden_dim * 2 if self.lstm_bidirectional else self.lstm_hidden_dim
 
-    def _forward(self, batch_data_dict):
+    def _forward_core(self, batch_data_dict):
         seq_ids = batch_data_dict["seq_ids"]  # [BS, SEQ_LEN]
         seq_lengths = batch_data_dict["seq_lengths"]  # [BS]
 
@@ -288,7 +289,7 @@ class SequenceLstmForTokenClassification(TokenClassificationCore):
         return batch_data_dict
 
 
-class CharLstmSequenceLstmForTokenClassification(TokenClassificationCore):
+class CharLstmSequenceLstmForTokenClassification(TokenClassificationBase):
     # pylint: disable=too-many-instance-attributes
 
     def __init__(self):
@@ -297,8 +298,8 @@ class CharLstmSequenceLstmForTokenClassification(TokenClassificationCore):
         # default encoder; have to either fit ot load to use it
         self.encoder = TokenClsDualEncoderForEmbLayers()
 
-    def fit_encoder_and_update_params(self, examples, **params):
-        params = super().fit_encoder_and_update_params(examples, **params)
+    def init_encoder(self, examples, **params):
+        params = super().init_encoder(examples, **params)
         params.update({
             "char_num_tokens": self.encoder.get_char_num_tokens(),
             "char_emb_dim": self.encoder.get_char_emb_dim(),
@@ -306,7 +307,7 @@ class CharLstmSequenceLstmForTokenClassification(TokenClassificationCore):
         })
         return params
 
-    def _init(self, **params):
+    def _init_core(self, **params):
         # params
         self.num_tokens = params["num_tokens"]
         self.emb_dim = params["emb_dim"]
@@ -365,7 +366,7 @@ class CharLstmSequenceLstmForTokenClassification(TokenClassificationCore):
         )
         self.out_dim = self.lstm_hidden_dim * 2 if self.lstm_bidirectional else self.lstm_hidden_dim
 
-    def _forward(self, batch_data_dict):
+    def _forward_core(self, batch_data_dict):
         char_seq_ids = batch_data_dict["char_seq_ids"]  # List of [BS, SEQ_LEN]
         char_seq_lengths = batch_data_dict["char_seq_lengths"]  # List of [BS]
 
@@ -389,7 +390,8 @@ class CharLstmSequenceLstmForTokenClassification(TokenClassificationCore):
         return batch_data_dict
 
 
-class CharCnnSequenceLstmForTokenClassification(TokenClassificationCore):
+class CharCnnSequenceLstmForTokenClassification(TokenClassificationBase):
+    # pylint: disable=too-many-instance-attributes
 
     def __init__(self):
         super().__init__()
@@ -397,8 +399,8 @@ class CharCnnSequenceLstmForTokenClassification(TokenClassificationCore):
         # default encoder; have to either fit ot load to use it
         self.encoder = TokenClsDualEncoderForEmbLayers()
 
-    def fit_encoder_and_update_params(self, examples, **params):
-        params = super().fit_encoder_and_update_params(examples, **params)
+    def init_encoder(self, examples, **params):
+        params = super().init_encoder(examples, **params)
         params.update({
             "char_num_tokens": self.encoder.get_char_num_tokens(),
             "char_emb_dim": self.encoder.get_char_emb_dim(),
@@ -406,7 +408,7 @@ class CharCnnSequenceLstmForTokenClassification(TokenClassificationCore):
         })
         return params
 
-    def _init(self, **params):
+    def _init_core(self, **params):
         # params
         self.num_tokens = params["num_tokens"]
         self.emb_dim = params["emb_dim"]
@@ -459,7 +461,7 @@ class CharCnnSequenceLstmForTokenClassification(TokenClassificationCore):
         )
         self.out_dim = self.lstm_hidden_dim * 2 if self.lstm_bidirectional else self.lstm_hidden_dim
 
-    def _forward(self, batch_data_dict):
+    def _forward_core(self, batch_data_dict):
         char_seq_ids = batch_data_dict["char_seq_ids"]  # List of [BS, SEQ_LEN]
         char_seq_lengths = batch_data_dict["char_seq_lengths"]  # List of [BS]
 
@@ -481,7 +483,7 @@ class CharCnnSequenceLstmForTokenClassification(TokenClassificationCore):
         return batch_data_dict
 
 
-class BertForTokenClassification(TokenClassificationCore):
+class BertForTokenClassification(TokenClassificationBase):
 
     def __init__(self):
         super().__init__()
@@ -566,7 +568,7 @@ class BertForTokenClassification(TokenClassificationCore):
         scheduler = getattr(torch.optim.lr_scheduler, "LambdaLR")(optimizer, lr_lambda)
         return optimizer, scheduler
 
-    def _init(self, **params):
+    def _init_core(self, **params):
         # params
         self.emb_dim = params["emb_dim"]
         self.embedder_output_keep_prob = params.get("embedder_output_keep_prob", 0.2)
@@ -574,12 +576,12 @@ class BertForTokenClassification(TokenClassificationCore):
         self.params_keys.update(["emb_dim", "token_spans_pooling_type"])
 
         # core layers
-        self.span_pooling_layer = TokenSpanPoolingLayer(self.token_spans_pooling_type)
+        self.span_pooling_layer = SplittingAndPoolingLayer(self.token_spans_pooling_type)
         self.dropout = nn.Dropout(1 - self.embedder_output_keep_prob)
         self.out_dim = self.emb_dim
 
-    def _forward(self, batch_data_dict):
-        split_lengths = batch_data_dict["split_lengths"]  # # List[List[Int]]
+    def _forward_core(self, batch_data_dict):
+        split_lengths = batch_data_dict["split_lengths"]  # List[List[Int]]
         last_hidden_state = batch_data_dict["last_hidden_state"]  # [BS, SEQ_LEN, EMD_DIM]
 
         encodings = self.span_pooling_layer(

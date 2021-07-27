@@ -20,14 +20,13 @@ from sklearn.externals import joblib
 
 from .evaluation import EntityModelEvaluation, EvaluatedExample
 from .helpers import (
-    create_model,
     get_label_encoder,
     get_seq_accuracy_scorer,
     get_seq_tag_accuracy_scorer,
     ingest_dynamic_gazetteer,
 )
 from .model import ModelConfig, Model, PytorchModel
-from .neural_models_utils import token_classification as nn_modules
+from .neural_models_utils import token_classification_modules as nn_modules
 from .taggers.crf import ConditionalRandomFields
 from .taggers.memm import MemmModel
 from ..exceptions import MindMeldError
@@ -74,6 +73,7 @@ class TaggerModel(Model):
     CRF_TYPE = "crf"
     MEMM_TYPE = "memm"
     LSTM_TYPE = "lstm"
+    ALLOWED_CLASSIFIER_TYPES = [CRF_TYPE, MEMM_TYPE, LSTM_TYPE]
 
     # for default model scoring types
     ACCURACY_SCORING = "accuracy"
@@ -87,8 +87,6 @@ class TaggerModel(Model):
         "in-gaz-span-seq": {},
         "sys-candidates-seq": {"start_positions": [-1, 0, 1]},
     }
-
-    ALLOWED_CLASSIFIER_TYPES = [CRF_TYPE, MEMM_TYPE, LSTM_TYPE]
 
     def __init__(self, config):
         if not config.features:
@@ -119,6 +117,25 @@ class TaggerModel(Model):
             attributes["_resources"][key] = self.__dict__["_resources"][key]
 
         return attributes
+
+    def _get_model_constructor(self):
+        """Returns the python class of the actual underlying model"""
+        classifier_type = self.config.model_settings["classifier_type"]
+        try:
+            if classifier_type == TaggerModel.LSTM_TYPE and LstmModel is None:
+                msg = (
+                    "{}: Classifier type {!r} dependencies not found. Install the "
+                    "mindmeld[tensorflow] extra to use this classifier type."
+                )
+                raise ValueError(msg.format(self.__class__.__name__, classifier_type))
+            return {
+                TaggerModel.MEMM_TYPE: MemmModel,
+                TaggerModel.CRF_TYPE: ConditionalRandomFields,
+                TaggerModel.LSTM_TYPE: LstmModel,
+            }[classifier_type]
+        except KeyError as e:
+            msg = "{}: Classifier type {!r} not recognized"
+            raise ValueError(msg.format(self.__class__.__name__, classifier_type)) from e
 
     def _fit(self, examples, labels, params=None):
         """Trains a classifier without cross-validation.
@@ -188,25 +205,6 @@ class TaggerModel(Model):
 
     def select_params(self, examples, labels, selection_settings=None):
         raise NotImplementedError
-
-    def _get_model_constructor(self):
-        """Returns the python class of the actual underlying model"""
-        classifier_type = self.config.model_settings["classifier_type"]
-        try:
-            if classifier_type == TaggerModel.LSTM_TYPE and LstmModel is None:
-                msg = (
-                    "{}: Classifier type {!r} dependencies not found. Install the "
-                    "mindmeld[tensorflow] extra to use this classifier type."
-                )
-                raise ValueError(msg.format(self.__class__.__name__, classifier_type))
-            return {
-                TaggerModel.MEMM_TYPE: MemmModel,
-                TaggerModel.CRF_TYPE: ConditionalRandomFields,
-                TaggerModel.LSTM_TYPE: LstmModel,
-            }[classifier_type]
-        except KeyError as e:
-            msg = "{}: Classifier type {!r} not recognized"
-            raise ValueError(msg.format(self.__class__.__name__, classifier_type)) from e
 
     def fit(self, examples, labels, params=None):
         """Trains the model.
@@ -359,40 +357,30 @@ class TaggerModel(Model):
         model_eval = EntityModelEvaluation(config, evaluations)
         return model_eval
 
-    def dump(self, path, metadata=None):
-        """
-        Dumps the model and call's the underlying model to dump its state.
-
-        Args:
-            path (str): The path to dump the model to
-            config (dict): The config containing the model configuration
-        """
+    def _dump(self, path):
 
         # In TaggerModel, unlike TextModel, two dumps happen,
-        # one, the underneath classifier and second, the model metadata
+        # one, the underneath classifier and two, the tagger model's metadata
 
-        metadata = metadata or {}
-        metadata.update({"model_config": self.config, "serializable": self._clf.is_serializable})
+        metadata = {"serializable": self._clf.is_serializable}
 
         if self._clf.is_serializable:
-            metadata.update({"model": self})
+            metadata.update({
+                "model": self
+            })
         else:
-            # underneath tagger dump
-            model_dir = self._clf.dump(path)
-            metadata.update({"model": model_dir})
-
-            # misc resources dump
-            tagger_vars = {
+            # underneath tagger dump for LSTM model, returned `model_dir` is None for MEMM & CRF
+            self._clf.dump(path)
+            metadata.update({
                 "current_params": self._current_params,
                 "label_encoder": self._label_encoder,
                 "no_entities": self._no_entities,
-            }
-            joblib.dump(
-                tagger_vars, os.path.join(model_dir, ".tagger_vars")
-            )
+                "model_config": self.config
+            })
 
         # dump model metadata
-        super().dump(path, metadata)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        joblib.dump(metadata, path)
 
     @classmethod
     def load(cls, path):
@@ -403,9 +391,8 @@ class TaggerModel(Model):
             path (str): The path to dump the model to
         """
 
-        # Note that we load in reverse chronological order in which they are dumped by .dump()
-
-        metadata = super().load(path)
+        # load model metadata
+        metadata = joblib.load(path)
 
         # The default is True since < MM 3.2.0 models are serializable by default
         is_serializable = metadata.get("serializable", True)
@@ -413,16 +400,19 @@ class TaggerModel(Model):
         # If model is serializable, it can be loaded and used as-is. But if not serializable,
         #   it means we need to create an instance and load necessary details for it to be used.
         if not is_serializable:
-            model_config = metadata.get("model_config")
-            model_dir = metadata["model"]
-
-            model = create_model(model_config)
+            model = cls(metadata["model_config"])
 
             # misc resources load
-            tagger_vars = joblib.load(model_dir, ".tagger_vars")
-            model._current_params = tagger_vars["current_params"]
-            model._label_encoder = tagger_vars["label_encoder"]
-            model._no_entities = tagger_vars["no_entities"]
+            try:
+                model._current_params = metadata["current_params"]
+                model._label_encoder = metadata["label_encoder"]
+                model._no_entities = metadata["no_entities"]
+            except KeyError:  # backwards compatability
+                model_dir = metadata["model"]
+                tagger_vars = joblib.load(model_dir, ".tagger_vars")
+                model._current_params = tagger_vars["current_params"]
+                model._label_encoder = tagger_vars["label_encoder"]
+                model._no_entities = tagger_vars["no_entities"]
 
             # underneath tagger load
             model._clf.load(model_dir)
@@ -430,7 +420,7 @@ class TaggerModel(Model):
             # replace model dump directory with actual model
             metadata["model"] = model
 
-        return metadata
+        return metadata["model"]
 
 
 class PytorchTaggerModel(PytorchModel):
@@ -441,6 +431,35 @@ class PytorchTaggerModel(PytorchModel):
 
         self._no_entities = False
         self.types = None
+
+    def _get_model_constructor(self):
+        """Returns the class of the actual underlying model"""
+        classifier_type = self.config.model_settings["classifier_type"]
+
+        # dismabiguation between glove and bert embedder
+        def _resolve_and_return_embedder_class():
+            allowed_embedder_types = [None, "glove", "bert"]
+            embedder_type = self.config.params.get("embedder_type")
+            if embedder_type not in allowed_embedder_types:
+                msg = f"Need a valid 'embedder_type' param in params field of config to load a " \
+                      f"embedder type model. Allowed values are {allowed_embedder_types}"
+                raise ValueError(msg)
+            return {
+                None: nn_modules.EmbedderForTokenClassification,
+                "glove": nn_modules.EmbedderForTokenClassification,
+                "bert": nn_modules.BertForTokenClassification
+            }[embedder_type]
+
+        try:
+            return {
+                "embedder": _resolve_and_return_embedder_class(),
+                "lstm-pytorch": nn_modules.SequenceLstmForTokenClassification,
+                "cnn-lstm": nn_modules.CharCnnSequenceLstmForTokenClassification,
+                "lstm-lstm": nn_modules.CharLstmSequenceLstmForTokenClassification,
+            }[classifier_type]
+        except KeyError as e:
+            msg = "{}: Classifier type {!r} not recognized"
+            raise ValueError(msg.format(self.__class__.__name__, classifier_type)) from e
 
     def evaluate(self, examples, labels):
         """Evaluates a model against the given examples and labels
@@ -473,6 +492,7 @@ class PytorchTaggerModel(PytorchModel):
     def fit(self, examples, labels, params=None):
 
         types = [entity.entity.type for label in labels for entity in label]
+        self.types = types
         if len(set(types)) == 0:
             self._no_entities = True
             logger.info(
@@ -529,34 +549,36 @@ class PytorchTaggerModel(PytorchModel):
 
         raise NotImplementedError
 
-    def _get_model_constructor(self):
-        """Returns the class of the actual underlying model"""
-        classifier_type = self.config.model_settings["classifier_type"]
+    def _dump(self, path):
 
-        # dismabiguation between glove and bert embedder
-        def _resolve_and_return_embedder_class():
-            allowed_embedder_types = [None, "glove", "bert"]
-            embedder_type = self.config.params.get("embedder_type")
-            if embedder_type not in allowed_embedder_types:
-                msg = f"Need a valid 'embedder_type' param in params field of config to load a " \
-                      f"embedder type model. Allowed values are {allowed_embedder_types}"
-                raise ValueError(msg)
-            return {
-                None: nn_modules.EmbedderForTokenClassification,
-                "glove": nn_modules.EmbedderForTokenClassification,
-                "bert": nn_modules.BertForTokenClassification
-            }[embedder_type]
+        self._clf.dump(path)
 
-        try:
-            return {
-                "embedder": _resolve_and_return_embedder_class(),
-                "lstm-pytorch": nn_modules.SequenceLstmForTokenClassification,
-                "cnn-lstm": nn_modules.CharCnnSequenceLstmForTokenClassification,
-                "lstm-lstm": nn_modules.CharLstmSequenceLstmForTokenClassification,
-            }[classifier_type]
-        except KeyError as e:
-            msg = "{}: Classifier type {!r} not recognized"
-            raise ValueError(msg.format(self.__class__.__name__, classifier_type)) from e
+        # dump model metadata
+        metadata = {
+            "label_encoder": self._label_encoder,
+            "class_encoder": self._class_encoder,
+            "no_entities": self._no_entities,
+            "model_config": self.config
+        }
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        joblib.dump(metadata, path)
+
+    @classmethod
+    def load(cls, path):
+
+        # load model metadata
+        metadata = joblib.load(path)
+
+        model = cls(metadata["model_config"])
+
+        model._label_encoder = metadata["label_encoder"]
+        model._class_encoder = metadata["class_encoder"]
+        model._no_entities = metadata["no_entities"]
+
+        # underneath tagger load
+        model._clf = model._get_model_constructor().load(path)  # .load() is a classmethod
+
+        return model
 
 
 class AutoTaggerModel:

@@ -12,9 +12,8 @@
 # limitations under the License.
 
 """This module contains feature extractors for entities"""
-from mindmeld.core import QueryEntity, Query, NestedEntity
-
 from ..helpers import GAZETTEER_RSC, get_ngram, register_entity_feature, requires
+from ...core import QueryEntity, Query, NestedEntity
 
 
 @register_entity_feature(feature_name="in-gaz")

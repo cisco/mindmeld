@@ -27,7 +27,7 @@ import numpy as np
 from sklearn.metrics import accuracy_score, f1_score
 from tqdm import tqdm
 
-from ._layers import (
+from .layers import (
     get_disk_space_of_model,
     get_num_params_of_model
 )
@@ -48,7 +48,7 @@ SEED = 6174
 logger = logging.getLogger(__name__)
 
 
-class ClassificationCore(nn_module):  # pylint: disable=too-many-instance-attributes
+class ClassificationBase(nn_module):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self):
         super().__init__()
@@ -87,7 +87,7 @@ class ClassificationCore(nn_module):  # pylint: disable=too-many-instance-attrib
             logger.error(msg)
 
         # fit an encoder and update params
-        params = self.fit_encoder_and_update_params(examples, **params)
+        params = self.init_encoder(examples, **params)
 
         # update number of labels and label pad idx
         try:
@@ -260,16 +260,19 @@ class ClassificationCore(nn_module):  # pylint: disable=too-many-instance-attrib
         scheduler = getattr(torch.optim.lr_scheduler, "LambdaLR")(optimizer, lambda _: 1)
         return optimizer, scheduler
 
-    # methods to load and dump resources
+    # methods to load and dump resources, common across sub-classes
 
     def dump(self, path):
         # resolve path and create associated folder if required
         path = os.path.abspath(os.path.splitext(path)[0]) + ".pytorch_model"
         os.makedirs(path, exist_ok=True)
+
         # save weights
         torch.save(self.state_dict(), os.path.join(path, "pytorch_model.bin"))
+
         # save encoder
         self.encoder.dump(path)
+
         # save params
         with open(os.path.join(path, "params.json"), "w") as fp:
             params_dict = {k: getattr(self, k) for k in self.params_keys}
@@ -284,9 +287,9 @@ class ClassificationCore(nn_module):  # pylint: disable=too-many-instance-attrib
     def load(cls, path):
         # resolve path
         path = os.path.abspath(os.path.splitext(path)[0]) + ".pytorch_model"
-        # create instance and populate
+
+        # create instance and populate with params
         module = cls()
-        # load params
         with open(os.path.join(path, "params.json"), "r") as fp:
             params = json.load(fp)
             for k, v in params.items():
@@ -294,8 +297,10 @@ class ClassificationCore(nn_module):  # pylint: disable=too-many-instance-attrib
             setattr(module, "params_keys", set(params.keys()))
             fp.close()
         module.init(**params)
+
         # load encoder
         module.encoder = module.encoder.load(path)  # .load() is a classmethod
+
         # load weights
         device = "cuda" if torch.cuda.is_available() else "cpu"
         if device != params.get("device"):
@@ -306,11 +311,11 @@ class ClassificationCore(nn_module):  # pylint: disable=too-many-instance-attrib
         msg = f"{module.name} model weights are loaded successfully"
         logger.info(msg)
 
-        # module.ready = True
+        module.ready = True
         module.dirty = False
         return module
 
-    # abstract methods definition, to be implemented by sub-classes
+    # abstract methods definitions, to be implemented by sub-classes
 
     @abstractmethod
     def init(self, **params) -> None:
@@ -329,6 +334,6 @@ class ClassificationCore(nn_module):  # pylint: disable=too-many-instance-attrib
         raise NotImplementedError
 
     @abstractmethod
-    def fit_encoder_and_update_params(self, examples, **kwargs) -> Dict:
+    def init_encoder(self, examples, **kwargs) -> Dict:
         # return updated kwargs dict
         raise NotImplementedError

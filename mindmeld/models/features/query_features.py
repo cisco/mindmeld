@@ -386,9 +386,9 @@ def extract_bag_of_words_features(
 
     def remove_excess_out_of_bounds(n_gram: str) -> str:
         """
-        In our frequency dictionaries, we only add a single OOB token to the start and end of a query.
-        This function takes care to remove excess OOB tokens and retains only 1, so we can look up their counts and
-        uphold the thresholding feature.
+        In our frequency dictionaries, we only add a single OOB token to the start
+        and end of a query. This function takes care to remove excess OOB tokens and
+        retains only 1, so we can look up their counts and uphold the thresholding feature.
         Eg., '<$> <$> what' --> '<$> what'
              '<$> what' --> '<$> what'
              'help <$> <$>' --> 'help <$>'
@@ -700,7 +700,8 @@ def extract_ngrams(lengths=(1,), thresholds=(1,), **kwargs):
                         joined_stemmed_ngram = OUT_OF_VOCABULARY
                     ngram_counter.update(
                         [
-                            "bag_of_words_stemmed|length:{}|ngram:{}".format(len(stemmed_ngram), joined_stemmed_ngram)
+                            "bag_of_words_stemmed|length:{}|ngram:{}".format(
+                                len(stemmed_ngram), joined_stemmed_ngram)
                         ]
                     )
 
@@ -834,9 +835,6 @@ def extract_edge_ngrams(lengths=(1,), **kwargs):
                         ): 1
                     }
                 )
-
-
-
         return feats
 
     return _extractor
@@ -915,7 +913,8 @@ def extract_gaz_freq(**kwargs):
         freq_features = defaultdict(int)
 
         for tok in tokens:
-            query_freq = OUT_OF_VOCABULARY if resources[WORD_FREQ_RSC].get(tok) is None else IN_VOCABULARY
+            query_freq = OUT_OF_VOCABULARY if resources[WORD_FREQ_RSC].get(tok) is None \
+                else IN_VOCABULARY
             for gaz_name, gaz in resources[GAZETTEER_RSC].items():
                 freq = len(gaz["index"].get(tok, []))
                 if freq > 0:

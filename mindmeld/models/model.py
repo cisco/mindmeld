@@ -17,8 +17,10 @@ import json
 import logging
 import math
 import os
+import pickle
 from abc import ABC, abstractmethod
 from inspect import signature
+from typing import Union
 
 from sklearn.externals import joblib
 from sklearn.model_selection import (
@@ -34,7 +36,6 @@ from sklearn.preprocessing import LabelEncoder as SKLabelEncoder
 
 from ._util import _is_module_available
 from .helpers import (
-    create_model,
     CHAR_NGRAM_FREQ_RSC,
     ENABLE_STEMMING,
     GAZETTEER_RSC,
@@ -48,8 +49,10 @@ from .helpers import (
     ingest_dynamic_gazetteer,
 )
 from .._version import get_mm_version
-from ..exceptions import ClassifierLoadError
 from ..tokenizer import Tokenizer
+
+# for backwards compatability for sklearn models serialized and dumped in previous version
+from .labels import LabelEncoder, EntityLabelEncoder  # pylint: disable=unused-import
 
 logger = logging.getLogger(__name__)
 
@@ -111,18 +114,10 @@ class ModelConfig:
     ):
         for arg, val in {
             "model_type": model_type,
-            "example_type": example_type,
             "label_type": label_type,
-            "features": features,
         }.items():
             if val is None:
                 raise TypeError("__init__() missing required argument {!r}".format(arg))
-        if params is None and (
-            param_selection is None or param_selection.get("grid") is None
-        ):
-            raise ValueError(
-                "__init__() One of 'params' and 'param_selection' is required"
-            )
         self.model_type = model_type
         self.example_type = example_type
         self.label_type = label_type
@@ -221,28 +216,34 @@ class ModelConfig:
         """
         # get list of resources required by feature extractors
         required_resources = set()
-        for name in self.features:
-            feature = get_feature_extractor(self.example_type, name)
-            required_resources.update(feature.__dict__.get("requirements", []))
+        if self.features:
+            for name in self.features:
+                feature = get_feature_extractor(self.example_type, name)
+                required_resources.update(feature.__dict__.get("requirements", []))
         return required_resources
 
 
-class BaseModel(ABC):
+class AbstractModel(ABC):
     """
     A minimalistic abstract class upon which all models are based.
     """
+
+    # In order to maintain backwards compatability, the skeleton of this class is designed based on
+    # all the access points of Classifier class and its sub-classes. In addition, it also introduces
+    # the decoupled way of dumping/loading across different model types (meaning not all models are
+    # dumped/loaded the same way). Furthermore, methods for validation are also introduced so as to
+    # cater to the model specific config validations. Lastly, this skleton also includes some common
+    # properties that could be used across all model types.
 
     def __init__(self, config: ModelConfig):
         self.config = config
         self.mindmeld_version = get_mm_version()
         self._resources = {}
 
-    @abstractmethod
-    def initialize_resources(self, resource_loader, examples=None, labels=None):
-        raise NotImplementedError
+        self._validate_model_configs()
 
     @abstractmethod
-    def _get_model_constructor(self):
+    def initialize_resources(self, resource_loader, examples=None, labels=None):
         raise NotImplementedError
 
     @abstractmethod
@@ -261,56 +262,106 @@ class BaseModel(ABC):
     def evaluate(self, examples, labels):
         raise NotImplementedError
 
-    def dump(self, path, metadata=None):
-
-        metadata = metadata or {}
-
-        # every XxxModel derived from baseModel has one default .pkl dump file that contains a
-        #   dictionary with at least the key 'model_config' whose value is a dictionary of the
-        #   model configs
-        if 'model_config' not in metadata:
-            metadata.update({'model_config': self.config})
-
-        # make directory if necessary
-        folder = os.path.dirname(path)
-        if not os.path.isdir(folder):
-            os.makedirs(folder)
-
-        joblib.dump(metadata, path)
-
     @classmethod
+    @abstractmethod
     def load(cls, path):
-
-        try:
-            metadata = joblib.load(path)
-        except (OSError, IOError) as e:
-            msg = "Unable to load {}. Pickle at {!r} cannot be read."
-            raise ClassifierLoadError(msg.format(cls.__name__, path)) from e
-
-        if not isinstance(metadata, dict):
-            # backwards compatability
-            #   this `if` condition is when a model is serialized and saved, and has to be loaded;
-            #   (1) the serialized model also consists of the model config;
-            #   (2) in this case, metadata = model
-            metadata = {"model": metadata, "model_config": metadata.config}
-
-        if 'model_config' not in metadata:
-            msg = f"Unable to obtain model_config from dump location- {path}." \
-                  f"Please re-build the models."
-            raise KeyError(msg)
-
-        return metadata
-
-    def view_extracted_features(self, example, dynamic_resource=None):
         raise NotImplementedError
 
-    def register_resources(self, **kwargs):
-        """Registers resources which are accessible to feature extractors
+    @classmethod
+    def load_model_config(cls, path):
+        """
+        Dumps the model's configs. Raises a FileNotFoundError if no configs file is found.
+        For backwards compatability wherein TextModel was serialized and dumped, the textModel file
+        is loaded using joblib and then the config is obtained from its public variables.
 
         Args:
-            **kwargs: dictionary of resources to register
+            path (str): The path where the model is dumped
         """
-        self._resources.update(kwargs)
+
+        try:
+            model_configs_save_path = cls._get_model_config_save_path(path)
+            model_config = pickle.load(open(model_configs_save_path, "rb"))
+        except FileNotFoundError as e:  # backwards compatability for sklearn-based model classes
+            metadata = joblib.load(path)
+            # metadata here can be a serialized model (eg. TextModel) or a dict (eg. TaggerModel)
+            if isinstance(metadata, dict):
+                # compatability with previously dumped EntityRecognizers and RoleClassifiers
+                try:
+                    # sklearn TaggerModel used by EntityRecognizer
+                    model_config = metadata["model_config"]
+                except KeyError:
+                    try:
+                        # sklearn TextModel used by RoleClassifier (w/ a non-NoneType "model")
+                        model_config = metadata["model"].config
+                    except AttributeError:
+                        # sklearn TextModel used by RoleClassifier (w/ a NoneType "model")
+                        #   in latest version, nothing gets dumped at the dump
+                        #       path: 'path/to/dump/<entity_name>-role.pkl' if the self._model in
+                        #       RoleClassifier is None because of a check in Classifier.dump()
+                        #   in previous version, a dictionary '{'model': None, 'roles': set()}'
+                        #       is dumped at the path: 'path/to/dump/<entity_name>-role.pkl'
+                        #       although the self._model in RoleClassifier is None
+                        msg = f"Model config data cold not be identified from existing dump at " \
+                              f"path: {path}. Assuming that the dumped model is NoneType and " \
+                              f"belongs to a role classifier"
+                        raise FileNotFoundError(msg) from e
+            else:
+                # compatability with previously dumped DomainClassifiers and IntentClassifiers
+                #   in this case, metadata = model which was serialized and dumped
+                model_config = metadata.config
+
+        return model_config
+
+    def dump(self, path) -> None:
+        """
+        Dumps the model's configs and calls the child model's dump method
+
+        Args:
+            path (str): The path to dump the model to
+        """
+
+        # every subclass of ABCModel has one .pkl dump file that contains a
+        #   dictionary with at least the key 'model_config' whose value is a model configs dict
+        #   this pickle file is sought in `load_model_config()` method
+        self._dump_model_config(path)
+
+        # call this subclass-implemeneted method to allow models to dump in their own style
+        # (eg. serialized dump for sklearn-based models, .bin files for pytorch-based models, etc.)
+        self._dump(path)
+
+    def _dump_model_config(self, path) -> None:
+        """
+        Dumps the model's configs
+        """
+
+        model_configs_save_path = self._get_model_config_save_path(path)
+        pickle.dump(self.config, open(model_configs_save_path, "wb"))
+
+    @abstractmethod
+    def _dump(self, path) -> None:
+        """
+        Dumps the model and calls the underlying algo to dump its state.
+
+        Args:
+            path (str): The path to dump the model to
+        """
+        pass
+
+    @staticmethod
+    def _get_model_config_save_path(path):
+        head, ext = os.path.splitext(path)
+        model_config_save_path = head + ".config" + ext
+        os.makedirs(os.path.dirname(model_config_save_path), exist_ok=True)
+        return model_config_save_path
+
+    def view_extracted_features(self, example, dynamic_resource=None):
+        # Not implemeneted for deep neural models
+        raise NotImplementedError
+
+    def register_resources(self, **kwargs):  # pylint: disable=no-self-use
+        # Resources for feature extractors are not required for deep neural models
+        del kwargs
+        pass
 
     def get_resource(self, name):
         return self._resources.get(name)
@@ -326,8 +377,11 @@ class BaseModel(ABC):
             tokenizer = Tokenizer()
         return tokenizer
 
+    def _validate_model_configs(self):
+        pass
 
-class Model(BaseModel):
+
+class Model(AbstractModel):
     """An abstract class upon which all models are based.
 
     Attributes:
@@ -345,6 +399,9 @@ class Model(BaseModel):
         self.cv_loss_ = None
 
     def _fit(self, examples, labels, params=None):
+        raise NotImplementedError
+
+    def _get_model_constructor(self):
         raise NotImplementedError
 
     def _fit_cv(self, examples, labels, groups=None, selection_settings=None):
@@ -503,6 +560,14 @@ class Model(BaseModel):
         config_dict["params"] = self._current_params
         return ModelConfig(**config_dict)
 
+    def register_resources(self, **kwargs):
+        """Registers resources which are accessible to feature extractors
+
+        Args:
+            **kwargs: dictionary of resources to register
+        """
+        self._resources.update(kwargs)
+
     def get_feature_matrix(self, examples, y=None, fit=False):
         raise NotImplementedError
 
@@ -652,8 +717,24 @@ class Model(BaseModel):
         # feature-specific resource
         self._resources["tokenizer"] = resource_loader.get_tokenizer()
 
+    def _validate_model_configs(self) -> Union[TypeError, ValueError]:
 
-class PytorchModel(BaseModel):
+        for arg, val in {
+            "features": self.config.features,
+            "example_type": self.config.example_type
+        }.items():
+            if val is None:
+                raise TypeError("__init__() missing required argument {!r}".format(arg))
+
+        if self.config.params is None and (
+            self.config.param_selection is None or self.config.param_selection.get("grid") is None
+        ):
+            raise ValueError(
+                "__init__() One of 'params' and 'param_selection' is required"
+            )
+
+
+class PytorchModel(AbstractModel):
 
     def __init__(self, config):
         if not _is_module_available('torch'):
@@ -668,42 +749,3 @@ class PytorchModel(BaseModel):
     def initialize_resources(self, resource_loader, examples=None, labels=None):
         del examples, labels
         self._resources["tokenizer"] = resource_loader.get_tokenizer()
-
-    def dump(self, path, metadata=None):
-        metadata = metadata or {}
-        metadata.update({
-            "model_config": self.config,
-            "serializable": False,
-            "class_encoder": self._class_encoder,
-        })
-
-        # dump clf if required
-        if self._clf:  # entity recognizers or role classifiers might just need to dump metadata
-            self._clf.dump(path)
-
-        # dump metadata
-        super().dump(path, metadata)
-
-    @classmethod
-    def load(cls, path):
-        # load metadata
-        metadata = super().load(path)
-        model_config = metadata.get("model_config")
-
-        try:
-            # disambiguate model class name
-            model = create_model(model_config)
-            # disambiguate classifier type
-            model._clf = model._get_model_constructor().load(path)  # .load() is a classmethod
-            # other details of model
-            model._class_encoder = metadata["class_encoder"]
-        except FileNotFoundError:
-            # entity recognizers or role classifiers might just need to load metadata
-            #   ideally, some metadata needs to be loaded here for classifiers layer as well for
-            #   these two to work when their self._model=None
-            model = None
-            pass
-
-        metadata["model"] = model
-
-        return metadata

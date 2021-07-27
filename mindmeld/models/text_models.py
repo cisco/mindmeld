@@ -17,10 +17,12 @@ of text.
 """
 import logging
 import operator
+import os
 import random
 
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.externals import joblib
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
@@ -37,7 +39,7 @@ from .helpers import (
     WORD_NGRAM_FREQ_RSC,
 )
 from .model import ModelConfig, Model, PytorchModel
-from .neural_models_utils import sequence_classification as nn_modules
+from .neural_models_utils import sequence_classification_modules as nn_modules
 
 logger = logging.getLogger(__name__)
 
@@ -48,13 +50,12 @@ class TextModel(Model):
     DECISION_TREE_TYPE = "dtree"
     RANDOM_FOREST_TYPE = "rforest"
     SVM_TYPE = "svm"
+    ALLOWED_CLASSIFIER_TYPES = [LOG_REG_TYPE, DECISION_TREE_TYPE, RANDOM_FOREST_TYPE, SVM_TYPE]
 
     # default model scoring type
     ACCURACY_SCORING = "accuracy"
 
     _NEG_INF = -1e10
-
-    ALLOWED_CLASSIFIER_TYPES = [LOG_REG_TYPE, DECISION_TREE_TYPE, RANDOM_FOREST_TYPE, SVM_TYPE]
 
     def __init__(self, config):
         super().__init__(config)
@@ -85,6 +86,20 @@ class TextModel(Model):
             ]
         }
         return attributes
+
+    def _get_model_constructor(self):
+        """Returns the class of the actual underlying model"""
+        classifier_type = self.config.model_settings["classifier_type"]
+        try:
+            return {
+                TextModel.LOG_REG_TYPE: LogisticRegression,
+                TextModel.DECISION_TREE_TYPE: DecisionTreeClassifier,
+                TextModel.RANDOM_FOREST_TYPE: RandomForestClassifier,
+                TextModel.SVM_TYPE: SVC,
+            }[classifier_type]
+        except KeyError as e:
+            msg = "{}: Classifier type {!r} not recognized"
+            raise ValueError(msg.format(self.__class__.__name__, classifier_type)) from e
 
     def _get_cv_scorer(self, selection_settings):
         """
@@ -371,20 +386,6 @@ class TextModel(Model):
         }.get(scale_type)
         return scaler
 
-    def _get_model_constructor(self):
-        """Returns the class of the actual underlying model"""
-        classifier_type = self.config.model_settings["classifier_type"]
-        try:
-            return {
-                TextModel.LOG_REG_TYPE: LogisticRegression,
-                TextModel.DECISION_TREE_TYPE: DecisionTreeClassifier,
-                TextModel.RANDOM_FOREST_TYPE: RandomForestClassifier,
-                TextModel.SVM_TYPE: SVC,
-            }[classifier_type]
-        except KeyError as e:
-            msg = "{}: Classifier type {!r} not recognized"
-            raise ValueError(msg.format(self.__class__.__name__, classifier_type)) from e
-
     def evaluate(self, examples, labels):
         """Evaluates a model against the given examples and labels
 
@@ -472,14 +473,20 @@ class TextModel(Model):
             example, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer
         )
 
-    def dump(self, path, metadata=None):
-        metadata = metadata or {}
-        metadata.update({
-            "model": self,
-            "model_config": self.config,
-            "serializable": True}
-        )
-        super().dump(path, metadata)
+    @classmethod
+    def load(cls, path):
+        metadata = joblib.load(path)
+
+        # backwards compatability check for RoleClassifiers
+        if isinstance(metadata, dict):
+            return metadata["model"]
+
+        # in this case, metadata = model which was serialized and dumped
+        return metadata
+
+    def _dump(self, path):
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        joblib.dump(self, path)
 
 
 class PytorchTextModel(PytorchModel):
@@ -580,6 +587,35 @@ class PytorchTextModel(PytorchModel):
             predictions.append((top_class, probabilities))
 
         return predictions
+
+    def _dump(self, path):
+
+        self._clf.dump(path)
+
+        # dump model metadata
+        metadata = {
+            "label_encoder": self._label_encoder,
+            "class_encoder": self._class_encoder,
+            "model_config": self.config
+        }
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        joblib.dump(metadata, path)
+
+    @classmethod
+    def load(cls, path):
+
+        # load model metadata
+        metadata = joblib.load(path)
+
+        model = cls(metadata["model_config"])
+
+        model._label_encoder = metadata["label_encoder"]
+        model._class_encoder = metadata["class_encoder"]
+
+        # underneath tagger load
+        model._clf = model._get_model_constructor().load(path)  # .load() is a classmethod
+
+        return model
 
 
 class AutoTextModel:
