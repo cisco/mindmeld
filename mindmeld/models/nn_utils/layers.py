@@ -42,7 +42,7 @@ def get_disk_space_of_model(pytorch_module):
     return size
 
 
-def get_num_params_of_model(pytorch_module):
+def get_num_weights_of_model(pytorch_module):
     n_total = 0
     n_requires_grad = 0
     for param in list(pytorch_module.parameters()):
@@ -114,7 +114,7 @@ class EmbeddingLayer(nn_module):
 
 class CnnLayer(nn_module):
 
-    def __init__(self, emb_dim, kernel_sizes, num_kernels, cnn_dropout):
+    def __init__(self, emb_dim, kernel_sizes, num_kernels):
         super().__init__()
 
         if isinstance(num_kernels, list) and len(num_kernels) != len(kernel_sizes):
@@ -139,7 +139,6 @@ class CnnLayer(nn_module):
                     nn.ReLU(),
                 )
             )
-        self.dropout = nn.Dropout(cnn_dropout)
 
     def forward(self, padded_token_embs):
         # padded_token_embs: dim: [BS, SEQ_LEN, EMD_DIM]
@@ -156,7 +155,6 @@ class CnnLayer(nn_module):
 
         # list([BS, n]) -> [BS, sum(n)]
         outputs = torch.cat(maxpool_conv_outputs, dim=1)
-        outputs = self.dropout(outputs)
 
         return outputs
 
@@ -170,7 +168,6 @@ class LstmLayer(nn_module):
             emb_dim, hidden_dim, num_layers=num_layers, dropout=lstm_dropout,
             bidirectional=bidirectional, batch_first=True
         )
-        self.dropout = nn.Dropout(lstm_dropout)
 
     def forward(self, padded_token_embs, lengths):
         # padded_token_embs: dim: [BS, SEQ_LEN, EMD_DIM]
@@ -182,7 +179,6 @@ class LstmLayer(nn_module):
                                       batch_first=True, enforce_sorted=False)
         lstm_outputs, _ = self.lstm(packed)
         outputs = pad_packed_sequence(lstm_outputs, batch_first=True)[0]
-        outputs = self.dropout(outputs)
 
         return outputs
 
@@ -194,10 +190,10 @@ class PoolingLayer(nn_module):
 
         pooling_type = pooling_type.lower()
 
-        ALLOWED_TYPES = ["start", "end", "max", "mean", "mean_sqrt"]
+        ALLOWED_TYPES = ["first", "last", "max", "mean", "mean_sqrt"]
         assert pooling_type in ALLOWED_TYPES
 
-        self._requires_length = ["end", "max", "mean", "mean_sqrt"]
+        self._requires_length = ["last", "max", "mean", "mean_sqrt"]
 
         self.pooling_type = pooling_type
 
@@ -210,9 +206,9 @@ class PoolingLayer(nn_module):
             msg = f"Missing required value 'lengths' for pooling_type: {self.pooling_type}"
             raise ValueError(msg)
 
-        if self.pooling_type == "start":
+        if self.pooling_type == "first":
             outputs = padded_token_embs[:, 0, :]
-        elif self.pooling_type == "end":
+        elif self.pooling_type == "last":
             last_seq_idxs = torch.LongTensor([x - 1 for x in lengths])
             outputs = padded_token_embs[range(padded_token_embs.shape[0]), last_seq_idxs, :]
         else:
@@ -241,7 +237,7 @@ class SplittingAndPoolingLayer(nn_module):
 
         pooling_type = pooling_type.lower()
 
-        ALLOWED_TYPES = ["start", "end", "max", "mean", "mean_sqrt"]
+        ALLOWED_TYPES = ["first", "last", "max", "mean", "mean_sqrt"]
         assert pooling_type in ALLOWED_TYPES
 
         self.pooling_type = pooling_type
@@ -253,11 +249,11 @@ class SplittingAndPoolingLayer(nn_module):
         splits = torch.split(tensor_2d[:sum(list_of_chunk_lengths)], list_of_chunk_lengths, dim=0)
         padded_token_embs = pad_sequence(splits, batch_first=True)  # [BS', SEQ_LEN', EMD_DIM]
 
-        if self.pooling_type == "start":
+        if self.pooling_type == "first":
             outputs = padded_token_embs[:, 0, :]
         else:
             raise NotImplementedError
-        # elif self.pooling_type == "end":
+        # elif self.pooling_type == "last":
         #     last_seq_idxs = torch.LongTensor([x - 1 for x in lengths])
         #     outputs = padded_token_embs[range(padded_token_embs.shape[0]), last_seq_idxs, :]
         # else:

@@ -39,7 +39,7 @@ from .helpers import (
     WORD_NGRAM_FREQ_RSC,
 )
 from .model import ModelConfig, Model, PytorchModel
-from .neural_models_utils import sequence_classification_modules as nn_modules
+from .nn_utils import sequence_classification_modules as nn_modules
 
 logger = logging.getLogger(__name__)
 

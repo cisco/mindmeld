@@ -26,7 +26,7 @@ from .helpers import (
     ingest_dynamic_gazetteer,
 )
 from .model import ModelConfig, Model, PytorchModel
-from .neural_models_utils import token_classification_modules as nn_modules
+from .nn_utils import token_classification_modules as nn_modules
 from .taggers.crf import ConditionalRandomFields
 from .taggers.memm import MemmModel
 from ..exceptions import MindMeldError
@@ -228,7 +228,7 @@ class TaggerModel(Model):
         if len(set(types)) == 0:
             self._no_entities = True
             logger.info(
-                "There are no labels in this label set, so we don't " "fit the model."
+                "There are no labels in this label set, so we don't fit the model."
             )
             return self
         # Extract labels - label encoders are the same accross all entity recognition models
@@ -453,9 +453,9 @@ class PytorchTaggerModel(PytorchModel):
         try:
             return {
                 "embedder": _resolve_and_return_embedder_class(),
-                "lstm-pytorch": nn_modules.SequenceLstmForTokenClassification,
-                "cnn-lstm": nn_modules.CharCnnSequenceLstmForTokenClassification,
-                "lstm-lstm": nn_modules.CharLstmSequenceLstmForTokenClassification,
+                "lstm-pytorch": nn_modules.LstmForTokenClassification,
+                "cnn-lstm": nn_modules.CharCnnWithWordLstmForTokenClassification,
+                "lstm-lstm": nn_modules.CharLstmWithWordLstmForTokenClassification,
             }[classifier_type]
         except KeyError as e:
             msg = "{}: Classifier type {!r} not recognized"
@@ -496,7 +496,7 @@ class PytorchTaggerModel(PytorchModel):
         if len(set(types)) == 0:
             self._no_entities = True
             logger.info(
-                "There are no labels in this label set, so we don't " "fit the model."
+                "There are no labels in this label set, so we don't fit the model."
             )
             return self
 

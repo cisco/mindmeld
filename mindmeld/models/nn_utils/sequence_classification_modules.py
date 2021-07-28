@@ -19,7 +19,6 @@ import logging
 from abc import abstractmethod
 from typing import Dict
 
-from .nn_base_modules import ClassificationBase
 from .input_encoders import (
     SeqClsEncoderForEmbLayer,
     SeqClsEncoderWithPlmLayer
@@ -30,6 +29,7 @@ from .layers import (
     LstmLayer,
     PoolingLayer
 )
+from .nn_base_modules import ClassificationBase
 
 try:
     import torch
@@ -42,11 +42,14 @@ logger = logging.getLogger(__name__)
 
 
 class SequenceClassificationBase(ClassificationBase):
-    """Base Module class that defines all the necessary elements to succesfully train/infer,
-     dump/load custom pytorch modules wrapped on top of this base class. Classes derived from
-     this base can be trained for sequence classification. The output of a class derived from
-     this base must contain `seq_embs` in its output dictionary.
+    """Base class that defines all the necessary elements to succesfully train/infer
+     custom pytorch modules wrapped on top of this base class. Classes derived from
+     this base can be trained for sequence classification.
     """
+
+    DEFAULT_PARAMS = {
+        "output_keep_prob": 0.7
+    }
 
     def __init__(self):
         super().__init__()
@@ -54,9 +57,13 @@ class SequenceClassificationBase(ClassificationBase):
         # default encoder; have to either fit ot load to use it
         self.encoder = SeqClsEncoderForEmbLayer()
 
-    # methods for training
+    def _get_subclasses_default_params(self):
+        return {
+            **SequenceClassificationBase.DEFAULT_PARAMS,
+            **self.__class__.DEFAULT_PARAMS
+        }
 
-    def init_encoder(self, examples, **params):
+    def _init_encoder(self, examples, **params):
         use_character_embeddings = params.pop("use_character_embeddings", False)
         if use_character_embeddings:
             tokenizer_type = params.get("tokenizer_type", "char-tokenizer")
@@ -76,51 +83,61 @@ class SequenceClassificationBase(ClassificationBase):
         })
         return params
 
-    def init(self, **params):
+    def _init_forward_graph(self):
 
-        self._init_core(**params)
-
-        # params
-        self.num_labels = params.get("num_labels")
-        self.dense_keep_prob = params.get("dense_keep_prob", 0.3)
-        self.params_keys.update(["num_labels", "dense_keep_prob"])
+        self._init_core()
 
         # init the underlying params and architectural components
         try:
-            self.hidden_size = self.out_dim
-            assert self.hidden_size
+            assert self.out_dim > 0
+            self.params.update({"out_dim": self.out_dim})
         except (AttributeError, AssertionError) as e:
             msg = f"Derived class '{self.name}' must indicate its hidden size for dense layer " \
                   f"classification by having an attribute 'self.out_dim', which must be a " \
                   f"positive integer greater than 1"
             raise ValueError(msg) from e
-        self.params_keys.update(["hidden_size"])
 
         # init the peripheral architecture params
-        if not self.num_labels:
-            msg = f"Invalid number of labels ({self.num_labels}) inputted for '{self.name}' class"
+        if not self.params.num_labels:
+            msg = f"Invalid number of labels ({self.params.num_labels}) inputted to '{self.name}'"
             raise ValueError(msg)
 
         # init the peripheral architectural components and the criterion to compute loss
-        self.dense_layer_dropout = nn.Dropout(p=1 - self.dense_keep_prob)
-        if self.num_labels == 2:
+        self.dense_layer_dropout = nn.Dropout(
+            p=1 - self.params.output_keep_prob
+        )
+        if self.params.num_labels == 2:
             # sigmoid criterion
-            self.classifier_head = nn.Linear(self.hidden_size, 1)
+            self.classifier_head = nn.Linear(self.out_dim, 1)
             self.criterion = nn.BCEWithLogitsLoss(reduction='mean')
-        elif self.num_labels > 2:
+        elif self.params.num_labels > 2:
             # cross-entropy criterion
-            self.classifier_head = nn.Linear(self.hidden_size, self.num_labels)
+            self.classifier_head = nn.Linear(self.out_dim, self.params.num_labels)
             self.criterion = nn.CrossEntropyLoss(reduction='mean')
         else:
-            msg = f"Invalid number of labels specified: {self.num_labels}. " \
+            msg = f"Invalid number of labels specified: {self.params.num_labels}. " \
                   f"A valid number is equal to or greater than 2"
             raise ValueError(msg)
 
         print(f"{self.name} is initialized")
 
+    def _forward_with_batching_and_no_grad(self, examples):
+        logits = None
+        was_training = self.training
+        self.eval()
+        with torch.no_grad():
+            for start_idx in range(0, len(examples), self.params.batch_size):
+                this_examples = examples[start_idx:start_idx + self.params.batch_size]
+                batch_data_dict = self.encoder.batch_encode(this_examples)
+                this_logits = self.forward(batch_data_dict)["logits"]
+                logits = torch.cat((logits, this_logits)) if logits is not None else this_logits
+        if was_training:
+            self.train()
+        return logits
+
     def forward(self, batch_data_dict):
 
-        batch_data_dict = self.inputs_to_device(batch_data_dict)
+        batch_data_dict = self._to_device(batch_data_dict)
         batch_data_dict = self._forward_core(batch_data_dict)
 
         seq_embs = batch_data_dict["seq_embs"]
@@ -130,52 +147,34 @@ class SequenceClassificationBase(ClassificationBase):
 
         targets = batch_data_dict.get("labels")
         if targets is not None:
-            if self.num_labels == 2:
+            if self.params.num_labels == 2:
                 loss = self.criterion(logits.view(-1), targets.float())
-            elif self.num_labels > 2:
+            elif self.params.num_labels > 2:
                 loss = self.criterion(logits, targets)
             batch_data_dict.update({"loss": loss})
 
         return batch_data_dict
 
-    # methods for inference
-
     def predict(self, examples):
         logits = self._forward_with_batching_and_no_grad(examples)
-        if self.num_labels == 2:
+        if self.params.num_labels == 2:
             preds = (logits >= 0.5).long().view(-1)
-        elif self.num_labels > 2:
+        elif self.params.num_labels > 2:
             preds = torch.argmax(logits, dim=-1)
         return preds.tolist()
 
     def predict_proba(self, examples):
         logits = self._forward_with_batching_and_no_grad(examples)
-        if self.num_labels == 2:
+        if self.params.num_labels == 2:
             probs = F.sigmoid(logits)
             # extending the results from shape [N,1] to [N,2] to give out class probs distinctly
             probs = torch.cat((1 - probs, probs), dim=-1)
-        elif self.num_labels > 2:
+        elif self.params.num_labels > 2:
             probs = F.softmax(logits, dim=-1)
         return probs.tolist()
 
-    def _forward_with_batching_and_no_grad(self, examples):
-        logits = None
-        was_training = self.training
-        self.eval()
-        with torch.no_grad():
-            for start_idx in range(0, len(examples), self.batch_size):
-                this_examples = examples[start_idx:start_idx + self.batch_size]
-                batch_data_dict = self.encoder.batch_encode(this_examples)
-                this_logits = self.forward(batch_data_dict)["logits"]
-                logits = torch.cat((logits, this_logits)) if logits is not None else this_logits
-        if was_training:
-            self.train()
-        return logits
-
-    # abstract methods definition, to be implemented by sub-classes
-
     @abstractmethod
-    def _init_core(self, **params) -> None:
+    def _init_core(self) -> None:
         raise NotImplementedError
 
     @abstractmethod
@@ -195,25 +194,27 @@ class EmbedderForSequenceClassification(SequenceClassificationBase):
     matrix (e.g. tf-idf weights).
     """
 
-    def _init_core(self, **params):
-        # params
-        self.num_tokens = params["num_tokens"]
-        self.emb_dim = params["emb_dim"]
-        self.padding_idx = params.get("padding_idx", None)
-        self.update_embeddings = params.get("update_embeddings", True)
-        self.embedder_output_keep_prob = params.get("embedder_output_keep_prob", 0.5)
-        self.embedder_output_pooling_type = params.get("embedder_output_pooling_type", "mean")
-        self.params_keys.update([
-            "num_tokens", "emb_dim", "padding_idx", "update_embeddings",
-            "embedder_output_keep_prob", "embedder_output_pooling_type"
-        ])
+    DEFAULT_PARAMS = {
+        "padding_idx": None,
+        "update_embeddings": True,
+        "embedder_output_keep_prob": 0.7,
+        "embedder_output_pooling_type": "mean",
+        "output_keep_prob": 1.0,
+    }
 
-        # core layers
-        self.emb_layer = EmbeddingLayer(self.num_tokens, self.emb_dim, self.padding_idx,
-                                        params.get("embedding_weights", None),
-                                        self.update_embeddings, 1 - self.embedder_output_keep_prob)
-        self.emb_layer_pooling = PoolingLayer(self.embedder_output_pooling_type)
-        self.out_dim = self.emb_dim
+    def _init_core(self):
+        self.emb_layer = EmbeddingLayer(
+            self.params.num_tokens,
+            self.params.emb_dim,
+            self.params.padding_idx,
+            self.params.pop("embedding_weights", None),
+            self.params.update_embeddings,
+            1 - self.params.embedder_output_keep_prob
+        )
+        self.emb_layer_pooling = PoolingLayer(
+            self.params.embedder_output_pooling_type
+        )
+        self.out_dim = self.params.emb_dim
 
     def _forward_core(self, batch_data_dict):
         seq_ids = batch_data_dict["seq_ids"]  # [BS, SEQ_LEN]
@@ -235,29 +236,29 @@ class CnnForSequenceClassification(SequenceClassificationBase):
     The `forward` method of this module expects only padded token ids as input.
     """
 
-    def _init_core(self, **params):
-        # params
-        self.num_tokens = params["num_tokens"]
-        self.emb_dim = params["emb_dim"]
-        self.padding_idx = params.get("padding_idx", None)
-        self.update_embeddings = params.get("update_embeddings", True)
-        self.embedder_output_keep_prob = params.get("embedder_output_keep_prob", 0.5)
-        self.window_sizes = params.get("window_sizes", [1, 3, 5])
-        self.number_of_windows = params.get("number_of_windows", [100] * len(self.window_sizes))
-        self.cnn_output_keep_prob = params.get("cnn_output_keep_prob", 0.5)
-        self.params_keys.update([
-            "num_tokens", "emb_dim", "padding_idx", "update_embeddings",
-            "embedder_output_keep_prob",
-            "window_sizes", "number_of_windows"
-        ])
+    DEFAULT_PARAMS = {
+        "padding_idx": None,
+        "update_embeddings": True,
+        "embedder_output_keep_prob": 0.7,
+        "window_sizes": [3, 4, 5],
+        "number_of_windows": [100, 100, 100],
+    }
 
-        # core layers
-        self.emb_layer = EmbeddingLayer(self.num_tokens, self.emb_dim, self.padding_idx,
-                                        params.get("embedding_weights", None),
-                                        self.update_embeddings, 1 - self.embedder_output_keep_prob)
-        self.conv_layer = CnnLayer(self.emb_dim, self.window_sizes, self.number_of_windows,
-                                   1 - self.cnn_output_keep_prob)
-        self.out_dim = sum(self.number_of_windows)
+    def _init_core(self):
+        self.emb_layer = EmbeddingLayer(
+            self.params.num_tokens,
+            self.params.emb_dim,
+            self.params.padding_idx,
+            self.params.pop("embedding_weights", None),
+            self.params.update_embeddings,
+            1 - self.params.embedder_output_keep_prob
+        )
+        self.conv_layer = CnnLayer(
+            self.params.emb_dim,
+            self.params.window_sizes,
+            self.params.number_of_windows
+        )
+        self.out_dim = sum(self.params.number_of_windows)
 
     def _forward_core(self, batch_data_dict):
         seq_ids = batch_data_dict["seq_ids"]  # [BS, SEQ_LEN]
@@ -271,7 +272,6 @@ class CnnForSequenceClassification(SequenceClassificationBase):
 
 
 class LstmForSequenceClassification(SequenceClassificationBase):
-    # pylint: disable=too-many-instance-attributes
     """A LSTM module that operates on a batched sequence of token ids. The tokens could be
     characters or words or sub-words. This module finally outputs one 1D representation
     for each instance in the batch (i.e. [BS, EMB_DIM]).
@@ -280,32 +280,40 @@ class LstmForSequenceClassification(SequenceClassificationBase):
     per instance in the batch.
     """
 
-    def _init_core(self, **params):
-        # params
-        self.num_tokens = params["num_tokens"]
-        self.emb_dim = params["emb_dim"]
-        self.padding_idx = params.get("padding_idx", None)
-        self.update_embeddings = params.get("update_embeddings", True)
-        self.embedder_output_keep_prob = params.get("embedder_output_keep_prob", 0.5)
-        self.lstm_hidden_dim = params.get("lstm_hidden_dim", 128)
-        self.lstm_num_layers = params.get("lstm_num_layers", 2)
-        self.lstm_output_keep_prob = params.get("lstm_output_keep_prob", 0.5)
-        self.lstm_bidirectional = params.get("lstm_bidirectional", True)
-        self.lstm_output_pooling_type = params.get("lstm_output_pooling_type", "end")
-        self.params_keys.update([
-            "num_tokens", "emb_dim", "padding_idx", "update_embeddings",
-            "embedder_output_keep_prob",
-            "lstm_hidden_dim", "lstm_num_layers", "lstm_output_keep_prob", "lstm_bidirectional"
-        ])
+    DEFAULT_PARAMS = {
+        "padding_idx": None,
+        "update_embeddings": True,
+        "embedder_output_keep_prob": 0.7,
+        "lstm_hidden_dim": 128,
+        "lstm_num_layers": 2,
+        "lstm_keep_prob": 0.7,
+        "lstm_bidirectional": True,
+        "lstm_output_pooling_type": "last",
+    }
 
-        # core layers
-        self.emb_layer = EmbeddingLayer(self.num_tokens, self.emb_dim, self.padding_idx,
-                                        params.get("embedding_weights", None),
-                                        self.update_embeddings, 1 - self.embedder_output_keep_prob)
-        self.lstm_layer = LstmLayer(self.emb_dim, self.lstm_hidden_dim, self.lstm_num_layers,
-                                    1 - self.lstm_output_keep_prob, self.lstm_bidirectional)
-        self.lstm_layer_pooling = PoolingLayer(self.lstm_output_pooling_type)
-        self.out_dim = self.lstm_hidden_dim * 2 if self.lstm_bidirectional else self.lstm_hidden_dim
+    def _init_core(self):
+        self.emb_layer = EmbeddingLayer(
+            self.params.num_tokens,
+            self.params.emb_dim,
+            self.params.padding_idx,
+            self.params.pop("embedding_weights", None),
+            self.params.update_embeddings,
+            1 - self.params.embedder_output_keep_prob
+        )
+        self.lstm_layer = LstmLayer(
+            self.params.emb_dim,
+            self.params.lstm_hidden_dim,
+            self.params.lstm_num_layers,
+            1 - self.params.lstm_keep_prob,
+            self.params.lstm_bidirectional
+        )
+        self.lstm_layer_pooling = PoolingLayer(
+            self.params.lstm_output_pooling_type
+        )
+        self.out_dim = (
+            self.params.lstm_hidden_dim * 2 if self.params.lstm_bidirectional
+            else self.params.lstm_hidden_dim
+        )
 
     def _forward_core(self, batch_data_dict):
         seq_ids = batch_data_dict["seq_ids"]  # [BS, SEQ_LEN]
@@ -321,6 +329,11 @@ class LstmForSequenceClassification(SequenceClassificationBase):
 
 
 class BertForSequenceClassification(SequenceClassificationBase):
+    DEFAULT_PARAMS = {
+        "embedder_output_keep_prob": 0.7,
+        "embedder_output_pooling_type": "first",
+        "output_keep_prob": 1.0,
+    }
 
     def __init__(self):
         super().__init__()
@@ -328,29 +341,29 @@ class BertForSequenceClassification(SequenceClassificationBase):
         # overwrite default encoder
         self.encoder = SeqClsEncoderWithPlmLayer()
 
-    def _init_core(self, **params):
-        # params
-        self.emb_dim = params["emb_dim"]
-        self.embedder_output_keep_prob = params.get("embedder_output_keep_prob", 0.2)
-        self.embedder_output_pooling_type = params.get("embedder_output_pooling_type", "start")
-        self.params_keys.update(["emb_dim", "embedder_output_pooling_type"])
+    def _init_core(self):
 
-        # core layers
-        if self.embedder_output_pooling_type != "start":
-            self.emb_layer_pooling = PoolingLayer(self.embedder_output_pooling_type)
-        self.dropout = nn.Dropout(1 - self.embedder_output_keep_prob)
-        self.out_dim = self.emb_dim
+        self.dropout = nn.Dropout(
+            p=1 - self.params.embedder_output_keep_prob
+        )
+        if self.params.embedder_output_pooling_type != "first":
+            self.emb_layer_pooling = PoolingLayer(
+                self.params.embedder_output_pooling_type
+            )
+        self.out_dim = self.params.emb_dim
 
     def _forward_core(self, batch_data_dict):
 
-        if self.embedder_output_pooling_type != "start":
-            seq_lengths = batch_data_dict["seq_lengths"]  # [BS]
+        if self.params.embedder_output_pooling_type != "first":
+
             last_hidden_state = batch_data_dict["last_hidden_state"]  # [BS, SEQ_LEN, EMD_DIM]
+            last_hidden_state = self.dropout(last_hidden_state)
+            seq_lengths = batch_data_dict["seq_lengths"]  # [BS]
             encodings = self.emb_layer_pooling(last_hidden_state, seq_lengths)  # [BS, self.out_dim]
         else:
-            encodings = batch_data_dict["pooler_output"]  # [BS, self.out_dim]
+            pooler_output = batch_data_dict["pooler_output"]  # [BS, self.out_dim]
+            encodings = self.dropout(pooler_output)
 
-        encodings = self.dropout(encodings)
         batch_data_dict.update({"seq_embs": encodings})
 
         return batch_data_dict
@@ -372,16 +385,18 @@ class BertForSequenceClassification(SequenceClassificationBase):
             {'params': [p for n, p in params if any(nd in n for nd in no_decay)],
              'weight_decay': 0.0}
         ]
-        optimizer = getattr(torch.optim, self.optimizer)(
-            optimizer_grouped_parameters, lr=self.learning_rate, eps=1e-08, weight_decay=0.01)
+        optimizer = getattr(torch.optim, self.params.optimizer)(
+            optimizer_grouped_parameters,
+            lr=self.params.learning_rate,
+            eps=1e-08,
+            weight_decay=0.01
+        )
         return optimizer
 
     def _create_optimizer_and_scheduler(self, num_training_steps):
-        # load a torch optimizer
-        optimizer = self._create_optimizer()
 
-        # load a lr scheduler
-        num_warmup_steps = 0.1 * num_training_steps
+        num_warmup_steps = min(0.1 * num_training_steps, self.params.num_warmup_steps)
+        self.params.update({"num_warmup_steps": num_warmup_steps})
 
         # https://github.com/huggingface/transformers/blob/master/src/transformers/optimization.py
         # refer `get_linear_schedule_with_warmup` method
@@ -393,41 +408,41 @@ class BertForSequenceClassification(SequenceClassificationBase):
                     max(1, num_training_steps - num_warmup_steps))
             )
 
+        # load a torch optimizer
+        optimizer = self._create_optimizer()
+        # load a lr scheduler
         scheduler = getattr(torch.optim.lr_scheduler, "LambdaLR")(optimizer, lr_lambda)
         return optimizer, scheduler
 
-    def fit(self, examples, labels, **params):  # overriding base class' method to set params
-        # this class is based only on bert embedder and
-        # hence no embedder info from params is expected in the inputted params
+    def fit(self, examples, labels, **params):
+        # overriding base class' method to set params, and then calling base class' .fit()
 
-        number_of_epochs = params.get("number_of_epochs", 10)
-        patience = params.get("patience", 4)
         embedder_type = params.get("embedder_type", "bert")
         if embedder_type != "bert":
-            msg = f"{self.__class__.__name__} can only be used with 'embedder_type': 'bert'. " \
+            msg = f"{self.name} can only be used with 'embedder_type': 'bert'. " \
                   f"Other values passed through config params are not allowed"
-            raise ValueError(msg)
-        optimizer = params.get("optimizer", "AdamW")
-        if optimizer != "AdamW":
-            msg = f"{self.__class__.__name__} can only be used with 'optimizer': 'AdamW'. " \
-                  f"Other values passed through config params are not allowed"
-            raise ValueError(msg)
-        lr = params.get("learning_rate", 2e-5)
-        if lr > 2e-5:
-            msg = f"{self.__class__.__name__} can only be used with 'lr' less than or equal to " \
-                  f"'2e-5'. Other values passed through config params are not allowed"
             raise ValueError(msg)
 
-        # update params
-        params.update({
-            "number_of_epochs": number_of_epochs,
-            "patience": patience,
-            "embedder_type": embedder_type,
-            "optimizer": optimizer,
-            "learning_rate": lr,
-            "batch_size": 16,  # TODO: add ValueError message
-            "gradient_accumulation_steps": 2,  # TODO: add ValueError message
-            "max_grad_norm": 1.0,  # TODO: add ValueError message
-        })
+        safe_values = {
+            "num_warmup_steps": 50,
+            "learning_rate": 2e-5,
+            "optimizer": "AdamW",
+            "number_of_epochs": 20,
+            "patience": 4,
+            "batch_size": 16,
+            "gradient_accumulation_steps": 2,
+            "max_grad_norm": 1.0
+        }
+
+        for k, v in safe_values.items():
+            v_inputted = params.get(k, v)
+            if v != v_inputted:
+                msg = f"{self.name} can be best used with '{k}' equal to '{v}'. Other " \
+                      f"values passed through config params might lead to unexpected results."
+                logger.warning(msg)
+            else:
+                params.update({k: v})
+
+        params.update({"embedder_type": "bert"})
 
         super().fit(examples, labels, **params)

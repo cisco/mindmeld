@@ -146,6 +146,9 @@ class WordEmbeddingsBasedEncoder(AbstractEncoder):
         "start_token": "<START>",
         "end_token": "<END>",
     }
+    DEFAULT_PARAMS = {
+        "emb_dim": 300,
+    }
 
     def fit(
         self,
@@ -208,10 +211,12 @@ class WordEmbeddingsBasedEncoder(AbstractEncoder):
 
         # validate if emb_dim is valid
         if not self.emb_dim:
-            msg = "Need a valid 'emb_dim' to initialize encoder resource. To specify a " \
-                  "particular dimension, either pass-in the 'emb_dim' param or provide a " \
-                  "valid 'embedder_type' param."
-            raise ValueError(msg)
+            emb_dim = self.__class__.DEFAULT_PARAMS["emb_dim"]
+            msg = f"Need a valid 'emb_dim' to initialize encoder resource. To specify a " \
+                  f"particular dimension, either pass-in the 'emb_dim' param or provide a " \
+                  f"valid 'embedder_type' param. Continuing by setting 'emb_dim':{emb_dim}"
+            logger.error(msg)
+            self.emb_dim = emb_dim
 
         # Add special vocab before actual vocab
         special_vocab_dict_ = self.__class__.BASIC_SPECIAL_VOCAB_DICT
@@ -755,6 +760,10 @@ class TokenClsDualEncoderForEmbLayers(TokenClsEncoderForEmbLayer):
         "char_start_token": "<CHAR_START>",
         "char_end_token": "<CHAR_END>",
     }
+    DEFAULT_PARAMS = {
+        "emb_dim": 300,
+        "char_emb_dim": 50
+    }
 
     def fit(
         self,
@@ -768,7 +777,7 @@ class TokenClsDualEncoderForEmbLayers(TokenClsEncoderForEmbLayer):
         # all other params
         **params,
     ):
-        self.char_emb_dim = char_emb_dim
+        self.char_emb_dim = char_emb_dim or 50
         self.char_special_vocab_dict = char_special_vocab_dict
         self.char_padding_length = char_padding_length
         self.char_add_terminals = char_add_terminals
@@ -780,10 +789,12 @@ class TokenClsDualEncoderForEmbLayers(TokenClsEncoderForEmbLayer):
 
         # validate if char_emb_dim is valid
         if not self.char_emb_dim:
-            msg = "Need a valid 'char_emb_dim' to initialize encoder resource. To specify a " \
-                  "particular dimension, either pass-in the 'char_emb_dim' param with a positive " \
-                  "integer value"
-            raise ValueError(msg)
+            char_emb_dim = self.__class__.DEFAULT_PARAMS["char_emb_dim"]
+            msg = f"Need a valid 'char_emb_dim' to initialize encoder resource. To specify a " \
+                  f"particular dimension, either pass-in the 'char_emb_dim' param with a " \
+                  f"positive integer value. Continuing by setting 'char_emb_dim':{char_emb_dim}"
+            logger.error(msg)
+            self.char_emb_dim = char_emb_dim
 
         # Add special vocab before actual vocab
         special_vocab_dict_ = self.__class__.BASIC_SPECIAL_CHAR_VOCAB_DICT
