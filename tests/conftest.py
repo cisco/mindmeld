@@ -200,10 +200,11 @@ def duckling():
 
 
 @pytest.fixture
-def text_preparation_pipeline():
+def text_preparation_pipeline(preprocessor):
     """The Text Preparation Pipeline Object"""
-    return TextPreparationPipelineFactory.create_default_text_preparation_pipeline()
-
+    text_preparation_pipeline = TextPreparationPipelineFactory.create_default_text_preparation_pipeline()
+    text_preparation_pipeline.preprocessors = [preprocessor]
+    return text_preparation_pipeline
 
 @pytest.fixture
 def query_factory(text_preparation_pipeline):
