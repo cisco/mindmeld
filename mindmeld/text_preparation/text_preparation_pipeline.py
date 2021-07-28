@@ -18,16 +18,9 @@ import re
 import unicodedata
 
 from .preprocessors import Preprocessor, PreprocessorFactory, NoOpPreprocessor
-from .normalizers import (
-    Normalizer,
-    NoOpNormalizer,
-    NormalizerFactory,
-    Lowercase,
-    ASCIIFold,
-    DEFAULT_REGEX_NORM_RULES
-)
-from .tokenizers import Tokenizer, TokenizerFactory, WhiteSpaceTokenizer
-from .stemmers import Stemmer, StemmerFactory, EnglishNLTKStemmer, NoOpStemmer
+from .normalizers import Normalizer, NoOpNormalizer, NormalizerFactory
+from .tokenizers import Tokenizer, TokenizerFactory
+from .stemmers import Stemmer, StemmerFactory, NoOpStemmer
 
 from ..components._config import (
     get_text_preparation_config,
@@ -80,10 +73,8 @@ class TextPreparationPipeline:
         """
         preprocessed_text = text
         for preprocessor in self.preprocessors:
-            preprocessed_text = (
-                TextPreparationPipeline.modify_around_annotations(
-                    text=preprocessed_text, function=preprocessor.process
-                )
+            preprocessed_text = TextPreparationPipeline.modify_around_annotations(
+                text=preprocessed_text, function=preprocessor.process
             )
         return preprocessed_text
 
@@ -141,7 +132,7 @@ class TextPreparationPipeline:
                             "entity": token_text,
                             "raw_entity": raw_token["text"],
                             "raw_token_index": i,
-                            "raw_start": raw_token["start"]
+                            "raw_start": raw_token["start"],
                         }
                     )
         return normalized_tokens
@@ -157,10 +148,8 @@ class TextPreparationPipeline:
         """
         normalized_text = text
         for normalizer in self.normalizers:
-            normalized_text = (
-                TextPreparationPipeline.modify_around_annotations(
-                    text=normalized_text, function=normalizer.normalize
-                )
+            normalized_text = TextPreparationPipeline.modify_around_annotations(
+                text=normalized_text, function=normalizer.normalize
             )
         # We tokenize the post-norm text and split the entity if possible
         # Ex: normalize("o'clock") -> "o clock" -> ["o", "clock"]
@@ -449,7 +438,8 @@ class TextPreparationPipelineFactory:
         )
         stemmer = (
             "NoOpStemmer"
-            if "stemmer" in text_preparation_config and not text_preparation_config["stemmer"]
+            if "stemmer" in text_preparation_config
+            and not text_preparation_config["stemmer"]
             else text_preparation_config.get("stemmer")
         )
         return TextPreparationPipelineFactory.create_text_preparation_pipeline(
@@ -458,16 +448,15 @@ class TextPreparationPipelineFactory:
             regex_norm_rules=text_preparation_config.get("regex_norm_rules"),
             normalizers=normalizers,
             tokenizer=text_preparation_config.get("tokenizer"),
-            stemmer=stemmer
+            stemmer=stemmer,
         )
-
 
     @staticmethod
     def create_text_preparation_pipeline(
         language: str = ENGLISH_LANGUAGE_CODE,
-        preprocessors: List[Preprocessor] = None,
+        preprocessors: List[str] = None,
         regex_norm_rules: List[Dict] = None,
-        normalizers: List[Normalizer] = None,
+        normalizers: List[str] = None,
         tokenizer: Tokenizer = None,
         stemmer: Stemmer = None,
     ):
@@ -475,7 +464,12 @@ class TextPreparationPipelineFactory:
 
         Args:
             language (str, optional): Language as specified using a 639-1/2 code.
-            preprocessors (List[Preprocessors]):
+            preprocessors (List[str]): List of preprocessor class names.
+            regex_norm_rules (List[Dict]): List of regex normalization rules represented as
+                dictionaries. ({"pattern":<pattern>, "replacement":<replacement>})
+            normalizers (List[str]): List of normalizer class names.
+            tokenizer (str): Class name of Tokenizer to use.
+            stemmer (str): Class name of Stemmer to use.
 
         Returns:
             TextPreparationPipeline: A TextPreparationPipeline class.
@@ -493,7 +487,9 @@ class TextPreparationPipelineFactory:
         )
 
         if regex_norm_rules:
-            regex_normalizers = NormalizerFactory.get_regex_normalizers(regex_norm_rules)
+            regex_normalizers = NormalizerFactory.get_regex_normalizers(
+                regex_norm_rules
+            )
             # Adds the regex normalizers as the first normalizers by default
             normalizers = regex_normalizers + normalizers
 
@@ -518,6 +514,7 @@ class TextPreparationPipelineFactory:
 
     @staticmethod
     def create_default_text_preparation_pipeline():
+        """ Default text_preparation_pipeline used across MindMeld internally."""
         return TextPreparationPipelineFactory.create_text_preparation_pipeline(
             preprocessors=None,
             normalizers=get_default_normalizers(ENGLISH_LANGUAGE_CODE),

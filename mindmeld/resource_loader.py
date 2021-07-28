@@ -298,19 +298,12 @@ class ResourceLoader:
 
         return self._entity_files[gaz_name]["gazetteer"]["data"]
 
-    def get_tokenizer(self):
-        """Get the tokenizer from the query_factory attribute
-
-        Returns:
-            tokenizer (Tokenizer): The resource loaders tokenizer
-        """
-        return self.query_factory.text_preparation_pipeline.tokenizer
-
     def get_text_preparation_pipeline(self):
         """Get the tokenizer from the query_factory attribute
 
         Returns:
-            tokenizer (Tokenizer): The resource loaders tokenizer
+            text_preparation_pipeline (TextPreparationPipeline): Class responsible for
+                the normalization and tokenization of text.
         """
         return self.query_factory.text_preparation_pipeline
 

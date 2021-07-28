@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 ASCII_CUTOFF = ord("\u0080")
 
+
 class Normalizer(ABC):
     """Abstract Normalizer Base Class."""
 
@@ -240,72 +241,40 @@ class RegexNormalizerRule(Normalizer):
 
 EXCEPTION_CHARS = r"\@\[\]\|\{\}'"
 DEFAULT_REGEX_NORM_RULES = {
-    
     "RemoveAposAtEndOfPossesiveForm": RegexNormalizerRule(
-        pattern=r"^'(?=\S)|(?<=\S)'$",
-        replacement=""
+        pattern=r"^'(?=\S)|(?<=\S)'$", replacement=""
     ),
-    
-    "RemoveAdjacentAposAndSpace": RegexNormalizerRule(
-        pattern=r" '|' ",
-        replacement=""
-    ),
-
-    "RemoveBeginningSpace": RegexNormalizerRule(
-        pattern=r"^\s+",
-        replacement=""
-    ),
-
-    "RemoveTrailingSpace": RegexNormalizerRule(
-        pattern=r"\s+$", replacement=""
-    ),
-
-    "ReplaceSpacesWithSpace": RegexNormalizerRule(
-        pattern=r"\s+", replacement=" "
-    ),
-
-    "ReplaceUnderscoreWithSpace": RegexNormalizerRule(
-        pattern=r"_", replacement=" "
-    ),
-
-    "SeparateAposS": RegexNormalizerRule(
-        pattern=r"(?<=[^\s])'[sS]", replacement=" 's"
-    ),
-
+    "RemoveAdjacentAposAndSpace": RegexNormalizerRule(pattern=r" '|' ", replacement=""),
+    "RemoveBeginningSpace": RegexNormalizerRule(pattern=r"^\s+", replacement=""),
+    "RemoveTrailingSpace": RegexNormalizerRule(pattern=r"\s+$", replacement=""),
+    "ReplaceSpacesWithSpace": RegexNormalizerRule(pattern=r"\s+", replacement=" "),
+    "ReplaceUnderscoreWithSpace": RegexNormalizerRule(pattern=r"_", replacement=" "),
+    "SeparateAposS": RegexNormalizerRule(pattern=r"(?<=[^\s])'[sS]", replacement=" 's"),
     "ReplacePunctuationAtWordStartWithSpace": RegexNormalizerRule(
         pattern=r"^[^\w\d&" + CURRENCY_SYMBOLS + EXCEPTION_CHARS + r"]+",
-        replacement=" "
+        replacement=" ",
     ),
-
     "ReplacePunctuationAtWordEndWithSpace": RegexNormalizerRule(
         pattern=r"[^\w\d&" + CURRENCY_SYMBOLS + EXCEPTION_CHARS + r"]+$",
-        replacement=" "
+        replacement=" ",
     ),
-    
     "ReplaceSpecialCharsBetweenLettersAndDigitsWithSpace": RegexNormalizerRule(
         pattern=r"(?<=[^\W\d_])[^\w\d\s&" + EXCEPTION_CHARS + r"]+(?=[\d]+)",
-        replacement=" "
+        replacement=" ",
     ),
-    
     "ReplaceSpecialCharsBetweenDigitsAndLettersWithSpace": RegexNormalizerRule(
         pattern=r"(?<=[\d])[^\w\d\s&" + EXCEPTION_CHARS + r"]+(?=[^\W\d_]+)",
-        replacement=" "
+        replacement=" ",
     ),
-
-
     "ReplaceSpecialCharsBetweenLettersWithSpace": RegexNormalizerRule(
         pattern=r"(?<=[^\W\d_])[^\w\d\s&" + EXCEPTION_CHARS + r"]+(?=[^\W\d_]+)",
-        replacement=" "
+        replacement=" ",
     ),
-
     "RemoveSpecialCharsBeforePipe": RegexNormalizerRule(
-        pattern=r"(?<=[\w\d])[^\w\d\s" + EXCEPTION_CHARS + r"]+(?=\|)",
-        replacement=""
+        pattern=r"(?<=[\w\d])[^\w\d\s" + EXCEPTION_CHARS + r"]+(?=\|)", replacement=""
     ),
-
     "ReplaceEndBracketAndFollowingSpecialCharsBeforeSWithSpace": RegexNormalizerRule(
-        pattern= r"[\]\}]+[^\w\d\s" + EXCEPTION_CHARS + r"]+(?=s)",
-        replacement=" "
+        pattern=r"[\]\}]+[^\w\d\s" + EXCEPTION_CHARS + r"]+(?=s)", replacement=" "
     ),
 }
 
@@ -347,8 +316,6 @@ class NormalizerFactory:
     @staticmethod
     def get_regex_normalizers(regex_norm_rules):
         return [
-            RegexNormalizerRule(
-                pattern=r["pattern"], replacement=r["replacement"]
-            )
+            RegexNormalizerRule(pattern=r["pattern"], replacement=r["replacement"])
             for r in regex_norm_rules
         ]
