@@ -1134,6 +1134,9 @@ class IntentProcessor(Processor):
 
     def _build(self, incremental=False, label_set=None, load_cached=True):
         """Builds the models for this intent"""
+        entity_types = self.entity_recognizer.get_entity_types(label_set=label_set)
+        if len(entity_types) == 0:  # equivalent to `len(self.entities) == 0`
+            return
 
         # train entity recognizer
         self.ready = self.entity_recognizer.fit(
@@ -1164,6 +1167,9 @@ class IntentProcessor(Processor):
             self._children[entity_type] = processor
 
     def _dump(self):
+        if len(self.entities) == 0:
+            return
+
         model_path, incremental_model_path = path.get_entity_model_paths(
             self._app_path, self.domain, self.name, timestamp=self.incremental_timestamp
         )
@@ -1177,6 +1183,9 @@ class IntentProcessor(Processor):
         self.entity_recognizer.unload()
 
     def _load(self, incremental_timestamp=None):
+        if len(self.entities) == 0:
+            return
+
         model_path, incremental_model_path = path.get_entity_model_paths(
             self._app_path, self.domain, self.name, timestamp=incremental_timestamp
         )
@@ -1202,7 +1211,7 @@ class IntentProcessor(Processor):
             self._children[entity_type] = processor
 
     def _evaluate(self, print_stats, label_set="test"):
-        if len(self.entity_recognizer.entity_types) > 1:
+        if len(self.entities) > 0:
             entity_eval = self.entity_recognizer.evaluate(label_set=label_set)
             if entity_eval:
                 print(
@@ -1286,22 +1295,30 @@ class IntentProcessor(Processor):
                 return nbest_transcripts_entities
             else:
                 if verbose:
+                    if len(self.entities) == 0:
+                        return []
                     return [
                         self.entity_recognizer.predict_proba(
                             query[0], dynamic_resource=dynamic_resource
                         )
                     ]
                 else:
+                    if len(self.entities) == 0:
+                        return [()]
                     return [
                         self.entity_recognizer.predict(
                             query[0], dynamic_resource=dynamic_resource
                         )
                     ]
         if verbose:
+            if len(self.entities) == 0:
+                return []
             return self.entity_recognizer.predict_proba(
                 query, dynamic_resource=dynamic_resource
             )
         else:
+            if len(self.entities) == 0:
+                return [()]
             return self.entity_recognizer.predict(
                 query, dynamic_resource=dynamic_resource
             )
