@@ -9,7 +9,6 @@ Tests for `tokenizer` module.
 """
 # pylint: disable=I0011,W0621
 import os
-import pytest
 
 
 APP_NAME = "food_ordering"

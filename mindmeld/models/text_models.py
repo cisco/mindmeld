@@ -470,7 +470,8 @@ class TextModel(Model):
 
     def view_extracted_features(self, example, dynamic_resource=None):
         return self._extract_features(
-            example, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer
+            example, dynamic_resource=dynamic_resource,
+            text_preparation_pipeline=self.text_preparation_pipeline
         )
 
     @classmethod

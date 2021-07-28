@@ -14,7 +14,6 @@
 """This module contains Normalizers."""
 from abc import ABC, abstractmethod
 import codecs
-import dataclasses
 import logging
 import re
 import unicodedata
@@ -226,13 +225,12 @@ class Lowercase(Normalizer):
         return text.lower()
 
 
-@dataclasses.dataclass
 class RegexNormalizerRule(Normalizer):
-    pattern: str
-    replacement: str
-    _expr: re.sre_compile = dataclasses.field(init=False, default=None)
 
-    def __post_init__(self):
+    def __init__(self, pattern: str, replacement: str):
+        """Creates a RegexNormalizerRule instance."""
+        self.pattern = pattern
+        self.replacement = replacement
         self._expr = re.compile(self.pattern)
 
     def normalize(self, s):
@@ -283,17 +281,11 @@ class NormalizerFactory:
     """Normalizer Factory Class"""
 
     @staticmethod
-    def get_normalizer(normalizer: str, regex_norm_rules=None):
+    def get_normalizer(normalizer: str):
         """A static method to get a Normalizer
 
         Args:
             normalizer (str): Name of the desired Normalizer class
-            regex_norm_rules (List[Dict], optional): Regex normalization rules represented as
-                dictionaries. The example rule below removes any text in parentheses.
-                {
-                    "pattern": "\(.+?\)",
-                    "replacement": ""
-                }
         Returns:
             (Normalizer): Normalizer Class
         """
@@ -315,6 +307,19 @@ class NormalizerFactory:
 
     @staticmethod
     def get_regex_normalizers(regex_norm_rules):
+        """A static method to get a RegexNormalizerRule from regex_norm_rules.
+
+        Args:
+            regex_norm_rules (List[Dict], optional): Regex normalization rules represented as
+                dictionaries. The example rule below removes any text in parentheses.
+                {
+                    "pattern": "\(.+?\)",
+                    "replacement": ""
+                }
+        Returns:
+            regex_normalizer_rules (List[RegexNormalizerRule]): List of RegexNormalizerRule ojects
+                created from the regex_norm_rules_provided.
+        """
         return [
             RegexNormalizerRule(pattern=r["pattern"], replacement=r["replacement"])
             for r in regex_norm_rules

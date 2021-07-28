@@ -543,6 +543,7 @@ DEFAULT_NORMALIZER_BY_LANGUAGE = {
     "fr": DEFAULT_EN_NORMALIZERS
 }
 
+
 class NlpConfigError(Exception):
     pass
 

@@ -40,7 +40,7 @@ class Gazetteer:
         """
         Args:
             domain (str): The domain that this gazetteer is used
-            text_preparation_pipeline (TextPreparationPipeline): Pipeline for tokenization and 
+            text_preparation_pipeline (TextPreparationPipeline): Pipeline for tokenization and
                 normalization of text.
             exclude_ngrams (bool): The boolean flat whether to exclude ngrams
         """
