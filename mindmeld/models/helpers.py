@@ -79,10 +79,26 @@ def create_model(config):
         ValueError: When model configuration is invalid
     """
     try:
-        return MODEL_MAP[config.model_type](config)
+        return MODEL_MAP["auto"].from_config(config)
     except KeyError as e:
         msg = "Invalid model configuration: Unknown model type {!r}"
         raise ValueError(msg.format(config.model_type)) from e
+
+
+def load_model(path):
+    """Loads a model from a specified path
+
+    Args:
+        path (str): A path where the model configuration is pickled along with other metadata
+
+    Returns:
+        dict: metadata loaded from the path, which contains the configured model in 'model' key
+            and the model configs in 'model_config' key along with other keys
+
+    Raises:
+        ValueError: When model configuration is invalid
+    """
+    return MODEL_MAP["auto"].from_path(path)
 
 
 def create_annotator(config):

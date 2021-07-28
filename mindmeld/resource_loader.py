@@ -454,7 +454,7 @@ class ResourceLoader:
                 hash_val = open(file_path, "r").read()
                 classifier_file_path = file_path.split(".hash")[0]
                 if not os.path.exists(classifier_file_path):
-                    logger.warning("Could not find the serialized model")
+                    logger.info("Could not find the serialized model")
                     continue
                 self._hash_to_model_path[hash_val] = classifier_file_path
 

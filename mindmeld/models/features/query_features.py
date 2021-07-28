@@ -16,7 +16,9 @@ import math
 import re
 from collections import Counter, defaultdict
 
-from .helpers import (
+from mindmeld.gazetteer import NestedGazetteer
+
+from ..helpers import (
     CHAR_NGRAM_FREQ_RSC,
     DEFAULT_SYS_ENTITIES,
     ENABLE_STEMMING,
@@ -35,8 +37,6 @@ from .helpers import (
     requires,
     get_ngrams_upto_n,
 )
-
-from ..gazetteer import NestedGazetteer
 
 
 @register_query_feature(feature_name="in-gaz-span-seq")

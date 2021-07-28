@@ -157,10 +157,11 @@ def safe_path(func):
     @wraps(func)
     def _wrapper(*args, **kwargs):
         res = func(*args, **kwargs)
+        # Replace with relpath to avoid replacing : (root dir) with _ in Windows
         if isinstance(res, tuple):
-            return tuple(map(lambda x: x.replace(":", "_") if x else x, res))
+            return tuple(map(lambda x: os.path.relpath(x).replace(":", "_") if x else x, res))
         elif isinstance(res, str):
-            return res.replace(":", "_")
+            return os.path.relpath(res).replace(":", "_")
         else:
             return res
 
