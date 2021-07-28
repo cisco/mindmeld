@@ -22,19 +22,20 @@ from .normalizers import (
     Normalizer,
     NoOpNormalizer,
     NormalizerFactory,
-    RegexNormalizer,
     Lowercase,
     ASCIIFold,
+    DEFAULT_REGEX_NORM_RULES
 )
 from .tokenizers import Tokenizer, TokenizerFactory, WhiteSpaceTokenizer
 from .stemmers import Stemmer, StemmerFactory, EnglishNLTKStemmer, NoOpStemmer
 
 from ..components._config import (
     get_text_preparation_config,
+    get_default_normalizers,
     get_language_config,
     ENGLISH_LANGUAGE_CODE,
 )
-from ..constants import UNICODE_SPACE_CATEGORY, DEFAULT_REGEX_NORM_RULES
+from ..constants import UNICODE_SPACE_CATEGORY
 
 logger = logging.getLogger(__name__)
 
@@ -441,27 +442,37 @@ class TextPreparationPipelineFactory:
         language, _ = get_language_config(app_path)
         text_preparation_config = get_text_preparation_config(app_path)
 
+        normalizers = (
+            get_default_normalizers(language)
+            if "normalizers" not in text_preparation_config
+            else text_preparation_config.get("normalizers")
+        )
+        stemmer = (
+            "NoOpStemmer"
+            if "stemmer" in text_preparation_config and not text_preparation_config["stemmer"]
+            else text_preparation_config.get("stemmer")
+        )
         return TextPreparationPipelineFactory.create_text_preparation_pipeline(
             language=language,
             preprocessors=text_preparation_config.get("preprocessors"),
-            normalizers=text_preparation_config.get("normalizers"),
             regex_norm_rules=text_preparation_config.get("regex_norm_rules"),
+            normalizers=normalizers,
             tokenizer=text_preparation_config.get("tokenizer"),
-            stemmer=text_preparation_config.get("stemmer"),
+            stemmer=stemmer
         )
+
 
     @staticmethod
     def create_text_preparation_pipeline(
         language: str = ENGLISH_LANGUAGE_CODE,
         preprocessors: List[Preprocessor] = None,
-        normalizers: List[Normalizer] = None,
         regex_norm_rules: List[Dict] = None,
+        normalizers: List[Normalizer] = None,
         tokenizer: Tokenizer = None,
         stemmer: Stemmer = None,
     ):
         """Static method to create a TextPreparationPipeline instance.
 
-        Args:
         Args:
             language (str, optional): Language as specified using a 639-1/2 code.
             preprocessors (List[Preprocessors]):
@@ -472,21 +483,19 @@ class TextPreparationPipelineFactory:
         preprocessors = (
             [PreprocessorFactory.get_preprocessor(p) for p in preprocessors]
             if preprocessors
-            else []
+            else [NoOpPreprocessor()]
         )
 
         normalizers = (
             [NormalizerFactory.get_normalizer(n) for n in normalizers]
             if normalizers
-            else []
+            else [NoOpNormalizer()]
         )
 
         if regex_norm_rules:
-            regex_normalizer = NormalizerFactory.get_normalizer(
-                normalizer=RegexNormalizer.__name__, regex_norm_rules=regex_norm_rules
-            )
-            # Adds the Regex Normalizer as the First Normalizer by Default
-            normalizers.insert(0, regex_normalizer)
+            regex_normalizers = NormalizerFactory.get_regex_normalizers(regex_norm_rules)
+            # Adds the regex normalizers as the first normalizers by default
+            normalizers = regex_normalizers + normalizers
 
         tokenizer = (
             TokenizerFactory.get_tokenizer(tokenizer, language)
@@ -498,6 +507,7 @@ class TextPreparationPipelineFactory:
             if stemmer
             else StemmerFactory.get_stemmer_by_language(language)
         )
+
         return TextPreparationPipeline(
             language=language,
             preprocessors=preprocessors,
@@ -508,13 +518,9 @@ class TextPreparationPipelineFactory:
 
     @staticmethod
     def create_default_text_preparation_pipeline():
-        return TextPreparationPipeline(
+        return TextPreparationPipelineFactory.create_text_preparation_pipeline(
             preprocessors=None,
-            normalizers=[
-                RegexNormalizer(DEFAULT_REGEX_NORM_RULES),
-                Lowercase(),
-                ASCIIFold(),
-            ],
-            tokenizer=WhiteSpaceTokenizer(),
-            stemmer=EnglishNLTKStemmer(),
+            normalizers=get_default_normalizers(ENGLISH_LANGUAGE_CODE),
+            tokenizer="WhiteSpaceTokenizer",
+            stemmer="EnglishNLTKStemmer",
         )

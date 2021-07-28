@@ -107,8 +107,7 @@ TEST_ENTITY_RECOGNIZER_CONFIG = {
 }
 
 TEXT_PREPARATION_CONFIG = {
-    "normalizers": ["MindMeldRegexNormalizer", "Lowercase", "ASCIIFold"],
-    "tokenizer": "WhiteSpaceTokenizer",
+    "tokenizer": "WhiteSpaceTokenizer"
 }
 
 

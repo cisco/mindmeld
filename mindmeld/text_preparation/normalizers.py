@@ -14,15 +14,17 @@
 """This module contains Normalizers."""
 from abc import ABC, abstractmethod
 import codecs
+import dataclasses
 import logging
 import re
 import unicodedata
-
-from ..constants import ASCII_CUTOFF, DEFAULT_REGEX_NORM_RULES
+from ..constants import CURRENCY_SYMBOLS
 from ..path import ASCII_FOLDING_DICT_PATH
 
 logger = logging.getLogger(__name__)
 
+
+ASCII_CUTOFF = ord("\u0080")
 
 class Normalizer(ABC):
     """Abstract Normalizer Base Class."""
@@ -223,58 +225,89 @@ class Lowercase(Normalizer):
         return text.lower()
 
 
-class RegexNormalizer(Normalizer):
-    """Normalization class that substitutes regex matches with either an empty string or a
-    replacement string."""
+@dataclasses.dataclass
+class RegexNormalizerRule(Normalizer):
+    pattern: str
+    replacement: str
+    _expr: re.sre_compile = dataclasses.field(init=False, default=None)
 
-    def __init__(self, regex_norm_rules):
-        """Creates a Regex Normalizer instance.
+    def __post_init__(self):
+        self._expr = re.compile(self.pattern)
 
-        Args:
-            regex_norm_rules (List[Dict]): List of regex normalization rules represented as
-                dictionaries. The example rule below removes any text in parentheses.
-                {
-                    "description": "remove_text_in_parantheses",
-                    "pattern": "\(.+?\)",
-                    "replacement": ""
-                }
-        """
-        super().__init__()
-        self.regex_norm_rules = regex_norm_rules
-
-    def normalize(self, text):
-        """Apply Regex substitutions to the given text.
-        Args:
-            text (str): Input text.
-        Returns:
-            normalized_text (str): Normalized Text.
-        """
-        # TODO: Handle case if the "pattern" or "replacement" is none
-
-        for regex_norm_rule in self.regex_norm_rules:
-            pattern = regex_norm_rule.get("pattern")
-            replacement = regex_norm_rule.get("replacement")
-            text = re.sub(pattern, replacement, text)
-        return text
+    def normalize(self, s):
+        return self._expr.sub(self.replacement, s)
 
 
-class MindMeldRegexNormalizer(RegexNormalizer):
-    """Normalization class that substitutes regex matches with either an empty string or a
-    replacement string."""
+EXCEPTION_CHARS = r"\@\[\]\|\{\}'"
+DEFAULT_REGEX_NORM_RULES = {
+    
+    "RemoveAposAtEndOfPossesiveForm": RegexNormalizerRule(
+        pattern=r"^'(?=\S)|(?<=\S)'$",
+        replacement=""
+    ),
+    
+    "RemoveAdjacentAposAndSpace": RegexNormalizerRule(
+        pattern=r" '|' ",
+        replacement=""
+    ),
 
-    def __init__(self):
-        """Creates a Regex Normalizer instance.
+    "RemoveBeginningSpace": RegexNormalizerRule(
+        pattern=r"^\s+",
+        replacement=""
+    ),
 
-        Args:
-            regex_norm_rules (List[Dict]): List of regex normalization rules represented as
-                dictionaries. The example rule below removes any text in parentheses.
-                {
-                    "description": "remove_text_in_parantheses",
-                    "pattern": "\(.+?\)",
-                    "replacement": ""
-                }
-        """
-        super().__init__(DEFAULT_REGEX_NORM_RULES)
+    "RemoveTrailingSpace": RegexNormalizerRule(
+        pattern=r"\s+$", replacement=""
+    ),
+
+    "ReplaceSpacesWithSpace": RegexNormalizerRule(
+        pattern=r"\s+", replacement=" "
+    ),
+
+    "ReplaceUnderscoreWithSpace": RegexNormalizerRule(
+        pattern=r"_", replacement=" "
+    ),
+
+    "SeparateAposS": RegexNormalizerRule(
+        pattern=r"(?<=[^\s])'[sS]", replacement=" 's"
+    ),
+
+    "ReplacePunctuationAtWordStartWithSpace": RegexNormalizerRule(
+        pattern=r"^[^\w\d&" + CURRENCY_SYMBOLS + EXCEPTION_CHARS + r"]+",
+        replacement=" "
+    ),
+
+    "ReplacePunctuationAtWordEndWithSpace": RegexNormalizerRule(
+        pattern=r"[^\w\d&" + CURRENCY_SYMBOLS + EXCEPTION_CHARS + r"]+$",
+        replacement=" "
+    ),
+    
+    "ReplaceSpecialCharsBetweenLettersAndDigitsWithSpace": RegexNormalizerRule(
+        pattern=r"(?<=[^\W\d_])[^\w\d\s&" + EXCEPTION_CHARS + r"]+(?=[\d]+)",
+        replacement=" "
+    ),
+    
+    "ReplaceSpecialCharsBetweenDigitsAndLettersWithSpace": RegexNormalizerRule(
+        pattern=r"(?<=[\d])[^\w\d\s&" + EXCEPTION_CHARS + r"]+(?=[^\W\d_]+)",
+        replacement=" "
+    ),
+
+
+    "ReplaceSpecialCharsBetweenLettersWithSpace": RegexNormalizerRule(
+        pattern=r"(?<=[^\W\d_])[^\w\d\s&" + EXCEPTION_CHARS + r"]+(?=[^\W\d_]+)",
+        replacement=" "
+    ),
+
+    "RemoveSpecialCharsBeforePipe": RegexNormalizerRule(
+        pattern=r"(?<=[\w\d])[^\w\d\s" + EXCEPTION_CHARS + r"]+(?=\|)",
+        replacement=""
+    ),
+
+    "ReplaceEndBracketAndFollowingSpecialCharsBeforeSWithSpace": RegexNormalizerRule(
+        pattern= r"[\]\}]+[^\w\d\s" + EXCEPTION_CHARS + r"]+(?=s)",
+        replacement=" "
+    ),
+}
 
 
 class NormalizerFactory:
@@ -289,13 +322,14 @@ class NormalizerFactory:
             regex_norm_rules (List[Dict], optional): Regex normalization rules represented as
                 dictionaries. The example rule below removes any text in parentheses.
                 {
-                    "description": "remove_text_in_parantheses",
                     "pattern": "\(.+?\)",
                     "replacement": ""
                 }
         Returns:
             (Normalizer): Normalizer Class
         """
+        if normalizer in DEFAULT_REGEX_NORM_RULES:
+            return DEFAULT_REGEX_NORM_RULES[normalizer]
         normalizer_classes = {
             NoOpNormalizer.__name__: NoOpNormalizer,
             ASCIIFold.__name__: ASCIIFold,
@@ -304,10 +338,17 @@ class NormalizerFactory:
             NFKC.__name__: NFKC,
             NFKD.__name__: NFKD,
             Lowercase.__name__: Lowercase,
-            RegexNormalizer.__name__: lambda: RegexNormalizer(regex_norm_rules),
-            MindMeldRegexNormalizer.__name__: MindMeldRegexNormalizer,
         }
         normalizer_class = normalizer_classes.get(normalizer)
         if not normalizer_class:
             raise TypeError(f"{normalizer} is not a valid Normalizer type.")
         return normalizer_class()
+
+    @staticmethod
+    def get_regex_normalizers(regex_norm_rules):
+        return [
+            RegexNormalizerRule(
+                pattern=r["pattern"], replacement=r["replacement"]
+            )
+            for r in regex_norm_rules
+        ]

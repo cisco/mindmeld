@@ -11,20 +11,9 @@ Tests for `tokenizer` module.
 import os
 import pytest
 
-from mindmeld.text_preparation.tokenizers import WhiteSpaceTokenizer
 
 APP_NAME = "food_ordering"
 APP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), APP_NAME)
-
-
-@pytest.fixture
-def tokenizer():
-    return WhiteSpaceTokenizer()
-
-
-@pytest.fixture
-def custom_tokenizer():
-    return WhiteSpaceTokenizer()
 
 
 def test_tokenize(text_preparation_pipeline):

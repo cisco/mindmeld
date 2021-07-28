@@ -27,8 +27,7 @@ from mindmeld.system_entity_recognizer import DucklingRecognizer
 from mindmeld.text_preparation.preprocessors import Preprocessor
 from mindmeld.text_preparation.stemmers import EnglishNLTKStemmer
 from mindmeld.text_preparation.tokenizers import WhiteSpaceTokenizer
-from mindmeld.text_preparation.normalizers import MindMeldRegexNormalizer, Lowercase, ASCIIFold
-from mindmeld.text_preparation.text_preparation_pipeline import TextPreparationPipeline
+from mindmeld.text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
 
 warnings.filterwarnings(
     "module", category=DeprecationWarning, module="sklearn.preprocessing.label"
@@ -201,19 +200,9 @@ def duckling():
 
 
 @pytest.fixture
-def regex_normalizer():
-    return MindMeldRegexNormalizer()
-
-
-@pytest.fixture
-def text_preparation_pipeline(preprocessor, tokenizer, stemmer):
+def text_preparation_pipeline():
     """The Text Preparation Pipeline Object"""
-    return TextPreparationPipeline(
-        preprocessors=[preprocessor],
-        normalizers=[MindMeldRegexNormalizer(), Lowercase(), ASCIIFold()],
-        tokenizer=tokenizer,
-        stemmer=stemmer
-    )
+    return TextPreparationPipelineFactory.create_default_text_preparation_pipeline()
 
 
 @pytest.fixture
