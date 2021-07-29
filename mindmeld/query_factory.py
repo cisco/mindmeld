@@ -109,7 +109,6 @@ class QueryFactory:
         # Step 3: Normalization
         normalized_tokens = self.text_preparation_pipeline._normalize_tokens(raw_tokens)
 
-        # TODO: Implement a function to rejoin normalized tokens into text (Not Space Based)
         normalized_text = " ".join([t["entity"] for t in normalized_tokens])
 
         # Step 4: Stemming

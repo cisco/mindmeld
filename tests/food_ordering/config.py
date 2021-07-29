@@ -46,7 +46,6 @@ DOMAIN_MODEL_CONFIG = {
 
 
 TEXT_PREPARATION_CONFIG = {
-    # "normalizers": ["MindMeldRegexNormalizer", "Lowercase", "ASCIIFold"],
     "tokenizer": "WhiteSpaceTokenizer",
 }
 

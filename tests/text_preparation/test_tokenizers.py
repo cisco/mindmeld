@@ -253,3 +253,10 @@ def test_tokenize(text_preparation_pipeline):
     assert tokens[4]["entity"] == "chyea"
     assert tokens[4]["raw_entity"] == "Chyea!"
     assert tokens[4]["raw_start"] == 26
+
+
+def test_tokenize_none(white_space_tokenizer, spacy_tokenizer_ja, letter_tokenizer, character_tokenizer):
+    assert white_space_tokenizer.tokenize(None) == []
+    assert spacy_tokenizer_ja.tokenize(None) == []
+    assert letter_tokenizer.tokenize(None) == []
+    assert character_tokenizer.tokenize(None) == []

@@ -9,7 +9,15 @@ Tests for Normalizers in the `text_preparation.normalizers` module.
 """
 import pytest
 
-from mindmeld.text_preparation.normalizers import ASCIIFold, NFD, NFC, NFKD, NFKC
+from mindmeld.text_preparation.normalizers import (
+    ASCIIFold,
+    NFD,
+    NFC,
+    NFKD,
+    NFKC,
+    Lowercase,
+    NormalizerFactory
+)
 
 # TESTING NORMALIZER CLASSES
 
@@ -136,6 +144,17 @@ def test_nfkc_normalization(nfkc_normalizer, sentence, expected_normalized_text)
     """ Testing NFKC normalization."""
     normalized_text = nfkc_normalizer.normalize(sentence)
     assert normalized_text == expected_normalized_text
+
+
+def test_lowercase_normalization():
+    assert Lowercase().normalize("Hello, How Are You?") == 'hello, how are you?'
+
+
+def test_get_regex_normalizers():
+
+    regex_norm_rule = { "pattern": ".*", "replacement": ""}
+    regex_normalizer = NormalizerFactory.get_regex_normalizers([regex_norm_rule])[0]
+    assert regex_normalizer.normalize("Cisco") == ""
 
 
 # TESTING NORMALIZATION ON SAMPLE SENTENCES

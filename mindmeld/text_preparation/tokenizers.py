@@ -82,6 +82,7 @@ class CharacterTokenizer(Tokenizer):
                 For example: [{"start": 0, "text":"hello"}]
         """
         if not text:
+            logger.warning("Cannot tokenize None, returning an empty list.")
             return []
         tokens = []
         for idx, char in enumerate(text):
@@ -109,6 +110,9 @@ class LetterTokenizer(Tokenizer):
                 Keys include "start" (token starting index), and "text" (token text).
                 For example: [{"start": 0, "text":"hello"}]
         """
+        if not text:
+            logger.warning("Cannot tokenize None, returning an empty list.")
+            return []
         token_num_by_char = LetterTokenizer.get_token_num_by_char(text)
         return LetterTokenizer.create_tokens(text, token_num_by_char)
 
@@ -162,6 +166,7 @@ class LetterTokenizer(Tokenizer):
                 For example: [{"start": 0, "text":"hello"}]
         """
         if not text:
+            logger.warning("Cannot tokenize None, returning an empty list.")
             return []
         tokens = []
         token_text = ""
@@ -199,6 +204,7 @@ class WhiteSpaceTokenizer(Tokenizer):
                 For example: [{"start": 0, "text":"hello"}]
         """
         if not text:
+            logger.warning("Cannot tokenize None, returning an empty list.")
             return []
         tokens = []
         token = {}
@@ -242,6 +248,7 @@ class SpacyTokenizer(Tokenizer):
                 For example: [{"start": 0, "text":"hello"}]
         """
         if not text:
+            logger.warning("Cannot tokenize None, returning an empty list.")
             return []
         spacy_tokens = [token.text for token in self.spacy_model(text)]
 
