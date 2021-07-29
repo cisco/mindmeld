@@ -333,7 +333,7 @@ class TextPreparationPipeline:
         Returns:
             dict: A mapping of character indexes from normalized query to raw query.
         """
-        text = raw_text
+        text = raw_text.lower()
 
         m = len(raw_text)
         n = len(normalized_text)
