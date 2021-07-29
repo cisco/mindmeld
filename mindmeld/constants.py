@@ -321,7 +321,6 @@ DUCKLING_TO_SYS_ENTITY_MAPPINGS = {
 CURRENCY_SYMBOLS = u"".join(
     chr(i) for i in range(0xFFFF) if unicodedata.category(chr(i)) == "Sc"
 )
-ASCII_CUTOFF = ord("\u0080")
 UNICODE_NON_LATIN_CATEGORY = "Lo"
 UNICODE_SPACE_CATEGORY = "Zs"
 

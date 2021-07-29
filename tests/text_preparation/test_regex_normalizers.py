@@ -187,7 +187,7 @@ def test_replace_special_chars_between_digits_and_letters_with_space(
         ("Racing all^^!#%%hours seven##%$days", "Racing all hours seven days"),
     ],
 )
-def test_replace_special_chars_between_digits_and_letters_with_space(
+def test_replace_special_chars_between_letters_with_space(
     text_preparation_pipeline, input_text, expected_text
 ):
     _check_match(
