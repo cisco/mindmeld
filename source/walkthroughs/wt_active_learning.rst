@@ -12,6 +12,20 @@ The first step for running active learning is to set up your MindMeld app with l
 
 For the purpose of this tutorial, we will generate 'logs' for the current HR Assistant blueprint using the MindMeld :doc:`Data Augmentation <../userguide/augmentation>` pipeline. These paraphrases will serve as additional queries for the app to train on. After we have figured out the best hyperparameters using the tuning step, we'll select the best queries from the data augmentation logs (files with the pattern ``train-augmented.txt``). Adding these queries to the train files of the assistant can improve the performance of the classifiers.
 
+.. note ::
+    
+    Install the additional dependencies for active learning:
+
+    .. code-block:: console
+
+        pip install mindmeld[active_learning]
+
+    or in a zsh shell: 
+
+    .. code-block:: console
+
+        pip install mindmeld"[active_learning]"
+
 Step 2: Define Active Learning Config
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -75,51 +89,55 @@ The results include two files for every tuning run, one to store the evaluation 
 
 Next, one of two :ref:`tuning levels <tuning_levels>` needs to be set for the pipeline. For this experiment, we show results across the domain tuning level. For changing to intent level active learning, the ``tuning_level`` can be set to 'intent' in the config while keeping the rest of the experiment the same. The next couple of blocks show how results for a single iteration of the Least Confidence Sampling heuristic are stored in the ``accuracies.json`` and ``selected_queries.json`` respectively.
 
+# accuracies.json
+
 .. code-block:: json
 
-    # accuracies.json
-
+    {
     "LeastConfidenceSampling": {
         "0": {
             "0": {
                 "num_sampled": 455,
-                "accuracies": {
-                    "overall": 0.8872727272727273
+                    "accuracies": {
+                        "overall": 0.8872727272727273
+                    }
                 }
-            },
+            }
         }
     }
 
 
+
+# selected_queries.json
+
 .. code-block:: json
 
-    # selected_queries.json
-
-    "LeastConfidenceSampling": {
-        "0": {
-            "0": [
-                {
-                    "unannotated_text": "Amy date of fire",
-                    "annotated_text": "{Amy|name} {date of fire|employment_action}",
-                    "domain": "date",
-                    "intent": "get_date"
-                },
-                {
-                    "unannotated_text": "question needs answering",
-                    "annotated_text": "question needs answering",
-                    "domain": "faq",
-                    "intent": "generic"
-                },
-                {
-                    "unannotated_text": "what is ivan's job title",
-                    "annotated_text": "what is {ivan|name}'s {job title|position}",
-                    "domain": "general",
-                    "intent": "get_info"
-                },
-                ...
+    {
+        "LeastConfidenceSampling": {
+            "0": {
+                "0": [
+                    {
+                        "unannotated_text": "Amy date of fire",
+                        "annotated_text": "{Amy|name} {date of fire|employment_action}",
+                        "domain": "date",
+                        "intent": "get_date"
+                    },
+                    {
+                        "unannotated_text": "question needs answering",
+                        "annotated_text": "question needs answering",
+                        "domain": "faq",
+                        "intent": "generic"
+                    },
+                    {
+                        "unannotated_text": "what is ivan's job title",
+                        "annotated_text": "what is {ivan|name}'s {job title|position}",
+                        "domain": "general",
+                        "intent": "get_info"
+                    }
                 ]
             }
         }
+    }
 
 The selected queries are stored both with the entity annotations and just as raw text, along with the domain and intent classification labels.
 
@@ -188,6 +206,7 @@ This results in the generation of ``selected_queries.json`` file in the output d
 
 .. code-block:: json
 
+    {
     "strategy": "EntropySampling",
     "selected_queries": [
         {
@@ -209,6 +228,7 @@ This results in the generation of ``selected_queries.json`` file in the output d
             "intent": "get_date"
         }
     ]
+    }
 
 
 If instead the logs were raw text and not annotated for domain and intent, then they could be collated into a single text file and passed into the configuration instead of the logs pattern as follows:
