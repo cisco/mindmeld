@@ -22,7 +22,7 @@ def _check_match(text_preparation_pipeline, regex_norm_rule, input_text, expecte
     [
         ("that's dennis' truck", "that's dennis truck"),
         ("where's luciens' cat?", "where's luciens cat?"),
-        ("JAMES' CAR", "JAMES CAR"),
+        ("JAMES' CAR", "JAMES CAR")
     ],
 )
 def test_remove_apos_at_end_of_possesive_form(

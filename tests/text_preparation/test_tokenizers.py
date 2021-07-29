@@ -237,3 +237,19 @@ def test_character_tokenizer_ja_three(character_tokenizer):
         {"start": 4, "text": "ポ"},
     ]
     assert tokenized_output == expected_output
+
+
+def test_tokenize(text_preparation_pipeline):
+    raw_tokens = text_preparation_pipeline.tokenize("Test: Query for $500,000. Chyea!")
+    tokens = text_preparation_pipeline._normalize_tokens(raw_tokens)
+
+    assert len(tokens)
+    assert tokens[0]["entity"] == "test"
+    assert tokens[0]["raw_entity"] == "Test:"
+    assert tokens[1]["raw_start"] == 6
+    assert tokens[3]["raw_entity"] == "$500,000."
+    assert tokens[3]["raw_start"] == 16
+    assert tokens[3]["entity"] == "$500,000"
+    assert tokens[4]["entity"] == "chyea"
+    assert tokens[4]["raw_entity"] == "Chyea!"
+    assert tokens[4]["raw_start"] == 26

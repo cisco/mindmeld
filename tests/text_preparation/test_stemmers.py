@@ -58,7 +58,7 @@ test_data_not_stemmed = [
 
 
 @pytest.mark.parametrize("query", test_data_not_stemmed)
-def test_nlp_for_non_stemmed_queries(kwik_e_mart_app_path, kwik_e_mart_nlp, query):
+def test_nlp_for_non_stemmed_queries(kwik_e_mart_app_path, query):
     """Tests queries that are NOT in the training data but have their stemmed
     versions in the training data"""
     query_factory = QueryFactory.create_query_factory(kwik_e_mart_app_path)
@@ -76,7 +76,7 @@ test_data_need_stemming = [
 
 
 @pytest.mark.parametrize("query,stemmed_query", test_data_need_stemming)
-def test_nlp_for_stemmed_queries(kwik_e_mart_app_path, kwik_e_mart_nlp, query, stemmed_query):
+def test_nlp_for_stemmed_queries(kwik_e_mart_app_path, query, stemmed_query):
     """Tests queries that are NOT in the training data but have their stemmed
     versions in the training data"""
     query_factory = QueryFactory.create_query_factory(kwik_e_mart_app_path)
@@ -95,3 +95,19 @@ def test_nlp_hierarchy_for_stemmed_queries(kwik_e_mart_nlp, query):
     assert response["text"] == query
     assert response["domain"] == "store_info"
     assert response["intent"] == "exit"
+
+
+def test_no_op_stemmer():
+    assert NoOpStemmer().stem_word("Running") == "Running"
+
+
+@pytest.mark.parametrize(
+    "language_code, language",
+    [
+        ("en", "English"),
+        ("far", "Fataleka"),
+        ("fr", "French")
+    ],
+)
+def test_get_language_from_language_code(language_code, language):
+    assert language == StemmerFactory.get_language_from_language_code(language_code).name
