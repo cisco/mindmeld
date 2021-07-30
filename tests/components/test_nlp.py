@@ -15,7 +15,6 @@ import pytest
 from mindmeld.components import NaturalLanguageProcessor
 from mindmeld.exceptions import ProcessorError
 from marshmallow.exceptions import ValidationError
-from mindmeld.query_factory import QueryFactory
 from mindmeld.components.domain_classifier import DomainClassifier
 
 

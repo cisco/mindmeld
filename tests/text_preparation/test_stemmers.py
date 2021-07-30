@@ -103,11 +103,9 @@ def test_no_op_stemmer():
 
 @pytest.mark.parametrize(
     "language_code, language",
-    [
-        ("en", "English"),
-        ("far", "Fataleka"),
-        ("fr", "French")
-    ],
+    [("en", "English"), ("far", "Fataleka"), ("fr", "French")],
 )
 def test_get_language_from_language_code(language_code, language):
-    assert language == StemmerFactory.get_language_from_language_code(language_code).name
+    assert (
+        language == StemmerFactory.get_language_from_language_code(language_code).name
+    )

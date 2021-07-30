@@ -432,7 +432,10 @@ class TextPreparationPipelineFactory:
         language, _ = get_language_config(app_path)
         text_preparation_config = get_text_preparation_config(app_path)
 
-        if text_preparation_config.get("regex_norm_rules") and "normalizers" not in text_preparation_config:
+        if (
+            text_preparation_config.get("regex_norm_rules")
+            and "normalizers" not in text_preparation_config
+        ):
             logger.warning(
                 "Detected 'regex_norm_rules' in TEXT_PREPARATION_CONFIG, however, 'normalizers' "
                 "have not been specified. Will apply specified 'regex_norm_rules' in addition to "

@@ -255,8 +255,15 @@ def test_tokenize(text_preparation_pipeline):
     assert tokens[4]["raw_start"] == 26
 
 
-def test_tokenize_none(white_space_tokenizer, spacy_tokenizer_ja, letter_tokenizer, character_tokenizer):
-    tokenizers = [white_space_tokenizer, spacy_tokenizer_ja, letter_tokenizer, character_tokenizer]
+def test_tokenize_none(
+    white_space_tokenizer, spacy_tokenizer_ja, letter_tokenizer, character_tokenizer
+):
+    tokenizers = [
+        white_space_tokenizer,
+        spacy_tokenizer_ja,
+        letter_tokenizer,
+        character_tokenizer,
+    ]
     for tokenizer in tokenizers:
         with pytest.raises(AssertionError):
             assert tokenizer.tokenize(None)

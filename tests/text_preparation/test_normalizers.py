@@ -16,7 +16,7 @@ from mindmeld.text_preparation.normalizers import (
     NFKD,
     NFKC,
     Lowercase,
-    NormalizerFactory
+    NormalizerFactory,
 )
 
 # TESTING NORMALIZER CLASSES
@@ -147,17 +147,18 @@ def test_nfkc_normalization(nfkc_normalizer, sentence, expected_normalized_text)
 
 
 def test_lowercase_normalization():
-    assert Lowercase().normalize("Hello, How Are You?") == 'hello, how are you?'
+    assert Lowercase().normalize("Hello, How Are You?") == "hello, how are you?"
 
 
 def test_get_regex_normalizers():
 
-    regex_norm_rule = { "pattern": ".*", "replacement": ""}
+    regex_norm_rule = {"pattern": ".*", "replacement": ""}
     regex_normalizer = NormalizerFactory.get_regex_normalizers([regex_norm_rule])[0]
     assert regex_normalizer.normalize("Cisco") == ""
 
 
 # TESTING NORMALIZER CLASSES
+
 
 def _check_match(text_preparation_pipeline, regex_norm_rule, input_text, expected_text):
     text_preparation_pipeline.normalizers = [DEFAULT_REGEX_NORM_RULES[regex_norm_rule]]
@@ -170,7 +171,7 @@ def _check_match(text_preparation_pipeline, regex_norm_rule, input_text, expecte
     [
         ("that's dennis' truck", "that's dennis truck"),
         ("where's luciens' cat?", "where's luciens cat?"),
-        ("JAMES' CAR", "JAMES CAR")
+        ("JAMES' CAR", "JAMES CAR"),
     ],
 )
 def test_remove_apos_at_end_of_possesive_form(
@@ -348,15 +349,19 @@ def test_replace_special_chars_between_letters_with_space(
 
 # TESTING NORMALIZATION ON SAMPLE SENTENCES
 
+
 @pytest.mark.parametrize(
     "raw_text, expected_text",
     [
         ("Test: Query for $500,000.", "test query for $500,000"),
-        ("Test: Query for test.12.345..test,test", "test query for test 12.345 test test"),
+        (
+            "Test: Query for test.12.345..test,test",
+            "test query for test 12.345 test test",
+        ),
         ("Test: awesome band sigur rós.", "test awesome band sigur ros"),
         ("D'Angelo's new album", "d'angelo 's new album"),
         ("is s.o.b. ,, gonna be on at 8 p.m.?", "is s o b gonna be on at 8 p m"),
-        ("join O'reilly's pmr", "join o'reilly 's pmr")
+        ("join O'reilly's pmr", "join o'reilly 's pmr"),
     ],
 )
 def test_normalization_on_sample_sentences(
@@ -366,6 +371,7 @@ def test_normalization_on_sample_sentences(
 
 
 # TESTING NORMALIZATION MAPPING
+
 
 def test_mapping(text_preparation_pipeline):
     raw = "Test: 1. 2. 3."

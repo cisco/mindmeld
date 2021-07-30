@@ -13,12 +13,17 @@ from mindmeld.components._config import ENGLISH_LANGUAGE_CODE
 from mindmeld.text_preparation.text_preparation_pipeline import (
     TextPreparationPipeline,
     TextPreparationPipelineError,
-    TextPreparationPipelineFactory
+    TextPreparationPipelineFactory,
 )
 from mindmeld.text_preparation.preprocessors import NoOpPreprocessor
-from mindmeld.text_preparation.normalizers import RegexNormalizerRule, Lowercase, ASCIIFold
+from mindmeld.text_preparation.normalizers import (
+    RegexNormalizerRule,
+    Lowercase,
+    ASCIIFold,
+)
 from mindmeld.text_preparation.tokenizers import WhiteSpaceTokenizer
 from mindmeld.text_preparation.stemmers import EnglishNLTKStemmer
+
 
 def test_text_preparation_pipeline_tokenizer_not_none():
     with pytest.raises(TextPreparationPipelineError):
@@ -30,17 +35,26 @@ def test_offset_token_start_values():
     TextPreparationPipeline.offset_token_start_values(tokens=[sample_token], offset=5)
     assert sample_token["start"] == 8
 
+
 def test_filter_out_space_text_tokens():
 
     input_tokens = [
-        {"text": "How"}, {"text": "   "}, {"text": "are"}, {"text": " "}, {"text": "you"},
-        {"text": "?"}
+        {"text": "How"},
+        {"text": "   "},
+        {"text": "are"},
+        {"text": " "},
+        {"text": "you"},
+        {"text": "?"},
     ]
     expected_output_tokens = [
-        {'text': 'How'}, {'text': 'are'}, {'text': 'you'}, {'text': '?'}
+        {"text": "How"},
+        {"text": "are"},
+        {"text": "you"},
+        {"text": "?"},
     ]
     output_tokens = TextPreparationPipeline.filter_out_space_text_tokens(input_tokens)
     assert expected_output_tokens == output_tokens
+
 
 def test_find_mindmeld_annotation_re_matches():
 
@@ -60,7 +74,7 @@ def test_normalize_around_annoations():
     normalized_sentence = TextPreparationPipeline.modify_around_annotations(
         text=sentence, function=Lowercase().normalize
     )
-    expected_normalized_sentence = 'hello {lucien|PERSON_NAME}, how are you?'
+    expected_normalized_sentence = "hello {lucien|PERSON_NAME}, how are you?"
     assert normalized_sentence == expected_normalized_sentence
 
 
@@ -71,25 +85,27 @@ def test_tokenize_around_annoations():
         text=sentence, function=WhiteSpaceTokenizer().tokenize
     )
     expected_raw_tokens = [
-        {'start': 0, 'text': 'HELLO'},
-        {'start': 7, 'text': 'LUCIEN'},
-        {'start': 26, 'text': ','},
-        {'start': 28, 'text': 'HOW'},
-        {'start': 32, 'text': 'ARE'},
-        {'start': 36, 'text': 'YOU?'}
+        {"start": 0, "text": "HELLO"},
+        {"start": 7, "text": "LUCIEN"},
+        {"start": 26, "text": ","},
+        {"start": 28, "text": "HOW"},
+        {"start": 32, "text": "ARE"},
+        {"start": 36, "text": "YOU?"},
     ]
     assert raw_tokens == expected_raw_tokens
 
 
 def test_create_text_preparation_pipeline():
 
-    text_preparation_pipeline = TextPreparationPipelineFactory.create_text_preparation_pipeline(
-        language = ENGLISH_LANGUAGE_CODE,
-        preprocessors = [],
-        regex_norm_rules = [{"pattern":".*", "replacement":"cisco"}],
-        normalizers = ["Lowercase", "ASCIIFold"],
-        tokenizer = "WhiteSpaceTokenizer",
-        stemmer = None,
+    text_preparation_pipeline = (
+        TextPreparationPipelineFactory.create_text_preparation_pipeline(
+            language=ENGLISH_LANGUAGE_CODE,
+            preprocessors=[],
+            regex_norm_rules=[{"pattern": ".*", "replacement": "cisco"}],
+            normalizers=["Lowercase", "ASCIIFold"],
+            tokenizer="WhiteSpaceTokenizer",
+            stemmer=None,
+        )
     )
 
     assert text_preparation_pipeline.language == ENGLISH_LANGUAGE_CODE
