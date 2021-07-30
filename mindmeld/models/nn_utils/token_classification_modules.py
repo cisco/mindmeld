@@ -541,13 +541,6 @@ class BertForTokenClassification(TokenClassificationBase):
         return batch_data_dict
 
     def _create_optimizer(self):
-
-        # references:
-        #   https://arxiv.org/pdf/2006.05987.pdf#page=3
-        #   https://pytorch.org/docs/stable/generated/torch.optim.AdamW.html,
-        #   https://huggingface.co/transformers/custom_datasets.html,
-        #   https://huggingface.co/transformers/migration.html
-
         params = list(self.named_parameters())
         no_decay = ["bias", 'LayerNorm.bias', "LayerNorm.weight",
                     'layer_norm.bias', 'layer_norm.weight']

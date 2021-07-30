@@ -121,19 +121,7 @@ class SequenceClassificationBase(ClassificationBase):
 
         print(f"{self.name} is initialized")
 
-    def _forward_with_batching_and_no_grad(self, examples):
-        logits = None
-        was_training = self.training
-        self.eval()
-        with torch.no_grad():
-            for start_idx in range(0, len(examples), self.params.batch_size):
-                this_examples = examples[start_idx:start_idx + self.params.batch_size]
-                batch_data_dict = self.encoder.batch_encode(this_examples)
-                this_logits = self.forward(batch_data_dict)["logits"]
-                logits = torch.cat((logits, this_logits)) if logits is not None else this_logits
-        if was_training:
-            self.train()
-        return logits
+
 
     def forward(self, batch_data_dict):
 
@@ -172,6 +160,20 @@ class SequenceClassificationBase(ClassificationBase):
         elif self.params.num_labels > 2:
             probs = F.softmax(logits, dim=-1)
         return probs.tolist()
+
+    def _forward_with_batching_and_no_grad(self, examples):
+        logits = None
+        was_training = self.training
+        self.eval()
+        with torch.no_grad():
+            for start_idx in range(0, len(examples), self.params.batch_size):
+                this_examples = examples[start_idx:start_idx + self.params.batch_size]
+                batch_data_dict = self.encoder.batch_encode(this_examples)
+                this_logits = self.forward(batch_data_dict)["logits"]
+                logits = torch.cat((logits, this_logits)) if logits is not None else this_logits
+        if was_training:
+            self.train()
+        return logits
 
     @abstractmethod
     def _init_core(self) -> None:
@@ -369,13 +371,6 @@ class BertForSequenceClassification(SequenceClassificationBase):
         return batch_data_dict
 
     def _create_optimizer(self):
-
-        # references:
-        #   https://arxiv.org/pdf/2006.05987.pdf#page=3
-        #   https://pytorch.org/docs/stable/generated/torch.optim.AdamW.html,
-        #   https://huggingface.co/transformers/custom_datasets.html,
-        #   https://huggingface.co/transformers/migration.html
-
         params = list(self.named_parameters())
         no_decay = ["bias", 'LayerNorm.bias', "LayerNorm.weight",
                     'layer_norm.bias', 'layer_norm.weight']

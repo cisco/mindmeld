@@ -1135,7 +1135,13 @@ class IntentProcessor(Processor):
     def _build(self, incremental=False, label_set=None, load_cached=True):
         """Builds the models for this intent"""
         entity_types = self.entity_recognizer.get_entity_types(label_set=label_set)
-        if len(entity_types) == 0:  # equivalent to `len(self.entities) == 0`
+        if len(entity_types) == 0:
+            # unlike when len(domains)==1 or len(intents)==1, this flag is required here because we
+            # will need to store entity recognizer's metadata although we don't save the underneath
+            # model. This metadata is loaded and is used to decide if there are any children to be
+            # loaded for this instance. Setting the state to True will trigger self._dump be called
+            # which stores metadata.
+            self.ready = True
             return
 
         # train entity recognizer
@@ -1167,9 +1173,6 @@ class IntentProcessor(Processor):
             self._children[entity_type] = processor
 
     def _dump(self):
-        if len(self.entities) == 0:
-            return
-
         model_path, incremental_model_path = path.get_entity_model_paths(
             self._app_path, self.domain, self.name, timestamp=self.incremental_timestamp
         )
@@ -1183,9 +1186,6 @@ class IntentProcessor(Processor):
         self.entity_recognizer.unload()
 
     def _load(self, incremental_timestamp=None):
-        if len(self.entities) == 0:
-            return
-
         model_path, incremental_model_path = path.get_entity_model_paths(
             self._app_path, self.domain, self.name, timestamp=incremental_timestamp
         )
@@ -1211,7 +1211,7 @@ class IntentProcessor(Processor):
             self._children[entity_type] = processor
 
     def _evaluate(self, print_stats, label_set="test"):
-        if len(self.entities) > 0:
+        if len(self.entity_recognizer.entity_types) > 0:
             entity_eval = self.entity_recognizer.evaluate(label_set=label_set)
             if entity_eval:
                 print(
@@ -1296,7 +1296,7 @@ class IntentProcessor(Processor):
             else:
                 if verbose:
                     if len(self.entities) == 0:
-                        return []
+                        return [[]]
                     return [
                         self.entity_recognizer.predict_proba(
                             query[0], dynamic_resource=dynamic_resource
@@ -1318,7 +1318,7 @@ class IntentProcessor(Processor):
             )
         else:
             if len(self.entities) == 0:
-                return [()]
+                return ()
             return self.entity_recognizer.predict(
                 query, dynamic_resource=dynamic_resource
             )
@@ -1530,6 +1530,7 @@ class IntentProcessor(Processor):
         Returns:
             list: A list of lists of non-overlapping entities for each n-best transcript
         """
+
         # This code block implements allowed entities described here:
         # https://github.com/cisco/mindmeld/pull/280
 

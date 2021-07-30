@@ -40,8 +40,10 @@ try:
     import torch.nn as nn
 
     nn_module = _get_module_or_attr("torch.nn", "Module")
+    is_cuda_available = _get_module_or_attr("torch.cuda", "is_available")()
 except ImportError:
     nn_module = object
+    is_cuda_available = False
     pass
 
 SEED = 6174
@@ -51,7 +53,7 @@ logger = logging.getLogger(__name__)
 
 class ClassificationBase(nn_module):
     DEFAULT_PARAMS = {
-        "device": "cuda" if torch.cuda.is_available() else "cpu",
+        "device": "cuda" if is_cuda_available else "cpu",
         "number_of_epochs": 100,
         "patience": 10,
         "batch_size": 32,
@@ -61,6 +63,7 @@ class ClassificationBase(nn_module):
         "learning_rate": 0.001,
         "validation_metric": "accuracy",  # or 'f1'
         "verbose": True,  # to print progress to stdout/log file
+        "dev_split_ratio": 0.8
     }
 
     def __init__(self):
@@ -79,17 +82,12 @@ class ClassificationBase(nn_module):
         return f"<{self.name}> ready:{self.ready} dirty:{self.dirty}"
 
     def who_am_i(self) -> str:
-        msg = f"Who Am I: <{self.name}> ready: {self.ready} dirty: {self.dirty} \n" \
+        msg = f"Who Am I: <{self.name}> " \
+              f"ready: {self.ready} dirty: {self.dirty} device:{self.params.device}\n" \
               f"\tNumber of weights (trainable, all): {get_num_weights_of_model(self)} \n" \
               f"\tDisk Size (in MB): {get_disk_space_of_model(self):.4f}"
         logger.info(msg)
         return msg
-
-    def _to_device(self, batch_data_dict: Dict) -> Dict:
-        for k, v in batch_data_dict.items():
-            if v is not None and isinstance(v, torch.Tensor):
-                batch_data_dict[k] = v.to(self.params.device)
-        return batch_data_dict
 
     # methods to load and dump resources, common across sub-classes
 
@@ -150,6 +148,14 @@ class ClassificationBase(nn_module):
         module.dirty = False
         return module
 
+    # methods for gpu usage and data loading
+
+    def _to_device(self, batch_data_dict: Dict) -> Dict:
+        for k, v in batch_data_dict.items():
+            if v is not None and isinstance(v, torch.Tensor):
+                batch_data_dict[k] = v.to(self.params.device)
+        return batch_data_dict
+
     # methods for training
 
     def fit(self, examples, labels, **params):  # pylint: disable=too-many-locals
@@ -181,6 +187,12 @@ class ClassificationBase(nn_module):
         # init the graph
         self._init_forward_graph()
 
+        # move model to device
+        self.to(self.params.device)
+
+        # print model stats
+        self.who_am_i()
+
         # create temp folder and a save path
         # dumping into a temp folder instead of keeping in memory to reduce memory usage
         temp_folder = os.path.join(USER_CONFIG_DIR, "pytorch_models", str(uuid.uuid4()))
@@ -191,16 +203,14 @@ class ClassificationBase(nn_module):
         indices = np.arange(len(examples))
         np.random.seed(SEED)
         np.random.shuffle(indices)
-        train_examples, train_labels = \
-            zip(*[(examples[i], labels[i]) for i in indices[:int(0.8 * len(indices))]])
-        dev_examples, dev_labels = \
-            zip(*[(examples[i], labels[i]) for i in indices[int(0.8 * len(indices)):]])
-
-        # move model to device
-        self.to(self.params.device)
-
-        # print model stats
-        self.who_am_i()
+        train_examples, train_labels = zip(*[
+            (examples[i], labels[i])
+            for i in indices[:int(self.params.dev_split_ratio * len(indices))]
+        ])
+        dev_examples, dev_labels = zip(*[
+            (examples[i], labels[i])
+            for i in indices[int(self.params.dev_split_ratio * len(indices)):]
+        ])
 
         # create an optimizer and attach all model params to it
         num_training_steps = int(
