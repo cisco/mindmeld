@@ -346,43 +346,6 @@ def test_replace_special_chars_between_letters_with_space(
     )
 
 
-@pytest.mark.parametrize(
-    "input_text, expected_text",
-    [
-        ("Lucien has one//++=/|sys_number cat", "Lucien has one|sys_number cat"),
-        ("Why seven!!!|sys_number", "Why seven|sys_number"),
-        ("Racing all^^!#%%|custom_entity hours", "Racing all|custom_entity hours"),
-    ],
-)
-def test_replace_special_chars_before_pipe(
-    text_preparation_pipeline, input_text, expected_text
-):
-    _check_match(
-        text_preparation_pipeline,
-        "RemoveSpecialCharsBeforePipe",
-        input_text,
-        expected_text,
-    )
-
-
-@pytest.mark.parametrize(
-    "input_text, expected_text",
-    [
-        ("Lucien}+=-+s cat", "Lucien s cat"),
-        ("John]+=-+s dog", "John s dog"),
-    ],
-)
-def test_replace_end_bracket_and_following_special_chars_before_s_with_space(
-    text_preparation_pipeline, input_text, expected_text
-):
-    _check_match(
-        text_preparation_pipeline,
-        "ReplaceEndBracketAndFollowingSpecialCharsBeforeSWithSpace",
-        input_text,
-        expected_text,
-    )
-
-
 # TESTING NORMALIZATION ON SAMPLE SENTENCES
 
 @pytest.mark.parametrize(

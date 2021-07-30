@@ -267,13 +267,7 @@ DEFAULT_REGEX_NORM_RULES = {
     "ReplaceSpecialCharsBetweenLettersWithSpace": RegexNormalizerRule(
         pattern=r"(?<=[^\W\d_])[^\w\d\s&" + EXCEPTION_CHARS + r"]+(?=[^\W\d_]+)",
         replacement=" ",
-    ),
-    "RemoveSpecialCharsBeforePipe": RegexNormalizerRule(
-        pattern=r"(?<=[\w\d])[^\w\d\s" + EXCEPTION_CHARS + r"]+(?=\|)", replacement=""
-    ),
-    "ReplaceEndBracketAndFollowingSpecialCharsBeforeSWithSpace": RegexNormalizerRule(
-        pattern=r"[\]\}]+[^\w\d\s" + EXCEPTION_CHARS + r"]+(?=s)", replacement=" "
-    ),
+    )
 }
 
 

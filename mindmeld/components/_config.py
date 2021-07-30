@@ -514,9 +514,7 @@ DEFAULT_ACTIVE_LEARNING_CONFIG = {
     },
 }
 
-DEFAULT_NORMALIZERS = ["NFC"]
-
-DEFAULT_EN_NORMALIZERS = [
+DEFAULT_NORMALIZERS = [
     'RemoveAposAtEndOfPossesiveForm',
     'RemoveAdjacentAposAndSpace',
     'RemoveBeginningSpace',
@@ -529,18 +527,15 @@ DEFAULT_EN_NORMALIZERS = [
     'ReplaceSpecialCharsBetweenLettersAndDigitsWithSpace',
     'ReplaceSpecialCharsBetweenDigitsAndLettersWithSpace',
     'ReplaceSpecialCharsBetweenLettersWithSpace',
-    'RemoveSpecialCharsBeforePipe',
-    'ReplaceEndBracketAndFollowingSpecialCharsBeforeSWithSpace',
     'Lowercase',
     'ASCIIFold'
 ]
 
-# TODO: Add normalization defaults for more languages.
-
-DEFAULT_NORMALIZER_BY_LANGUAGE = {
-    ENGLISH_LANGUAGE_CODE: DEFAULT_EN_NORMALIZERS,
-    "es": DEFAULT_EN_NORMALIZERS,
-    "fr": DEFAULT_EN_NORMALIZERS
+DEFAULT_EN_TEXT_PREPARATION_CONFIG = {
+    "preprocessors": [],
+    "normalizers": DEFAULT_NORMALIZERS,
+    "tokenizer": "WhiteSpaceTokenizer",
+    "stemmer": "EnglishNLTKStemmer"
 }
 
 
@@ -1073,21 +1068,6 @@ def get_active_learning_config(app_path=None):
         return DEFAULT_ACTIVE_LEARNING_CONFIG
 
 
-def get_default_normalizers(language: str):
-    """ Get the default normalizers based on the given language.
-
-    Args:
-        language (str, optional): Language as specified using a 639-1/2 code.
-    Returns:
-        default_normalizers (List(str)): List of default normalizer class names for the given
-            languages.
-    """
-    if language in DEFAULT_NORMALIZER_BY_LANGUAGE:
-        return DEFAULT_NORMALIZER_BY_LANGUAGE[language]
-    logger.info("%s does not have default normalizers.", language)
-    return DEFAULT_NORMALIZERS
-
-
 def get_text_preparation_config(app_path=None):
     """Gets the text preparation configuration for the app at the specified path.
 
@@ -1098,7 +1078,7 @@ def get_text_preparation_config(app_path=None):
         dict: The text preparation pipeline configuration.
     """
     if not app_path:
-        return {"normalizers": get_default_normalizers(ENGLISH_LANGUAGE_CODE)}
+        return DEFAULT_EN_TEXT_PREPARATION_CONFIG
     try:
         tokenizer_config = getattr(
             _get_config_module(app_path), "TEXT_PREPARATION_CONFIG"
@@ -1106,5 +1086,4 @@ def get_text_preparation_config(app_path=None):
         return tokenizer_config
     except (OSError, IOError, AttributeError):
         logger.info("No app configuration file found. Using default text_preparation_config.")
-        language, _ = get_language_config(app_path)
-        return {"normalizers": get_default_normalizers(language)}
+        return {"normalizers": DEFAULT_NORMALIZERS}

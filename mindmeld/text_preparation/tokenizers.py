@@ -82,8 +82,7 @@ class CharacterTokenizer(Tokenizer):
                 For example: [{"start": 0, "text":"hello"}]
         """
         if not text:
-            logger.warning("Cannot tokenize None, returning an empty list.")
-            return []
+            raise AssertionError("'text' cannot be None or an empty string.")
         tokens = []
         for idx, char in enumerate(text):
             if not char.isspace():
@@ -111,8 +110,7 @@ class LetterTokenizer(Tokenizer):
                 For example: [{"start": 0, "text":"hello"}]
         """
         if not text:
-            logger.warning("Cannot tokenize None, returning an empty list.")
-            return []
+            raise AssertionError("'text' cannot be None or an empty string.")
         token_num_by_char = LetterTokenizer.get_token_num_by_char(text)
         return LetterTokenizer.create_tokens(text, token_num_by_char)
 
@@ -166,8 +164,7 @@ class LetterTokenizer(Tokenizer):
                 For example: [{"start": 0, "text":"hello"}]
         """
         if not text:
-            logger.warning("Cannot tokenize None, returning an empty list.")
-            return []
+            raise AssertionError("'text' cannot be None or an empty string.")
         tokens = []
         token_text = ""
         for index, token_num in enumerate(token_num_by_char):
@@ -204,8 +201,7 @@ class WhiteSpaceTokenizer(Tokenizer):
                 For example: [{"start": 0, "text":"hello"}]
         """
         if not text:
-            logger.warning("Cannot tokenize None, returning an empty list.")
-            return []
+            raise AssertionError("'text' cannot be None or an empty string.")
         tokens = []
         token = {}
         token_text = ""
@@ -248,8 +244,7 @@ class SpacyTokenizer(Tokenizer):
                 For example: [{"start": 0, "text":"hello"}]
         """
         if not text:
-            logger.warning("Cannot tokenize None, returning an empty list.")
-            return []
+            raise AssertionError("'text' cannot be None or an empty string.")
         spacy_tokens = [token.text for token in self.spacy_model(text)]
 
         start_index = 0
