@@ -9,9 +9,16 @@ Tests for TextPreparationPipeline in the `text_preparation.text_preparation_pipe
 """
 import pytest
 
-from mindmeld.text_preparation.text_preparation_pipeline import TextPreparationPipeline, TextPreparationPipelineError
-from mindmeld.text_preparation.normalizers import Lowercase
+from mindmeld.components._config import ENGLISH_LANGUAGE_CODE
+from mindmeld.text_preparation.text_preparation_pipeline import (
+    TextPreparationPipeline,
+    TextPreparationPipelineError,
+    TextPreparationPipelineFactory
+)
+from mindmeld.text_preparation.preprocessors import NoOpPreprocessor
+from mindmeld.text_preparation.normalizers import RegexNormalizerRule, Lowercase, ASCIIFold
 from mindmeld.text_preparation.tokenizers import WhiteSpaceTokenizer
+from mindmeld.text_preparation.stemmers import EnglishNLTKStemmer
 
 def test_text_preparation_pipeline_tokenizer_not_none():
     with pytest.raises(TextPreparationPipelineError):
@@ -74,3 +81,21 @@ def test_tokenize_around_annoations():
     assert raw_tokens == expected_raw_tokens
 
 
+def test_create_text_preparation_pipeline():
+
+    text_preparation_pipeline = TextPreparationPipelineFactory.create_text_preparation_pipeline(
+        language = ENGLISH_LANGUAGE_CODE,
+        preprocessors = [],
+        regex_norm_rules = [{"pattern":".*", "replacement":"cisco"}],
+        normalizers = ["Lowercase", "ASCIIFold"],
+        tokenizer = "WhiteSpaceTokenizer",
+        stemmer = None,
+    )
+
+    assert text_preparation_pipeline.language == ENGLISH_LANGUAGE_CODE
+    assert isinstance(text_preparation_pipeline.preprocessors[0], NoOpPreprocessor)
+    assert isinstance(text_preparation_pipeline.normalizers[0], RegexNormalizerRule)
+    assert isinstance(text_preparation_pipeline.normalizers[1], Lowercase)
+    assert isinstance(text_preparation_pipeline.normalizers[2], ASCIIFold)
+    assert isinstance(text_preparation_pipeline.tokenizer, WhiteSpaceTokenizer)
+    assert isinstance(text_preparation_pipeline.stemmer, EnglishNLTKStemmer)
