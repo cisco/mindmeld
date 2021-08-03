@@ -94,7 +94,7 @@ setup(
             'torch~=1.7.0; python_version>="3.6"',
             'transformers~=3.5.1; python_version>="3.6"',
             'sentence-transformers~=0.3; python_version>="3.6"',
-            "elasticsearch>=7.0",
+            'elasticsearch>=7.0,<7.14',
         ],
         "examples": [
             'connexion>=2.7.0; python_version>="3.6"',
@@ -108,7 +108,7 @@ setup(
             "google-cloud-translate>=3.0.1",
         ],
         "elasticsearch": [
-            "elasticsearch>=5.0",
+            "elasticsearch>=5.0,<7.14",
         ],
         "active_learning": [
             "matplotlib~=3.3.1",
