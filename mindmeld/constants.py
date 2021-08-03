@@ -17,7 +17,7 @@ DEFAULT_TRAIN_SET_REGEX = r"train.*\.txt"
 DEFAULT_TEST_SET_REGEX = r"test.*\.txt"
 BLUEPRINTS_URL = "https://blueprints.mindmeld.com"
 BINARIES_URL = "https://binaries.mindmeld.com"
-DUCKLING_VERSION = "20200701"
+DUCKLING_VERSION = "20210730"
 
 
 # ACTIVE LEARNING CONSTANTS
