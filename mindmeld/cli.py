@@ -795,6 +795,7 @@ def _get_auto_annotator_config(app_path, overwrite=False, unannotate_all=False):
     help="The application's path.",
 )
 @click.option(
+    "-l",
     "--language",
     help="Augmentation language code. Follows ISO 639-1 format.",
 )

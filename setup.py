@@ -54,7 +54,7 @@ test_requirements = [
 
 setup(
     name="mindmeld",
-    version="4.3.5rc10",
+    version="4.3.5rc11",
     description="A Conversational AI platform.",
     long_description=readme,
     long_description_content_type="text/markdown",

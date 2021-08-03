@@ -7,13 +7,13 @@ Quick Start
 -----------
 This section briefly explains the use of the ``augment`` command.
 
-The command below can be used to augment data across all training and testing files in the application, given a language code.
+The command below can be used to augment data across all training and testing files in the application, given a language code (specified using the ``--language`` or ``-l`` flags).
 
 Command-line:
 
 .. code-block:: console
 
-    mindmeld augment --app-path <app_path> --lang <lang_code>
+    mindmeld augment --app-path <app_path> --language <lang_code>
 
 The following section explains this in more detail.
 
@@ -26,6 +26,20 @@ can be defined to get the best augmentation results based on the application.
 Currently, we support data augmentation through paraphrasing for the following languages (with codes in ISO 639-1 format): English (en), French (fr), Italian (it), Portugese (pt), Romanian (ro), Spanish (es). This is done with the use of two models: the English paraphraser and the multi-lingual paraphraser.
 
 First, we will discuss the configuration needed to initiate an augmentor and then follow it with detailed descriptions of the paraphrasers.
+
+.. note::
+    
+    Install the additional dependencies for augmentors.
+
+    .. code-block:: console
+
+        pip install mindmeld[augment]
+
+    or in a zsh shell: 
+
+    .. code-block:: console
+        
+        pip install mindmeld"[augment]"
 
 Augmentation Configuration
 --------------------------
@@ -68,7 +82,7 @@ Usage
 
 .. code-block:: console
 
-    mindmeld augment --app-path <app_path> --lang "en"
+    mindmeld augment --app-path <app_path> --language "en"
 
 In the config for this paraphraser class, the ``'augmentor_class'`` should be set to :class:`EnglishParaphraser`.
 
@@ -103,7 +117,7 @@ Usage
 
 .. code-block:: console
 
-    mindmeld augment --app-path <app_path> --lang "code"
+    mindmeld augment --app-path <app_path> --language "code"
 
 In the config for this paraphraser class, the ``'augmentor_class'`` should be set to :class:`MultiLingualParaphraser`.
 

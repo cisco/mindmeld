@@ -31,7 +31,7 @@ Modifying the configuration file is the first step towards customizing the activ
 +===========================+============+==================================================================================+
 | train_pattern             | str        | Regex pattern to match train files. Example for all train files ".*train.*.txt"  |
 +---------------------------+------------+----------------------------------------------------------------------------------+
-| test_pattern              | str        | Regex pattern to match test files. Example for all test files ".*test.*.txt"    |
+| test_pattern              | str        | Regex pattern to match test files. Example for all test files ".*test.*.txt"     |
 +---------------------------+------------+----------------------------------------------------------------------------------+
 | train_seed_pct            | float      | Percentage of training data to use as the initial seed                           |
 +---------------------------+------------+----------------------------------------------------------------------------------+
@@ -47,7 +47,7 @@ Modifying the configuration file is the first step towards customizing the activ
 +---------------------------+------------+----------------------------------------------------------------------------------+
 | batch_size                | int        | Number of queries to sample at each iteration from the train data                |
 +---------------------------+------------+----------------------------------------------------------------------------------+
-| tuning_level              | str        | Selecting the hierarchy level to use for tuning, options: "domain" or "intent"           |
+| tuning_level              | str        | Selecting the hierarchy level to use for tuning, options: "domain" or "intent"   |
 +---------------------------+------------+----------------------------------------------------------------------------------+
 | tuning_strategies         | List[str]  | List of strategies (heuristics) to use for tuning                                |
 +---------------------------+------------+----------------------------------------------------------------------------------+
@@ -57,12 +57,12 @@ Modifying the configuration file is the first step towards customizing the activ
 +---------------------------+------------+----------------------------------------------------------------------------------+
 | Configuration Key         | Type       | Definition and Examples                                                          |
 +===========================+============+==================================================================================+
-| save_sampled_queries      | bool       | Option to save the queries sampled at each iteration                            |
+| save_sampled_queries      | bool       | Option to save the queries sampled at each iteration                             |
 +---------------------------+------------+----------------------------------------------------------------------------------+
-| aggregate_statistic       | str        | Aggregated classifier performance metric to record in the output and plots,  |
+| aggregate_statistic       | str        | Aggregated classifier performance metric to record in the output and plots,      |
 |                           |            | options: "accuracy", "f1_weighted", "f1_macro", "f1_micro"                       |
 +---------------------------+------------+----------------------------------------------------------------------------------+
-| class_level_statistic     | str        | Class level performance metric to record in the output and plots,    |
+| class_level_statistic     | str        | Class level performance metric to record in the output and plots,                |
 |                           |            | options: "f_beta", "percision", "recall"                                         |
 +---------------------------+------------+----------------------------------------------------------------------------------+
 
@@ -127,6 +127,17 @@ If there is no configuration defined in the ``config.py`` file or if fields are 
 
     * If the application consists of a single domain, choose 'intent' as the tuning level. If any domain consists of a single intent or any intent has no test files available, choose 'domain' as the tuning level.
 
+    * Install the additional dependencies for active learning:
+
+        .. code-block:: console
+
+            pip install mindmeld[active_learning]
+
+        or in a zsh shell: 
+
+        .. code-block:: console
+
+            pip install mindmeld"[active_learning]"
 
 .. _al_strategy_tuning:
 
@@ -182,7 +193,7 @@ The tuning step allows the application to run 7 possible strategies (``tuning_st
 +---------------------------+-----------------------------------------------------------------------------------------------+
 | Disagreement Sampling     | Across n runs of the classifier, this sampling strategy calculates an agreement score for     |
 |                           | every query (% of classifiers that voted for the most frequent class). The queries are then   |
-|                           | ranked from lowest classifier agreement to highest and then sampled in order.                  |
+|                           | ranked from lowest classifier agreement to highest and then sampled in order.                 |
 +---------------------------+-----------------------------------------------------------------------------------------------+
 | KL Divergence Sampling    | Across n runs of the classifier, this sampling strategy calculates the KL divergence between  |
 |                           | average confidence distribution across all classifiers for a given class and the confidence   |
