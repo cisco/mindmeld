@@ -1516,13 +1516,6 @@ class IntentProcessor(Processor):
         # This code block implements allowed entities described here:
         # https://github.com/cisco/mindmeld/pull/280
 
-        # We extract the `entity` key from each token since that represents the normalized text of
-        # each token which we will compare against the normalized text of the query
-        def get_normalized_tokens_as_tuples(text):
-            return tuple(
-                self.resource_loader.query_factory.text_preparation_pipeline.normalize(text).split()
-            )
-
         dynamic_gazetteer = dynamic_resource.get(GAZETTEER_RSC, {}) if dynamic_resource else {}
         n_best_entities = [[] for _ in range(len(query))]
 
@@ -1539,7 +1532,7 @@ class IntentProcessor(Processor):
             consolidated_set = set(self.resource_loader.get_gazetteer(entity)['pop_dict'])
             consolidated_set = consolidated_set.union(
                 {
-                    get_normalized_tokens_as_tuples(key)
+                    self.resource_loader.query_factory.text_preparation_pipeline.get_normalized_tokens_as_tuples(key)
                     for key in dynamic_gazetteer.get(entity, {})
                 }
             )

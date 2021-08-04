@@ -101,13 +101,8 @@ class QueryFactory:
         else:
             preprocessed_text = raw_text
 
-        # Step 2: Tokenization
-        raw_tokens = self.text_preparation_pipeline.tokenize(
-            preprocessed_text
-        )
-
-        # Step 3: Normalization
-        normalized_tokens = self.text_preparation_pipeline._normalize_tokens(raw_tokens)
+        # Step 2: Tokenization and Step 3: Normalization
+        normalized_tokens = self.text_preparation_pipeline.tokenize_and_normalize(preprocessed_text)
 
         normalized_text = " ".join([t["entity"] for t in normalized_tokens])
 

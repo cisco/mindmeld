@@ -86,11 +86,11 @@ class TextPreparationPipeline:
         Returns:
             normalized_text (str): Normalized text.
         """
-        normalized_tokens = self.get_normalized_tokens_from_text(text)
+        normalized_tokens = self.tokenize_and_normalize(text)
         normalized_text = " ".join([t["entity"] for t in normalized_tokens])
         return normalized_text
 
-    def get_normalized_tokens_from_text(self, text):
+    def tokenize_and_normalize(self, text):
         """
         Args:
             text (str): Text to normalize.
@@ -105,22 +105,6 @@ class TextPreparationPipeline:
                     }
         """
         raw_tokens = self.tokenizer.tokenize(text)
-        return self._normalize_tokens(raw_tokens)
-
-    def _normalize_tokens(self, raw_tokens):
-        """Normalize individual token dicts produced by Tokenizers.
-        Args:
-            raw_tokens (List(Dict)): List of raw tokens represented as dictionaries.
-        Returns:
-            normalized_tokens (List[Dict]): Normalized tokens represented as dictionaries.
-                For Example:
-                    norm_token = {
-                        "entity": "order",
-                        "raw_entity": "order",
-                        "raw_token_index": 1,
-                        "raw_start": 1
-                    }`
-        """
         normalized_tokens = []
         for i, raw_token in enumerate(raw_tokens):
             if not raw_token["text"]:
@@ -153,16 +137,20 @@ class TextPreparationPipeline:
         normalized_text = text
         for normalizer in self.normalizers:
             normalized_text = TextPreparationPipeline.modify_around_annotations(
-                text=normalized_text, function=normalizer.normalize
+                text=normalized_text, function=normalizer.normalize,
             )
         return normalized_text
+
+    def get_normalized_tokens_as_tuples(self, text):
+        normalized_tokens = self.tokenize_and_normalize(text)
+        return (t["entity"] for t in normalized_tokens)
 
     def tokenize(self, text):
         """
         Args:
             text (str): Input text.
         Returns:
-            tokens (List[str]): List of tokens.
+            tokens (List[dict]): List of tokens represented as dictionaries.
         """
         return self.tokenize_around_mindmeld_annotations(text)
 
@@ -210,7 +198,7 @@ class TextPreparationPipeline:
         for match in matches:
             entity_start, entity_end = match.span()
 
-            # Adds "function(pre_entity_text)" {..
+            # Adds "function(pre_entity_text) "{..
             text_before_entity = text[prev_entity_end:entity_start]
             modified_text.append(function(text_before_entity))
 

@@ -524,12 +524,11 @@ def test_process_verbose_long_tokens(kwik_e_mart_nlp):
     text_preparation_pipeline = (
         kwik_e_mart_nlp.resource_loader.query_factory.text_preparation_pipeline
     )
-
-    raw_tokens = text_preparation_pipeline.tokenize(text)
+ 
     raw_tokens_text = [t["text"] for t in text_preparation_pipeline.tokenize(text)]
     assert raw_tokens_text == ["Is", "the", "Kwik-E-Mart", "open", "tomorrow?"]
 
-    normalized_tokens = text_preparation_pipeline._normalize_tokens(raw_tokens)
+    normalized_tokens = text_preparation_pipeline.tokenize_and_normalize(text)
     normalized_tokens_text = [t["entity"] for t in normalized_tokens]
     assert normalized_tokens_text == ["is", "the", "kwik", "e", "mart", "open", "tomorrow"]
 
@@ -550,11 +549,10 @@ def test_process_verbose_short_tokens(kwik_e_mart_nlp):
         kwik_e_mart_nlp.resource_loader.query_factory.text_preparation_pipeline
     )
 
-    raw_tokens = text_preparation_pipeline.tokenize(text)
     raw_tokens_text = [t["text"] for t in text_preparation_pipeline.tokenize(text)]
     assert raw_tokens_text == ["when", "**", "open", "--", "tomorrow?"]
 
-    normalized_tokens = text_preparation_pipeline._normalize_tokens(raw_tokens)
+    normalized_tokens = text_preparation_pipeline.tokenize_and_normalize(text)
     normalized_tokens_text = [t["entity"] for t in normalized_tokens]
     assert normalized_tokens_text == ["when", "open", "tomorrow"]
 

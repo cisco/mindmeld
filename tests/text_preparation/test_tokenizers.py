@@ -240,8 +240,7 @@ def test_character_tokenizer_ja_three(character_tokenizer):
 
 
 def test_tokenize(text_preparation_pipeline):
-    raw_tokens = text_preparation_pipeline.tokenize("Test: Query for $500,000. Chyea!")
-    tokens = text_preparation_pipeline._normalize_tokens(raw_tokens)
+    tokens = text_preparation_pipeline.tokenize_and_normalize("Test: Query for $500,000. Chyea!")
 
     assert len(tokens)
     assert tokens[0]["entity"] == "test"
