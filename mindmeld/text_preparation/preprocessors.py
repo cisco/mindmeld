@@ -62,8 +62,6 @@ class PreprocessorFactory:
         Returns:
             (Preprocessor): Preprocessor Class
         """
-        preprocessor_classes = {NoOpPreprocessor.__name__: NoOpPreprocessor}
-        preprocessor_class = preprocessor_classes.get(preprocessor)
-        if not preprocessor_class:
-            raise TypeError(f"{preprocessor} is not a valid Preprocessor type.")
-        return preprocessor_class()
+        if preprocessor == NoOpPreprocessor.__name__:
+            return NoOpPreprocessor()
+        raise TypeError(f"{preprocessor} is not a valid Preprocessor type.")

@@ -80,10 +80,12 @@ def test_normalize_around_annoations():
 
 def test_tokenize_around_annoations():
 
-    sentence = "HELLO {LUCIEN|PERSON_NAME}, HOW ARE YOU?"
-    raw_tokens = TextPreparationPipeline.tokenize_around_mindmeld_annotations(
-        text=sentence, function=WhiteSpaceTokenizer().tokenize
+    text_preparation_pipeline = (
+        TextPreparationPipelineFactory.create_default_text_preparation_pipeline()
     )
+    sentence = "HELLO {LUCIEN|PERSON_NAME}, HOW ARE YOU?"
+    raw_tokens = text_preparation_pipeline.tokenize(sentence)
+
     expected_raw_tokens = [
         {"start": 0, "text": "HELLO"},
         {"start": 7, "text": "LUCIEN"},

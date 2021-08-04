@@ -125,7 +125,11 @@ class TextPreparationPipeline:
         for i, raw_token in enumerate(raw_tokens):
             if not raw_token["text"]:
                 continue
-            normalized_texts = self._normalize_single_token(raw_token["text"])
+            normalized_text = self._normalize_text(raw_token["text"])
+            # We tokenize the post-norm text and split the entity if possible
+            # Ex: normalize("o'clock") -> "o clock" -> ["o", "clock"]
+            normalized_texts = [t["text"] for t in self.tokenize(normalized_text)]
+
             if len(normalized_texts) > 0:
                 for token_text in normalized_texts:
                     normalized_tokens.append(
@@ -138,23 +142,20 @@ class TextPreparationPipeline:
                     )
         return normalized_tokens
 
-    def _normalize_single_token(self, text):
+    def _normalize_text(self, text):
         """Normalize an individual token by processing text with all normalizers.
 
         Args:
             text (str): Text to normalize.
         Returns:
-            normalized_texts (List[str]): Normalized texts. We tokenize the post-norm text and
-                split the entity if possible.
+            normalized_text (str): Normalized text.
         """
         normalized_text = text
         for normalizer in self.normalizers:
             normalized_text = TextPreparationPipeline.modify_around_annotations(
                 text=normalized_text, function=normalizer.normalize
             )
-        # We tokenize the post-norm text and split the entity if possible
-        # Ex: normalize("o'clock") -> "o clock" -> ["o", "clock"]
-        return [t["text"] for t in self.tokenize(normalized_text)]
+        return normalized_text
 
     def tokenize(self, text):
         """
@@ -163,9 +164,7 @@ class TextPreparationPipeline:
         Returns:
             tokens (List[str]): List of tokens.
         """
-        return TextPreparationPipeline.tokenize_around_mindmeld_annotations(
-            text=text, function=self.tokenizer.tokenize
-        )
+        return self.tokenize_around_mindmeld_annotations(text)
 
     def stem_word(self, word):
         """
@@ -237,8 +236,7 @@ class TextPreparationPipeline:
 
         return "".join(modified_text)
 
-    @staticmethod
-    def tokenize_around_mindmeld_annotations(text, function):
+    def tokenize_around_mindmeld_annotations(self, text):
         """Applied a function around the mindmeld annotation.
 
         tokenize(pre_entity_text) + { + tokenize(entity_text) + |entity_name}
@@ -246,7 +244,6 @@ class TextPreparationPipeline:
 
         Args:
             text (str): Original sentence with markup to modify.
-            function (function): Function to apply around the annotation
         Returns:
             tokens (List[dict]): List of tokens represented as dictionaries.
         """
@@ -260,7 +257,7 @@ class TextPreparationPipeline:
             entity_text = match.group(1)
 
             # Adds tokens from text before the current entity and after the last entity
-            tokens_before_entity = function(text[prev_entity_end:entity_start])
+            tokens_before_entity = self.tokenizer.tokenize(text[prev_entity_end:entity_start])
             TextPreparationPipeline.offset_token_start_values(
                 tokens=tokens_before_entity, offset=prev_entity_end
             )
@@ -269,7 +266,7 @@ class TextPreparationPipeline:
             # Adds tokens from text within the entity text
             entity_text_start, _ = match.span(1)
             entity_text = match.group(1)
-            tokens_within_entity_text = function(entity_text)
+            tokens_within_entity_text = self.tokenizer.tokenize(entity_text)
             TextPreparationPipeline.offset_token_start_values(
                 tokens=tokens_within_entity_text, offset=entity_text_start
             )
@@ -280,7 +277,7 @@ class TextPreparationPipeline:
 
         if prev_entity_end < len(text):
             # Add tokens from the text after the last MindMeld entity
-            tokens_after_last_entity = function(text[prev_entity_end : len(text)])
+            tokens_after_last_entity = self.tokenizer.tokenize(text[prev_entity_end : len(text)])
             TextPreparationPipeline.offset_token_start_values(
                 tokens=tokens_after_last_entity, offset=prev_entity_end
             )
