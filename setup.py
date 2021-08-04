@@ -15,7 +15,7 @@ requirements = [
     "click-log==0.1.8",
     "distro~=1.3",
     "dvc>=1.8.1",
-    "elasticsearch>=5.0",
+    "elasticsearch>=5.0,<7.14",
     "Flask~=1.0",
     "Flask-Cors~=3.0",
     "future~=0.17",
