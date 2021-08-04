@@ -1,65 +1,86 @@
 Working with the Text Preparation Pipeline
 ==========================================
 
-The Preprocessor
+The Text Preparation Pipeline
 
- - is an optional module that is run before any component in the MindMeld pipeline
- - uses app-specific logic defined by the developer to perform arbitrary text modifications on the user query before it is sent to the :doc:`natural language processor <nlp>`
-
-
-MindMeld's tokenizer handles both the tokenization and normalization of raw text in your application. These components are configurable based on language-specific needs.
+ - is MindMeld's text processing module which handles the preprocessing, tokenization, normalization, and stemming of raw queries
+ - has extensible components that can be configured based on language-specific requirements
+ - offers components that integrate functionality from Spacy, NLTK and Regex
 
 
-.. image:: /images/architecture1.png
+The :attr:`TextPreparationPipeline` processes text in the following order:
+
+.. image:: /images/text_preparation_pipeline.png
     :align: center
-    :name: architecture_diagram
+    :name: text_preparation_pipeline
 
-Tokenizer Configuration
-----------------------------
 
-The :attr:`DEFAULT_TOKENIZER_CONFIG` shown below is the default config for the Tokenizer.
-A custom config can be included in :attr:`config.py` by duplicating the default config and renaming it to :attr:`TOKENIZER_CONFIG`.
-If no custom configuration is defined, the default is used.
+The diagram below is a visual example of a :attr:`TextPreparationPipeline` that uses Spacy for tokenization, Regex for normalization and NLTK for stemming.
+
+.. image:: /images/text_preparation_pipeline_sample_breakdown.png
+    :align: center
+    :name: text_preparation_pipeline_sample_breakdown
+
+TextPreparationPipeline Configuration
+-------------------------------------
+
+The :attr:`DEFAULT_TEXT_PREPARATION_CONFIG` is shown below. Observe that various normalization classes
+have been pre-selected by default. To modify the selected components (or to use a subset of the normalization steps), duplicate the
+default config and rename it to :attr:`TEXT_PREPARATION_CONFIG`. Place this custom config in :attr:`config.py`. 
+If a custom configuration is not defined, the default is used.
 
 .. code-block:: python
 
-    DEFAULT_TOKENIZER_CONFIG = {
-        "allowed_patterns": default_allowed_patterns,
+    DEFAULT_TEXT_PREPARATION_CONFIG = {
+        "preprocessors": [],
         "tokenizer": "WhiteSpaceTokenizer",
-        "normalizer": "ASCIIFold",
+        "normalizers": [
+            'RemoveAposAtEndOfPossesiveForm',
+            'RemoveAdjacentAposAndSpace',
+            'RemoveBeginningSpace',
+            'RemoveTrailingSpace',
+            'ReplaceSpacesWithSpace',
+            'ReplaceUnderscoreWithSpace',
+            'SeparateAposS',
+            'ReplacePunctuationAtWordStartWithSpace',
+            'ReplacePunctuationAtWordEndWithSpace',
+            'ReplaceSpecialCharsBetweenLettersAndDigitsWithSpace',
+            'ReplaceSpecialCharsBetweenDigitsAndLettersWithSpace',
+            'ReplaceSpecialCharsBetweenLettersWithSpace',
+            'Lowercase',
+            'ASCIIFold'
+        ],
+        "regex_norm_rules": [],
+        "stemmer": "EnglishNLTKStemmer"
     }
 
 
-Let's define the the parameters in the Tokenizer config:
+Let's define the the parameters in the TextPreparationPipeline config:
 
-``'allowed_patterns'`` (:class:`str`): Enables defining your custom regular expression patterns in the form of a list of different patterns or combinations.
-(If :attr:`allowed_patterns` are not provided, then default values will be used.) This list is combined and compiled internally by MindMeld and the resulting pattern is applied for filtering out the characters from the user input queries. For eg.
+``'preprocessors'`` (:class:`List[str]`): The preprocessor class to use. (Mindmeld does not currently offer default preprocessors.) 
 
-.. code:: python
+``'tokenizer'`` (:class:`str`): The tokenization method to split raw queries.
 
-   TOKENIZER_CONFIG = {
-        "allowed_patterns": ['\w+'],
-    }
+``'normalizers'`` (:class:`List[str]`): List of normalization classes. The text will be normalized sequentially given the order of the normalizers specified.
 
-will allow the system to capture alphanumeric strings and
+``'regex_norm_rules'`` (:class:`List[Dict]`): Regex normalization rules represented as dictionaries. Each rule should have the key "pattern" and "replacement" which map to a
+regex pattern (str) and replacement string, respectively. For example, { "pattern": "_", "replacement": " " }.
 
-.. code:: python
-
-   TOKENIZER_CONFIG = {
-        "allowed_patterns": ['(\w+\.)$', '(\w+\?)$'],
-    }
-
-allows the system to capture only tokens that end with either a question mark or a period.
+``'stemmer`` (:class:`str`): The stemmer class to use.
 
 
-``'tokenizer'`` (:class:`str`): The tokenization method to split raw queries. Options include :attr:`WhiteSpaceTokenizer`, :attr:`CharacterTokenizer`, and the :attr:`SpacyTokenizer`.
+.. note::
 
-``'normalizer'`` (:class:`str`): The method to normalize raw queries. Options include :attr:`ASCIIFold` and Unicode Character normalization methods such as :attr:`NFD`, :attr:`NFC`, :attr:`NFKD`, :attr:`NFKC`.
-For more information on Unicode Chracter Normalization visit the `Unicode Documentation <https://unicode.org/reports/tr15/>`_. Currently, only one normalizer can be selected at a time. 
+    A Regex normalization rule when added will not overwrite existing normalization rules. To do that, place the key in the config.
 
 
-Tokenizer Methods
-------------------
+Preprocessing
+--------------
+Preprocessing
+
+
+Tokenization
+-------------
 
 
 White Space Tokenizer
@@ -147,11 +168,12 @@ We see that the original text is split semantically and not simply by whitespace
     ['紳士', 'が', '過ぎ', '去っ', 'た', '、', 'なぜ', 'それ', 'が', '起こっ', 'た', 'の', 'か', '誰', 'に', 'も', '分かり', 'ませ', 'ん', '！']
 
 
-Normalization Methods
----------------------
+Normalization
+--------------
 
-Default MindMeld Normalization
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Default Regex Normalization
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Talk about default regex_normalization.
 As a default in MindMeld, the Tokenizer retains the following special characters in addition to alphanumeric characters and spaces:
 
 1. All currency symbols in UNICODE.
@@ -214,3 +236,8 @@ We can print the character values for each of the texts and observe the the norm
     >>> [113, 117, 105, 233, 110]
     >>> print([ord(c) for c in normalized_text])
     >>> [113, 117, 105, 101, 769, 110]
+
+Stemming
+--------
+Stemming information.
+

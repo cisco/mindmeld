@@ -123,6 +123,7 @@ Contents
    userguide/auto_annotator
    userguide/custom_action
    userguide/tokenizer
+   userguide/text_preparation_pipeline
    userguide/internationalization
    userguide/voice
    userguide/dvc
