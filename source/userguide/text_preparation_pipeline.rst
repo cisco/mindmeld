@@ -63,6 +63,8 @@ Let's define the the parameters in the TextPreparationPipeline config:
 
 ``'normalizers'`` (:class:`List[str]`): List of normalization classes. The text will be normalized sequentially given the order of the normalizers specified.
 
+``'keep_special_chars'`` (:class:`str`): String containing characters to be skipped when normalizing/filtering special characters. This only applies for a subset of default MindMeld normalization rules.
+
 ``'regex_norm_rules'`` (:class:`List[Dict]`): Regex normalization rules represented as dictionaries. Each rule should have the key "pattern" and "replacement" which map to a
 regex pattern (str) and replacement string, respectively. For example, { "pattern": "_", "replacement": " " }.
 
@@ -182,6 +184,35 @@ As a default in MindMeld, the Tokenizer retains the following special characters
 4. Apostrophe within tokens, such as ``O'Reilly``. Apostrophes at the beginning/end of tokens are removed, say ``Dennis'`` or ``'Tis``.
 
 Setting argument ``keep_special_chars=False`` in the Tokenizer would remove all special characters.
+
++-----------------------------------------------------+--------------------------------------------------------------------------------------------------+---------------------------------------+-------------------------------+
+| Regex Normalization Rule                            | Description                                                                                      | Example Input                         | Example Output                |
++=====================================================+==================================================================================================+=======================================+===============================+
+| RemoveAposAtEndOfPossesiveForm                      | Removes any apostrophe following an 's' at the end of a word.                                    | "dennis' truck"                       | "dennis truck"                |
++-----------------------------------------------------+--------------------------------------------------------------------------------------------------+---------------------------------------+-------------------------------+
+| RemoveAdjacentAposAndSpace                          | Removes apostrophes followed by a space character and apostrphes that precede a space character. | "havana' "                            | "havana"                      |
++-----------------------------------------------------+--------------------------------------------------------------------------------------------------+---------------------------------------+-------------------------------+
+| RemoveBeginningSpace                                | Removes extra spaces at the start of a word.                                                     | "      MindMeld"                      | "MindMeld"                    |
++-----------------------------------------------------+--------------------------------------------------------------------------------------------------+---------------------------------------+-------------------------------+
+| RemoveTrailingSpace                                 | Removes extra spaces at the end of a word.                                                       | "MindMeld       "                     | "MindMeld"                    |
++-----------------------------------------------------+--------------------------------------------------------------------------------------------------+---------------------------------------+-------------------------------+
+| ReplaceSpacesWithSpace                              | Replaces multiple consecutive spaces with a single space.                                        | "How    are    you?"                  | "How are you?"                |
++-----------------------------------------------------+--------------------------------------------------------------------------------------------------+---------------------------------------+-------------------------------+
+| ReplaceUnderscoreWithSpace                          | Replaces underscore with a single space.                                                         | "How_are_you?"                        | "How are you?"                |
++-----------------------------------------------------+--------------------------------------------------------------------------------------------------+---------------------------------------+-------------------------------+
+| SeparateAposS                                       | Adds a space before 's.                                                                          | "mindmeld's code"                     | "mindmeld 's code"            |
++-----------------------------------------------------+--------------------------------------------------------------------------------------------------+---------------------------------------+-------------------------------+
+| ReplacePunctuationAtWordStartWithSpace              | Replaces special characters infront of words with a space.                                       | "HI %#++=-=SPERO"                     | "HI SPERO"                    |
++-----------------------------------------------------+--------------------------------------------------------------------------------------------------+---------------------------------------+-------------------------------+
+| ReplacePunctuationAtWordEndWithSpace                | Replaces special characters following words with a space.                                        | "How%+=* are++- you^^%"               | "How are you"                 |
++-----------------------------------------------------+--------------------------------------------------------------------------------------------------+---------------------------------------+-------------------------------+
+| ReplaceSpecialCharsBetweenLettersAndDigitsWithSpace | Replaces special characters between letters and digits with a space.                             | "Coding^^!#%24 hours#%7 days"         | "Coding 24 hours 7 days"      |
++-----------------------------------------------------+--------------------------------------------------------------------------------------------------+---------------------------------------+-------------------------------+
+| ReplaceSpecialCharsBetweenDigitsAndLettersWithSpace | Replaces special characters between digits and letters with a space.                             | "Coding 24^^!#%%hours 7##%days"      | "Coding 24 hours 7 days"       |
++-----------------------------------------------------+--------------------------------------------------------------------------------------------------+---------------------------------------+-------------------------------+
+| ReplaceSpecialCharsBetweenLettersWithSpace          | Replaces special characters between letters and letters with a space.                            | "Coding all^^!#%%hours seven##%days" | "Coding all hours seven days"  |
++-----------------------------------------------------+--------------------------------------------------------------------------------------------------+---------------------------------------+-------------------------------+
+
 
 ASCII Fold Normalization
 ^^^^^^^^^^^^^^^^^^^^^^^^
