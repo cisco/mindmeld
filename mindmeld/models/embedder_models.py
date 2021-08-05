@@ -758,16 +758,15 @@ class GloveEmbedder(Embedder):
 
     def __init__(self, app_path, **kwargs):
         super().__init__(app_path, **kwargs)
-        self.glove_text_preparation_pipeline = (
+        self.text_preparation_pipeline = (
             TextPreparationPipelineFactory.create_default_text_preparation_pipeline()
         )
 
     def tokenize(self, text):
-        tokens = self.glove_text_preparation_pipeline.get_normalized_tokens_from_text(
-            text
-        )
-        token_list = [t["entity"] for t in tokens]
-        return token_list
+        return [
+            t["entity"] for t in
+            self.text_preparation_pipeline.tokenize_and_normalize(text)
+        ]
 
     def _load(self, **kwargs):
         token_embedding_dimension = kwargs.get(

@@ -81,8 +81,10 @@ class CharacterTokenizer(Tokenizer):
                 Keys include "start" (token starting index), and "text" (token text).
                 For example: [{"start": 0, "text":"hello"}]
         """
+        if text == "":
+            return []
         if not text:
-            raise AssertionError("'text' cannot be None or an empty string.")
+            raise AssertionError("'text' cannot be None.")
         tokens = []
         for idx, char in enumerate(text):
             if not char.isspace():
@@ -109,8 +111,10 @@ class LetterTokenizer(Tokenizer):
                 Keys include "start" (token starting index), and "text" (token text).
                 For example: [{"start": 0, "text":"hello"}]
         """
+        if text == "":
+            return []
         if not text:
-            raise AssertionError("'text' cannot be None or an empty string.")
+            raise AssertionError("'text' cannot be None.")
         token_num_by_char = LetterTokenizer.get_token_num_by_char(text)
         return LetterTokenizer.create_tokens(text, token_num_by_char)
 
@@ -163,8 +167,10 @@ class LetterTokenizer(Tokenizer):
                 Keys include "start" (token starting index), and "text" (token text).
                 For example: [{"start": 0, "text":"hello"}]
         """
+        if text == "":
+            return []
         if not text:
-            raise AssertionError("'text' cannot be None or an empty string.")
+            raise AssertionError("'text' cannot be None.")
         tokens = []
         token_text = ""
         for index, token_num in enumerate(token_num_by_char):
@@ -200,8 +206,10 @@ class WhiteSpaceTokenizer(Tokenizer):
                 Keys include "start" (token starting index), and "text" (token text).
                 For example: [{"start": 0, "text":"hello"}]
         """
+        if text == "":
+            return []
         if not text:
-            raise AssertionError("'text' cannot be None or an empty string.")
+            raise AssertionError("'text' cannot be None.")
         tokens = []
         token = {}
         token_text = ""
@@ -243,8 +251,10 @@ class SpacyTokenizer(Tokenizer):
                 Keys include "start" (token starting index), and "text" (token text).
                 For example: [{"start": 0, "text":"hello"}]
         """
+        if text == "":
+            return []
         if not text:
-            raise AssertionError("'text' cannot be None or an empty string.")
+            raise AssertionError("'text' cannot be None.")
         spacy_tokens = [token.text for token in self.spacy_model(text)]
 
         start_index = 0

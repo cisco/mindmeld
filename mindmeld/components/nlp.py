@@ -1529,10 +1529,11 @@ class IntentProcessor(Processor):
                 continue
 
             # check if entity is in the gazetteers
+            text_preparation_pipeline = self.resource_loader.query_factory.text_preparation_pipeline
             consolidated_set = set(self.resource_loader.get_gazetteer(entity)['pop_dict'])
             consolidated_set = consolidated_set.union(
                 {
-                    self.resource_loader.query_factory.text_preparation_pipeline.get_normalized_tokens_as_tuples(key)
+                    text_preparation_pipeline.get_normalized_tokens_as_tuples(key)
                     for key in dynamic_gazetteer.get(entity, {})
                 }
             )

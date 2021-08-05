@@ -220,9 +220,9 @@ class Gazetteer:
             min_popularity = min(self.pop_dict.values())
         for item in mapping:
 
-            normalized_tokens = normalizer(item["cname"]).split()
-            tokenized_canonical = tuple(token["entity"] for token in normalized_tokens)
-
+            tokenized_canonical = tuple(
+                token["entity"] for token in normalizer(item["cname"]).split()
+            )
             for syn in item["whitelist"]:
                 line_count += 1
                 synonym = normalizer(syn)

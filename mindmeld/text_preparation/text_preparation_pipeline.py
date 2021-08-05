@@ -90,6 +90,30 @@ class TextPreparationPipeline:
         normalized_text = " ".join([t["entity"] for t in normalized_tokens])
         return normalized_text
 
+    def _normalize_text(self, text):
+        """Normalize an individual token by processing text with all normalizers.
+
+        Args:
+            text (str): Text to normalize.
+        Returns:
+            normalized_text (str): Normalized text.
+        """
+        normalized_text = text
+        for normalizer in self.normalizers:
+            normalized_text = TextPreparationPipeline.modify_around_annotations(
+                text=normalized_text, function=normalizer.normalize,
+            )
+        return normalized_text
+
+    def tokenize(self, text):
+        """
+        Args:
+            text (str): Input text.
+        Returns:
+            tokens (List[dict]): List of tokens represented as dictionaries.
+        """
+        return self.tokenize_around_mindmeld_annotations(text)
+
     def tokenize_and_normalize(self, text):
         """
         Args:
@@ -126,33 +150,15 @@ class TextPreparationPipeline:
                     )
         return normalized_tokens
 
-    def _normalize_text(self, text):
-        """Normalize an individual token by processing text with all normalizers.
+    def get_normalized_tokens_as_tuples(self, text):
+        """ Gets normalized tokens from input text and returns the result as a tuple.
 
         Args:
             text (str): Text to normalize.
         Returns:
-            normalized_text (str): Normalized text.
+            normalized_tokens_as_tuples (Tuple(str)): A Tuple of normalized tokens.
         """
-        normalized_text = text
-        for normalizer in self.normalizers:
-            normalized_text = TextPreparationPipeline.modify_around_annotations(
-                text=normalized_text, function=normalizer.normalize,
-            )
-        return normalized_text
-
-    def get_normalized_tokens_as_tuples(self, text):
-        normalized_tokens = self.tokenize_and_normalize(text)
-        return (t["entity"] for t in normalized_tokens)
-
-    def tokenize(self, text):
-        """
-        Args:
-            text (str): Input text.
-        Returns:
-            tokens (List[dict]): List of tokens represented as dictionaries.
-        """
-        return self.tokenize_around_mindmeld_annotations(text)
+        return tuple(t["entity"] for t in self.tokenize_and_normalize(text))
 
     def stem_word(self, word):
         """

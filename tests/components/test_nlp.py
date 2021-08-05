@@ -524,7 +524,7 @@ def test_process_verbose_long_tokens(kwik_e_mart_nlp):
     text_preparation_pipeline = (
         kwik_e_mart_nlp.resource_loader.query_factory.text_preparation_pipeline
     )
- 
+
     raw_tokens_text = [t["text"] for t in text_preparation_pipeline.tokenize(text)]
     assert raw_tokens_text == ["Is", "the", "Kwik-E-Mart", "open", "tomorrow?"]
 
