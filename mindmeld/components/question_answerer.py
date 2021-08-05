@@ -34,6 +34,7 @@ import numpy as np
 from nltk.corpus import stopwords as nltk_stopwords
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize as nltk_word_tokenize
+from sklearn.externals import joblib
 
 from ._config import (
     get_app_namespace,
@@ -103,22 +104,17 @@ class BaseQuestionAnswerer(ABC):
         app_path = kwargs.get("app_path") or os.getcwd()  # app_path can be NoneType as well!
         self.app_path = os.path.abspath(app_path)
         self.app_namespace = kwargs.get("app_namespace") or get_app_namespace(self.app_path)
-        self._resource_loader = kwargs.get("resource_loader")
+        self.resource_loader = (
+            kwargs.get("resource_loader") or ResourceLoader.create_resource_loader(self.app_path)
+        )
         self._qa_config = (
             kwargs.get("config") or
             get_classifier_config("question_answering", app_path=self.app_path)
         )
 
     def __repr__(self):
-        return f"<{self.__class__.__name__} query_type: {self.query_type} " \
-               f"app_path: {self.app_path} app_namespace: {self.app_namespace}>"
-
-    @property
-    def resource_loader(self) -> ResourceLoader:
-        return (
-            self._resource_loader or
-            ResourceLoader.create_resource_loader(self.app_path)
-        )
+        return f"<{self.__class__.__name__} query_type:{self.query_type} " \
+               f"app_path:{self.app_path} app_namespace:{self.app_namespace}>"
 
     @property
     def model_type(self) -> str:
@@ -146,6 +142,14 @@ class BaseQuestionAnswerer(ABC):
 
     @abstractmethod
     def _load_kb(self, *args, **kwargs):
+        raise NotImplementedError
+
+    @abstractmethod
+    def _dump(self, pkl_path):
+        raise NotImplementedError
+
+    @abstractmethod
+    def load(self, pkl_path):
         raise NotImplementedError
 
     @staticmethod
@@ -231,6 +235,23 @@ class BaseQuestionAnswerer(ABC):
                   "configurations and/or app path before calling '.load_kb()'."
             raise ValueError(msg)
         self._load_kb(index_name, data_file, **kwargs)
+
+    def dump(self, pkl_path):
+        folder = os.path.dirname(pkl_path)
+        os.makedirs(folder, exist_ok=True)
+        self._dump(pkl_path)
+
+        metadata = {
+            "app_path": self.app_path,
+            "app_namespace": self.app_namespace,
+            "resource_loader": self.resource_loader,
+            "config": self._qa_config
+        }
+        pkl_path_splitext = os.path.splitext(pkl_path)
+        joblib.dump(metadata, pkl_path_splitext[0] + ".metadata" + pkl_path_splitext[1])
+        msg = f"All loaded Indices are successfully dumped at '{pkl_path}' along with the " \
+              f"input configurations passed-in for QuestionAnswerer"
+        logger.info(msg)
 
 
 class NativeQuestionAnswerer(BaseQuestionAnswerer):
@@ -437,6 +458,12 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
             scoped_index_name, index_resources, [*all_ids.keys()]
         )
 
+    def _dump(self, pkl_path):
+        joblib.dump(NativeQuestionAnswerer.ALL_INDICES, pkl_path)
+
+    def load(self, pkl_path):
+        NativeQuestionAnswerer.ALL_INDICES = joblib.load(pkl_path)
+
     class Indices:
         """ An object that hold all the indices for an app_path
 
@@ -606,15 +633,21 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
 
             # convert it into standard format, e.g. "37.77,122.41"
 
+            # eg. {"lat": 37.77, "lon": 122.41}
             if isinstance(value, dict) and "lat" in value and "lon" in value:
-                # eg. {"lat": 37.77, "lon": 122.41}
                 return ",".join([str(value["lat"]), str(value["lon"])])
-            elif isinstance(value, str) and "," in value and len(value.split(",")) == 2:
-                # eg. "37.77,122.41"
+            # eg. "37.77,122.41"
+            elif isinstance(value, str) and len(value.split(",")) == 2:
+                for val in value.split(","):
+                    try:
+                        val = float(val)
+                    except ValueError:
+                        # eg. "Brown, Mia"
+                        return None
                 return value.strip()
+            # eg. [37.77, 122.41]
             elif (isinstance(value, list) and len(value) == 2 and
                   isinstance(value[0], numbers.Number) and isinstance(value[1], numbers.Number)):
-                # eg. [37.77, 122.41]
                 return ",".join([str(_value) for _value in value])
 
             return None
@@ -757,11 +790,11 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
             self._embedding_resolver = None  # an embedding based entity resolver
 
         def __repr__(self):
-            return f"{self.__class__.__name__} " \
-                   f"field_name: {self.field_name} " \
-                   f"data_type: {self.data_type} " \
-                   f"has_text_resolver: {self.has_text_resolver} " \
-                   f"has_embedding_resolver: {self.has_embedding_resolver}"
+            return f"<{self.__class__.__name__} " \
+                   f"field_name:{self.field_name} " \
+                   f"data_type:{self.data_type} " \
+                   f"has_text_resolver:{self.has_text_resolver} " \
+                   f"has_embedding_resolver:{self.has_embedding_resolver}>"
 
         @staticmethod
         def _auto_string_processor(string_or_strings, query_type, language='english'):
@@ -827,16 +860,16 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
             except AttributeError:
                 pass
 
-            if self.is_location(value):
+            if self.is_location(value):  # Union[dict, str, List[int]]
                 self.data_type = "location"
+            elif self.is_date(value):
+                self.data_type = "date"  # str
             elif self.is_bool(value):
                 self.data_type = "bool"
             elif self.is_number(value):
                 self.data_type = "number"
-            elif self.is_string(value) or self.is_list_of_strings(value):
+            elif self.is_string(value) or self.is_list_of_strings(value):  # str, List[str]
                 self.data_type = "string"
-            elif self.is_date(value):
-                self.data_type = "date"
             else:
                 self.data_type = "unknown"
 
@@ -1937,6 +1970,16 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         if embedder_model:
             embedder_model.dump_cache()
 
+    def _dump(self, pkl_path):
+        del pkl_path
+        msg = f"'dump' method not allowed for {self.__class__.__name__}"
+        raise NotImplementedError(msg)
+
+    def load(self, pkl_path):
+        del pkl_path
+        msg = f"'load' method not allowed for {self.__class__.__name__}"
+        raise NotImplementedError(msg)
+
     class Search:
         """This class models a generic filtered search in knowledge base. It allows developers to
         construct more complex knowledge base search criteria based on the application requirements.
@@ -2746,43 +2789,15 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             return self.type in self.VECTOR_TYPES
 
 
-class QuestionAnswerer:
+class QuestionAnswererFactory:
     """
-    Factory class with backwards compatability
+    Factory class for creating QuestionAnswerers
 
-    deprecated usages
-        >>> QuestionAnswerer.load_kb(...)
-
-    new usages
-        >>> question_answerer = QuestionAnswerer(app_path, resource_loader, es_host, config)
-        # or ...
-        >>> question_answerer = QuestionAnswerer.create_question_answerer(**kwargs)
-        # And then ...
+    usage
+        >>> question_answerer = QuestionAnswererFactory.create_question_answerer(**kwargs)
         >>> question_answerer.load_kb(...)
-        >>> question_answerer.get(...) # .get(...), .build_search(...)
+        >>> question_answerer.get(...) # .get(...) or .build_search(...)
     """
-
-    def __new__(cls, app_path=None, resource_loader=None, es_host=None, config=None, **kwargs):
-        """
-        This method is used to initialize a XxxQuestionAnswerer based on the model_type
-
-        To keep the code base backwards compatible, we use a '__new__()' way of creating instances
-        alongside using a factory approach. For cases wherein a question-answerer is instantiated
-        from 'QuestionAnswerer' class instead of  'QuestionAnswerer.create_question_answerer',
-        this method is called before __init__ and returns an instance of a question-answerer.
-
-        See that the input arguments are kept as-is with respect to the '__init__()' of
-        'ElasticsearchQuestionAnswerer' class which was the 'QuestionAnswerer' class in previous
-        version of 'question_answerer.py'
-        """
-
-        kwargs.update({
-            "app_path": app_path,
-            "resource_loader": resource_loader,
-            "es_host": es_host,
-            "config": config,
-        })
-        return cls.create_question_answerer(**kwargs)
 
     @classmethod
     def create_question_answerer(cls, **kwargs):
@@ -2802,72 +2817,6 @@ class QuestionAnswerer:
         config = cls._correct_deprecated_qa_config(config)
         kwargs.update({"config": config})
         return cls._get_question_answerer_class(config.get("model_type"))(**kwargs)
-
-    @classmethod
-    def load_kb(cls,
-                app_namespace,
-                index_name,
-                data_file,
-                es_host=None,
-                es_client=None,
-                connect_timeout=2,
-                clean=False,
-                app_path=None,
-                config=None,
-                **kwargs):
-        """
-        Implemented to maintain backward compatibility. Should be removed in future versions.
-
-        Args:
-            app_namespace (str): The namespace of the app. Used to prevent
-                collisions between the indices of this app and those of other
-                apps.
-            index_name (str): The name of the new index to be created.
-            data_file (str): The path to the data file containing the documents
-                to be imported into the knowledge base index. It could be
-                either json or jsonl file.
-            es_host (str): The Elasticsearch host server.
-            es_client (Elasticsearch): The Elasticsearch client.
-            connect_timeout (int, optional): The amount of time for a
-                connection to the Elasticsearch host.
-            clean (bool): Set to true if you want to delete an existing index
-                and reindex it
-            app_path (str): The path to the directory containing the app's data
-            config (dict): The QA config if passed directly rather than loaded from the app config
-        """
-
-        # As a way to reduce entropy in using 'load_kb()' and it's related inconsistencies of not
-        # exposing 'app_namespace' argument in '.get()' and '.build_search()', this reformatting
-        # recommends that all these methods be used as instance methods and not as class methods
-        msg = "Calling the 'load_kb(...)' method directly from the QuestionAnswerer object " \
-              "like 'QuestionAnswerer.load_kb(...)' will be deprecated. New usage: " \
-              "'qa = QuestionAnswerer(...); qa.load_kb(...)'. Note that this change might also " \
-              "lead to creating different QA instances for different configs. " \
-              "See https://www.mindmeld.com/docs/userguide/kb.html for more details. "
-        warnings.warn(msg, DeprecationWarning)
-
-        # add everything except 'index_name' and 'data_file' to kwargs, and create a QA instance
-        kwargs.update({
-            "app_namespace": app_namespace,
-            "es_host": es_host,
-            "es_client": es_client,
-            "connect_timeout": connect_timeout,
-            "clean": clean,
-            "config": config,
-            "app_path": app_path,
-        })
-        question_answerer = cls.create_question_answerer(**kwargs)
-
-        # only retain 'connection_timeout', 'clean' information as everything else is already
-        #   absorbed during initialization; the recommended way of passing configs to QA is by
-        #   passing those details during initialization, that way there exists no discrepancies
-        #   between loading and inference.
-        kwargs.pop("app_namespace")
-        kwargs.pop("es_host")
-        kwargs.pop("es_client")
-        kwargs.pop("config")
-        kwargs.pop("app_path")
-        question_answerer.load_kb(index_name, data_file, **kwargs)
 
     @staticmethod
     def _get_config(config=None, app_path=None):
@@ -2934,6 +2883,139 @@ class QuestionAnswerer:
                               "to use Elasticsearch for question answering.")
 
         return QUESTION_ANSWERER_MODEL_MAPPINGS[model_type]
+
+    @classmethod
+    def load(cls, pkl_path):
+        pkl_path_splitext = os.path.splitext(pkl_path)
+        metadata = joblib.load(pkl_path_splitext[0] + ".metadata" + pkl_path_splitext[1])
+        loaded_qa = cls.create_question_answerer(**metadata)
+        loaded_qa.load(pkl_path)
+        msg = f"All dumped Indices are successfully loaded from '{pkl_path}' using the same " \
+              f"QuestionAnswerer configurations as those identified during dumping. " \
+              f"You can now load more Indices using the .load_kb() method or search within the " \
+              f"existing Indices using .get() or .build_search() methods. " \
+              f"Upon loading new Indices through the .load_kb() method, you can dump back the QA " \
+              f"instance (using the .dump() method) with updated list of Indices."
+        logger.info(msg)
+        return loaded_qa
+
+
+class QuestionAnswerer:
+    """
+    Backwards compatible QuestionAnswerer class
+
+    usages that will be deprecated
+        >>> QuestionAnswerer.load_kb(...)
+
+    new usages
+        >>> question_answerer = QuestionAnswerer(app_path, resource_loader, es_host, config)
+        # or ...
+        >>> question_answerer = QuestionAnswerer.create_question_answerer(**kwargs)
+        # And then ...
+        >>> question_answerer.load_kb(...)
+        >>> question_answerer.get(...) # .get(...), .build_search(...)
+    """
+
+    DEPRECATION_MESSAGE = \
+        "Calling QuestionAnswerer class directly will be deprecated in future versions. " \
+        "To instantiate a QA instance, use the QuestionAnswererFactory by calling " \
+        "'qa = QuestionAnswererFactory.create_question_answerer(**kwargs)'. " \
+        "An instantiated QA can then be used as 'qa.load_kb(...)', 'qa.get(...)', etc. " \
+        "See https://www.mindmeld.com/docs/userguide/kb.html for details about the various " \
+        "functionalities available with different question-answerers."
+
+    def __new__(cls, app_path=None, resource_loader=None, es_host=None, config=None, **kwargs):
+        """
+        This method is used to initialize a XxxQuestionAnswerer based on the model_type
+
+        To keep the code base backwards compatible, we use a '__new__()' way of creating instances
+        alongside using a factory approach. For cases wherein a question-answerer is instantiated
+        from 'QuestionAnswerer' class instead of  'QuestionAnswerer.create_question_answerer',
+        this method is called before __init__ and returns an instance of a question-answerer.
+
+        See that the input arguments are kept as-is with respect to the '__init__()' of
+        'ElasticsearchQuestionAnswerer' class which was the 'QuestionAnswerer' class in previous
+        version of 'question_answerer.py'
+        """
+
+        warnings.warn(QuestionAnswerer.DEPRECATION_MESSAGE, DeprecationWarning)
+
+        kwargs.update({
+            "app_path": app_path,
+            "resource_loader": resource_loader,
+            "es_host": es_host,
+            "config": config,
+        })
+        return QuestionAnswererFactory.create_question_answerer(**kwargs)
+
+    @classmethod
+    def load_kb(cls,
+                app_namespace,
+                index_name,
+                data_file,
+                es_host=None,
+                es_client=None,
+                connect_timeout=2,
+                clean=False,
+                app_path=None,
+                config=None,
+                **kwargs):
+        """
+        Implemented to maintain backward compatibility. Should be removed in future versions.
+
+        Args:
+            app_namespace (str): The namespace of the app. Used to prevent
+                collisions between the indices of this app and those of other
+                apps.
+            index_name (str): The name of the new index to be created.
+            data_file (str): The path to the data file containing the documents
+                to be imported into the knowledge base index. It could be
+                either json or jsonl file.
+            es_host (str): The Elasticsearch host server.
+            es_client (Elasticsearch): The Elasticsearch client.
+            connect_timeout (int, optional): The amount of time for a
+                connection to the Elasticsearch host.
+            clean (bool): Set to true if you want to delete an existing index
+                and reindex it
+            app_path (str): The path to the directory containing the app's data
+            config (dict): The QA config if passed directly rather than loaded from the app config
+        """
+
+        warnings.warn(QuestionAnswerer.DEPRECATION_MESSAGE, DeprecationWarning)
+
+        # As a way to reduce entropy in using 'load_kb()' and it's related inconsistencies of not
+        # exposing 'app_namespace' argument in '.get()' and '.build_search()', this reformatting
+        # recommends that all these methods be used as instance methods and not as class methods
+        msg = "Calling the 'load_kb(...)' method directly from the QuestionAnswerer object " \
+              "like 'QuestionAnswerer.load_kb(...)' will be deprecated. New usage: " \
+              "'qa = QuestionAnswererFactory.create_question_answerer(**kwargs); " \
+              "qa.load_kb(...)'. Note that this change might also " \
+              "lead to creating different QA instances for different configs. " \
+              "See https://www.mindmeld.com/docs/userguide/kb.html for more details. "
+        warnings.warn(msg, DeprecationWarning)
+
+        # add everything except 'index_name' and 'data_file' to kwargs, and create a QA instance
+        kwargs.update({
+            "app_namespace": app_namespace,
+            "es_host": es_host,
+            "es_client": es_client,
+            "connect_timeout": connect_timeout,
+            "clean": clean,
+            "config": config,
+            "app_path": app_path,
+        })
+        question_answerer = QuestionAnswererFactory.create_question_answerer(**kwargs)
+
+        # only retain 'connection_timeout', 'clean' information as everything else is already
+        #   absorbed during initialization; the recommended way of passing configs to QA is by
+        #   passing those details during initialization, that way there exists no discrepancies
+        #   between loading and inference.
+        kwargs.pop("app_namespace")
+        kwargs.pop("es_host")
+        kwargs.pop("es_client")
+        kwargs.pop("config")
+        kwargs.pop("app_path")
+        question_answerer.load_kb(index_name, data_file, **kwargs)
 
 
 QUESTION_ANSWERER_MODEL_MAPPINGS = {

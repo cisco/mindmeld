@@ -16,7 +16,7 @@ from .dialogue import Conversation, DialogueManager, DialogueResponder
 from .entity_resolver import EntityResolver, EntityResolverFactory
 from .nlp import NaturalLanguageProcessor
 from .preprocessor import Preprocessor
-from .question_answerer import QuestionAnswerer
+from .question_answerer import QuestionAnswerer, QuestionAnswererFactory
 from .request import Request
 from .custom_action import (
     CustomAction,
@@ -33,6 +33,7 @@ __all__ = [
     "DialogueManager",
     "NaturalLanguageProcessor",
     "QuestionAnswerer",
+    "QuestionAnswererFactory",
     "EntityResolver",
     "EntityResolverFactory",
     "Preprocessor",
