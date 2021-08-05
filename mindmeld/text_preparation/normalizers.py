@@ -226,7 +226,6 @@ class Lowercase(Normalizer):
 
 
 class RegexNormalizerRule(Normalizer):
-
     def __init__(self, pattern: str, replacement: str):
         """Creates a RegexNormalizerRule instance."""
         self.pattern = pattern
@@ -267,7 +266,7 @@ DEFAULT_REGEX_NORM_RULES = {
     "ReplaceSpecialCharsBetweenLettersWithSpace": RegexNormalizerRule(
         pattern=r"(?<=[^\W\d_])[^\w\d\s&" + EXCEPTION_CHARS + r"]+(?=[^\W\d_]+)",
         replacement=" ",
-    )
+    ),
 }
 
 

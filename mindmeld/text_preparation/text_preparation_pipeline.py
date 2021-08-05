@@ -27,7 +27,7 @@ from ..components._config import (
     DEFAULT_NORMALIZERS,
     DEFAULT_EN_TEXT_PREPARATION_CONFIG,
     get_language_config,
-    ENGLISH_LANGUAGE_CODE
+    ENGLISH_LANGUAGE_CODE,
 )
 from ..constants import UNICODE_SPACE_CATEGORY
 
@@ -75,7 +75,9 @@ class TextPreparationPipeline:
         preprocessed_text = text
         for preprocessor in self.preprocessors:
             preprocessed_text = TextPreparationPipeline.modify_around_annotations(
-                text=preprocessed_text, function=preprocessor.process
+                text=preprocessed_text,
+                function=preprocessor.process,
+                keep_space_before_annotation=True,
             )
         return preprocessed_text
 
@@ -101,7 +103,8 @@ class TextPreparationPipeline:
         normalized_text = text
         for normalizer in self.normalizers:
             normalized_text = TextPreparationPipeline.modify_around_annotations(
-                text=normalized_text, function=normalizer.normalize,
+                text=normalized_text,
+                function=normalizer.normalize,
             )
         return normalized_text
 
@@ -151,7 +154,7 @@ class TextPreparationPipeline:
         return normalized_tokens
 
     def get_normalized_tokens_as_tuples(self, text):
-        """ Gets normalized tokens from input text and returns the result as a tuple.
+        """Gets normalized tokens from input text and returns the result as a tuple.
 
         Args:
             text (str): Text to normalize.
@@ -184,7 +187,7 @@ class TextPreparationPipeline:
         return list(MINDMELD_ANNOTATION_PATTERN.finditer(text))
 
     @staticmethod
-    def modify_around_annotations(text, function):
+    def modify_around_annotations(text, function, keep_space_before_annotation=False):
         """Applied a function around the mindmeld annotation.
 
         function(pre_entity_text) + { + function(entity_text) + |entity_name}
@@ -193,6 +196,8 @@ class TextPreparationPipeline:
         Args:
             text (str): Original sentence with markup to modify.
             function (function): Function to apply around the annotation
+            keep_space_before_annotation (bool): If True and if there is a space before entity
+                annotation, then the space will not be modified.
         Returns:
             modified_text (str): Text modified around annotations.
         """
@@ -204,7 +209,15 @@ class TextPreparationPipeline:
         for match in matches:
             entity_start, entity_end = match.span()
 
-            # Adds "function(pre_entity_text) "{..
+            # Include Space Before Entity Annotation
+            if (
+                keep_space_before_annotation
+                and entity_start > 0
+                and text[entity_start - 1].isspace()
+            ):
+                entity_start -= 1
+
+            # Adds "function(pre_entity_text) "{.. or "function(pre_entity_text)" {..
             text_before_entity = text[prev_entity_end:entity_start]
             modified_text.append(function(text_before_entity))
 
@@ -251,7 +264,9 @@ class TextPreparationPipeline:
             entity_text = match.group(1)
 
             # Adds tokens from text before the current entity and after the last entity
-            tokens_before_entity = self.tokenizer.tokenize(text[prev_entity_end:entity_start])
+            tokens_before_entity = self.tokenizer.tokenize(
+                text[prev_entity_end:entity_start]
+            )
             TextPreparationPipeline.offset_token_start_values(
                 tokens=tokens_before_entity, offset=prev_entity_end
             )
@@ -271,7 +286,9 @@ class TextPreparationPipeline:
 
         if prev_entity_end < len(text):
             # Add tokens from the text after the last MindMeld entity
-            tokens_after_last_entity = self.tokenizer.tokenize(text[prev_entity_end : len(text)])
+            tokens_after_last_entity = self.tokenizer.tokenize(
+                text[prev_entity_end : len(text)]
+            )
             TextPreparationPipeline.offset_token_start_values(
                 tokens=tokens_after_last_entity, offset=prev_entity_end
             )
