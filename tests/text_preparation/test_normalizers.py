@@ -8,7 +8,6 @@ test Normalizers
 Tests for Normalizers in the `text_preparation.normalizers` module.
 """
 import pytest
-from mindmeld.text_preparation.normalizers import DEFAULT_REGEX_NORM_RULES
 from mindmeld.text_preparation.normalizers import (
     ASCIIFold,
     NFD,
@@ -16,7 +15,7 @@ from mindmeld.text_preparation.normalizers import (
     NFKD,
     NFKC,
     Lowercase,
-    NormalizerFactory,
+    RegexNormalizerRuleFactory
 )
 
 # TESTING NORMALIZER CLASSES
@@ -153,7 +152,7 @@ def test_lowercase_normalization():
 def test_get_regex_normalizers():
 
     regex_norm_rule = {"pattern": ".*", "replacement": ""}
-    regex_normalizer = NormalizerFactory.get_regex_normalizers([regex_norm_rule])[0]
+    regex_normalizer = RegexNormalizerRuleFactory.get_regex_normalizers([regex_norm_rule])[0]
     assert regex_normalizer.normalize("Cisco") == ""
 
 
@@ -161,7 +160,11 @@ def test_get_regex_normalizers():
 
 
 def _check_match(text_preparation_pipeline, regex_norm_rule, input_text, expected_text):
-    text_preparation_pipeline.normalizers = [DEFAULT_REGEX_NORM_RULES[regex_norm_rule]]
+
+    regex_normalizer = RegexNormalizerRuleFactory.get_default_regex_normalizer_rule(
+        regex_norm_rule
+    )
+    text_preparation_pipeline.normalizers = [regex_normalizer]
     normalized_text = text_preparation_pipeline.normalize(input_text)
     assert normalized_text == expected_text
 

@@ -226,9 +226,6 @@ class Lowercase(Normalizer):
 
 
 class RegexNormalizerRule(Normalizer):
-
-    EXCEPTION_CHARS = r"\@\[\]'" #\|\{\}
-
     def __init__(self, pattern: str, replacement: str):
         """Creates a RegexNormalizerRule instance."""
         self.pattern = pattern
@@ -239,67 +236,27 @@ class RegexNormalizerRule(Normalizer):
         return self._expr.sub(self.replacement, s)
 
 
+class RegexNormalizerRuleFactory:
 
-DEFAULT_REGEX_NORM_RULES = {
-    "RemoveAposAtEndOfPossesiveForm": RegexNormalizerRule(
-        pattern=r"^'(?=\S)|(?<=\S)'$", replacement=""
-    ),
-    "RemoveAdjacentAposAndSpace": RegexNormalizerRule(pattern=r" '|' ", replacement=""),
-    "RemoveBeginningSpace": RegexNormalizerRule(pattern=r"^\s+", replacement=""),
-    "RemoveTrailingSpace": RegexNormalizerRule(pattern=r"\s+$", replacement=""),
-    "ReplaceSpacesWithSpace": RegexNormalizerRule(pattern=r"\s+", replacement=" "),
-    "ReplaceUnderscoreWithSpace": RegexNormalizerRule(pattern=r"_", replacement=" "),
-    "SeparateAposS": RegexNormalizerRule(pattern=r"(?<=[^\s])'[sS]", replacement=" 's"),
-    "ReplacePunctuationAtWordStartWithSpace": RegexNormalizerRule(
-        pattern=r"^[^\w\d&" + CURRENCY_SYMBOLS + RegexNormalizerRule.EXCEPTION_CHARS + r"]+",
-        replacement=" ",
-    ),
-    "ReplacePunctuationAtWordEndWithSpace": RegexNormalizerRule(
-        pattern=r"[^\w\d&" + CURRENCY_SYMBOLS + RegexNormalizerRule.EXCEPTION_CHARS + r"]+$",
-        replacement=" ",
-    ),
-    "ReplaceSpecialCharsBetweenLettersAndDigitsWithSpace": RegexNormalizerRule(
-        pattern=r"(?<=[^\W\d_])[^\w\d\s&" + RegexNormalizerRule.EXCEPTION_CHARS + r"]+(?=[\d]+)",
-        replacement=" ",
-    ),
-    "ReplaceSpecialCharsBetweenDigitsAndLettersWithSpace": RegexNormalizerRule(
-        pattern=r"(?<=[\d])[^\w\d\s&" + RegexNormalizerRule.EXCEPTION_CHARS + r"]+(?=[^\W\d_]+)",
-        replacement=" ",
-    ),
-    "ReplaceSpecialCharsBetweenLettersWithSpace": RegexNormalizerRule(
-        pattern=r"(?<=[^\W\d_])[^\w\d\s&" + RegexNormalizerRule.EXCEPTION_CHARS + r"]+(?=[^\W\d_]+)",
-        replacement=" ",
-    )
-}
-
-
-class NormalizerFactory:
-    """Normalizer Factory Class"""
+    EXCEPTION_CHARS = r"\@\[\]'"
 
     @staticmethod
-    def get_normalizer(normalizer: str):
-        """A static method to get a Normalizer
+    def get_default_regex_normalizer_rule(regex_normalizer: str):
+        """ Creates a RegexNormalizerRule object based on the given rule and the current
+        EXCEPTION_CHARS.
 
         Args:
-            normalizer (str): Name of the desired Normalizer class
+            regex_normalizer (str): Name of the desired RegexNormalizerRule
         Returns:
-            (Normalizer): Normalizer Class
+            (RegexNormalizerRule): Default Regex Normalizer Rule
         """
-        if normalizer in DEFAULT_REGEX_NORM_RULES:
-            return DEFAULT_REGEX_NORM_RULES[normalizer]
-        normalizer_classes = {
-            NoOpNormalizer.__name__: NoOpNormalizer,
-            ASCIIFold.__name__: ASCIIFold,
-            NFC.__name__: NFC,
-            NFD.__name__: NFD,
-            NFKC.__name__: NFKC,
-            NFKD.__name__: NFKD,
-            Lowercase.__name__: Lowercase,
-        }
-        normalizer_class = normalizer_classes.get(normalizer)
-        if not normalizer_class:
-            raise TypeError(f"{normalizer} is not a valid Normalizer type.")
-        return normalizer_class()
+        if regex_normalizer in DEFAULT_REGEX_NORM_RULES:
+            regex_rule_dict = DEFAULT_REGEX_NORM_RULES[regex_normalizer]
+            # Inserts Current EXCEPTION_CHARS in String if Applicable
+            regex_rule_dict["pattern"] = regex_rule_dict["pattern"].format(
+                exception_chars=RegexNormalizerRuleFactory.EXCEPTION_CHARS
+            )
+            return RegexNormalizerRule(**regex_rule_dict)
 
     @staticmethod
     def get_regex_normalizers(regex_norm_rules):
@@ -320,3 +277,69 @@ class NormalizerFactory:
             RegexNormalizerRule(pattern=r["pattern"], replacement=r["replacement"])
             for r in regex_norm_rules
         ]
+
+
+DEFAULT_REGEX_NORM_RULES = {
+    "RemoveAposAtEndOfPossesiveForm": {
+        "pattern": r"^'(?=\S)|(?<=\S)'$",
+        "replacement": "",
+    },
+    "RemoveAdjacentAposAndSpace": {"pattern": r" '|' ", "replacement": ""},
+    "RemoveBeginningSpace": {"pattern": r"^\s+", "replacement": ""},
+    "RemoveTrailingSpace": {"pattern": r"\s+$", "replacement": ""},
+    "ReplaceSpacesWithSpace": {"pattern": r"\s+", "replacement": " "},
+    "ReplaceUnderscoreWithSpace": {"pattern": r"_", "replacement": " "},
+    "SeparateAposS": {"pattern": r"(?<=[^\s])'[sS]", "replacement": " 's"},
+    "ReplacePunctuationAtWordStartWithSpace": {
+        "pattern": r"^[^\w\d&" + CURRENCY_SYMBOLS + "{exception_chars}" + r"]+",
+        "replacement": " ",
+    },
+    "ReplacePunctuationAtWordEndWithSpace": {
+        "pattern": r"[^\w\d&" + CURRENCY_SYMBOLS + "{exception_chars}" + r"]+$",
+        "replacement": " ",
+    },
+    "ReplaceSpecialCharsBetweenLettersAndDigitsWithSpace": {
+        "pattern": r"(?<=[^\W\d_])[^\w\d\s&" + "{exception_chars}" + r"]+(?=[\d]+)",
+        "replacement": " ",
+    },
+    "ReplaceSpecialCharsBetweenDigitsAndLettersWithSpace": {
+        "pattern": r"(?<=[\d])[^\w\d\s&" + "{exception_chars}" + r"]+(?=[^\W\d_]+)",
+        "replacement": " ",
+    },
+    "ReplaceSpecialCharsBetweenLettersWithSpace": {
+        "pattern": r"(?<=[^\W\d_])[^\w\d\s&" + "{exception_chars}" + r"]+(?=[^\W\d_]+)",
+        "replacement": " ",
+    },
+}
+
+
+class NormalizerFactory:
+    """Normalizer Factory Class"""
+
+    @staticmethod
+    def get_normalizer(normalizer: str):
+        """A static method to get a Normalizer
+
+        Args:
+            normalizer (str): Name of the desired Normalizer class
+        Returns:
+            (Normalizer): Normalizer Class
+        """
+        if normalizer in DEFAULT_REGEX_NORM_RULES:
+            return RegexNormalizerRuleFactory.get_default_regex_normalizer_rule(
+                normalizer
+            )
+
+        normalizer_classes = {
+            NoOpNormalizer.__name__: NoOpNormalizer,
+            ASCIIFold.__name__: ASCIIFold,
+            NFC.__name__: NFC,
+            NFD.__name__: NFD,
+            NFKC.__name__: NFKC,
+            NFKD.__name__: NFKD,
+            Lowercase.__name__: Lowercase,
+        }
+        normalizer_class = normalizer_classes.get(normalizer)
+        if not normalizer_class:
+            raise TypeError(f"{normalizer} is not a valid Normalizer type.")
+        return normalizer_class()

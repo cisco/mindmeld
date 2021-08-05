@@ -20,7 +20,7 @@ from mindmeld.text_preparation.normalizers import (
     RegexNormalizerRule,
     Lowercase,
     ASCIIFold,
-    DEFAULT_REGEX_NORM_RULES
+    RegexNormalizerRuleFactory
 )
 from mindmeld.text_preparation.tokenizers import WhiteSpaceTokenizer
 from mindmeld.text_preparation.stemmers import EnglishNLTKStemmer
@@ -122,9 +122,12 @@ def test_create_text_preparation_pipeline():
 
 def test_keep_space_before_annotation():
     text = "Hello how are you {Lucien|name}"
+    regex_normalizer = RegexNormalizerRuleFactory.get_default_regex_normalizer_rule(
+        "RemoveTrailingSpace"
+    )
     modified_text = TextPreparationPipeline.modify_around_annotations(
         text=text,
-        function=DEFAULT_REGEX_NORM_RULES["RemoveTrailingSpace"].normalize,
+        function=regex_normalizer.normalize,
         keep_space_before_annotation=True
     )
     assert modified_text == text

@@ -18,7 +18,12 @@ import re
 import unicodedata
 
 from .preprocessors import Preprocessor, PreprocessorFactory, NoOpPreprocessor
-from .normalizers import Normalizer, NoOpNormalizer, NormalizerFactory
+from .normalizers import (
+    Normalizer,
+    NoOpNormalizer,
+    NormalizerFactory,
+    RegexNormalizerRuleFactory,
+)
 from .tokenizers import Tokenizer, TokenizerFactory
 from .stemmers import Stemmer, StemmerFactory, NoOpStemmer
 
@@ -464,6 +469,7 @@ class TextPreparationPipelineFactory:
             language=language,
             preprocessors=text_preparation_config.get("preprocessors"),
             regex_norm_rules=text_preparation_config.get("regex_norm_rules"),
+            keep_special_chars=text_preparation_config.get("keep_special_chars"),
             normalizers=normalizers,
             tokenizer=text_preparation_config.get("tokenizer"),
             stemmer=stemmer,
@@ -474,6 +480,7 @@ class TextPreparationPipelineFactory:
         language: str = ENGLISH_LANGUAGE_CODE,
         preprocessors: List[str] = None,
         regex_norm_rules: List[Dict] = None,
+        keep_special_chars: str = None,
         normalizers: List[str] = None,
         tokenizer: Tokenizer = None,
         stemmer: Stemmer = None,
@@ -498,6 +505,9 @@ class TextPreparationPipelineFactory:
             else [NoOpPreprocessor()]
         )
 
+        if keep_special_chars:
+            RegexNormalizerRuleFactory.EXCEPTION_CHARS = keep_special_chars
+
         normalizers = (
             [NormalizerFactory.get_normalizer(n) for n in normalizers]
             if normalizers
@@ -505,7 +515,7 @@ class TextPreparationPipelineFactory:
         )
 
         if regex_norm_rules:
-            regex_normalizers = NormalizerFactory.get_regex_normalizers(
+            regex_normalizers = RegexNormalizerRuleFactory.get_regex_normalizers(
                 regex_norm_rules
             )
             # Adds the regex normalizers as the first normalizers by default
