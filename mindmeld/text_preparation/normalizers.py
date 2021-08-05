@@ -242,7 +242,7 @@ class RegexNormalizerRuleFactory:
 
     @staticmethod
     def get_default_regex_normalizer_rule(regex_normalizer: str):
-        """ Creates a RegexNormalizerRule object based on the given rule and the current
+        """Creates a RegexNormalizerRule object based on the given rule and the current
         EXCEPTION_CHARS.
 
         Args:

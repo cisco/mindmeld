@@ -86,13 +86,22 @@ class TextPreparationPipeline:
             )
         return preprocessed_text
 
-    def normalize(self, text):
+    def normalize(self, text, keep_special_chars=None):
         """Normalize Text.
         Args:
             text (str): Text to normalize.
+            keep_special_chars (bool): Whether to prevent special characters (such as @, [, ])
+                from being removed in the normalization process. No longer supported at the
+                function level, can be specified in the config.
         Returns:
             normalized_text (str): Normalized text.
         """
+        if keep_special_chars:
+            logger.warning(
+                "'keep_special_chars' is depreciated as a parameter to normalize(). "
+                "You can specify 'keep_special_chars' in the TEXT_PREPARATION_CONFIG."
+            )
+
         normalized_tokens = self.tokenize_and_normalize(text)
         normalized_text = " ".join([t["entity"] for t in normalized_tokens])
         return normalized_text
@@ -113,13 +122,22 @@ class TextPreparationPipeline:
             )
         return normalized_text
 
-    def tokenize(self, text):
+    def tokenize(self, text, keep_special_chars=None):
         """
         Args:
             text (str): Input text.
+            keep_special_chars (bool): Whether to prevent special characters (such as @, [, ])
+                from being removed in the normalization process. No longer supported at the
+                function level, can be specified in the config.
         Returns:
             tokens (List[dict]): List of tokens represented as dictionaries.
         """
+        if keep_special_chars:
+            logger.warning(
+                "'keep_special_chars' is depreciated as a parameter to normalize(). "
+                "You can specify 'keep_special_chars' in the TEXT_PREPARATION_CONFIG."
+            )
+
         return self.tokenize_around_mindmeld_annotations(text)
 
     def tokenize_and_normalize(self, text):
