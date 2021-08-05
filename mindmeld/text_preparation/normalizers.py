@@ -226,6 +226,9 @@ class Lowercase(Normalizer):
 
 
 class RegexNormalizerRule(Normalizer):
+
+    EXCEPTION_CHARS = r"\@\[\]'" #\|\{\}
+
     def __init__(self, pattern: str, replacement: str):
         """Creates a RegexNormalizerRule instance."""
         self.pattern = pattern
@@ -236,7 +239,7 @@ class RegexNormalizerRule(Normalizer):
         return self._expr.sub(self.replacement, s)
 
 
-EXCEPTION_CHARS = r"\@\[\]\|\{\}'"
+
 DEFAULT_REGEX_NORM_RULES = {
     "RemoveAposAtEndOfPossesiveForm": RegexNormalizerRule(
         pattern=r"^'(?=\S)|(?<=\S)'$", replacement=""
@@ -248,25 +251,25 @@ DEFAULT_REGEX_NORM_RULES = {
     "ReplaceUnderscoreWithSpace": RegexNormalizerRule(pattern=r"_", replacement=" "),
     "SeparateAposS": RegexNormalizerRule(pattern=r"(?<=[^\s])'[sS]", replacement=" 's"),
     "ReplacePunctuationAtWordStartWithSpace": RegexNormalizerRule(
-        pattern=r"^[^\w\d&" + CURRENCY_SYMBOLS + EXCEPTION_CHARS + r"]+",
+        pattern=r"^[^\w\d&" + CURRENCY_SYMBOLS + RegexNormalizerRule.EXCEPTION_CHARS + r"]+",
         replacement=" ",
     ),
     "ReplacePunctuationAtWordEndWithSpace": RegexNormalizerRule(
-        pattern=r"[^\w\d&" + CURRENCY_SYMBOLS + EXCEPTION_CHARS + r"]+$",
+        pattern=r"[^\w\d&" + CURRENCY_SYMBOLS + RegexNormalizerRule.EXCEPTION_CHARS + r"]+$",
         replacement=" ",
     ),
     "ReplaceSpecialCharsBetweenLettersAndDigitsWithSpace": RegexNormalizerRule(
-        pattern=r"(?<=[^\W\d_])[^\w\d\s&" + EXCEPTION_CHARS + r"]+(?=[\d]+)",
+        pattern=r"(?<=[^\W\d_])[^\w\d\s&" + RegexNormalizerRule.EXCEPTION_CHARS + r"]+(?=[\d]+)",
         replacement=" ",
     ),
     "ReplaceSpecialCharsBetweenDigitsAndLettersWithSpace": RegexNormalizerRule(
-        pattern=r"(?<=[\d])[^\w\d\s&" + EXCEPTION_CHARS + r"]+(?=[^\W\d_]+)",
+        pattern=r"(?<=[\d])[^\w\d\s&" + RegexNormalizerRule.EXCEPTION_CHARS + r"]+(?=[^\W\d_]+)",
         replacement=" ",
     ),
     "ReplaceSpecialCharsBetweenLettersWithSpace": RegexNormalizerRule(
-        pattern=r"(?<=[^\W\d_])[^\w\d\s&" + EXCEPTION_CHARS + r"]+(?=[^\W\d_]+)",
+        pattern=r"(?<=[^\W\d_])[^\w\d\s&" + RegexNormalizerRule.EXCEPTION_CHARS + r"]+(?=[^\W\d_]+)",
         replacement=" ",
-    ),
+    )
 }
 
 
