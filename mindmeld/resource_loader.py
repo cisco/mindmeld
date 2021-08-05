@@ -257,8 +257,17 @@ class ResourceLoader:
         # }
         self.file_to_query_info = {}
         self._hasher = Hasher()
-        self.query_cache = query_cache or QueryCache(app_path=self.app_path)
+        self._query_cache = query_cache
         self._hash_to_model_path = None
+
+    @property
+    def query_cache(self):
+        """
+        Lazy load the query cache since it's not required for inference.
+        """
+        if not self._query_cache:
+            self._query_cache = QueryCache(app_path=self.app_path)
+        return self._query_cache
 
     @property
     def hash_to_model_path(self):
@@ -898,8 +907,7 @@ class ResourceLoader:
         query_factory = query_factory or QueryFactory.create_query_factory(
             app_path, preprocessor=preprocessor
         )
-        query_cache = QueryCache(app_path)
-        return ResourceLoader(app_path, query_factory, query_cache)
+        return ResourceLoader(app_path, query_factory)
 
     RSC_HASH_MAP = {
         GAZETTEER_RSC: get_gazetteers_hash,

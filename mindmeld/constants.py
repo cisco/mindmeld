@@ -17,7 +17,7 @@ DEFAULT_TRAIN_SET_REGEX = r"train.*\.txt"
 DEFAULT_TEST_SET_REGEX = r"test.*\.txt"
 BLUEPRINTS_URL = "https://blueprints.mindmeld.com"
 BINARIES_URL = "https://binaries.mindmeld.com"
-DUCKLING_VERSION = "20200701"
+DUCKLING_VERSION = "20210730"
 
 
 # ACTIVE LEARNING CONSTANTS
@@ -140,6 +140,7 @@ DUCKLING_TO_SYS_ENTITY_MAPPINGS = {
         "sys_ordinal",
         "sys_time",
         "sys_interval",
+        "sys_phone-number",
     ],
     "el": ["sys_duration", "sys_number", "sys_ordinal", "sys_time", "sys_interval"],
     "en": [
@@ -206,8 +207,9 @@ DUCKLING_TO_SYS_ENTITY_MAPPINGS = {
         "sys_ordinal",
         "sys_time",
         "sys_interval",
+        "sys_phone-number",
     ],
-    "ja": ["sys_duration", "sys_number", "sys_ordinal"],
+    "ja": ["sys_duration", "sys_number", "sys_ordinal", "sys_time", "sys_phone-number"],
     "ka": [
         "sys_duration",
         "sys_number",
