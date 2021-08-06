@@ -127,7 +127,9 @@ class Gazetteer:
         # Only update the relevant data structures when the entity isn't
         # already in the gazetteer. Update the popularity either way.
         tokenized_gaz_entry = tuple(
-            token["text"] for token in self.text_preparation_pipeline.tokenize(entity)
+            token["entity"] for token in self.text_preparation_pipeline.tokenize_and_normalize(
+                entity
+            )
         )
 
         if self.pop_dict[tokenized_gaz_entry] == 0:

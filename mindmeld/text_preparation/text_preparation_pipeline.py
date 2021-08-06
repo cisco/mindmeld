@@ -101,7 +101,6 @@ class TextPreparationPipeline:
                 "'keep_special_chars' is depreciated as a parameter to normalize(). "
                 "You can specify 'keep_special_chars' in the TEXT_PREPARATION_CONFIG."
             )
-
         normalized_tokens = self.tokenize_and_normalize(text)
         normalized_text = " ".join([t["entity"] for t in normalized_tokens])
         return normalized_text
@@ -137,7 +136,6 @@ class TextPreparationPipeline:
                 "'keep_special_chars' is depreciated as a parameter to normalize(). "
                 "You can specify 'keep_special_chars' in the TEXT_PREPARATION_CONFIG."
             )
-
         return self.tokenize_around_mindmeld_annotations(text)
 
     def tokenize_and_normalize(self, text):
@@ -524,7 +522,7 @@ class TextPreparationPipelineFactory:
         )
 
         if keep_special_chars:
-            RegexNormalizerRuleFactory.set_exception_chars(keep_special_chars)
+            RegexNormalizerRuleFactory.EXCEPTION_CHARS = keep_special_chars
 
         normalizers = (
             [NormalizerFactory.get_normalizer(n) for n in normalizers]
