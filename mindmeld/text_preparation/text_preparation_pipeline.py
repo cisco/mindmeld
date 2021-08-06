@@ -79,11 +79,7 @@ class TextPreparationPipeline:
         """
         preprocessed_text = text
         for preprocessor in self.preprocessors:
-            preprocessed_text = TextPreparationPipeline.modify_around_annotations(
-                text=preprocessed_text,
-                function=preprocessor.process,
-                keep_space_before_annotation=True,
-            )
+            preprocessed_text = preprocessor.process(preprocessed_text)
         return preprocessed_text
 
     def normalize(self, text, keep_special_chars=None):
@@ -208,7 +204,7 @@ class TextPreparationPipeline:
         return list(MINDMELD_ANNOTATION_PATTERN.finditer(text))
 
     @staticmethod
-    def modify_around_annotations(text, function, keep_space_before_annotation=False):
+    def modify_around_annotations(text, function):
         """Applied a function around the mindmeld annotation.
 
         function(pre_entity_text) + { + function(entity_text) + |entity_name}
@@ -217,8 +213,6 @@ class TextPreparationPipeline:
         Args:
             text (str): Original sentence with markup to modify.
             function (function): Function to apply around the annotation
-            keep_space_before_annotation (bool): If True and if there is a space before entity
-                annotation, then the space will not be modified.
         Returns:
             modified_text (str): Text modified around annotations.
         """
@@ -229,14 +223,6 @@ class TextPreparationPipeline:
 
         for match in matches:
             entity_start, entity_end = match.span()
-
-            # Include Space Before Entity Annotation
-            if (
-                keep_space_before_annotation
-                and entity_start > 0
-                and text[entity_start - 1].isspace()
-            ):
-                entity_start -= 1
 
             # Adds "function(pre_entity_text) "{.. or "function(pre_entity_text)" {..
             text_before_entity = text[prev_entity_end:entity_start]

@@ -238,6 +238,7 @@ class RegexNormalizerRule(Normalizer):
 
 class RegexNormalizerRuleFactory:
 
+    # exception_chars is a class var so that updates are accessible throughout the application
     exception_chars = r"\@\[\]'"
 
     @staticmethod

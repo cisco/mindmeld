@@ -21,14 +21,13 @@ from mindmeld.converter.dialogflow import DialogflowConverter
 from mindmeld.components import NaturalLanguageProcessor, QuestionAnswerer
 from mindmeld.components._elasticsearch_helpers import create_es_client
 from mindmeld.markup import load_query
-from mindmeld.query_factory import QueryFactory
 from mindmeld.resource_loader import ResourceLoader
 from mindmeld.system_entity_recognizer import DucklingRecognizer
 from mindmeld.text_preparation.preprocessors import Preprocessor
 from mindmeld.text_preparation.stemmers import EnglishNLTKStemmer
 from mindmeld.text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
 from mindmeld.text_preparation.tokenizers import WhiteSpaceTokenizer
-
+from mindmeld.query_factory import QueryFactory
 
 warnings.filterwarnings(
     "module", category=DeprecationWarning, module="sklearn.preprocessing.label"
