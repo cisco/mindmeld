@@ -98,7 +98,7 @@ class TextPreparationPipeline:
         """
         if keep_special_chars:
             logger.warning(
-                "'keep_special_chars' is depreciated as a parameter to normalize(). "
+                "'keep_special_chars' is deprecated as a parameter to normalize(). "
                 "You can specify 'keep_special_chars' in the TEXT_PREPARATION_CONFIG."
             )
         normalized_tokens = self.tokenize_and_normalize(text)
@@ -133,7 +133,7 @@ class TextPreparationPipeline:
         """
         if keep_special_chars:
             logger.warning(
-                "'keep_special_chars' is depreciated as a parameter to normalize(). "
+                "'keep_special_chars' is deprecated as a parameter to normalize(). "
                 "You can specify 'keep_special_chars' in the TEXT_PREPARATION_CONFIG."
             )
         return self.tokenize_around_mindmeld_annotations(text)
