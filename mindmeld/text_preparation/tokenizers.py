@@ -83,8 +83,6 @@ class CharacterTokenizer(Tokenizer):
         """
         if text == "":
             return []
-        if not text:
-            raise AssertionError("'text' cannot be None.")
         tokens = []
         for idx, char in enumerate(text):
             if not char.isspace():
@@ -113,8 +111,6 @@ class LetterTokenizer(Tokenizer):
         """
         if text == "":
             return []
-        if not text:
-            raise AssertionError("'text' cannot be None.")
         token_num_by_char = LetterTokenizer.get_token_num_by_char(text)
         return LetterTokenizer.create_tokens(text, token_num_by_char)
 
@@ -169,8 +165,6 @@ class LetterTokenizer(Tokenizer):
         """
         if text == "":
             return []
-        if not text:
-            raise AssertionError("'text' cannot be None.")
         tokens = []
         token_text = ""
         for index, token_num in enumerate(token_num_by_char):
@@ -208,8 +202,6 @@ class WhiteSpaceTokenizer(Tokenizer):
         """
         if text == "":
             return []
-        if not text:
-            raise AssertionError("'text' cannot be None.")
         tokens = []
         token = {}
         token_text = ""
@@ -253,8 +245,6 @@ class SpacyTokenizer(Tokenizer):
         """
         if text == "":
             return []
-        if not text:
-            raise AssertionError("'text' cannot be None.")
         spacy_tokens = [(token.text, token.idx) for token in self.spacy_model(text)]
         tokens = []
         for token_text, token_idx in spacy_tokens:
