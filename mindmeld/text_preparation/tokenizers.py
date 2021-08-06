@@ -229,9 +229,9 @@ class WhiteSpaceTokenizer(Tokenizer):
 
 
 class SpacyTokenizer(Tokenizer):
-    """A Tokenizer that splits text at spaces."""
+    """A Tokenizer that uses Spacy to split text into tokens."""
 
-    def __init__(self, language, spacy_model_size):
+    def __init__(self, language, spacy_model_size="sm"):
         """Initializes a SpacyTokenizer.
 
         Args:
@@ -255,14 +255,11 @@ class SpacyTokenizer(Tokenizer):
             return []
         if not text:
             raise AssertionError("'text' cannot be None.")
-        spacy_tokens = [token.text for token in self.spacy_model(text)]
-
-        start_index = 0
+        spacy_tokens = [(token.text, token.idx) for token in self.spacy_model(text)]
         tokens = []
-        for token_text in spacy_tokens:
-            token = {"start": start_index, "text": token_text}
+        for token_text, token_idx in spacy_tokens:
+            token = {"start": token_idx, "text": token_text}
             tokens.append(token)
-            start_index += len(token_text)
         return tokens
 
 

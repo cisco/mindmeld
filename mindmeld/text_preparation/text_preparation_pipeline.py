@@ -524,7 +524,7 @@ class TextPreparationPipelineFactory:
         )
 
         if keep_special_chars:
-            RegexNormalizerRuleFactory.EXCEPTION_CHARS = keep_special_chars
+            RegexNormalizerRuleFactory.set_exception_chars(keep_special_chars)
 
         normalizers = (
             [NormalizerFactory.get_normalizer(n) for n in normalizers]

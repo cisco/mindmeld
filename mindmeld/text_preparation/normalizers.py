@@ -238,7 +238,23 @@ class RegexNormalizerRule(Normalizer):
 
 class RegexNormalizerRuleFactory:
 
-    EXCEPTION_CHARS = r"\@\[\]'"
+    exception_chars = r"\@\[\]'"
+
+    @staticmethod
+    def get_exception_chars():
+        """
+        Returns:
+            exception_chars (str): String with characters to avoid normalizing.
+        """
+        return RegexNormalizerRuleFactory.exception_chars
+
+    @staticmethod
+    def set_exception_chars(exception_chars):
+        """Sets the RegexNormalizerRuleFactory's exception characters.
+        Args:
+            exception_chars (str): String with characters to avoid normalizing.
+        """
+        RegexNormalizerRuleFactory.exception_chars = exception_chars
 
     @staticmethod
     def get_default_regex_normalizer_rule(regex_normalizer: str):
@@ -252,9 +268,9 @@ class RegexNormalizerRuleFactory:
         """
         if regex_normalizer in DEFAULT_REGEX_NORM_RULES:
             regex_rule_dict = DEFAULT_REGEX_NORM_RULES[regex_normalizer]
-            # Inserts Current EXCEPTION_CHARS in String if Applicable
+            # Inserts current exception_chars in pattern string if applicable
             regex_rule_dict["pattern"] = regex_rule_dict["pattern"].format(
-                exception_chars=RegexNormalizerRuleFactory.EXCEPTION_CHARS
+                exception_chars=RegexNormalizerRuleFactory.exception_chars
             )
             return RegexNormalizerRule(**regex_rule_dict)
 
