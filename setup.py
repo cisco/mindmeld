@@ -14,7 +14,6 @@ requirements = [
     "Click~=7.1",
     "click-log==0.1.8",
     "distro~=1.3",
-    "dvc>=1.8.1",
     # elasticsearch-py 7.14 breaks backwards compatibility with servers prior to 7.11
     "elasticsearch>=5.0,<7.14",
     "Flask~=1.0",
@@ -115,6 +114,9 @@ setup(
         ],
         "active_learning": [
             "matplotlib~=3.3.1",
+        ],
+        "dvc": [
+            "dvc>=1.8.1"
         ]
     },
 )

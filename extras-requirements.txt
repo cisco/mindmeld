@@ -5,3 +5,4 @@
 -e .[augment]
 -e .[language_annotator]
 -e .[active_learning]
+-e .[dvc]
