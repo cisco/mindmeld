@@ -10,20 +10,20 @@ Tests for TextPreparationPipeline in the `text_preparation.text_preparation_pipe
 import pytest
 
 from mindmeld.components._config import ENGLISH_LANGUAGE_CODE
-from mindmeld.text_preparation.text_preparation_pipeline import (
-    TextPreparationPipeline,
-    TextPreparationPipelineError,
-    TextPreparationPipelineFactory,
-)
-from mindmeld.text_preparation.preprocessors import NoOpPreprocessor
 from mindmeld.text_preparation.normalizers import (
     RegexNormalizerRule,
     Lowercase,
     ASCIIFold,
     RegexNormalizerRuleFactory
 )
-from mindmeld.text_preparation.tokenizers import WhiteSpaceTokenizer
+from mindmeld.text_preparation.preprocessors import NoOpPreprocessor
 from mindmeld.text_preparation.stemmers import EnglishNLTKStemmer
+from mindmeld.text_preparation.text_preparation_pipeline import (
+    TextPreparationPipeline,
+    TextPreparationPipelineError,
+    TextPreparationPipelineFactory,
+)
+from mindmeld.text_preparation.tokenizers import WhiteSpaceTokenizer
 
 
 def test_text_preparation_pipeline_tokenizer_not_none():

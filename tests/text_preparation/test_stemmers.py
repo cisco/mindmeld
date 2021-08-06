@@ -8,13 +8,13 @@ test Stemmers
 Tests for Stemmers in the `text_preparation.stemmers` module.
 """
 import pytest
-from mindmeld.query_factory import QueryFactory
 from mindmeld.text_preparation.stemmers import (
     StemmerFactory,
     EnglishNLTKStemmer,
     NoOpStemmer,
     SnowballNLTKStemmer,
 )
+from mindmeld.query_factory import QueryFactory
 
 
 @pytest.mark.parametrize(

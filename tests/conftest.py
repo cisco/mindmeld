@@ -26,8 +26,8 @@ from mindmeld.resource_loader import ResourceLoader
 from mindmeld.system_entity_recognizer import DucklingRecognizer
 from mindmeld.text_preparation.preprocessors import Preprocessor
 from mindmeld.text_preparation.stemmers import EnglishNLTKStemmer
-from mindmeld.text_preparation.tokenizers import WhiteSpaceTokenizer
 from mindmeld.text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
+from mindmeld.text_preparation.tokenizers import WhiteSpaceTokenizer
 
 
 warnings.filterwarnings(

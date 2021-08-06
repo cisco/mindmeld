@@ -18,12 +18,12 @@ import logging
 import unicodedata
 
 from .spacy_model_factory import SpacyModelFactory
+from ..components._config import ENGLISH_LANGUAGE_CODE
 from ..constants import (
     UNICODE_NON_LATIN_CATEGORY,
     UNICODE_SPACE_CATEGORY,
     SPACY_SUPPORTED_LANGUAGES,
 )
-from ..components._config import ENGLISH_LANGUAGE_CODE
 
 
 logger = logging.getLogger(__name__)

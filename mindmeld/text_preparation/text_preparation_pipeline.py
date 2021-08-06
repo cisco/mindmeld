@@ -17,15 +17,15 @@ from typing import List, Dict
 import re
 import unicodedata
 
-from .preprocessors import Preprocessor, PreprocessorFactory, NoOpPreprocessor
 from .normalizers import (
     Normalizer,
     NoOpNormalizer,
     NormalizerFactory,
     RegexNormalizerRuleFactory,
 )
-from .tokenizers import Tokenizer, TokenizerFactory
+from .preprocessors import Preprocessor, PreprocessorFactory, NoOpPreprocessor
 from .stemmers import Stemmer, StemmerFactory, NoOpStemmer
+from .tokenizers import Tokenizer, TokenizerFactory
 
 from ..components._config import (
     get_text_preparation_config,
