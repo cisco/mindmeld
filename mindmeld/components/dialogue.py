@@ -752,7 +752,7 @@ class AutoEntityFilling:
         self._app = app
         self._app.lazy_init()
         self._handler = handler
-        self._form = Form(entities=form['entities'], exit_keys=form.get('exit_keys'),
+        self._form = Form(entities=form.get('entities'), exit_keys=form.get('exit_keys'),
                           exit_msg=form.get('exit_msg'), max_retries=form.get('max_retries'))
         self._local_entity_form = None
         self._prompt_turn = None

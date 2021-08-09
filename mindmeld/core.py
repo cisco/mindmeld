@@ -13,7 +13,7 @@
 
 """This module contains a collection of the core data structures used in MindMeld."""
 import logging
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Callable
 import immutables
 
 from .constants import SYSTEM_ENTITY_PREFIX
@@ -1022,11 +1022,10 @@ class FormEntity:
         value: Optional[Dict] = None,
         default_eval: Optional[bool] = True,
         hints: Optional[List[str]] = None,
-        custom_eval: Optional[str] = None,
+        custom_eval: Optional[Callable] = None,
     ):
         self.entity = entity
         self.role = role
-
         if isinstance(responses, str):
             responses = [responses]
         self.responses = responses or [

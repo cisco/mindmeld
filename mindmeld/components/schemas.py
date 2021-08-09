@@ -397,7 +397,15 @@ class FormEntitySchema(Schema):
     value = fields.Dict(allow_none=True)
     default_eval = fields.Boolean(default=True)
     hints = fields.List(fields.String(), allow_none=True)
-    custom_eval = fields.String(allow_none=True)
+    custom_eval = fields.Method("serialize_custom_eval",
+                                deserialize="deserialize_custom_eval")
+
+    def serialize_custom_eval(self, form):  # pylint: disable=no-self-use
+        if form:
+            return form.custom_eval
+
+    def deserialize_custom_eval(self, custom_eval):  # pylint: disable=no-self-use
+            return custom_eval
 
     def serialize_value(self, form):  # pylint: disable=no-self-use
         if form:
