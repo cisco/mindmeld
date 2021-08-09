@@ -118,16 +118,3 @@ def test_create_text_preparation_pipeline():
     assert isinstance(text_preparation_pipeline.normalizers[2], ASCIIFold)
     assert isinstance(text_preparation_pipeline.tokenizer, WhiteSpaceTokenizer)
     assert isinstance(text_preparation_pipeline.stemmer, EnglishNLTKStemmer)
-
-
-def test_keep_space_before_annotation():
-    text = "Hello how are you {Lucien|name}"
-    regex_normalizer = RegexNormalizerRuleFactory.get_default_regex_normalizer_rule(
-        "RemoveTrailingSpace"
-    )
-    modified_text = TextPreparationPipeline.modify_around_annotations(
-        text=text,
-        function=regex_normalizer.normalize,
-        keep_space_before_annotation=True
-    )
-    assert modified_text == text
