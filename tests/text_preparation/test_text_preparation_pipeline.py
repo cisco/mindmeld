@@ -11,12 +11,15 @@ import pytest
 
 from mindmeld.components._config import ENGLISH_LANGUAGE_CODE
 from mindmeld.text_preparation.normalizers import (
+    ASCIIFold,
+    Normalizer,
+    NoOpNormalizer,
     RegexNormalizerRule,
-    Lowercase,
-    ASCIIFold
+    Lowercase
 )
-from mindmeld.text_preparation.preprocessors import NoOpPreprocessor
+from mindmeld.text_preparation.preprocessors import NoOpPreprocessor, Preprocessor
 from mindmeld.text_preparation.stemmers import EnglishNLTKStemmer
+from mindmeld.text_preparation.tokenizers import SpacyTokenizer
 from mindmeld.text_preparation.text_preparation_pipeline import (
     TextPreparationPipeline,
     TextPreparationPipelineError,
@@ -116,4 +119,21 @@ def test_create_text_preparation_pipeline():
     assert isinstance(text_preparation_pipeline.normalizers[1], Lowercase)
     assert isinstance(text_preparation_pipeline.normalizers[2], ASCIIFold)
     assert isinstance(text_preparation_pipeline.tokenizer, WhiteSpaceTokenizer)
+    assert isinstance(text_preparation_pipeline.stemmer, EnglishNLTKStemmer)
+
+def test_construct_pipeline_components():
+
+    text_preparation_pipeline = TextPreparationPipelineFactory.create_text_preparation_pipeline(
+        preprocessors = ("NoOpPreprocessor", NoOpPreprocessor()),
+        normalizers = ("RemoveBeginningSpace", NoOpNormalizer(), "ReplaceSpacesWithSpace", Lowercase()),
+        tokenizer = "SpacyTokenizer",
+        stemmer = None
+    )
+
+    assert text_preparation_pipeline.language == ENGLISH_LANGUAGE_CODE
+    for preprocessor in text_preparation_pipeline.preprocessors:
+        assert isinstance(preprocessor, Preprocessor)
+    for normalizer in text_preparation_pipeline.normalizers:
+        assert isinstance(normalizer, Normalizer)
+    assert isinstance(text_preparation_pipeline.tokenizer, SpacyTokenizer)
     assert isinstance(text_preparation_pipeline.stemmer, EnglishNLTKStemmer)
