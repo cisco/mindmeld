@@ -121,7 +121,7 @@ def test_create_text_preparation_pipeline():
     assert isinstance(text_preparation_pipeline.tokenizer, WhiteSpaceTokenizer)
     assert isinstance(text_preparation_pipeline.stemmer, EnglishNLTKStemmer)
 
-def test_construct_pipeline_components():
+def test_construct_pipeline_components_valid_input():
 
     text_preparation_pipeline = TextPreparationPipelineFactory.create_text_preparation_pipeline(
         preprocessors = ("NoOpPreprocessor", NoOpPreprocessor()),
@@ -137,3 +137,38 @@ def test_construct_pipeline_components():
         assert isinstance(normalizer, Normalizer)
     assert isinstance(text_preparation_pipeline.tokenizer, SpacyTokenizer)
     assert isinstance(text_preparation_pipeline.stemmer, EnglishNLTKStemmer)
+
+
+def test_construct_pipeline_components_invalid_input():
+
+    with pytest.raises(TypeError):
+        TextPreparationPipelineFactory.create_text_preparation_pipeline(
+            preprocessors = None,
+            normalizers = ("SpacyTokenizer"),
+            tokenizer = None,
+            stemmer = None
+        )
+
+    with pytest.raises(TypeError):
+        TextPreparationPipelineFactory.create_text_preparation_pipeline(
+            preprocessors = None,
+            normalizers = None,
+            tokenizer = "NoOpNormalizer",
+            stemmer = None
+        )
+    
+    with pytest.raises(TypeError):
+        TextPreparationPipelineFactory.create_text_preparation_pipeline(
+            preprocessors = None,
+            normalizers = None,
+            tokenizer = None,
+            stemmer = "NoOpPreprocessor"
+        )
+
+    with pytest.raises(TypeError):
+        TextPreparationPipelineFactory.create_text_preparation_pipeline(
+            preprocessors = ("NoOpNormalizer"),
+            normalizers = None,
+            tokenizer = None,
+            stemmer = None
+        )

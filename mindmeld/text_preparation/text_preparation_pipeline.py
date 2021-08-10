@@ -503,7 +503,6 @@ class TextPreparationPipelineFactory:
         Returns:
             TextPreparationPipeline: A TextPreparationPipeline class.
         """
-
         # Instantiate Preprocessors
         instantiated_preprocessors = (
             TextPreparationPipelineFactory._construct_pipeline_components(
