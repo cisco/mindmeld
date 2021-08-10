@@ -492,12 +492,13 @@ class TextPreparationPipelineFactory:
         Args:
             language (str, optional): Language as specified using a 639-1/2 code.
             preprocessors (Tuple[Union[str, Preprocessor]]): List of preprocessor class
-                names.
+                names or objects.
             regex_norm_rules (List[Dict]): List of regex normalization rules represented
                 as dictionaries. ({"pattern":<pattern>, "replacement":<replacement>})
-            normalizers (Tuple[Union[str, Preprocessor]]): List of normalizer class names.
-            tokenizer (Union[str, Tokenizer]): Class name of Tokenizer to use.
-            stemmer (Union[str, Stemmer]): Class name of Stemmer to use.
+            normalizers (Tuple[Union[str, Preprocessor]]): List of normalizer class names or
+                objects.
+            tokenizer (Union[str, Tokenizer]): Class name of Tokenizer to use or Tokenizer object.
+            stemmer (Union[str, Stemmer]): Class name of Stemmer to use or Stemmer object.
 
         Returns:
             TextPreparationPipeline: A TextPreparationPipeline class.
@@ -505,8 +506,8 @@ class TextPreparationPipelineFactory:
 
         # Instantiate Preprocessors
         instantiated_preprocessors = (
-            TextPreparationPipelineFactory._instantiate_pipeline_components(
-                Preprocessor, preprocessors, language
+            TextPreparationPipelineFactory._construct_pipeline_components(
+                Preprocessor, preprocessors
             )
             if preprocessors
             else [NoOpPreprocessor()]
@@ -514,12 +515,12 @@ class TextPreparationPipelineFactory:
 
         # Update Regex Normalization Exception Characters as Specified in the Config
         if keep_special_chars:
-            RegexNormalizerRuleFactory.set_exception_chars(keep_special_chars)
+            RegexNormalizerRuleFactory.EXCEPTION_CHARS = keep_special_chars
 
         # Instantiate Normalizers
         instantiated_normalizers = (
-            TextPreparationPipelineFactory._instantiate_pipeline_components(
-                Normalizer, normalizers, language
+            TextPreparationPipelineFactory._construct_pipeline_components(
+                Normalizer, normalizers
             )
             if normalizers
             else [NoOpNormalizer()]
@@ -535,18 +536,18 @@ class TextPreparationPipelineFactory:
 
         # Instantiate Tokenizer
         instantiated_tokenizer = (
-            TextPreparationPipelineFactory._instantiate_pipeline_components(
+            TextPreparationPipelineFactory._construct_pipeline_components(
                 Tokenizer, tokenizer, language
-            )
+            )[0]
             if tokenizer
             else TokenizerFactory.get_tokenizer_by_language(language)
         )
 
         # Instantiate Stemmer
         instantiated_stemmer = (
-            TextPreparationPipelineFactory._instantiate_pipeline_components(
-                Stemmer, stemmer, language
-            )
+            TextPreparationPipelineFactory._construct_pipeline_components(
+                Stemmer, stemmer
+            )[0]
             if stemmer
             else StemmerFactory.get_stemmer_by_language(language)
         )
@@ -567,18 +568,20 @@ class TextPreparationPipelineFactory:
         )
 
     @staticmethod
-    def _instantiate_pipeline_components(  # pylint: disable=W0640
+    def _construct_pipeline_components(  # pylint: disable=W0640
         expected_component_class, components, language=None
     ):
-        """Helper method to instantiate the components of a TextPreparationPipeline by iterating
-        through a tuple of either Strings or Component Objects. If the value is a string, the
-        related component_factory_getter will be used to instantiate the required component.
+        """Helper method to instantiate the components of a TextPreparationPipeline.
+
         Args:
+            expected_component_class (Class): The expected type of the component.
+            components (Tuple[Union[str, Object]]): A List/Tuple of components that are either
+                strings representing the object that needs to be instantiated or objects that are
+                already instantiated.
+            language (str, optional): Language as specified using a 639-1/2 code.
 
-        expected_component_class (Class): The expected type of the component.
-        component_factory_getter (function):
-        components List[Object]:
-
+        Returns:
+            instantiated_components (List[Object]): A list instantiated components.
         """
         if not isinstance(components, (list, tuple)):
             components = tuple([components])
@@ -608,6 +611,4 @@ class TextPreparationPipelineFactory:
                     f"{component} must be of type String or {expected_component_class.__name__}."
                 )
 
-        if len(instantiated_components) == 1:
-            return instantiated_components[0]
         return instantiated_components
