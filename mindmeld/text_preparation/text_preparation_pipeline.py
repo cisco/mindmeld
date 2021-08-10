@@ -505,7 +505,7 @@ class TextPreparationPipelineFactory:
         """
         # Instantiate Preprocessors
         instantiated_preprocessors = (
-            TextPreparationPipelineFactory._construct_multiple_pipeline_components(
+            TextPreparationPipelineFactory._construct_pipeline_components(
                 Preprocessor, preprocessors
             )
             if preprocessors
@@ -518,7 +518,7 @@ class TextPreparationPipelineFactory:
 
         # Instantiate Normalizers
         instantiated_normalizers = (
-            TextPreparationPipelineFactory._construct_multiple_pipeline_components(
+            TextPreparationPipelineFactory._construct_pipeline_components(
                 Normalizer, normalizers
             )
             if normalizers
@@ -535,7 +535,7 @@ class TextPreparationPipelineFactory:
 
         # Instantiate Tokenizer
         instantiated_tokenizer = (
-            TextPreparationPipelineFactory._construct_single_pipeline_component(
+            TextPreparationPipelineFactory._construct_pipeline_component(
                 Tokenizer, tokenizer, language
             )
             if tokenizer
@@ -544,7 +544,7 @@ class TextPreparationPipelineFactory:
 
         # Instantiate Stemmer
         instantiated_stemmer = (
-            TextPreparationPipelineFactory._construct_single_pipeline_component(
+            TextPreparationPipelineFactory._construct_pipeline_component(
                 Stemmer, stemmer
             )
             if stemmer
@@ -567,7 +567,7 @@ class TextPreparationPipelineFactory:
         )
 
     @staticmethod
-    def _construct_multiple_pipeline_components(  # pylint: disable=W0640
+    def _construct_pipeline_components(  # pylint: disable=W0640
         expected_component_class, components, language=None
     ):
         """Helper method to instantiate multiple components of a TextPreparationPipeline.
@@ -585,14 +585,14 @@ class TextPreparationPipelineFactory:
         instantiated_components = []
         for component in components:
             instantiated_components.append(
-                TextPreparationPipelineFactory._construct_single_pipeline_component(
+                TextPreparationPipelineFactory._construct_pipeline_component(
                     expected_component_class, component, language
                 )
             )
         return instantiated_components
 
     @staticmethod
-    def _construct_single_pipeline_component(  # pylint: disable=W0640
+    def _construct_pipeline_component(  # pylint: disable=W0640
         expected_component_class, component, language=None
     ):
         """Helper method to instantiate a single component of a TextPreparationPipeline.
