@@ -15,11 +15,11 @@ from mindmeld.text_preparation.normalizers import (
     Normalizer,
     NoOpNormalizer,
     RegexNormalizerRule,
-    Lowercase
+    Lowercase,
 )
 from mindmeld.text_preparation.preprocessors import NoOpPreprocessor, Preprocessor
 from mindmeld.text_preparation.stemmers import EnglishNLTKStemmer
-from mindmeld.text_preparation.tokenizers import SpacyTokenizer
+from mindmeld.text_preparation.tokenizers import NoOpTokenizer, SpacyTokenizer
 from mindmeld.text_preparation.text_preparation_pipeline import (
     TextPreparationPipeline,
     TextPreparationPipelineError,
@@ -121,13 +121,21 @@ def test_create_text_preparation_pipeline():
     assert isinstance(text_preparation_pipeline.tokenizer, WhiteSpaceTokenizer)
     assert isinstance(text_preparation_pipeline.stemmer, EnglishNLTKStemmer)
 
+
 def test_construct_pipeline_components_valid_input():
 
-    text_preparation_pipeline = TextPreparationPipelineFactory.create_text_preparation_pipeline(
-        preprocessors = ("NoOpPreprocessor", NoOpPreprocessor()),
-        normalizers = ("RemoveBeginningSpace", NoOpNormalizer(), "ReplaceSpacesWithSpace", Lowercase()),
-        tokenizer = "SpacyTokenizer",
-        stemmer = None
+    text_preparation_pipeline = (
+        TextPreparationPipelineFactory.create_text_preparation_pipeline(
+            preprocessors=("NoOpPreprocessor", NoOpPreprocessor()),
+            normalizers=(
+                "RemoveBeginningSpace",
+                NoOpNormalizer(),
+                "ReplaceSpacesWithSpace",
+                Lowercase(),
+            ),
+            tokenizer="SpacyTokenizer",
+            stemmer=None,
+        )
     )
 
     assert text_preparation_pipeline.language == ENGLISH_LANGUAGE_CODE
@@ -143,32 +151,48 @@ def test_construct_pipeline_components_invalid_input():
 
     with pytest.raises(TypeError):
         TextPreparationPipelineFactory.create_text_preparation_pipeline(
-            preprocessors = None,
-            normalizers = ("SpacyTokenizer"),
-            tokenizer = None,
-            stemmer = None
+            preprocessors=None,
+            normalizers=("SpacyTokenizer"),
+            tokenizer=None,
+            stemmer=None,
         )
 
     with pytest.raises(TypeError):
         TextPreparationPipelineFactory.create_text_preparation_pipeline(
-            preprocessors = None,
-            normalizers = None,
-            tokenizer = "NoOpNormalizer",
-            stemmer = None
-        )
-    
-    with pytest.raises(TypeError):
-        TextPreparationPipelineFactory.create_text_preparation_pipeline(
-            preprocessors = None,
-            normalizers = None,
-            tokenizer = None,
-            stemmer = "NoOpPreprocessor"
+            preprocessors=None,
+            normalizers=(NoOpTokenizer(), "NoOpTokenizer"),
+            tokenizer=None,
+            stemmer=None,
         )
 
     with pytest.raises(TypeError):
         TextPreparationPipelineFactory.create_text_preparation_pipeline(
-            preprocessors = ("NoOpNormalizer"),
-            normalizers = None,
-            tokenizer = None,
-            stemmer = None
+            preprocessors=None,
+            normalizers=None,
+            tokenizer="NoOpNormalizer",
+            stemmer=None,
+        )
+
+    with pytest.raises(TypeError):
+        TextPreparationPipelineFactory.create_text_preparation_pipeline(
+            preprocessors=None,
+            normalizers=None,
+            tokenizer=None,
+            stemmer="NoOpPreprocessor",
+        )
+
+    with pytest.raises(TypeError):
+        TextPreparationPipelineFactory.create_text_preparation_pipeline(
+            preprocessors=("NoOpNormalizer"),
+            normalizers=None,
+            tokenizer=None,
+            stemmer=None,
+        )
+
+    with pytest.raises(TypeError):
+        TextPreparationPipelineFactory.create_text_preparation_pipeline(
+            preprocessors=(NoOpNormalizer(), NoOpTokenizer()),
+            normalizers=None,
+            tokenizer=None,
+            stemmer=None,
         )

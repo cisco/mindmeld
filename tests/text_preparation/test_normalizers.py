@@ -15,7 +15,7 @@ from mindmeld.text_preparation.normalizers import (
     NFKD,
     NFKC,
     Lowercase,
-    RegexNormalizerRuleFactory
+    RegexNormalizerRuleFactory,
 )
 
 # TESTING NORMALIZER CLASSES
@@ -152,7 +152,9 @@ def test_lowercase_normalization():
 def test_get_regex_normalizers():
 
     regex_norm_rule = {"pattern": ".*", "replacement": ""}
-    regex_normalizer = RegexNormalizerRuleFactory.get_regex_normalizers([regex_norm_rule])[0]
+    regex_normalizer = RegexNormalizerRuleFactory.get_regex_normalizers(
+        [regex_norm_rule]
+    )[0]
     assert regex_normalizer.normalize("Cisco") == ""
 
 
@@ -194,6 +196,7 @@ def test_remove_apos_at_end_of_possesive_form(
         ("          MindMeld", "MindMeld"),
         ("      ", ""),
         ("      How are you?", "How are you?"),
+        ("       わくわくしてます!", "わくわくしてます!")
     ],
 )
 def test_remove_beginning_space(text_preparation_pipeline, input_text, expected_text):
@@ -208,6 +211,7 @@ def test_remove_beginning_space(text_preparation_pipeline, input_text, expected_
         ("MindMeld           ", "MindMeld"),
         ("      ", ""),
         ("How are you?     ", "How are you?"),
+        ("わくわくしてます!     ", "わくわくしてます!")
     ],
 )
 def test_remove_trailing_space(text_preparation_pipeline, input_text, expected_text):
