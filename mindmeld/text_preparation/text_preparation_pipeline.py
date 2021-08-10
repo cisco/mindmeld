@@ -13,7 +13,7 @@
 
 """This module contains a text Processing Pipeline."""
 import logging
-from typing import List, Dict
+from typing import List, Dict, Tuple, Union
 import re
 import unicodedata
 
@@ -480,66 +480,83 @@ class TextPreparationPipelineFactory:
     @staticmethod
     def create_text_preparation_pipeline(
         language: str = ENGLISH_LANGUAGE_CODE,
-        preprocessors: List[str] = None,
+        preprocessors: Tuple[Union[str, Preprocessor]] = None,
         regex_norm_rules: List[Dict] = None,
         keep_special_chars: str = None,
-        normalizers: List[str] = None,
-        tokenizer: Tokenizer = None,
-        stemmer: Stemmer = None,
+        normalizers: Tuple[Union[str, Normalizer]] = None,
+        tokenizer: Union[str, Tokenizer] = None,
+        stemmer: Union[str, Stemmer] = None,
     ):
         """Static method to create a TextPreparationPipeline instance.
 
         Args:
             language (str, optional): Language as specified using a 639-1/2 code.
-            preprocessors (List[str]): List of preprocessor class names.
-            regex_norm_rules (List[Dict]): List of regex normalization rules represented as
-                dictionaries. ({"pattern":<pattern>, "replacement":<replacement>})
-            normalizers (List[str]): List of normalizer class names.
-            tokenizer (str): Class name of Tokenizer to use.
-            stemmer (str): Class name of Stemmer to use.
+            preprocessors (Tuple[Union[str, Preprocessor]]): List of preprocessor class
+                names.
+            regex_norm_rules (List[Dict]): List of regex normalization rules represented
+                as dictionaries. ({"pattern":<pattern>, "replacement":<replacement>})
+            normalizers (Tuple[Union[str, Preprocessor]]): List of normalizer class names.
+            tokenizer (Union[str, Tokenizer]): Class name of Tokenizer to use.
+            stemmer (Union[str, Stemmer]): Class name of Stemmer to use.
 
         Returns:
             TextPreparationPipeline: A TextPreparationPipeline class.
         """
-        preprocessors = (
-            [PreprocessorFactory.get_preprocessor(p) for p in preprocessors]
+
+        # Instantiate Preprocessors
+        instantiated_preprocessors = (
+            TextPreparationPipelineFactory._instantiate_pipeline_components(
+                Preprocessor, preprocessors, language
+            )
             if preprocessors
             else [NoOpPreprocessor()]
         )
 
+        # Update Regex Normalization Exception Characters as Specified in the Config
         if keep_special_chars:
-            RegexNormalizerRuleFactory.EXCEPTION_CHARS = keep_special_chars
+            RegexNormalizerRuleFactory.set_exception_chars(keep_special_chars)
 
-        normalizers = (
-            [NormalizerFactory.get_normalizer(n) for n in normalizers]
+        # Instantiate Normalizers
+        instantiated_normalizers = (
+            TextPreparationPipelineFactory._instantiate_pipeline_components(
+                Normalizer, normalizers, language
+            )
             if normalizers
             else [NoOpNormalizer()]
         )
 
+        # Instatiate Regex Norm Rules as Normalizer Classes
         if regex_norm_rules:
             regex_normalizers = RegexNormalizerRuleFactory.get_regex_normalizers(
                 regex_norm_rules
             )
             # Adds the regex normalizers as the first normalizers by default
-            normalizers = regex_normalizers + normalizers
+            instantiated_normalizers = regex_normalizers + instantiated_normalizers
 
-        tokenizer = (
-            TokenizerFactory.get_tokenizer(tokenizer, language)
+        # Instantiate Tokenizer
+        instantiated_tokenizer = (
+            TextPreparationPipelineFactory._instantiate_pipeline_components(
+                Tokenizer, tokenizer, language
+            )
             if tokenizer
             else TokenizerFactory.get_tokenizer_by_language(language)
         )
-        stemmer = (
-            StemmerFactory.get_stemmer(stemmer)
+
+        # Instantiate Stemmer
+        instantiated_stemmer = (
+            TextPreparationPipelineFactory._instantiate_pipeline_components(
+                Stemmer, stemmer, language
+            )
             if stemmer
             else StemmerFactory.get_stemmer_by_language(language)
         )
 
         return TextPreparationPipeline(
             language=language,
-            preprocessors=preprocessors,
-            normalizers=normalizers,
-            tokenizer=tokenizer,
-            stemmer=stemmer,
+            preprocessors=instantiated_preprocessors,
+            normalizers=instantiated_normalizers,
+            tokenizer=instantiated_tokenizer,
+            stemmer=instantiated_stemmer,
         )
 
     @staticmethod
@@ -548,3 +565,49 @@ class TextPreparationPipelineFactory:
         return TextPreparationPipelineFactory.create_text_preparation_pipeline(
             **DEFAULT_EN_TEXT_PREPARATION_CONFIG
         )
+
+    @staticmethod
+    def _instantiate_pipeline_components(  # pylint: disable=W0640
+        expected_component_class, components, language=None
+    ):
+        """Helper method to instantiate the components of a TextPreparationPipeline by iterating
+        through a tuple of either Strings or Component Objects. If the value is a string, the
+        related component_factory_getter will be used to instantiate the required component.
+        Args:
+
+        expected_component_class (Class): The expected type of the component.
+        component_factory_getter (function):
+        components List[Object]:
+
+        """
+        if not isinstance(components, (list, tuple)):
+            components = tuple([components])
+
+        instantiated_components = []
+        for component in components:
+            if isinstance(component, str):
+                component_factory_getter = {
+                    Preprocessor.__name__: lambda: PreprocessorFactory.get_preprocessor(
+                        component
+                    ),
+                    Normalizer.__name__: lambda: NormalizerFactory.get_normalizer(
+                        component
+                    ),
+                    Tokenizer.__name__: lambda: TokenizerFactory.get_tokenizer(
+                        component, language
+                    ),
+                    Stemmer.__name__: lambda: StemmerFactory.get_stemmer(component),
+                }
+                instantiated_components.append(
+                    component_factory_getter.get(expected_component_class.__name__)()
+                )
+            elif isinstance(component, expected_component_class):
+                instantiated_components.append(component)
+            else:
+                raise ValueError(
+                    f"{component} must be of type String or {expected_component_class.__name__}."
+                )
+
+        if len(instantiated_components) == 1:
+            return instantiated_components[0]
+        return instantiated_components

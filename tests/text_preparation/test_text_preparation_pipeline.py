@@ -13,8 +13,7 @@ from mindmeld.components._config import ENGLISH_LANGUAGE_CODE
 from mindmeld.text_preparation.normalizers import (
     RegexNormalizerRule,
     Lowercase,
-    ASCIIFold,
-    RegexNormalizerRuleFactory
+    ASCIIFold
 )
 from mindmeld.text_preparation.preprocessors import NoOpPreprocessor
 from mindmeld.text_preparation.stemmers import EnglishNLTKStemmer
