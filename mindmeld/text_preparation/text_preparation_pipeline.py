@@ -505,7 +505,7 @@ class TextPreparationPipelineFactory:
         """
         # Instantiate Preprocessors
         instantiated_preprocessors = (
-            TextPreparationPipelineFactory._construct_pipeline_components(
+            TextPreparationPipelineFactory._construct_multiple_pipeline_components(
                 Preprocessor, preprocessors
             )
             if preprocessors
@@ -518,7 +518,7 @@ class TextPreparationPipelineFactory:
 
         # Instantiate Normalizers
         instantiated_normalizers = (
-            TextPreparationPipelineFactory._construct_pipeline_components(
+            TextPreparationPipelineFactory._construct_multiple_pipeline_components(
                 Normalizer, normalizers
             )
             if normalizers
@@ -535,18 +535,18 @@ class TextPreparationPipelineFactory:
 
         # Instantiate Tokenizer
         instantiated_tokenizer = (
-            TextPreparationPipelineFactory._construct_pipeline_components(
+            TextPreparationPipelineFactory._construct_single_pipeline_component(
                 Tokenizer, tokenizer, language
-            )[0]
+            )
             if tokenizer
             else TokenizerFactory.get_tokenizer_by_language(language)
         )
 
         # Instantiate Stemmer
         instantiated_stemmer = (
-            TextPreparationPipelineFactory._construct_pipeline_components(
+            TextPreparationPipelineFactory._construct_single_pipeline_component(
                 Stemmer, stemmer
-            )[0]
+            )
             if stemmer
             else StemmerFactory.get_stemmer_by_language(language)
         )
@@ -567,10 +567,10 @@ class TextPreparationPipelineFactory:
         )
 
     @staticmethod
-    def _construct_pipeline_components(  # pylint: disable=W0640
+    def _construct_multiple_pipeline_components(  # pylint: disable=W0640
         expected_component_class, components, language=None
     ):
-        """Helper method to instantiate the components of a TextPreparationPipeline.
+        """Helper method to instantiate multiple components of a TextPreparationPipeline.
 
         Args:
             expected_component_class (Class): The expected type of the component.
@@ -582,32 +582,48 @@ class TextPreparationPipelineFactory:
         Returns:
             instantiated_components (List[Object]): A list instantiated components.
         """
-        if not isinstance(components, (list, tuple)):
-            components = tuple([components])
-
         instantiated_components = []
         for component in components:
-            if isinstance(component, str):
-                component_factory_getter = {
-                    Preprocessor.__name__: lambda: PreprocessorFactory.get_preprocessor(
-                        component
-                    ),
-                    Normalizer.__name__: lambda: NormalizerFactory.get_normalizer(
-                        component
-                    ),
-                    Tokenizer.__name__: lambda: TokenizerFactory.get_tokenizer(
-                        component, language
-                    ),
-                    Stemmer.__name__: lambda: StemmerFactory.get_stemmer(component),
-                }
-                instantiated_components.append(
-                    component_factory_getter.get(expected_component_class.__name__)()
+            instantiated_components.append(
+                TextPreparationPipelineFactory._construct_single_pipeline_component(
+                    expected_component_class, component, language
                 )
-            elif isinstance(component, expected_component_class):
-                instantiated_components.append(component)
-            else:
-                raise ValueError(
-                    f"{component} must be of type String or {expected_component_class.__name__}."
-                )
-
+            )
         return instantiated_components
+
+    @staticmethod
+    def _construct_single_pipeline_component(  # pylint: disable=W0640
+        expected_component_class, component, language=None
+    ):
+        """Helper method to instantiate a single component of a TextPreparationPipeline.
+
+        Args:
+            expected_component_class (Class): The expected type of the component.
+            component (Union[str, Object]): A List/Tuple of components that are either
+                strings representing the object that needs to be instantiated or objects that are
+                already instantiated.
+            language (str, optional): Language as specified using a 639-1/2 code.
+
+        Returns:
+            instantiated_component (Object): A single TextPreparationPipeline component.
+        """
+        if isinstance(component, str):
+            component_factory_getter = {
+                Preprocessor.__name__: lambda: PreprocessorFactory.get_preprocessor(
+                    component
+                ),
+                Normalizer.__name__: lambda: NormalizerFactory.get_normalizer(
+                    component
+                ),
+                Tokenizer.__name__: lambda: TokenizerFactory.get_tokenizer(
+                    component, language
+                ),
+                Stemmer.__name__: lambda: StemmerFactory.get_stemmer(component),
+            }
+            return component_factory_getter.get(expected_component_class.__name__)()
+        elif isinstance(component, expected_component_class):
+            return component
+        else:
+            raise TypeError(
+                f"{component} must be of type String or {expected_component_class.__name__}."
+            )
