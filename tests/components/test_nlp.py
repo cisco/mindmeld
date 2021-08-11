@@ -808,14 +808,13 @@ def test_custom_data(kwik_e_mart_nlp):
     store_info_processor = kwik_e_mart_nlp.domains.store_info
 
     store_hours_ent_rec = store_info_processor.intents.get_store_hours.entity_recognizer
-    print(f"**** {store_hours_ent_rec._model_config}")
-    assert store_hours_ent_rec._model_config.train_label_set == "testtrain.*\\.txt"
-    assert store_hours_ent_rec._model_config.test_label_set == "testtrain.*\\.txt"
+    assert store_hours_ent_rec._model.config.train_label_set == "testtrain.*\\.txt"
+    assert store_hours_ent_rec._model.config.test_label_set == "testtrain.*\\.txt"
 
     # make sure another intent having an entity recognizer doesn't have the same custom data specs
     exit_ent_rec = store_info_processor.intents.get_store_number.entity_recognizer
-    assert exit_ent_rec._model_config.train_label_set != "testtrain.*\\.txt"
-    assert exit_ent_rec._model_config.test_label_set != "testtrain.*\\.txt"
+    assert exit_ent_rec._model.config.train_label_set != "testtrain.*\\.txt"
+    assert exit_ent_rec._model.config.test_label_set != "testtrain.*\\.txt"
 
 
 def test_dynamic_gazetteer_case_sensitiveness(kwik_e_mart_nlp):
