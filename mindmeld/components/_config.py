@@ -22,7 +22,6 @@ import warnings
 
 from .schemas import validate_language_code, validate_locale_code
 from .. import path
-from ..constants import CURRENCY_SYMBOLS
 
 logger = logging.getLogger(__name__)
 
@@ -480,13 +479,6 @@ DEFAULT_AUTO_ANNOTATOR_CONFIG = {
     "translator": "NoOpTranslator",
 }
 
-DEFAULT_TOKENIZER_CONFIG = {
-    # populated in the `get_tokenizer_config` func
-    "allowed_patterns": [],
-    "tokenizer": "WhiteSpaceTokenizer",
-    "normalizer": "ASCIIFold",
-}
-
 DEFAULT_ACTIVE_LEARNING_CONFIG = {
     "output_folder": None,
     "pre_tuning": {
@@ -520,6 +512,30 @@ DEFAULT_ACTIVE_LEARNING_CONFIG = {
         "labeled_logs_pattern": None,
         "unlabeled_logs_path": "logs.txt",
     },
+}
+
+DEFAULT_NORMALIZERS = [
+    'RemoveAposAtEndOfPossesiveForm',
+    'RemoveAdjacentAposAndSpace',
+    'RemoveBeginningSpace',
+    'RemoveTrailingSpace',
+    'ReplaceSpacesWithSpace',
+    'ReplaceUnderscoreWithSpace',
+    'SeparateAposS',
+    'ReplacePunctuationAtWordStartWithSpace',
+    'ReplacePunctuationAtWordEndWithSpace',
+    'ReplaceSpecialCharsBetweenLettersAndDigitsWithSpace',
+    'ReplaceSpecialCharsBetweenDigitsAndLettersWithSpace',
+    'ReplaceSpecialCharsBetweenLettersWithSpace',
+    'Lowercase',
+    'ASCIIFold'
+]
+
+DEFAULT_EN_TEXT_PREPARATION_CONFIG = {
+    "preprocessors": [],
+    "normalizers": DEFAULT_NORMALIZERS,
+    "tokenizer": "WhiteSpaceTokenizer",
+    "stemmer": "EnglishNLTKStemmer"
 }
 
 
@@ -1028,116 +1044,6 @@ def get_auto_annotator_config(app_path=None):
         return DEFAULT_AUTO_ANNOTATOR_CONFIG
 
 
-def _get_default_regex(exclude_from_norm):
-    """Gets the default special character regex for the Tokenizer config.
-
-    Args:
-        exclude_from_norm (optional) - list of chars to exclude from normalization
-
-    Returns:
-        list: default special character regex list
-    """
-    # List of regex's for matching and tokenizing when keep_special_chars=True
-    keep_special_regex_list = []
-
-    exception_chars = "\@\[\]\|\{\}'"  # noqa: W605
-
-    to_exclude = CURRENCY_SYMBOLS + "".join(exclude_from_norm or [])
-
-    letter_pattern_str = "[^\W\d_]+"  # noqa: W605
-
-    # Make keep special regex list
-    keep_special_regex_list.append(
-        "?P<start>^[^\w\d&" + to_exclude + exception_chars + "]+"  # noqa: W605
-    )
-    keep_special_regex_list.append(
-        "?P<end>[^\w\d&" + to_exclude + exception_chars + "]+$"  # noqa: W605
-    )
-    keep_special_regex_list.append(
-        "?P<pattern1>(?P<pattern1_replace>"  # noqa: W605
-        + letter_pattern_str
-        + ")"
-        + "[^\w\d\s&"  # noqa: W605
-        + exception_chars
-        + "]+(?=[\d]+)"  # noqa: W605
-    )
-    keep_special_regex_list.append(
-        "?P<pattern2>(?P<pattern2_replace>[\d]+)[^\w\d\s&"  # noqa: W605
-        + exception_chars
-        + "]+"
-        + "u(?="
-        + letter_pattern_str
-        + ")"
-    )
-    keep_special_regex_list.append(
-        "?P<pattern3>(?P<pattern3_replace>"
-        + letter_pattern_str
-        + ")"  # noqa: W605
-        + "[^\w\d\s&"  # noqa: W605
-        + exception_chars
-        + "]+"
-        + "(?="  # noqa: W605
-        + letter_pattern_str
-        + ")"
-    )
-    keep_special_regex_list.append(
-        "?P<escape1>(?P<escape1_replace>[\w\d]+)"  # noqa: W605
-        + "[^\w\d\s"  # noqa: W605
-        + exception_chars
-        + "]+"
-        + "(?=\|)"  # noqa: W605
-    )
-    keep_special_regex_list.append(
-        "?P<escape2>(?P<escape2_replace>[\]\}]+)"  # noqa: W605
-        + "[^\w\d\s"  # noqa: W605
-        + exception_chars
-        + "]+(?=s)"
-    )
-
-    keep_special_regex_list.append("?P<underscore>_")  # noqa: W605
-    keep_special_regex_list.append("?P<begspace>^\s+")  # noqa: W605
-    keep_special_regex_list.append("?P<trailspace>\s+$")  # noqa: W605
-    keep_special_regex_list.append("?P<spaceplus>\s+")  # noqa: W605
-    keep_special_regex_list.append("?P<apos_space> '|' ")  # noqa: W605
-    keep_special_regex_list.append("?P<apos_s>(?<=[^\\s])'[sS]")  # noqa: W605
-    # handle the apostrophes used at the end of a possessive form, e.g. dennis'
-    keep_special_regex_list.append("?P<apos_poss>(^'(?=\S)|(?<=\S)'$)")  # noqa: W605
-
-    return keep_special_regex_list
-
-
-def get_tokenizer_config(app_path=None, exclude_from_norm=None):
-    """Gets the tokenizer configuration for the app at the specified path.
-
-    Args:
-        app_path (str, optional): The location of the MindMeld app
-        exclude_from_norm (list, optional): chars to exclude from normalization
-
-    Returns:
-        dict: The tokenizer configuration.
-    """
-    DEFAULT_TOKENIZER_CONFIG["default_allowed_patterns"] = _get_default_regex(
-        exclude_from_norm
-    )
-
-    if not app_path:
-        return DEFAULT_TOKENIZER_CONFIG
-    try:
-        tokenizer_config = getattr(
-            _get_config_module(app_path), "TOKENIZER_CONFIG", DEFAULT_TOKENIZER_CONFIG
-        )
-        if not tokenizer_config.get("allowed_patterns"):
-            # If allowed_patterns are not provided, use default
-            tokenizer_config["allowed_patterns"] = []
-            tokenizer_config["default_allowed_patterns"] = _get_default_regex(
-                exclude_from_norm
-            )
-        return tokenizer_config
-    except (OSError, IOError, AttributeError):
-        logger.info("No app configuration file found. Using default tokenizer config.")
-        return DEFAULT_TOKENIZER_CONFIG
-
-
 def get_active_learning_config(app_path=None):
     """Gets the active learning configuration for the app at the specified path.
 
@@ -1160,3 +1066,24 @@ def get_active_learning_config(app_path=None):
     except (OSError, IOError, AttributeError):
         logger.info("No app configuration file found.")
         return DEFAULT_ACTIVE_LEARNING_CONFIG
+
+
+def get_text_preparation_config(app_path=None):
+    """Gets the text preparation configuration for the app at the specified path.
+
+    Args:
+        app_path (str, optional): The location of the MindMeld app
+
+    Returns:
+        dict: The text preparation pipeline configuration.
+    """
+    if not app_path:
+        return DEFAULT_EN_TEXT_PREPARATION_CONFIG
+    try:
+        tokenizer_config = getattr(
+            _get_config_module(app_path), "TEXT_PREPARATION_CONFIG"
+        )
+        return tokenizer_config
+    except (OSError, IOError, AttributeError):
+        logger.info("No app configuration file found. Using default text_preparation_config.")
+        return {"normalizers": DEFAULT_NORMALIZERS}

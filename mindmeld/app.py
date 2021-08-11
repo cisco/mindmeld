@@ -41,7 +41,8 @@ class Application:
                 Request.
             responder_class (DialogueResponder): Any class that \
                 inherits from the DialogueResponder.
-            preprocessor (Preprocessor): The application preprocessor, if any.
+            text_preparation_pipeline (TextPreparationPipeline): The application text preparation
+                pipeline, if any.
             async_mode (bool): ``True`` if the application is async, ``False`` otherwise.
         """
 
@@ -50,7 +51,7 @@ class Application:
         import_name,
         request_class=None,
         responder_class=None,
-        preprocessor=None,
+        text_preparation_pipeline=None,
         async_mode=False,
     ):
         self.import_name = import_name
@@ -65,7 +66,7 @@ class Application:
         self._middleware = []
         self.request_class = request_class or Request
         self.responder_class = responder_class or DialogueResponder
-        self.preprocessor = preprocessor
+        self.text_preparation_pipeline = text_preparation_pipeline
         self.async_mode = async_mode
         self.custom_action_config = get_custom_action_config(self.app_path)
 
@@ -88,7 +89,7 @@ class Application:
             nlp,
             responder_class=self.responder_class,
             request_class=self.request_class,
-            preprocessor=self.preprocessor,
+            text_preparation_pipeline=self.text_preparation_pipeline,
             async_mode=self.async_mode,
         )
         self._server = MindMeldServer(self.app_manager)

@@ -18,7 +18,13 @@ import logging
 import unicodedata
 
 from .spacy_model_factory import SpacyModelFactory
-from ..constants import UNICODE_NON_LATIN_CATEGORY, UNICODE_SPACE_CATEGORY
+from ..components._config import ENGLISH_LANGUAGE_CODE
+from ..constants import (
+    UNICODE_NON_LATIN_CATEGORY,
+    UNICODE_SPACE_CATEGORY,
+    SPACY_SUPPORTED_LANGUAGES,
+)
+
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +81,8 @@ class CharacterTokenizer(Tokenizer):
                 Keys include "start" (token starting index), and "text" (token text).
                 For example: [{"start": 0, "text":"hello"}]
         """
+        if text == "":
+            return []
         tokens = []
         for idx, char in enumerate(text):
             if not char.isspace():
@@ -83,8 +91,8 @@ class CharacterTokenizer(Tokenizer):
 
 
 class LetterTokenizer(Tokenizer):
-    """ A Tokenizer that splits text into a separate token if the character proceeds a space, is a
-        non-latin character, or is a different unicode category than the previous character.
+    """A Tokenizer that splits text into a separate token if the character proceeds a space, is a
+    non-latin character, or is a different unicode category than the previous character.
     """
 
     def __init__(self):
@@ -101,6 +109,8 @@ class LetterTokenizer(Tokenizer):
                 Keys include "start" (token starting index), and "text" (token text).
                 For example: [{"start": 0, "text":"hello"}]
         """
+        if text == "":
+            return []
         token_num_by_char = LetterTokenizer.get_token_num_by_char(text)
         return LetterTokenizer.create_tokens(text, token_num_by_char)
 
@@ -153,6 +163,8 @@ class LetterTokenizer(Tokenizer):
                 Keys include "start" (token starting index), and "text" (token text).
                 For example: [{"start": 0, "text":"hello"}]
         """
+        if text == "":
+            return []
         tokens = []
         token_text = ""
         for index, token_num in enumerate(token_num_by_char):
@@ -188,6 +200,8 @@ class WhiteSpaceTokenizer(Tokenizer):
                 Keys include "start" (token starting index), and "text" (token text).
                 For example: [{"start": 0, "text":"hello"}]
         """
+        if text == "":
+            return []
         tokens = []
         token = {}
         token_text = ""
@@ -207,10 +221,15 @@ class WhiteSpaceTokenizer(Tokenizer):
 
 
 class SpacyTokenizer(Tokenizer):
-    """A Tokenizer that splits text at spaces."""
+    """A Tokenizer that uses Spacy to split text into tokens."""
 
-    def __init__(self, language, spacy_model_size):
-        """Initializes a SpacyTokenizer."""
+    def __init__(self, language, spacy_model_size="sm"):
+        """Initializes a SpacyTokenizer.
+
+        Args:
+            language (str, optional): Language as specified using a 639-1/2 code.
+            spacy_model_size (str, optional): Size of the Spacy model to use. ("sm", "md", or "lg")
+        """
         self.spacy_model = SpacyModelFactory.get_spacy_language_model(
             language, spacy_model_size
         )
@@ -224,14 +243,13 @@ class SpacyTokenizer(Tokenizer):
                 Keys include "start" (token starting index), and "text" (token text).
                 For example: [{"start": 0, "text":"hello"}]
         """
-        spacy_tokens = [token.text for token in self.spacy_model(text)]
-
-        start_index = 0
+        if text == "":
+            return []
+        spacy_tokens = [(token.text, token.idx) for token in self.spacy_model(text)]
         tokens = []
-        for token_text in spacy_tokens:
-            token = {"start": start_index, "text": token_text}
+        for token_text, token_idx in spacy_tokens:
+            token = {"start": token_idx, "text": token_text}
             tokens.append(token)
-            start_index += len(token_text)
         return tokens
 
 
@@ -239,7 +257,9 @@ class TokenizerFactory:
     """Tokenizer Factory Class"""
 
     @staticmethod
-    def get_tokenizer(tokenizer, language=None, spacy_model_size="sm"):
+    def get_tokenizer(
+        tokenizer: str, language=ENGLISH_LANGUAGE_CODE, spacy_model_size="sm"
+    ):
         """A static method to get a tokenizer
 
         Args:
@@ -250,14 +270,30 @@ class TokenizerFactory:
         Returns:
             (Tokenizer): Tokenizer Class
         """
-        if tokenizer == NoOpTokenizer.__name__:
-            return NoOpTokenizer()
-        elif tokenizer == CharacterTokenizer.__name__:
-            return CharacterTokenizer()
-        elif tokenizer == LetterTokenizer.__name__:
-            return LetterTokenizer()
-        elif tokenizer == WhiteSpaceTokenizer.__name__:
+        tokenizer_classes = {
+            NoOpTokenizer.__name__: NoOpTokenizer,
+            CharacterTokenizer.__name__: CharacterTokenizer,
+            LetterTokenizer.__name__: LetterTokenizer,
+            WhiteSpaceTokenizer.__name__: WhiteSpaceTokenizer,
+            SpacyTokenizer.__name__: lambda: SpacyTokenizer(language, spacy_model_size),
+        }
+        tokenizer_class = tokenizer_classes.get(tokenizer)
+        if not tokenizer_class:
+            raise TypeError(f"{tokenizer} is not a valid Tokenizer type.")
+        return tokenizer_class()
+
+    @staticmethod
+    def get_tokenizer_by_language(language):
+        """Creates a tokenizer based on the language. If the language is supported by Spacy a SpacyTokenizer
+        will be initialized, otherwise a WhiteSpaceTokenizer will be initialized.
+
+        Args:
+            language (str, optional): Language as specified using a 639-1/2 code.
+
+        Returns:
+            (Tokenizer): Tokenizer Class
+        """
+        if language in SPACY_SUPPORTED_LANGUAGES:
+            return SpacyTokenizer(language, spacy_model_size="sm")
+        else:
             return WhiteSpaceTokenizer()
-        elif tokenizer == SpacyTokenizer.__name__:
-            return SpacyTokenizer(language, spacy_model_size)
-        raise AssertionError(f" {tokenizer} is not a valid Tokenizer.")

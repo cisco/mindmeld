@@ -15,26 +15,12 @@ import pytest
 from mindmeld import markup
 from mindmeld.models import CLASS_LABEL_TYPE, QUERY_EXAMPLE_TYPE, ModelConfig
 from mindmeld.models.text_models import TextModel
-from mindmeld.query_factory import QueryFactory
 from mindmeld.resource_loader import ResourceLoader, ProcessedQueryList
-from mindmeld.tokenizer import Tokenizer
 
 APP_NAME = "kwik_e_mart"
 APP_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), APP_NAME
 )
-
-
-@pytest.fixture
-def tokenizer():
-    """A tokenizer for normalizing text"""
-    return Tokenizer()
-
-
-@pytest.fixture
-def query_factory(tokenizer):
-    """For creating queries"""
-    return QueryFactory(tokenizer)
 
 
 @pytest.fixture

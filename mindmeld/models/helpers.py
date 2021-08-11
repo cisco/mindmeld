@@ -20,9 +20,8 @@ from tempfile import mkstemp
 
 import nltk
 from sklearn.metrics import make_scorer
-
+from ..text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
 from ..gazetteer import Gazetteer
-from ..tokenizer import Tokenizer
 
 logger = logging.getLogger(__name__)
 
@@ -436,7 +435,7 @@ def entity_seqs_equal(expected, predicted):
     return True
 
 
-def merge_gazetteer_resource(resource, dynamic_resource, tokenizer):
+def merge_gazetteer_resource(resource, dynamic_resource, text_preparation_pipeline):
     """
     Returns a new resource that is a merge between the original resource and the dynamic
     resource passed in for only the gazetteer values
@@ -444,7 +443,7 @@ def merge_gazetteer_resource(resource, dynamic_resource, tokenizer):
     Args:
         resource (dict): The original resource built from the app
         dynamic_resource (dict): The dynamic resource passed in
-        tokenizer (Tokenizer): This component is used to normalize entities in dyn gaz
+        text_preparation_pipeline (TextPreparationPipeline): For text tokenization and normalization
 
     Returns:
         dict: The merged resource
@@ -462,14 +461,14 @@ def merge_gazetteer_resource(resource, dynamic_resource, tokenizer):
             # If the entity type is in the dyn gaz, we merge the data. Else,
             # just pass by reference the original resource data
             if entity_type in dynamic_resource[key]:
-                new_gaz = Gazetteer(entity_type, tokenizer)
+                new_gaz = Gazetteer(entity_type, text_preparation_pipeline)
                 # We deep copy here since shallow copying will also change the
                 # original resource's data during the '_update_entity' op.
                 new_gaz.from_dict(resource[key][entity_type])
 
                 for entity in dynamic_resource[key][entity_type]:
                     new_gaz._update_entity(
-                        tokenizer.normalize(entity),
+                        text_preparation_pipeline.normalize(entity),
                         dynamic_resource[key][entity_type][entity],
                     )
 
@@ -480,21 +479,26 @@ def merge_gazetteer_resource(resource, dynamic_resource, tokenizer):
     return return_obj
 
 
-def ingest_dynamic_gazetteer(resource, dynamic_resource=None, tokenizer=None):
+def ingest_dynamic_gazetteer(resource, dynamic_resource=None, text_preparation_pipeline=None):
     """Ingests dynamic gazetteers from the app and adds them to the resource
 
     Args:
         resource (dict): The original resource
         dynamic_resource (dict, optional): The dynamic resource that needs to be ingested
-        tokenizer (Tokenizer): This used to normalize the entities in the dynamic resource
+        text_preparation_pipeline (TextPreparationPipeline): For text tokenization and normalization
 
     Returns:
         (dict): A new resource with the ingested dynamic resource
     """
     if not dynamic_resource or GAZETTEER_RSC not in dynamic_resource:
         return resource
-    tokenizer = tokenizer or Tokenizer()
-    workspace_resource = merge_gazetteer_resource(resource, dynamic_resource, tokenizer)
+    text_preparation_pipeline = (
+        text_preparation_pipeline
+        or TextPreparationPipelineFactory.create_default_text_preparation_pipeline()
+    )
+    workspace_resource = merge_gazetteer_resource(
+        resource, dynamic_resource, text_preparation_pipeline
+    )
     return workspace_resource
 
 
