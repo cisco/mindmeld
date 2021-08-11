@@ -444,6 +444,7 @@ class Classifier(ABC):
                 self._model.dump(path)
 
             hash_path = path + ".hash"
+            os.makedirs(os.path.dirname(hash_path), exist_ok=True)
             with open(hash_path, "w") as hash_file:
                 hash_file.write(self.hash)
 

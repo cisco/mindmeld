@@ -101,13 +101,17 @@ class EntityRecognizer(Classifier):
         )
         # create model with given params
         self._model_config = self._get_model_config(**kwargs)
-        model = create_model(self._model_config)
 
         label_set = label_set or self._model_config.train_label_set or DEFAULT_TRAIN_SET_REGEX
         queries = self._resolve_queries(queries, label_set)
 
         new_hash = self._get_model_hash(self._model_config, queries)
         cached_model = self._resource_loader.hash_to_model_path.get(new_hash)
+        # In the latest developments, entity.pkl file is not created when there are no entity types,
+        # an act similar to no having domain.pkl or intent.pkl when there are no more than 1 domain
+        # or 1 intent respectively. Previously, this lead to `cached_model=None` but lately, this
+        # will be set to `cached_model=<>.pkl` path and the self.load() takes care of loading
+        # a NoneType model.
 
         if incremental_timestamp and cached_model:
             logger.info("No need to fit.  Previous model is cached.")
@@ -119,16 +123,20 @@ class EntityRecognizer(Classifier):
         # Load labeled data
         examples, labels = self._get_examples_and_labels(queries)
 
-        # Build entity types set
-        self.entity_types = set()
-        for label in labels:
-            for entity in label:
-                self.entity_types.add(entity.entity.type)
+        if examples:
+            # Build entity types set
+            self.entity_types = set()
+            for label in labels:
+                for entity in label:
+                    self.entity_types.add(entity.entity.type)
 
-        model.initialize_resources(self._resource_loader, examples, labels)
-        model.fit(examples, labels)
-        self._model = model
-        self.config = ClassifierConfig.from_model_config(self._model.config)
+            if self.entity_types:
+                model = create_model(self._model_config)
+                model.initialize_resources(self._resource_loader, examples, labels)
+                model.fit(examples, labels)
+                self._model = model
+                self.config = ClassifierConfig.from_model_config(self._model.config)
+
         self.hash = new_hash
 
         self.ready = True
@@ -151,10 +159,13 @@ class EntityRecognizer(Classifier):
     def _dump(self, path):
         er_data = {
             "entity_types": self.entity_types,
-            "w_ngram_freq": self._model.get_resource("w_ngram_freq"),
-            "c_ngram_freq": self._model.get_resource("c_ngram_freq"),
             "model_config": self._model_config,
         }
+        if self._model:
+            er_data.update({
+                "w_ngram_freq": self._model.get_resource("w_ngram_freq"),
+                "c_ngram_freq": self._model.get_resource("c_ngram_freq"),
+            })
         pickle.dump(er_data, open(self._get_classifier_resources_save_path(path), "wb"))
 
     def unload(self):
