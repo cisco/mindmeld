@@ -118,12 +118,12 @@ Contents
    userguide/custom_features
    userguide/kb
    userguide/dm
+   userguide/text_preparation_pipeline
    userguide/active_learning
    userguide/augmentation
    userguide/auto_annotator
    userguide/custom_action
    userguide/tokenizer
-   userguide/text_preparation_pipeline
    userguide/internationalization
    userguide/voice
    userguide/dvc

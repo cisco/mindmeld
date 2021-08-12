@@ -26,14 +26,15 @@ TextPreparationPipeline Configuration
 
 The :attr:`DEFAULT_TEXT_PREPARATION_CONFIG` is shown below. Observe that various normalization classes
 have been pre-selected by default. To modify the selected components (or to use a subset of the normalization steps), duplicate the
-default config and rename it to :attr:`TEXT_PREPARATION_CONFIG`. Place this custom config in :attr:`config.py`. 
-If a custom configuration is not defined, the default is used.
+default config and rename it to :attr:`TEXT_PREPARATION_CONFIG`. Place this custom config in the :attr:`config.py` file for your application.
+If a custom configuration is not defined, a default is used. The config below is example of a default config specifically for English.
+The :attr:`normalizers` component includes 12 default MindMeld regex normalization rules in addtion to :attr:`Lowercase` and :attr:`ASCIIFold`.
 
 .. code-block:: python
 
-    DEFAULT_TEXT_PREPARATION_CONFIG = {
+    DEFAULT_EN_TEXT_PREPARATION_CONFIG = {
         "preprocessors": [],
-        "tokenizer": "WhiteSpaceTokenizer",
+        "tokenizer": "SpacyTokenizer",
         "normalizers": [
             'RemoveAposAtEndOfPossesiveForm',
             'RemoveAdjacentAposAndSpace',
@@ -51,8 +52,38 @@ If a custom configuration is not defined, the default is used.
             'ASCIIFold'
         ],
         "regex_norm_rules": [],
-        "stemmer": "EnglishNLTKStemmer"
+        "stemmer": "EnglishNLTKStemmer",
+        "keep_special_chars": r"\@\[\]'"
     }
+
+In general, the :attr:`Tokenizer` and :attr:`Stemmer` components are dynamically selected based
+on the language of the application, if they are not explicitly defined in the config. The table below explains these defaults:
+
++--------------------+---------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Config Element     | Default                         | Condition                                                                                                                                                                                                                                                            |
++====================+=================================+======================================================================================================================================================================================================================================================================+
+| Preprocessors      | None                            | Always                                                                                                                                                                                                                                                               |
++--------------------+---------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|                    | 12 Default MindMeld Regex Rules |                                                                                                                                                                                                                                                                      |
+|                    |                                 |                                                                                                                                                                                                                                                                      |
+|                    | Lowercase                       |                                                                                                                                                                                                                                                                      |
+|                    |                                 |                                                                                                                                                                                                                                                                      |
+| Normalizers        | ASCII Fold                      | Always                                                                                                                                                                                                                                                               |
++--------------------+---------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Regex Norm Rules   | None                            | Always                                                                                                                                                                                                                                                               |
++--------------------+---------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Tokenizer          | SpacyTokenizer                  | If the language is supported by Spacy: English (en), Spanish (es), French (fr), German (de), Danish (da), Greek (el), Portuguese (pt), Lithuanian (lt), Norwegian Bokmal (nb), Romanian (ro), Polish (pl), Italian (it), Japanese (ja), Chinese (zh), or Dutch (nl). |
++--------------------+---------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|                    | WhiteSpaceTokenizer             | If the language is not supported by Spacy.                                                                                                                                                                                                                           |
++--------------------+---------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Stemmer            | EnglishNLTKStemmer              | If the language is English.                                                                                                                                                                                                                                          |
++--------------------+---------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|                    | SnowballStemmer                 | If the language is supported by NLTK's SnowballStemmer: Danish (da), Dutch (nl), Finnish (fi), French (fr), German (de), Hungarian (hu), Italian (it), Norwegian (nb), Portuguese (pt), Romanian (ro), Russian (ru), Spanish (es) and Swedish (sv).                  |
++--------------------+---------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|                    | NoOpStemmer                     | If the language is not English and is not supported by NLTK's SnowballStemmer.                                                                                                                                                                                       |
++--------------------+---------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| keep_special_chars | @, [, ], '                      | Always                                                                                                                                                                                                                                                               |
++--------------------+---------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
 Let's define the the parameters in the TextPreparationPipeline config:
@@ -66,23 +97,71 @@ Let's define the the parameters in the TextPreparationPipeline config:
 ``'keep_special_chars'`` (:class:`str`): String containing characters to be skipped when normalizing/filtering special characters. This only applies for a subset of default MindMeld normalization rules.
 
 ``'regex_norm_rules'`` (:class:`List[Dict]`): Regex normalization rules represented as dictionaries. Each rule should have the key "pattern" and "replacement" which map to a
-regex pattern (str) and replacement string, respectively. For example, { "pattern": "_", "replacement": " " }.
+regex pattern (str) and replacement string, respectively. For example: { "pattern": "_", "replacement": " " }.
 
-``'stemmer`` (:class:`str`): The stemmer class to use.
+``'stemmer`` (:class:`str`): The stemmer class to reduce words to their word stem.
 
 
 .. note::
 
-    A Regex normalization rule when added will not overwrite existing normalization rules. To do that, place the key in the config.
+    If :attr:`regex_norm_rules` are specified in the config they will be applied before other normalization rules. This includes the default normalization rules if normalization rules are not explicitly defined in the config.
 
 
 Preprocessing
 --------------
-Preprocessing
+
+By preprocessing text, we can make modifications to raw text before it is processed through the :attr:`TextPreparationPipeline`. Examples of some common preprocessing tasks include spelling correction, punctuation removal, handling special characters,
+and other kinds of application-specific text normalization. Currently, MindMeld does not offer pre-built processors, however, the pipeline does support custom preprocessors.
+
+Creating a Custom Preprocessor
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This section includes boilerplate code to build a custom preprocessor class. Let's build a simple :attr:`ASRPreprocessor` class that corrects mistranscriptions which is a common problem with
+Automatic Speech Recognition systems. A custom preprocessor must extend from MindMeld's abstract :attr:`Preprocessor` class:
+
+
+.. code:: python
+
+    from abc import ABC, abstractmethod
+
+    class Preprocessor(ABC):
+        """
+        Base class for Preprocessor object
+        """    
+        @abstractmethod
+        def process(self, text):
+            """
+            Args:
+                text (str)
+    
+            Returns:
+                (str)
+            """
+            pass
+
+Now that we have a better understanding of the base class. Let's create a simple :attr:`ASRPreprocessor` class which implements the abstract :attr:`preprocess` method and replaces any substring of "croissant ready"
+with the intended name, "prasanth reddy".
+
+
+.. code:: python
+
+    from mindmeld.text_preparation.preprocessors import Preprocessor
+
+    class ASRPreprocessor(Preprocessor):
+        """ Sample Preprocessor Class """
+
+        def process(self, text):
+            return text.replace("croissant ready", "Prasanth Reddy")
+
+
+This would transform the transcript "Let's start the meeting with croissant ready." to "Let's start the meeting with Prasanth Reddy."
+The steps to use a custom Preprocessor in your application are explained here.
 
 
 Tokenization
 -------------
+
+Tokenization is the process of splitting the text of a queries into smaller chunks. MindMeld offers a number of ready-made tokenizers that you can use
+for your application. MindMeld supports the development of custom tokenizers as well.
 
 
 White Space Tokenizer
@@ -170,20 +249,86 @@ We see that the original text is split semantically and not simply by whitespace
     ['紳士', 'が', '過ぎ', '去っ', 'た', '、', 'なぜ', 'それ', 'が', '起こっ', 'た', 'の', 'か', '誰', 'に', 'も', '分かり', 'ませ', 'ん', '！']
 
 
+Creating a Custom Tokenizer
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This section includes boilerplate code to build a custom tokenizer class. Let's rebuild a :attr:`CharacterTokenizer` class that creates a token for each character in a string as long as the
+character is not a space. A custom tokenizer must extend from MindMeld's abstract :attr:`Tokenizer` class:
+
+
+.. code:: python
+
+    from abc import ABC, abstractmethod
+
+    class Tokenizer(ABC):
+        """Abstract Tokenizer Base Class."""
+
+        @abstractmethod
+        def tokenize(self, text):
+            """
+            Args:
+                text (str): The text to tokenize.
+            Returns:
+                tokens (List[Dict]): List of tokenized tokens which a represented as dictionaries.
+                    Keys include "start" (token starting index), and "text" (token text).
+                    For example: [{"start": 0, "text":"hello"}]
+            """
+            raise NotImplementedError("Subclasses must implement this method")
+
+
+Note that any MindMeld tokenizer must return the final tokens as a list of dictionaries. Where each dictionary represents a single token and contains the "start" index of the token and the "text" of the token.
+Here is an example of the expected output for the tokens generated when tokenizing the phrase "Hi Andy": [{"start": 0, "text":"Hi"}, {"start": 3, "text":"Andy"}].
+With this in mind, let's recreate MindMeld's :attr:`CharacterTokenizer` class which converts every individual character in a string into a separate token while skipping spaces.
+
+
+.. code:: python
+
+    from mindmeld.text_preparation.tokenizers import Tokenizer
+
+    class CharacterTokenizer(Tokenizer):
+        """A Tokenizer that splits text at the character level."""
+
+        def tokenize(self, text):
+            tokens = []
+            for idx, char in enumerate(text):
+                if not char.isspace():
+                    tokens.append({"start": idx, "text": char})
+            return tokens
+
+
+This tokenizes the phrase "Hi Andy" in the following manner:
+
+.. code:: python
+
+    [
+        {'start': 0, 'text': 'H'},
+        {'start': 1, 'text': 'i'},
+        {'start': 3, 'text': 'A'},
+        {'start': 4, 'text': 'n'},
+        {'start': 5, 'text': 'd'},
+        {'start': 6, 'text': 'y'}
+    ]
+
+The steps to use a custom Tokenizer in your application are explained here.
+
+
 Normalization
 --------------
 
+Normalization is the process of transforming text into a standardized form. MindMeld supports the use of multiple normalizers to be applied to the original raw query in a sequential manner.
+MindMeld offers a number of pre-built normalizers that can be specified in the :attr:`config.py` file. MindMeld also supports the development of custom normalizers to meet
+application-specific requirements.
+
+.. note::
+
+    Normalization and Tokenization are conducted around MindMeld's entity annotations. For example, let's look at the query, "Where is {Andy Neff|person_name} located?".
+    Let's assume our normalization method is to use the Uppercase value of each character. The :attr:`TextPreparationPipeline` will normalize the query to become the following:
+    "WHERE IS {ANDY NEFF|person_name} LOCATED?". Notice that the entity name in the entity annotation is not modified. A similar process happens during tokenization. Another way to
+    think of this, is that the entity annotations are "temporarily removed" before normalization and then added back in.
+
+
 Default Regex Normalization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Talk about default regex_normalization.
-As a default in MindMeld, the Tokenizer retains the following special characters in addition to alphanumeric characters and spaces:
-
-1. All currency symbols in UNICODE.
-2. Entity annotation symbols ``{, }, |``.
-3. Decimal point in numeric values (e.g. ``124.45``).
-4. Apostrophe within tokens, such as ``O'Reilly``. Apostrophes at the beginning/end of tokens are removed, say ``Dennis'`` or ``'Tis``.
-
-Setting argument ``keep_special_chars=False`` in the Tokenizer would remove all special characters.
+By default, MindMeld uses 12 Regex-based normalization rules when normalizing texts (in addition to :attr:`Lowercase` and :attr:`ASCIIFold`). Descriptions for these 12 rules can be found in the table below.
 
 +-----------------------------------------------------+--------------------------------------------------------------------------------------------------+---------------------------------------+-------------------------------+
 | Regex Normalization Rule                            | Description                                                                                      | Example Input                         | Example Output                |
@@ -208,10 +353,33 @@ Setting argument ``keep_special_chars=False`` in the Tokenizer would remove all 
 +-----------------------------------------------------+--------------------------------------------------------------------------------------------------+---------------------------------------+-------------------------------+
 | ReplaceSpecialCharsBetweenLettersAndDigitsWithSpace | Replaces special characters between letters and digits with a space.                             | "Coding^^!#%24 hours#%7 days"         | "Coding 24 hours 7 days"      |
 +-----------------------------------------------------+--------------------------------------------------------------------------------------------------+---------------------------------------+-------------------------------+
-| ReplaceSpecialCharsBetweenDigitsAndLettersWithSpace | Replaces special characters between digits and letters with a space.                             | "Coding 24^^!#%%hours 7##%days"      | "Coding 24 hours 7 days"       |
+| ReplaceSpecialCharsBetweenDigitsAndLettersWithSpace | Replaces special characters between digits and letters with a space.                             | "Coding 24^^!#%%hours 7##%days"       | "Coding 24 hours 7 days"      |
 +-----------------------------------------------------+--------------------------------------------------------------------------------------------------+---------------------------------------+-------------------------------+
-| ReplaceSpecialCharsBetweenLettersWithSpace          | Replaces special characters between letters and letters with a space.                            | "Coding all^^!#%%hours seven##%days" | "Coding all hours seven days"  |
+| ReplaceSpecialCharsBetweenLettersWithSpace          | Replaces special characters between letters and letters with a space.                            | "Coding all^^!#%%hours seven##%days"  | "Coding all hours seven days" |
 +-----------------------------------------------------+--------------------------------------------------------------------------------------------------+---------------------------------------+-------------------------------+
+
+The last 5 rules above remove special characters in different contexts. These special characters can be specified in the config using the key, :attr:`keep_special_chars`.
+By default, :attr:`keep_special_chars` includes :attr:`@`, :attr:`[`, :attr:`]` and :attr:`'` represented as a single string. A custom set of special characters can be specified in :attr:`config.py`.
+
+
+Lowercase Normalization
+^^^^^^^^^^^^^^^^^^^^^^^^
+The :attr:`Lowercase` normalizer converts every character in a string to its lowercase equivalent. For example:
+
+.. code:: python
+
+    from mindmeld.text_preparation.normalizers import Lowercase
+    
+    sentence = "I Like to Run!"
+    lowercase_normalizer = Lowercase()
+    normalized_text = lowercase_normalizer.normalize(sentence)
+    print(normalized_text)
+
+As expected, this would display the following normalized text:
+
+.. code:: python
+
+    'i like to run!'
 
 
 ASCII Fold Normalization
@@ -268,7 +436,159 @@ We can print the character values for each of the texts and observe the the norm
     >>> print([ord(c) for c in normalized_text])
     >>> [113, 117, 105, 101, 769, 110]
 
+
+Creating a Custom Normalizer
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This section includes boilerplate code to build a custom normalizer class. Let's recreate the :attr:`Lowercase` normalizer class.
+A custom tokenizer must extend from MindMeld's abstract :attr:`Normalizer` class:
+
+
+.. code:: python
+
+    from abc import ABC, abstractmethod
+
+    class Normalizer(ABC):
+        """Abstract Normalizer Base Class."""
+
+        @abstractmethod
+        def normalize(self, text):
+            """
+            Args:
+                text (str): Text to normalize.
+            Returns:
+                normalized_text (str): Normalized Text.
+            """
+            raise NotImplementedError("Subclasses must implement this method")
+
+
+With this in mind, let's recreate MindMeld's :attr:`Lowercase` normalizer class.
+
+.. code:: python
+
+    from mindmeld.text_preparation.normalizers import Normalizer
+
+    class Lowercase(Normalizer):
+
+        def normalize(self, text):
+            return text.lower()
+
+
+This normalizer would transform the text "I Like to Run!" to "i like to run!".
+The steps to use a custom Normalizer in your application are explained here.
+
+
+.. note::
+
+    MindMeld normalizes queries on a per-token basis. Custom normalizers should be designed to normalize individual tokens and not sentences as a whole.
+
+
 Stemming
 --------
-Stemming information.
+Stemming is the process of reducing a word to its stem or root. Mindmeld offers 
 
+
+EnglishNLTKStemmer
+^^^^^^^^^^^^^^^^^^
+
+The :attr:`ASCIIFold` normalizer converts numeric, symbolic and alphabetic characters which are not in the first 127 ASCII characters (Basic Latin Unicode block) into an ASCII equivalent (if possible).
+
+For example, we can normalize the following Spanish sentence with several accented characters:
+
+.. code:: python
+
+    from mindmeld.text_preparation.normalizers import ASCIIFold
+    
+    sentence_es = "Ha pasado un caballero, ¡quién sabe por qué pasó!"
+    ascii_fold_normalizer = ASCIIFold()
+    normalized_text = ascii_fold_normalizer.normalize(sentence_es)
+    print(normalized_text)
+
+The accents are removed and the accented characters have been replaced with compatible ASCII equivalents.
+
+.. code:: python
+
+    'Ha pasado un caballero, ¡quien sabe por que paso!'
+
+
+SnowballStemmer
+^^^^^^^^^^^^^^^
+
+The :attr:`ASCIIFold` normalizer converts numeric, symbolic and alphabetic characters which are not in the first 127 ASCII characters (Basic Latin Unicode block) into an ASCII equivalent (if possible).
+
+For example, we can normalize the following Spanish sentence with several accented characters:
+
+.. code:: python
+
+    from mindmeld.text_preparation.normalizers import ASCIIFold
+    
+    sentence_es = "Ha pasado un caballero, ¡quién sabe por qué pasó!"
+    ascii_fold_normalizer = ASCIIFold()
+    normalized_text = ascii_fold_normalizer.normalize(sentence_es)
+    print(normalized_text)
+
+The accents are removed and the accented characters have been replaced with compatible ASCII equivalents.
+
+.. code:: python
+
+    'Ha pasado un caballero, ¡quien sabe por que paso!'
+
+
+Creating a Custom Stemmer
+^^^^^^^^^^^^^^^^^^^^^^^^^
+This section includes boilerplate code to build a custom normalizer class. Let's recreate the :attr:`Lowercase` normalizer class.
+A custom tokenizer must extend from MindMeld's abstract :attr:`Normalizer` class:
+
+
+.. code:: python
+
+    from abc import ABC, abstractmethod
+
+    class Normalizer(ABC):
+        """Abstract Normalizer Base Class."""
+
+        @abstractmethod
+        def normalize(self, text):
+            """
+            Args:
+                text (str): Text to normalize.
+            Returns:
+                normalized_text (str): Normalized Text.
+            """
+            raise NotImplementedError("Subclasses must implement this method")
+
+
+With this in mind, let's recreate MindMeld's :attr:`Lowercase` normalizer class.
+
+.. code:: python
+
+    from mindmeld.text_preparation.normalizers import Normalizer
+
+    class Lowercase(Normalizer):
+
+        def normalize(self, text):
+            return text.lower()
+
+
+This normalizer would transform the text "I Like to Run!" to "i like to run!".
+The steps to use a custom Normalizer in your application are explained here.
+
+
+.. note::
+
+    MindMeld normalizes queries on a per-token basis. Custom normalizers should be designed to normalize individual tokens and not sentences as a whole.
+
+
+
+Use the preprocessor
+--------------------
+
+To use your custom preprocessing logic within your MindMeld application, pass in an instance of your implemented preprocessor class when initializing the :class:`Application` object in the application container file, ``__init__.py``.
+
+.. code:: python
+  :caption: __init__.py
+
+  from mindmeld import Application
+  from .stem_processor import StemProcessor
+
+  preprocessor = StemProcessor()
+  app = Application(__name__, preprocessor=preprocessor)
