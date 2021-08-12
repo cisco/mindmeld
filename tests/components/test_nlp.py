@@ -15,7 +15,6 @@ import pytest
 from mindmeld.components import NaturalLanguageProcessor
 from mindmeld.exceptions import ProcessorError
 from marshmallow.exceptions import ValidationError
-from mindmeld.query_factory import QueryFactory
 from mindmeld.components.domain_classifier import DomainClassifier
 
 
@@ -484,71 +483,6 @@ def test_nlp_hierarchy_for_queries_duckling_fails_on(kwik_e_mart_nlp, query):
     assert response["text"] == query
 
 
-test_data_not_stemmed = [
-    "airliner",
-    "gyroscopic",
-    "adjustable",
-    "defensible",
-    "irritant",
-    "replacement",
-    "adjustment",
-    "dependent",
-    "adoption",
-    "communism",
-    "activate",
-    "effective",
-    "bowdlerize",
-    "manager",
-    "proceed",
-    "exceed",
-    "succeed",
-    "outing",
-    "inning",
-    "news",
-    "sky",
-]
-
-
-@pytest.mark.parametrize("query", test_data_not_stemmed)
-def test_nlp_for_non_stemmed_queries(kwik_e_mart_nlp, query):
-    """Tests queries that are NOT in the training data but have their stemmed
-    versions in the training data"""
-    query_factory = QueryFactory.create_query_factory()
-    stemmed_tokens = query_factory.create_query(text=query).stemmed_tokens
-    assert query == stemmed_tokens[0]
-
-
-test_data_need_stemming = [
-    ("cancelled", "cancel"),
-    ("aborted", "abort"),
-    ("backwards", "backward"),
-    ("exitted", "exit"),
-    ("finished", "finish"),
-]
-
-
-@pytest.mark.parametrize("query,stemmed_query", test_data_need_stemming)
-def test_nlp_for_stemmed_queries(kwik_e_mart_nlp, query, stemmed_query):
-    """Tests queries that are NOT in the training data but have their stemmed
-    versions in the training data"""
-    query_factory = QueryFactory.create_query_factory()
-    stemmed_tokens = query_factory.create_query(text=query).stemmed_tokens
-    assert stemmed_query == stemmed_tokens[0]
-
-
-test_data_stemmed = ["cancelled", "exited", "aborted"]
-
-
-@pytest.mark.parametrize("query", test_data_stemmed)
-def test_nlp_hierarchy_for_stemmed_queries(kwik_e_mart_nlp, query):
-    """Tests queries that are NOT in the training data but have their stemmed
-    versions in the training data"""
-    response = kwik_e_mart_nlp.process(query)
-    assert response["text"] == query
-    assert response["domain"] == "store_info"
-    assert response["intent"] == "exit"
-
-
 def test_validate_and_extract_allowed_intents(kwik_e_mart_nlp):
     """Tests user specified allowable domains and intents"""
     with pytest.raises(ValidationError):
@@ -587,12 +521,16 @@ def test_process_verbose_long_tokens(kwik_e_mart_nlp):
     text = "Is the Kwik-E-Mart open tomorrow?"
     response = kwik_e_mart_nlp.process(text, verbose=True)
 
-    tokenizer = kwik_e_mart_nlp.resource_loader.query_factory.tokenizer
-    raw_tokens = [t["text"] for t in tokenizer._tokenizer.tokenize(text)]
-    normalized_tokens = [t["entity"] for t in tokenizer.tokenize(text)]
+    text_preparation_pipeline = (
+        kwik_e_mart_nlp.resource_loader.query_factory.text_preparation_pipeline
+    )
 
-    assert raw_tokens == ["Is", "the", "Kwik-E-Mart", "open", "tomorrow?"]
-    assert normalized_tokens == ["is", "the", "kwik", "e", "mart", "open", "tomorrow"]
+    raw_tokens_text = [t["text"] for t in text_preparation_pipeline.tokenize(text)]
+    assert raw_tokens_text == ["Is", "the", "Kwik-E-Mart", "open", "tomorrow?"]
+
+    normalized_tokens = text_preparation_pipeline.tokenize_and_normalize(text)
+    normalized_tokens_text = [t["entity"] for t in normalized_tokens]
+    assert normalized_tokens_text == ["is", "the", "kwik", "e", "mart", "open", "tomorrow"]
 
     assert response["domain"] == "store_info"
     assert response["intent"] == "get_store_hours"
@@ -607,12 +545,16 @@ def test_process_verbose_short_tokens(kwik_e_mart_nlp):
     text = "when ** open -- tomorrow?"
     response = kwik_e_mart_nlp.process(text, verbose=True)
 
-    tokenizer = kwik_e_mart_nlp.resource_loader.query_factory.tokenizer
-    raw_tokens = [t["text"] for t in tokenizer._tokenizer.tokenize(text)]
-    normalized_tokens = [t["entity"] for t in tokenizer.tokenize(text)]
+    text_preparation_pipeline = (
+        kwik_e_mart_nlp.resource_loader.query_factory.text_preparation_pipeline
+    )
 
-    assert raw_tokens == ["when", "**", "open", "--", "tomorrow?"]
-    assert normalized_tokens == ["when", "open", "tomorrow"]
+    raw_tokens_text = [t["text"] for t in text_preparation_pipeline.tokenize(text)]
+    assert raw_tokens_text == ["when", "**", "open", "--", "tomorrow?"]
+
+    normalized_tokens = text_preparation_pipeline.tokenize_and_normalize(text)
+    normalized_tokens_text = [t["entity"] for t in normalized_tokens]
+    assert normalized_tokens_text == ["when", "open", "tomorrow"]
 
     assert response["domain"] == "store_info"
     assert response["intent"] == "get_store_hours"

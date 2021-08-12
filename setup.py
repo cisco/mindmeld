@@ -14,8 +14,8 @@ requirements = [
     "Click~=7.1",
     "click-log==0.1.8",
     "distro~=1.3",
-    "dvc>=1.8.1",
-    "elasticsearch>=5.0",
+    # elasticsearch-py 7.14 breaks backwards compatibility with servers prior to 7.11
+    "elasticsearch>=5.0,<7.14",
     "Flask~=1.0",
     "Flask-Cors~=3.0",
     "future~=0.17",
@@ -94,7 +94,8 @@ setup(
             'torch~=1.7.0; python_version>="3.6"',
             'transformers~=3.5.1; python_version>="3.6"',
             'sentence-transformers~=0.3; python_version>="3.6"',
-            "elasticsearch>=7.0",
+            # elasticsearch-py 7.14 breaks backwards compatibility with servers prior to 7.11
+            'elasticsearch>=7.0,<7.14',
         ],
         "examples": [
             'connexion>=2.7.0; python_version>="3.6"',
@@ -108,10 +109,14 @@ setup(
             "google-cloud-translate>=3.0.1",
         ],
         "elasticsearch": [
-            "elasticsearch>=5.0",
+            # elasticsearch-py 7.14 breaks backwards compatibility with servers prior to 7.11
+            "elasticsearch>=5.0,<7.14",
         ],
         "active_learning": [
             "matplotlib~=3.3.1",
+        ],
+        "dvc": [
+            "dvc>=1.8.1"
         ]
     },
 )

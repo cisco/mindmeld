@@ -12,15 +12,18 @@
 # limitations under the License.
 
 """This module contains Normalizers."""
-import unicodedata
-import codecs
 from abc import ABC, abstractmethod
+import codecs
 import logging
-
-from ..constants import ASCII_CUTOFF
+import re
+import unicodedata
+from ..constants import CURRENCY_SYMBOLS
 from ..path import ASCII_FOLDING_DICT_PATH
 
 logger = logging.getLogger(__name__)
+
+
+ASCII_CUTOFF = ord("\u0080")
 
 
 class Normalizer(ABC):
@@ -124,10 +127,13 @@ class ASCIIFold(Normalizer):
 
 
 class NFD(Normalizer):
-    """Unicode NFD Normalizer Class."""
+    """Unicode NFD Normalizer Class. (Canonical Decomposition)
+
+    For more details: https://unicode.org/reports/tr15/#Norm_Forms
+    """
 
     def __init__(self):
-        """Creates a NFDNormalizer instance."""
+        """Creates a NFD Normalizer instance."""
         super().__init__()
         self.normalization_type = "NFD"
 
@@ -142,10 +148,14 @@ class NFD(Normalizer):
 
 
 class NFC(Normalizer):
-    """Unicode NFC Normalizer Class."""
+    """Unicode NFC Normalizer Class.
+    (Canonical Decomposition, followed by Canonical Composition)
+
+    For more details: https://unicode.org/reports/tr15/#Norm_Forms
+    """
 
     def __init__(self):
-        """Creates a NFCNormalizer instance."""
+        """Creates a NFC Normalizer instance."""
         super().__init__()
         self.normalization_type = "NFC"
 
@@ -160,10 +170,13 @@ class NFC(Normalizer):
 
 
 class NFKD(Normalizer):
-    """Unicode NFKD Normalizer Class."""
+    """Unicode NFKD Normalizer Class. (Compatibility Decomposition)
+
+    For more details: https://unicode.org/reports/tr15/#Norm_Forms
+    """
 
     def __init__(self):
-        """Creates a NFKDNormalizer instance."""
+        """Creates a NFKD Normalizer instance."""
         super().__init__()
         self.normalization_type = "NFKD"
 
@@ -178,10 +191,14 @@ class NFKD(Normalizer):
 
 
 class NFKC(Normalizer):
-    """Unicode NFKC Normalizer Class."""
+    """Unicode NFKC Normalizer Class.
+    (Compatibility Decomposition, followed by Canonical Composition)
+
+    For more details: https://unicode.org/reports/tr15/#Norm_Forms
+    """
 
     def __init__(self):
-        """Creates a NFKCNormalizer instance."""
+        """Creates a NFKC Normalizer instance."""
         super().__init__()
         self.normalization_type = "NFKC"
 
@@ -195,11 +212,113 @@ class NFKC(Normalizer):
         return unicodedata.normalize(self.normalization_type, text)
 
 
+class Lowercase(Normalizer):
+    """Lowercase Normalizer Class."""
+
+    def normalize(self, text):
+        """
+        Args:
+            text (str): Input text.
+        Returns:
+            normalized_text (str): Normalized Text.
+        """
+        return text.lower()
+
+
+class RegexNormalizerRule(Normalizer):
+    def __init__(self, pattern: str, replacement: str):
+        """Creates a RegexNormalizerRule instance."""
+        self.pattern = pattern
+        self.replacement = replacement
+        self._expr = re.compile(self.pattern)
+
+    def normalize(self, s):
+        return self._expr.sub(self.replacement, s)
+
+
+class RegexNormalizerRuleFactory:
+
+    # exception_chars is a class var so that updates are accessible throughout the application
+    EXCEPTION_CHARS = r"\@\[\]'"
+
+    @staticmethod
+    def get_default_regex_normalizer_rule(regex_normalizer: str):
+        """Creates a RegexNormalizerRule object based on the given rule and the current
+        EXCEPTION_CHARS.
+
+        Args:
+            regex_normalizer (str): Name of the desired RegexNormalizerRule
+        Returns:
+            (RegexNormalizerRule): Default Regex Normalizer Rule
+        """
+        if regex_normalizer in DEFAULT_REGEX_NORM_RULES:
+            regex_rule_dict = DEFAULT_REGEX_NORM_RULES[regex_normalizer]
+            # Inserts current EXCEPTION_CHARS in pattern string if applicable
+            regex_rule_dict["pattern"] = regex_rule_dict["pattern"].format(
+                exception_chars=RegexNormalizerRuleFactory.EXCEPTION_CHARS
+            )
+            return RegexNormalizerRule(**regex_rule_dict)
+
+    @staticmethod
+    def get_regex_normalizers(regex_norm_rules):
+        """A static method to get a RegexNormalizerRule from regex_norm_rules.
+
+        Args:
+            regex_norm_rules (List[Dict], optional): Regex normalization rules represented as
+                dictionaries. The example rule below removes any text in parentheses.
+                {
+                    "pattern": "\(.+?\)",
+                    "replacement": ""
+                }
+        Returns:
+            regex_normalizer_rules (List[RegexNormalizerRule]): List of RegexNormalizerRule ojects
+                created from the regex_norm_rules_provided.
+        """
+        return [
+            RegexNormalizerRule(pattern=r["pattern"], replacement=r["replacement"])
+            for r in regex_norm_rules
+        ]
+
+
+DEFAULT_REGEX_NORM_RULES = {
+    "RemoveAposAtEndOfPossesiveForm": {
+        "pattern": r"^'(?=\S)|(?<=\S)'$",
+        "replacement": "",
+    },
+    "RemoveAdjacentAposAndSpace": {"pattern": r" '|' ", "replacement": ""},
+    "RemoveBeginningSpace": {"pattern": r"^\s+", "replacement": ""},
+    "RemoveTrailingSpace": {"pattern": r"\s+$", "replacement": ""},
+    "ReplaceSpacesWithSpace": {"pattern": r"\s+", "replacement": " "},
+    "ReplaceUnderscoreWithSpace": {"pattern": r"_", "replacement": " "},
+    "SeparateAposS": {"pattern": r"(?<=[^\s])'[sS]", "replacement": " 's"},
+    "ReplacePunctuationAtWordStartWithSpace": {
+        "pattern": r"^[^\w\d&" + CURRENCY_SYMBOLS + "{exception_chars}" + r"]+",
+        "replacement": " ",
+    },
+    "ReplacePunctuationAtWordEndWithSpace": {
+        "pattern": r"[^\w\d&" + CURRENCY_SYMBOLS + "{exception_chars}" + r"]+$",
+        "replacement": " ",
+    },
+    "ReplaceSpecialCharsBetweenLettersAndDigitsWithSpace": {
+        "pattern": r"(?<=[^\W\d_])[^\w\d\s&" + "{exception_chars}" + r"]+(?=[\d]+)",
+        "replacement": " ",
+    },
+    "ReplaceSpecialCharsBetweenDigitsAndLettersWithSpace": {
+        "pattern": r"(?<=[\d])[^\w\d\s&" + "{exception_chars}" + r"]+(?=[^\W\d_]+)",
+        "replacement": " ",
+    },
+    "ReplaceSpecialCharsBetweenLettersWithSpace": {
+        "pattern": r"(?<=[^\W\d_])[^\w\d\s&" + "{exception_chars}" + r"]+(?=[^\W\d_]+)",
+        "replacement": " ",
+    },
+}
+
+
 class NormalizerFactory:
     """Normalizer Factory Class"""
 
     @staticmethod
-    def get_normalizer(normalizer):
+    def get_normalizer(normalizer: str):
         """A static method to get a Normalizer
 
         Args:
@@ -207,16 +326,21 @@ class NormalizerFactory:
         Returns:
             (Normalizer): Normalizer Class
         """
-        if normalizer == NoOpNormalizer.__name__:
-            return NoOpNormalizer()
-        elif normalizer == ASCIIFold.__name__:
-            return ASCIIFold()
-        elif normalizer == NFC.__name__:
-            return NFC()
-        elif normalizer == NFD.__name__:
-            return NFD()
-        elif normalizer == NFKC.__name__:
-            return NFKC()
-        elif normalizer == NFKD.__name__:
-            return NFKD()
-        raise AssertionError(f" {normalizer} is not a valid Normalizer.")
+        if normalizer in DEFAULT_REGEX_NORM_RULES:
+            return RegexNormalizerRuleFactory.get_default_regex_normalizer_rule(
+                normalizer
+            )
+
+        normalizer_classes = {
+            NoOpNormalizer.__name__: NoOpNormalizer,
+            ASCIIFold.__name__: ASCIIFold,
+            NFC.__name__: NFC,
+            NFD.__name__: NFD,
+            NFKC.__name__: NFKC,
+            NFKD.__name__: NFKD,
+            Lowercase.__name__: Lowercase,
+        }
+        normalizer_class = normalizer_classes.get(normalizer)
+        if not normalizer_class:
+            raise TypeError(f"{normalizer} is not a valid Normalizer type.")
+        return normalizer_class()

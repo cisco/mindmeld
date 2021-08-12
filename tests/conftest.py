@@ -16,17 +16,18 @@ import warnings
 
 import pytest
 
-from mindmeld.components import NaturalLanguageProcessor, Preprocessor, QuestionAnswerer
-from mindmeld.components._elasticsearch_helpers import create_es_client
-from mindmeld.markup import load_query
-from mindmeld.query_factory import QueryFactory
-from mindmeld.resource_loader import ResourceLoader
-from mindmeld.stemmers import EnglishNLTKStemmer
-from mindmeld.system_entity_recognizer import DucklingRecognizer
-from mindmeld.tokenizer import Tokenizer
 from mindmeld.converter.rasa import RasaConverter
 from mindmeld.converter.dialogflow import DialogflowConverter
-
+from mindmeld.components import NaturalLanguageProcessor, QuestionAnswerer
+from mindmeld.components._elasticsearch_helpers import create_es_client
+from mindmeld.markup import load_query
+from mindmeld.resource_loader import ResourceLoader
+from mindmeld.system_entity_recognizer import DucklingRecognizer
+from mindmeld.text_preparation.preprocessors import Preprocessor
+from mindmeld.text_preparation.stemmers import EnglishNLTKStemmer
+from mindmeld.text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
+from mindmeld.text_preparation.tokenizers import WhiteSpaceTokenizer
+from mindmeld.query_factory import QueryFactory
 
 warnings.filterwarnings(
     "module", category=DeprecationWarning, module="sklearn.preprocessing.label"
@@ -45,11 +46,17 @@ AENEID_FILE = "aeneid.txt"
 AENEID_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), AENEID_FILE)
 STORE_DATA_FILE_PATH = os.path.join(APP_PATH, "data/stores.json")
 
-CONVERTER_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'converter')
-RASA_CONVERTER_PROJECT_PATH = os.path.join(CONVERTER_PATH, 'rasa_sample_project')
-DIALOG_CONVERTER_PROJECT_PATH = os.path.join(CONVERTER_PATH, 'dialogflow_sample_project')
-MINDMELD_RASA_CONVERTER_PROJECT_PATH = os.path.join(CONVERTER_PATH, 'mm_rasa_converted_project')
-MINDMELD_DIALOG_CONVERTER_PROJECT_PATH = os.path.join(CONVERTER_PATH, 'mm_df_converted_project')
+CONVERTER_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "converter")
+RASA_CONVERTER_PROJECT_PATH = os.path.join(CONVERTER_PATH, "rasa_sample_project")
+DIALOG_CONVERTER_PROJECT_PATH = os.path.join(
+    CONVERTER_PATH, "dialogflow_sample_project"
+)
+MINDMELD_RASA_CONVERTER_PROJECT_PATH = os.path.join(
+    CONVERTER_PATH, "mm_rasa_converted_project"
+)
+MINDMELD_DIALOG_CONVERTER_PROJECT_PATH = os.path.join(
+    CONVERTER_PATH, "mm_df_converted_project"
+)
 
 
 @pytest.fixture
@@ -149,8 +156,7 @@ def qa_kwik_e_mart(kwik_e_mart_app_path, es_client):
 
 @pytest.fixture(scope="session")
 def rasa_converter():
-    converter = RasaConverter(RASA_CONVERTER_PROJECT_PATH,
-                              MINDMELD_RASA_CONVERTER_PROJECT_PATH)
+    converter = RasaConverter(RASA_CONVERTER_PROJECT_PATH, MINDMELD_RASA_CONVERTER_PROJECT_PATH)
     converter.convert_project()
     return converter
 
@@ -162,8 +168,9 @@ def mindmeld_rasa_converter_app_path():
 
 @pytest.fixture(scope="session")
 def dialogflow_converter():
-    return DialogflowConverter(DIALOG_CONVERTER_PROJECT_PATH,
-                               MINDMELD_DIALOG_CONVERTER_PROJECT_PATH)
+    return DialogflowConverter(
+        DIALOG_CONVERTER_PROJECT_PATH, MINDMELD_DIALOG_CONVERTER_PROJECT_PATH
+    )
 
 
 class GhostPreprocessor(Preprocessor):
@@ -174,14 +181,11 @@ class GhostPreprocessor(Preprocessor):
             text = text.replace("ghost", "")
         return text
 
-    def get_char_index_map(self, raw_text, processed_text):
-        return {}, {}
-
 
 @pytest.fixture
 def tokenizer():
     """A tokenizer for normalizing text"""
-    return Tokenizer()
+    return WhiteSpaceTokenizer()
 
 
 @pytest.fixture
@@ -202,12 +206,20 @@ def duckling():
 
 
 @pytest.fixture
-def query_factory(tokenizer, preprocessor, stemmer):
+def text_preparation_pipeline(preprocessor):
+    """The Text Preparation Pipeline Object"""
+    text_preparation_pipeline = (
+        TextPreparationPipelineFactory.create_default_text_preparation_pipeline()
+    )
+    text_preparation_pipeline.preprocessors = [preprocessor]
+    return text_preparation_pipeline
+
+
+@pytest.fixture
+def query_factory(text_preparation_pipeline):
     """For creating queries"""
     return QueryFactory(
-        tokenizer=tokenizer,
-        preprocessor=preprocessor,
-        stemmer=stemmer,
+        text_preparation_pipeline=text_preparation_pipeline,
         system_entity_recognizer=None,
         duckling=True,
     )
@@ -297,11 +309,10 @@ test_queries = [
     ("domain2", "intent2", "I'd like a processed query please10"),
 ]
 
+
 @pytest.fixture
 def processed_queries(query_factory):
     pq_list = []
     for domain, intent, text in test_queries:
-        pq_list.append(
-            load_query(text, query_factory, domain=domain, intent=intent)
-        )
+        pq_list.append(load_query(text, query_factory, domain=domain, intent=intent))
     return pq_list

@@ -10,12 +10,6 @@ Tests for `core` module.
 # pylint: disable=locally-disabled,redefined-outer-name
 import pytest
 
-from mindmeld.stemmers import (
-    get_language_stemmer,
-    EnglishNLTKStemmer,
-    NoOpStemmer,
-    SnowballNLTKStemmer,
-)
 from mindmeld.core import (
     TEXT_FORM_NORMALIZED,
     TEXT_FORM_PROCESSED,
@@ -403,21 +397,6 @@ def test_system_entity_time_resolution(home_assistant_nlp):
     # Check that resolved entities are '2' and '6' rather than '2' and '2 to 6' (5:58)
     assert entities[0]["text"] == "2"
     assert entities[1]["text"] == "6"
-
-
-@pytest.mark.parametrize(
-    "language_code,stemmer_class",
-    [
-        ("en", EnglishNLTKStemmer),
-        ("EN", EnglishNLTKStemmer),
-        ("es", SnowballNLTKStemmer),
-        ("AFG", NoOpStemmer),
-        ("INVALID_CODE", NoOpStemmer),
-    ],
-)
-def test_get_language_stemmer(language_code, stemmer_class):
-    stemmer = get_language_stemmer(language_code)
-    assert isinstance(stemmer, stemmer_class)
 
 
 @pytest.mark.parametrize(

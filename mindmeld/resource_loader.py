@@ -307,13 +307,14 @@ class ResourceLoader:
 
         return self._entity_files[gaz_name]["gazetteer"]["data"]
 
-    def get_tokenizer(self):
+    def get_text_preparation_pipeline(self):
         """Get the tokenizer from the query_factory attribute
 
         Returns:
-            tokenizer (Tokenizer): The resource loaders tokenizer
+            text_preparation_pipeline (TextPreparationPipeline): Class responsible for
+                the normalization and tokenization of text.
         """
-        return self.query_factory.tokenizer
+        return self.query_factory.text_preparation_pipeline
 
     @staticmethod
     def get_sentiment_analyzer():
@@ -377,7 +378,7 @@ class ResourceLoader:
         logger.info("Building gazetteer '%s'", gaz_name)
 
         # TODO: support role gazetteers
-        gaz = Gazetteer(gaz_name, self.get_tokenizer(), exclude_ngrams)
+        gaz = Gazetteer(gaz_name, self.get_text_preparation_pipeline(), exclude_ngrams)
 
         entity_data_path = path.get_entity_gaz_path(self.app_path, gaz_name)
         gaz.update_with_entity_data_file(
@@ -403,7 +404,7 @@ class ResourceLoader:
         Args:
             gaz_name (str): The name of the entity the gazetteer corresponds to
         """
-        gaz = Gazetteer(gaz_name, self.get_tokenizer())
+        gaz = Gazetteer(gaz_name, self.get_text_preparation_pipeline())
         gaz_path = path.get_gazetteer_data_path(self.app_path, gaz_name)
         gaz.load(gaz_path)
         self._entity_files[gaz_name]["gazetteer"]["data"] = gaz.to_dict()
@@ -893,19 +894,20 @@ class ResourceLoader:
         return self._hasher.hash_list(items)
 
     @staticmethod
-    def create_resource_loader(app_path, query_factory=None, preprocessor=None):
+    def create_resource_loader(app_path, query_factory=None, text_preparation_pipeline=None):
         """Creates the resource loader for the app at app path.
 
         Args:
             app_path (str): The path to the directory containing the app's data
             query_factory (QueryFactory): The app's query factory
-            preprocessor (Preprocessor): The app's preprocessor
+            text_preparation_pipeline (TextPreparationPipeline): The app's text preparation
+                pipeline.
 
         Returns:
             ResourceLoader: a resource loader
         """
         query_factory = query_factory or QueryFactory.create_query_factory(
-            app_path, preprocessor=preprocessor
+            app_path, text_preparation_pipeline=text_preparation_pipeline
         )
         return ResourceLoader(app_path, query_factory)
 

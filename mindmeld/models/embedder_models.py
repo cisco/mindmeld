@@ -27,10 +27,11 @@ from tqdm.autonotebook import trange
 from ._util import _is_module_available, _get_module_or_attr as _getattr
 from .helpers import register_embedder
 from .taggers.embeddings import WordSequenceEmbedding
+
 from .. import path
 from ..core import Bunch
 from ..resource_loader import Hasher
-from ..tokenizer import Tokenizer
+from ..text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
 
 logger = logging.getLogger(__name__)
 
@@ -757,12 +758,15 @@ class GloveEmbedder(Embedder):
 
     def __init__(self, app_path, **kwargs):
         super().__init__(app_path, **kwargs)
-        self.glove_tokenizer = Tokenizer()
+        self.text_preparation_pipeline = (
+            TextPreparationPipelineFactory.create_default_text_preparation_pipeline()
+        )
 
     def tokenize(self, text):
-        tokens = self.glove_tokenizer.tokenize(text, keep_special_chars=False)
-        token_list = [t["entity"] for t in tokens]
-        return token_list
+        return [
+            t["entity"] for t in
+            self.text_preparation_pipeline.tokenize_and_normalize(text)
+        ]
 
     def _load(self, **kwargs):
         token_embedding_dimension = kwargs.get(
