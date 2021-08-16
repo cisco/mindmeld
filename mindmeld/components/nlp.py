@@ -1134,15 +1134,6 @@ class IntentProcessor(Processor):
 
     def _build(self, incremental=False, label_set=None, load_cached=True):
         """Builds the models for this intent"""
-        entity_types = self.entity_recognizer.get_entity_types(label_set=label_set)
-        if len(entity_types) == 0:
-            # unlike when len(domains)==1 or len(intents)==1, this flag is required here because we
-            # will need to store entity recognizer's metadata although we don't save the underneath
-            # model. This metadata is loaded and is used to decide if there are any children to be
-            # loaded for this instance. Setting the state to True will trigger self._dump be called
-            # which stores metadata.
-            self.ready = True
-            return
 
         # train entity recognizer
         self.ready = self.entity_recognizer.fit(
@@ -1211,7 +1202,7 @@ class IntentProcessor(Processor):
             self._children[entity_type] = processor
 
     def _evaluate(self, print_stats, label_set="test"):
-        if len(self.entity_recognizer.entity_types) > 0:
+        if len(self.entity_recognizer.entity_types) > 1:
             entity_eval = self.entity_recognizer.evaluate(label_set=label_set)
             if entity_eval:
                 print(
@@ -1295,30 +1286,22 @@ class IntentProcessor(Processor):
                 return nbest_transcripts_entities
             else:
                 if verbose:
-                    if len(self.entities) == 0:
-                        return [[]]
                     return [
                         self.entity_recognizer.predict_proba(
                             query[0], dynamic_resource=dynamic_resource
                         )
                     ]
                 else:
-                    if len(self.entities) == 0:
-                        return [()]
                     return [
                         self.entity_recognizer.predict(
                             query[0], dynamic_resource=dynamic_resource
                         )
                     ]
         if verbose:
-            if len(self.entities) == 0:
-                return []
             return self.entity_recognizer.predict_proba(
                 query, dynamic_resource=dynamic_resource
             )
         else:
-            if len(self.entities) == 0:
-                return ()
             return self.entity_recognizer.predict(
                 query, dynamic_resource=dynamic_resource
             )
@@ -1530,15 +1513,8 @@ class IntentProcessor(Processor):
         Returns:
             list: A list of lists of non-overlapping entities for each n-best transcript
         """
-
         # This code block implements allowed entities described here:
         # https://github.com/cisco/mindmeld/pull/280
-
-        # We extract the `entity` key from each token since that represents the normalized text of
-        # each token which we will compare against the normalized text of the query
-        def tokenize_to_tuples(text):
-            return tuple([token["entity"] for token in
-                          self.resource_loader.query_factory.tokenizer.tokenize(text)])
 
         dynamic_gazetteer = dynamic_resource.get(GAZETTEER_RSC, {}) if dynamic_resource else {}
         n_best_entities = [[] for _ in range(len(query))]
@@ -1553,9 +1529,14 @@ class IntentProcessor(Processor):
                 continue
 
             # check if entity is in the gazetteers
+            text_preparation_pipeline = self.resource_loader.query_factory.text_preparation_pipeline
             consolidated_set = set(self.resource_loader.get_gazetteer(entity)['pop_dict'])
             consolidated_set = consolidated_set.union(
-                {tokenize_to_tuples(key) for key in dynamic_gazetteer.get(entity, {})})
+                {
+                    text_preparation_pipeline.get_normalized_tokens_as_tuples(key)
+                    for key in dynamic_gazetteer.get(entity, {})
+                }
+            )
 
             for idx, n_best_query in enumerate(query):
                 normalized_tokens = n_best_query.normalized_tokens

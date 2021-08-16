@@ -54,6 +54,7 @@ class EntityRecognizer(Classifier):
         self.domain = domain
         self.intent = intent
         self.entity_types = set()
+        self._model_config = None
 
     def _get_model_config(self, **kwargs):  # pylint: disable=arguments-differ
         """Gets a machine learning model configuration
@@ -98,14 +99,14 @@ class EntityRecognizer(Classifier):
         logger.info(
             "Fitting entity recognizer: domain=%r, intent=%r", self.domain, self.intent
         )
-
         # create model with given params
-        model_config = self._get_model_config(**kwargs)
+        self._model_config = self._get_model_config(**kwargs)
+        model = create_model(self._model_config)
 
-        label_set = label_set or model_config.train_label_set or DEFAULT_TRAIN_SET_REGEX
+        label_set = label_set or self._model_config.train_label_set or DEFAULT_TRAIN_SET_REGEX
         queries = self._resolve_queries(queries, label_set)
 
-        new_hash = self._get_model_hash(model_config, queries)
+        new_hash = self._get_model_hash(self._model_config, queries)
         cached_model = self._resource_loader.hash_to_model_path.get(new_hash)
 
         if incremental_timestamp and cached_model:
@@ -118,19 +119,16 @@ class EntityRecognizer(Classifier):
         # Load labeled data
         examples, labels = self._get_examples_and_labels(queries)
 
-        if examples:
-            # Build entity types set
-            self.entity_types = set()
-            for label in labels:
-                for entity in label:
-                    self.entity_types.add(entity.entity.type)
+        # Build entity types set
+        self.entity_types = set()
+        for label in labels:
+            for entity in label:
+                self.entity_types.add(entity.entity.type)
 
-            model = create_model(model_config)
-            model.initialize_resources(self._resource_loader, examples, labels)
-            model.fit(examples, labels)
-            self._model = model
-            self.config = ClassifierConfig.from_model_config(self._model.config)
-
+        model.initialize_resources(self._resource_loader, examples, labels)
+        model.fit(examples, labels)
+        self._model = model
+        self.config = ClassifierConfig.from_model_config(self._model.config)
         self.hash = new_hash
 
         self.ready = True
@@ -153,12 +151,10 @@ class EntityRecognizer(Classifier):
     def _dump(self, path):
         er_data = {
             "entity_types": self.entity_types,
+            "w_ngram_freq": self._model.get_resource("w_ngram_freq"),
+            "c_ngram_freq": self._model.get_resource("c_ngram_freq"),
+            "model_config": self._model_config,
         }
-        if self._model:
-            er_data.update({
-                "w_ngram_freq": self._model.get_resource("w_ngram_freq"),
-                "c_ngram_freq": self._model.get_resource("c_ngram_freq"),
-            })
         pickle.dump(er_data, open(self._get_classifier_resources_save_path(path), "wb"))
 
     def unload(self):
@@ -166,6 +162,7 @@ class EntityRecognizer(Classifier):
             "Unloading entity recognizer: domain=%r, intent=%r", self.domain, self.intent
         )
         self.entity_types = None
+        self._model_config = None
         self._model = None
         self.ready = False
 
@@ -188,6 +185,7 @@ class EntityRecognizer(Classifier):
         except FileNotFoundError:  # backwards compatability for previous version's saved models
             er_data = joblib.load(model_path)
         self.entity_types = er_data["entity_types"]
+        self._model_config = er_data["model_config"]
 
         # validate and register resources
         if self._model is not None:
@@ -205,7 +203,7 @@ class EntityRecognizer(Classifier):
                 self._model.config.resolve_config(self._get_model_config())
 
             gazetteers = self._resource_loader.get_gazetteers()
-            tokenizer = self._resource_loader.get_tokenizer()
+            text_preparation_pipeline = self._resource_loader.get_text_preparation_pipeline()
             sys_types = set(
                 (t for t in self.entity_types if Entity.is_system_entity(t))
             )
@@ -218,7 +216,7 @@ class EntityRecognizer(Classifier):
                 sys_types=sys_types,
                 w_ngram_freq=w_ngram_freq,
                 c_ngram_freq=c_ngram_freq,
-                tokenizer=tokenizer,
+                text_preparation_pipeline=text_preparation_pipeline,
             )
             self.config = ClassifierConfig.from_model_config(self._model.config)
 

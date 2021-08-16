@@ -139,14 +139,12 @@ def test_all_classifier_are_unique_for_incremental_builds(home_assistant_app_pat
 
     for domain in nlp.domains:
         for intent in nlp.domains[domain].intents:
-
-            if nlp.domains[domain].intents[intent].entity_recognizer.entity_types:
-                _, cached_path = get_entity_model_paths(
-                    home_assistant_app_path, domain, intent, timestamp=example_cache
-                )
-                hash_val = open(cached_path + ".hash", "r").read()
-                assert hash_val not in unique_hashs
-                unique_hashs.add(hash_val)
+            _, cached_path = get_entity_model_paths(
+                home_assistant_app_path, domain, intent, timestamp=example_cache
+            )
+            hash_val = open(cached_path + ".hash", "r").read()
+            assert hash_val not in unique_hashs
+            unique_hashs.add(hash_val)
 
             for entity in (
                 nlp.domains[domain].intents[intent].entity_recognizer.entity_types

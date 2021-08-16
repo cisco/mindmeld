@@ -27,7 +27,7 @@ import numpy as np
 from sklearn.metrics import accuracy_score, f1_score
 from tqdm import tqdm
 
-from .layers import (
+from .helpers import (
     get_disk_space_of_model,
     get_num_weights_of_model
 )
