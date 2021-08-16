@@ -14,7 +14,10 @@
 import logging
 import os
 
-import torch
+try:
+    import torch
+except ImportError:
+    pass
 
 logger = logging.getLogger(__name__)
 
