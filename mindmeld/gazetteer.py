@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 class Gazetteer:
     """
-    This class holds the following  fields, which are extracted and exported to file.
+    This class holds the following fields, which are extracted and exported to file.
 
     Attributes:
       entity_count (int): Total entities in the file
@@ -36,11 +36,12 @@ class Gazetteer:
       sys_types (set): The set of nested numeric types for this entity
     """
 
-    def __init__(self, name, tokenizer, exclude_ngrams=False):
+    def __init__(self, name, text_preparation_pipeline, exclude_ngrams=False):
         """
         Args:
             domain (str): The domain that this gazetteer is used
-            entity_type (str): The name of the entity that this gazetteer is used
+            text_preparation_pipeline (TextPreparationPipeline): Pipeline for tokenization and
+                normalization of text.
             exclude_ngrams (bool): The boolean flat whether to exclude ngrams
         """
         self.name = name
@@ -52,7 +53,7 @@ class Gazetteer:
         self.index = defaultdict(set)
         self.entities = []
         self.sys_types = set()
-        self.tokenizer = tokenizer
+        self.text_preparation_pipeline = text_preparation_pipeline
 
     def to_dict(self):
         """
@@ -125,7 +126,11 @@ class Gazetteer:
         """
         # Only update the relevant data structures when the entity isn't
         # already in the gazetteer. Update the popularity either way.
-        tokenized_gaz_entry = tuple(token["entity"] for token in self.tokenizer.tokenize(entity))
+        tokenized_gaz_entry = tuple(
+            token["entity"] for token in self.text_preparation_pipeline.tokenize_and_normalize(
+                entity
+            )
+        )
 
         if self.pop_dict[tokenized_gaz_entry] == 0:
             self.entities.append(entity)
@@ -216,10 +221,8 @@ class Gazetteer:
         if len(self.pop_dict) > 0:
             min_popularity = min(self.pop_dict.values())
         for item in mapping:
-            tokenized_canonical = tuple(
-                token["entity"] for token in self.tokenizer.tokenize(
-                    normalizer(item["cname"])))
 
+            tokenized_canonical = tuple(normalizer(item["cname"]).split())
             for syn in item["whitelist"]:
                 line_count += 1
                 synonym = normalizer(syn)

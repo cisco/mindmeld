@@ -14,7 +14,6 @@ import sqlite3
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-from mindmeld import markup
 from mindmeld.core import ProcessedQuery
 from mindmeld.query_cache import QueryCache
 
@@ -29,8 +28,10 @@ def test_query_cache_has_the_correct_format(kwik_e_mart_app_path):
     assert pq.domain == "store_info"
     assert pq.intent == "help"
 
+
 def compare_dbs(db1, db2):
     pass
+
 
 def get_query_from_disk(tmpdir, key):
     conn = sqlite3.connect(f"{tmpdir}/.generated/query_cache.db")
@@ -39,6 +40,7 @@ def get_query_from_disk(tmpdir, key):
     """, (key,)).fetchone()
     conn.close()
     return tuple(res) if res else None
+
 
 def test_disk_query_cache(processed_queries):
     environ = {"MM_QUERY_CACHE_IN_MEMORY": "0"}
@@ -53,6 +55,7 @@ def test_disk_query_cache(processed_queries):
             cache.put(key, q)
             # Verify that queries are written to disk immediately
             assert get_query_from_disk(tmpdir, key) == (q.domain, q.intent, q.query.text)
+
 
 def test_memory_query_cache(processed_queries):
     environ = {

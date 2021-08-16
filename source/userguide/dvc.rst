@@ -7,6 +7,12 @@ files and directories in concert with Git without storing the data itself in Git
 
 You can find more info about DVC in the `official documentation <https://dvc.org/doc>`_.
 
+Install DVC using the following command.
+
+.. code-block:: console
+
+   pip install 'mindmeld[dvc]'
+
 The functionality of the DVC command within MindMeld is shown in the table below.
 
 Available Options in MindMeld

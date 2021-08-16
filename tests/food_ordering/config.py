@@ -45,11 +45,8 @@ DOMAIN_MODEL_CONFIG = {
 }
 
 
-TOKENIZER_CONFIG = {
-    "allowed_patterns": ['\w+\.', '\{.*\|.*\}'],  # noqa: W605
+TEXT_PREPARATION_CONFIG = {
     "tokenizer": "WhiteSpaceTokenizer",
-    "normalizer": "ASCIIFold",
 }
-
 
 MAX_HISTORY_LEN = 5

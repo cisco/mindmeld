@@ -121,8 +121,6 @@ class SequenceClassificationBase(ClassificationBase):
 
         print(f"{self.name} is initialized")
 
-
-
     def forward(self, batch_data_dict):
 
         batch_data_dict = self._to_device(batch_data_dict)

@@ -253,24 +253,6 @@ class SplittingAndPoolingLayer(nn_module):
             outputs = padded_token_embs[:, 0, :]
         else:
             raise NotImplementedError
-        # elif self.pooling_type == "last":
-        #     last_seq_idxs = torch.LongTensor([x - 1 for x in lengths])
-        #     outputs = padded_token_embs[range(padded_token_embs.shape[0]), last_seq_idxs, :]
-        # else:
-        #     mask = pad_sequence(
-        #         [torch.as_tensor([1] * length_) for length_ in lengths], batch_first=True
-        #     ).unsqueeze(-1).expand(padded_token_embs.size()).float()
-        #     if self.pooling_type == "max":
-        #         padded_token_embs[mask == 0] = -1e9  # set to a large negative value
-        #         outputs, _ = torch.max(padded_token_embs, dim=1)[0]
-        #     elif self.pooling_type == "mean":
-        #         summed_padded_token_embs = torch.sum(padded_token_embs, dim=1)
-        #         expanded_lengths = lengths.unsqueeze(dim=1).expand(summed_padded_token_embs.size())
-        #         outputs = torch.div(summed_padded_token_embs, expanded_lengths)
-        #     elif self.pooling_type == "mean_sqrt":
-        #         summed_padded_token_embs = torch.sum(padded_token_embs, dim=1)
-        #         expanded_lengths = lengths.unsqueeze(dim=1).expand(summed_padded_token_embs.size())
-        #         outputs = torch.div(summed_padded_token_embs, torch.sqrt(expanded_lengths))
 
         return outputs
 
