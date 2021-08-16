@@ -10,13 +10,9 @@ logger = logging.getLogger(__name__)
 
 
 class Stemmer(ABC):
-    def __init__(self, language=None):
-        self.language = language
 
-    @property
-    @abstractmethod
-    def _stemmer(self):
-        raise NotImplementedError
+    def __init__(self):
+        """Creates a Stemmer instance."""
 
     @abstractmethod
     def stem_word(self, word):
@@ -27,15 +23,12 @@ class Stemmer(ABC):
             word (str): The word to stem
 
         Returns:
-            stemmed word (str): A stemmed version of the word
+            stemmed_word (str): A stemmed version of the word
         """
         raise NotImplementedError
 
 
 class NoOpStemmer(Stemmer):
-    @property
-    def _stemmer(self):
-        return
 
     def stem_word(self, word):
         return word
@@ -72,6 +65,10 @@ class EnglishNLTKStemmer(Stemmer):
 
 
 class SnowballNLTKStemmer(Stemmer):
+
+    def __init__(self, language=None):
+        self.language = language
+
     @property
     def _stemmer(self):
         # lazy init the stemmer

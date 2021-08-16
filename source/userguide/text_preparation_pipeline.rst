@@ -484,98 +484,110 @@ The steps to use a custom Normalizer in your application are explained here.
 
 Stemming
 --------
-Stemming is the process of reducing a word to its stem or root. Mindmeld offers 
+Stemming is the process of reducing a word to its stem or root. If a stemmer is not specified in the :attr:`TEXT_PREPARATION_CONFIG`, then MindMeld will automatically select a stemmer
+based on the language of the application.
 
 
 EnglishNLTKStemmer
 ^^^^^^^^^^^^^^^^^^
 
-The :attr:`ASCIIFold` normalizer converts numeric, symbolic and alphabetic characters which are not in the first 127 ASCII characters (Basic Latin Unicode block) into an ASCII equivalent (if possible).
+The :attr:`EnglishNLTKStemmer` stemmer uses the :attr:`PorterStemmer` from the nltk library. The porter stemmer implements a series of rules that determine common suffixes from sentences.
+This includes removing the letter "s" from plural words or "ing" from gerunds.
 
-For example, we can normalize the following Spanish sentence with several accented characters:
-
-.. code:: python
-
-    from mindmeld.text_preparation.normalizers import ASCIIFold
-    
-    sentence_es = "Ha pasado un caballero, ¡quién sabe por qué pasó!"
-    ascii_fold_normalizer = ASCIIFold()
-    normalized_text = ascii_fold_normalizer.normalize(sentence_es)
-    print(normalized_text)
-
-The accents are removed and the accented characters have been replaced with compatible ASCII equivalents.
+Let's take a look at a few examples of the :attr:`EnglishNLTKStemmer`. First we'll make an instance of the stemmer:
 
 .. code:: python
 
-    'Ha pasado un caballero, ¡quien sabe por que paso!'
+    from mindmeld.text_preparation.stemmers import EnglishNLTKStemmer
+    english_nltk_stemmer = EnglishNLTKStemmer()
 
-
-SnowballStemmer
-^^^^^^^^^^^^^^^
-
-The :attr:`ASCIIFold` normalizer converts numeric, symbolic and alphabetic characters which are not in the first 127 ASCII characters (Basic Latin Unicode block) into an ASCII equivalent (if possible).
-
-For example, we can normalize the following Spanish sentence with several accented characters:
+Now let's stem the words "running" and "pearls".
 
 .. code:: python
 
-    from mindmeld.text_preparation.normalizers import ASCIIFold
-    
-    sentence_es = "Ha pasado un caballero, ¡quién sabe por qué pasó!"
-    ascii_fold_normalizer = ASCIIFold()
-    normalized_text = ascii_fold_normalizer.normalize(sentence_es)
-    print(normalized_text)
+    >>> print(english_nltk_stemmer.stem_word("running"))
+    >>> run
+    >>> print(english_nltk_stemmer.stem_word("pearls"))
+    >>> pearl
 
-The accents are removed and the accented characters have been replaced with compatible ASCII equivalents.
+As expected, the stemmer removes "ing" from "running" and the "s" from "pearls" to create stemmed words.
+
+
+SnowballNLTKStemmer
+^^^^^^^^^^^^^^^^^^^
+
+The :attr:`SnowballNLTKStemmer` stemmer works in a similar manner to the :attr:`EnglishNLTKStemmer`, however, it offers support for a larger set of languages.
+Namely, the :attr:`SnowballNLTKStemmer` supports Danish (da), Dutch (nl), Finnish (fi), French (fr), German (de), Hungarian (hu), Italian (it), Norwegian (nb), Portuguese (pt), Romanian (ro), Russian (ru), Spanish (es) and Swedish (sv).
+
+To create an instance of the :attr:`SnowballNLTKStemmer`, we can use MindMeld's :attr:`StemmerFactory`.
 
 .. code:: python
 
-    'Ha pasado un caballero, ¡quien sabe por que paso!'
+    from mindmeld.text_preparation.stemmers import StemmerFactory
+    es_snowball_stemmer = StemmerFactory.get_stemmer_by_language("es")
+
+Now let's stem the words "corriendo" ("running") and "perlas" ("pearls").
+
+.. code:: python
+
+    >>> print(english_nltk_stemmer.stem_word("corriendo"))
+    >>> corr
+    >>> print(english_nltk_stemmer.stem_word("perlas"))
+    >>> perl
+
+As expected, the stemmer removes "iendo" from "corriendo" and the "as" from "perlas" to create stemmed words.
 
 
 Creating a Custom Stemmer
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-This section includes boilerplate code to build a custom normalizer class. Let's recreate the :attr:`Lowercase` normalizer class.
-A custom tokenizer must extend from MindMeld's abstract :attr:`Normalizer` class:
+This section includes boilerplate code to build a custom stemmer class.
+A custom stemmer must extend from MindMeld's abstract :attr:`Stemmer` class:
 
 
 .. code:: python
 
     from abc import ABC, abstractmethod
 
-    class Normalizer(ABC):
-        """Abstract Normalizer Base Class."""
+    class Stemmer(ABC):
 
         @abstractmethod
-        def normalize(self, text):
+        def stem_word(self, word):
             """
+            Gets the stem of a word. For example, the stem of the word 'fishing' is 'fish'.
+
             Args:
-                text (str): Text to normalize.
+                word (str): The word to stem
+
             Returns:
-                normalized_text (str): Normalized Text.
+                stemmed_word (str): A stemmed version of the word
             """
-            raise NotImplementedError("Subclasses must implement this method")
+            raise NotImplementedError
 
-
-With this in mind, let's recreate MindMeld's :attr:`Lowercase` normalizer class.
+Let's create a stemmer that only removes the "-ing" suffix if found at the end of a word. We'll call it the :attr:`GerundSuffixStemmer`.
 
 .. code:: python
 
-    from mindmeld.text_preparation.normalizers import Normalizer
+    from mindmeld.text_preparation.stemmers import Stemmer
 
-    class Lowercase(Normalizer):
+    class GerundSuffixStemmer(Stemmer):
 
-        def normalize(self, text):
-            return text.lower()
+        def stem_word(self, word):
+            """
+            Stemmer that removes the "-ing" suffix if found at the end of a word.
+
+            Args:
+                word (str): The word to stem
+
+            Returns:
+                stemmed_word (str): A stemmed version of the word
+            """
+            if word.endswith("ing"):
+                return word[:-len("ing")]
+            return word
 
 
-This normalizer would transform the text "I Like to Run!" to "i like to run!".
-The steps to use a custom Normalizer in your application are explained here.
-
-
-.. note::
-
-    MindMeld normalizes queries on a per-token basis. Custom normalizers should be designed to normalize individual tokens and not sentences as a whole.
+This stemmer would transform "jumping" to "jump".
+The steps to use a custom Stemmer in your application are explained here.
 
 
 
