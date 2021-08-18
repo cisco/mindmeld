@@ -1134,26 +1134,30 @@ class IntentProcessor(Processor):
 
     def _build(self, incremental=False, label_set=None, load_cached=True):
         """Builds the models for this intent"""
-        entity_types = self.entity_recognizer.get_entity_types(label_set=label_set)
 
-        # Context:
-        # In cases of len(domains)==1 or len(intents)==1 in NaturalLanguageProcessor and
-        # DomainProcessor respectively, the self.ready flag is unchanged to remain 'False'. This
-        # leads to not triggering the ._dump() and .unload() abstract methods in the
+        # Should we call .fit() when there are zero entity_types?
+        # entity_types = self.entity_recognizer.get_entity_types(label_set=label_set)
+        #
+        # During model building, when len(domains)==1 or len(intents)==1 in NaturalLanguageProcessor
+        # and DomainProcessor respectively, the self.ready flag is unchanged and remains 'False'.
+        # This doesn't trigger the ._dump() and .unload() abstract methods in the
         # ._build_recursive() method, and subsequently, the .load() method in .build() method takes
         # care of loading a NoneType model. However, in case of entity recognizers, the _dump method
-        # must be called to ave metadata information which is later used to ascertain if there were
-        # no entity_types or not. Hence, the self.ready flag must be modified to True.
+        # must be called to save metadata information which is later used to ascertain if there were
+        # any entity_types or not. Hence, the self.ready flag must be modified to True by calling
+        # .fit() in case of building entity recognizer.
         # Edge-case:
         # When incremental build is initiated and when the self.ready flag is obtained as output of
         # self.entity_recognizer.fit() method, the _dump() method mustn't be called if there are no
-        # new changes to data/config. So to enbale this edge case flag, we do not check for
+        # new changes to data/config. So to enable this edge case flag, we do not check for
         # `if len(entity_types) == 0` and instead rely on the output of the fit() method. The fit()
         # method returns a True only if there were changes to hash value (so need to call _dump())
-        # or when load_cached=True.
+        # or when load_cached=True, else it returns a False.
         # Bug in PR-321:
         # Due to a check `if len(entity_types) == 0`, the hash value saved at entity.pkl.hash is
-        # empty instead of populating with a hash value, as the hash is never computed.
+        # empty instead of populating with a hash value, as the hash is never computed. While this
+        # is not a requirement for domain and intent classifiers, it is required in case of
+        # entity recognizers.
 
         # train entity recognizer
         self.ready = self.entity_recognizer.fit(

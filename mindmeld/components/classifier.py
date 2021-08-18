@@ -439,8 +439,8 @@ class Classifier(ABC):
             if self._model:
                 # sometimes a model might be NoneType, eg. in role classifiers, in which case,
                 # no dumping is required. While loading such models, the model_path (.pkl)
-                # will not be found and the helpers.load_model() will return None, whic makes it
-                # backwards compataible to loading a NoneType model
+                # will not be found and the helpers.load_model() will return None, which makes it
+                # backwards compatible to loading a NoneType model
                 self._model.dump(path)
 
             hash_path = path + ".hash"
