@@ -13,6 +13,7 @@
 
 """This module contains a collection of the core data structures used in MindMeld."""
 import logging
+import pickle
 from typing import Optional, List, Dict, Callable
 import immutables
 
@@ -1042,8 +1043,15 @@ class FormEntity:
 
         if not self.entity or not isinstance(self.entity, str):
             raise TypeError("Entity cannot be empty.")
+
         if self.custom_eval and not callable(custom_eval):
-            raise TypeError("Invalid custom validation function type.")
+            try:
+                f = open(custom_eval, "rb")
+                custom_eval = pickle.load(f)
+                f.close()
+                self.custom_eval = custom_eval
+            except:
+                raise TypeError("Invalid custom validation function type.")
 
     def to_dict(self):
         """Converts the entity into a dictionary"""

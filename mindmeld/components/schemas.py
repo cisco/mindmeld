@@ -14,6 +14,7 @@ import logging
 import math
 from typing import Any, Dict, List, Optional, Union, Tuple
 
+import pickle
 import immutables
 from marshmallow import EXCLUDE, Schema, fields, ValidationError
 import pycountry
@@ -398,17 +399,16 @@ class FormEntitySchema(Schema):
     default_eval = fields.Boolean(default=True)
     hints = fields.List(fields.String(), allow_none=True)
     custom_eval = fields.Method("serialize_custom_eval",
-                                deserialize="deserialize_custom_eval")
-
+                                default=None)
     def serialize_custom_eval(self, form):  # pylint: disable=no-self-use
-        if form:
-            return form.custom_eval
-
-    def deserialize_custom_eval(self, custom_eval):  # pylint: disable=no-self-use
-            return custom_eval
+        if form.custom_eval:
+            f = open("custom_eval", "wb")
+            pickle.dump(form.custom_eval, f)
+            f.close()
+            return "custom_eval"
 
     def serialize_value(self, form):  # pylint: disable=no-self-use
-        if form:
+        if form.value:
             return form.value or dict(form.value)
 
     def deserialize_value(self, value):  # pylint: disable=no-self-use
