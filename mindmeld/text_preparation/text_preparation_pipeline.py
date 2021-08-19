@@ -35,6 +35,7 @@ from ..components._config import (
     ENGLISH_LANGUAGE_CODE,
 )
 from ..constants import UNICODE_SPACE_CATEGORY
+from ..path import get_app
 
 logger = logging.getLogger(__name__)
 
@@ -67,6 +68,58 @@ class TextPreparationPipeline:
 
         if self.tokenizer is None:
             raise TextPreparationPipelineError("Tokenizer cannot be None.")
+
+    # Getters
+    def get_tokenizer(self):
+        return self.tokenizer
+
+    def get_preprocessors(self):
+        return self.preprocessors
+
+    def get_normalizers(self):
+        return self.normalizers
+
+    def get_stemmer(self):
+        return self.stemmer
+
+    # Setters
+    def set_tokenizer(self, tokenizer: Tokenizer):
+        """Set the tokenizer for the Text Preparation Pipeline
+        Args:
+            tokenizer (Tokenizer): Tokenizer to use.
+        """
+        if not isinstance(tokenizer, Tokenizer):
+            raise TypeError(f"{tokenizer} must be a Tokenizer object.")
+        self.tokenizer = tokenizer
+
+    def set_preprocessors(self, preprocessors: List[Preprocessor]):
+        """Set the preprocessors for the Text Preparation Pipeline
+        Args:
+            preprocessors (List[Preprocessor]): Preprocessor to use.
+        """
+        for preprocessor in preprocessors:
+            if not isinstance(preprocessor, Preprocessor):
+                raise TypeError(f"{preprocessor} must be a Preprocessor object.")
+        self.preprocessors = preprocessors
+
+    def set_normalizers(self, normalizers: List[Normalizer]):
+        """Set the normalizers for the Text Preparation Pipeline
+        Args:
+            normalizers (List[Preprocessor]): Preprocessor to use.
+        """
+        for normalizer in normalizers:
+            if not isinstance(normalizer, Normalizer):
+                raise TypeError(f"{normalizer} must be a Normalizer object.")
+        self.normalizers = normalizers
+
+    def set_stemmer(self, stemmer: Stemmer):
+        """Set the stemmer for the Text Preparation Pipeline
+        Args:
+            stemmer (Stemmer): Stemmer to use.
+        """
+        if not isinstance(stemmer, Stemmer):
+            raise TypeError(f"{stemmer} must be a Stemmer object.")
+        self.stemmer = stemmer
 
     def preprocess(self, text):
         """
@@ -437,6 +490,28 @@ class TextPreparationPipelineFactory:
     @staticmethod
     def create_from_app_path(app_path):
         """Static method to create a TextPreparationPipeline instance from an app_path.
+        If a custom text_preparation_pipeline is passed into the Application object in the
+        app_path/__init__.py file then it will be used. Otherwise, a text_preparation_pipeline
+        will be created based on the specifications in the config.
+
+        Args:
+            app_path (str): The application path.
+
+        Returns:
+            TextPreparationPipeline: A TextPreparationPipeline class.
+        """
+        app = get_app(app_path)
+        if (app.text_preparation_pipeline):
+            logger.info(
+                "Using custom text_preparation_pipeline from %s/__init__.py.", app_path
+            )
+            return app.text_preparation_pipeline
+        return TextPreparationPipelineFactory.create_from_app_config(app_path)
+
+    @staticmethod
+    def create_from_app_config(app_path):
+        """ Static method to create a TextPreparation pipeline based on the speficiations in
+        the config.
 
         Args:
             app_path (str): The application path.
@@ -511,7 +586,6 @@ class TextPreparationPipelineFactory:
             if preprocessors
             else [NoOpPreprocessor()]
         )
-
         # Update Regex Normalization Exception Characters as Specified in the Config
         if keep_special_chars:
             RegexNormalizerRuleFactory.EXCEPTION_CHARS = keep_special_chars

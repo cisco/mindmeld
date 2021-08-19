@@ -589,18 +589,73 @@ Let's create a stemmer that only removes the "-ing" suffix if found at the end o
 This stemmer would transform "jumping" to "jump".
 The steps to use a custom Stemmer in your application are explained here.
 
-
-
-Use the preprocessor
---------------------
-
-To use your custom preprocessing logic within your MindMeld application, pass in an instance of your implemented preprocessor class when initializing the :class:`Application` object in the application container file, ``__init__.py``.
+Using a Custom TextPreparationPipeline for your Application
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+As a recap, every MindMeld project is also a Python package and has an ``__init.py__`` file at the root level.
+This package also contains an *application container* -- a container for all of the logic and functionality for your application.
+This application container enumerates all of the dialogue states and their associated handlers, and should be defined as ``app`` in the application's Python package.
+To use a :attr:`TextPreparationPipeline` with custom components, we must pass in a custom object into the application container in ``__init.py__``.
+Let's first take a look at an example of a an ``__init.py__`` file before a custom :attr:`TextPreparationPipeline` used.
 
 .. code:: python
-  :caption: __init__.py
+    :caption: root/__init__.py (Without a Custom Pipeline)
+  
+    from mindmeld import Application
+  
+    app = Application(__name__)
+  
+    @app.handle(intent='greet')
+    def welcome(request, responder):
+        responder.reply('Hello')
 
-  from mindmeld import Application
-  from .stem_processor import StemProcessor
+Now let's look at this ``__init.py__`` file after a custom :attr:`TextPreparationPipeline` is used.
+To isolate the logic and functionality of our custom :attr:`TextPreparationPipeline` let's create the object in a separate file at the root level, we'll call it ``text_preparation_pipeline.py``.
+``text_preparation_pipeline.py`` will contain a function :attr:`get_text_preparation_pipeline()` which we can use to pass the custom pipeline into the application container.
 
-  preprocessor = StemProcessor()
-  app = Application(__name__, preprocessor=preprocessor)
+.. code:: python
+    :caption: root/__init__.py (With a Custom Pipeline)
+    
+    from mindmeld import Application
+    from .text_preparation_pipeline import get_text_preparation_pipeline
+    
+    app = Application(__name__, text_preparation_pipeline=get_text_preparation_pipeline())
+    
+    @app.handle(intent='greet')
+    def welcome(request, responder):
+        responder.reply('Hello')
+
+
+In the ``text_preparation_pipeline.py`` file we'll implement the :attr:`get_text_preparation_pipeline()` method which returns a custom :attr:`TextPreparationPipeline` object.
+Let's piece together multiple custom components into a single :attr:`TextPreparationPipeline`. We will define and use an :attr:`ASRPreprocessor`, :attr:`GerundSuffixStemmer` and :attr:`RemoveExclamation` normalizer.
+In the code below, we have created each of our components by implementing the respective MindMeld abstract classes.
+In :attr:`get_text_preparation_pipeline()` we first create a default :attr:`TextPreparationPipeline` using the :attr:`TextPreparationPipelineFactory`. This factory class uses the specifications in the config for the application which is
+identified by the current path. A series of setter methods are used to update components. Finally, the modified pipeline is returned.
+
+.. code:: python
+    :caption: root/text_preparation_pipeline.py
+
+    from mindmeld.text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
+    from mindmeld.text_preparation.preprocessors import Preprocessor
+    from mindmeld.text_preparation.stemmers import Stemmer
+    from mindmeld.text_preparation.normalizers import Normalizer
+
+    class ASRPreprocessor(Preprocessor):
+        def process(self, text):
+            return text.replace("croissant ready", "Prasanth Reddy")
+
+    class GerundSuffixStemmer(Stemmer):
+        def stem_word(self, word):
+            if word.endswith("ing"):
+                return word[:-len("ing")]
+            return word
+
+    class RemoveExclamation(Normalizer):
+        def normalize(self, text):
+            return text.lower()
+
+    def get_text_preparation_pipeline():
+        text_preparation_pipeline = TextPreparationPipelineFactory.create_from_app_config("./")
+        text_preparation_pipeline.set_preprocessors([ASRPreprocessor()])
+        text_preparation_pipeline.normalizers.append(RemoveExclamation())
+        text_preparation_pipeline.set_stemmer(GerundSuffixStemmer())
+        return text_preparation_pipeline
