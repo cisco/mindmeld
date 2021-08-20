@@ -420,6 +420,8 @@ class NaturalLanguageProcessor(Processor):
         self.domain_classifier = DomainClassifier(self.resource_loader)
         self.progress_bar = progress_bar
 
+        # TODO: Move setting self._children to .build() & .load() methods. Same as IntentProcessor,
+        # the setting in .load() should be from a pickled metadata file instead of using os.walk()
         for domain in path.get_domains(self._app_path):
 
             if domain in self._children:
@@ -820,6 +822,8 @@ class DomainProcessor(Processor):
         super().__init__(app_path, resource_loader)
         self.name = domain
         self.intent_classifier = IntentClassifier(self.resource_loader, domain)
+        # TODO: Move setting self._children to .build() & .load() methods. Same as IntentProcessor,
+        # the setting in .load() should be from a pickled metadata file instead of using os.walk()
         intents = path.get_intents(app_path, domain)
 
         # If there is only one intent in the domain, the classifier would not run
@@ -1135,6 +1139,30 @@ class IntentProcessor(Processor):
     def _build(self, incremental=False, label_set=None, load_cached=True):
         """Builds the models for this intent"""
 
+        # Should we call .fit() when there are zero entity_types?
+        # entity_types = self.entity_recognizer.get_entity_types(label_set=label_set)
+        #
+        # During model building, when len(domains)==1 or len(intents)==1 in NaturalLanguageProcessor
+        # and DomainProcessor respectively, the self.ready flag is unchanged and remains 'False'.
+        # This doesn't trigger the ._dump() and .unload() abstract methods in the
+        # ._build_recursive() method, and subsequently, the .load() method in .build() method takes
+        # care of loading a NoneType model. However, in case of entity recognizers, the _dump method
+        # must be called to save metadata information which is later used to ascertain if there were
+        # any entity_types or not. Hence, the self.ready flag must be modified to True by calling
+        # .fit() in case of building entity recognizer.
+        # Edge-case:
+        # When incremental build is initiated and when the self.ready flag is obtained as output of
+        # self.entity_recognizer.fit() method, the _dump() method mustn't be called if there are no
+        # new changes to data/config. So to enable this edge case flag, we do not check for
+        # `if len(entity_types) == 0` and instead rely on the output of the fit() method. The fit()
+        # method returns a True only if there were changes to hash value (so need to call _dump())
+        # or when load_cached=True, else it returns a False.
+        # Bug in PR-321:
+        # Due to a check `if len(entity_types) == 0`, the hash value saved at entity.pkl.hash is
+        # empty instead of populating with a hash value, as the hash is never computed. While this
+        # is not a requirement for domain and intent classifiers, it is required in case of
+        # entity recognizers.
+
         # train entity recognizer
         self.ready = self.entity_recognizer.fit(
             label_set=label_set,
@@ -1147,8 +1175,7 @@ class IntentProcessor(Processor):
             self.progress_bar.refresh()
 
         # Create the entity processors
-        entity_types = self.entity_recognizer.entity_types
-        for entity_type in entity_types:
+        for entity_type in self.entity_recognizer.entity_types:
 
             if entity_type in self._children:
                 return
@@ -1185,8 +1212,7 @@ class IntentProcessor(Processor):
         )
 
         # Create the entity processors
-        entity_types = self.entity_recognizer.entity_types
-        for entity_type in entity_types:
+        for entity_type in self.entity_recognizer.entity_types:
 
             if entity_type in self._children:
                 continue
@@ -1202,7 +1228,7 @@ class IntentProcessor(Processor):
             self._children[entity_type] = processor
 
     def _evaluate(self, print_stats, label_set="test"):
-        if len(self.entity_recognizer.entity_types) > 1:
+        if len(self.entity_recognizer.entity_types) > 0:
             entity_eval = self.entity_recognizer.evaluate(label_set=label_set)
             if entity_eval:
                 print(
@@ -1285,6 +1311,8 @@ class IntentProcessor(Processor):
                 )
                 return nbest_transcripts_entities
             else:
+                if len(self.entities) == 0:
+                    return [()]
                 if verbose:
                     return [
                         self.entity_recognizer.predict_proba(
@@ -1297,6 +1325,8 @@ class IntentProcessor(Processor):
                             query[0], dynamic_resource=dynamic_resource
                         )
                     ]
+        if len(self.entities) == 0:
+            return ()
         if verbose:
             return self.entity_recognizer.predict_proba(
                 query, dynamic_resource=dynamic_resource
@@ -1513,6 +1543,7 @@ class IntentProcessor(Processor):
         Returns:
             list: A list of lists of non-overlapping entities for each n-best transcript
         """
+
         # This code block implements allowed entities described here:
         # https://github.com/cisco/mindmeld/pull/280
 
