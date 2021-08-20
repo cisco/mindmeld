@@ -130,10 +130,7 @@ class EntityRecognizer(Classifier):
 
         if examples:
             # Build entity types set
-            self.entity_types = set()
-            for label in labels:
-                for entity in label:
-                    self.entity_types.add(entity.entity.type)
+            self.entity_types = {entity.entity.type for label in labels for entity in label}
 
             if self.entity_types:
                 model = create_model(self._model_config)

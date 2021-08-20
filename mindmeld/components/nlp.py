@@ -420,6 +420,8 @@ class NaturalLanguageProcessor(Processor):
         self.domain_classifier = DomainClassifier(self.resource_loader)
         self.progress_bar = progress_bar
 
+        # TODO: Move setting self._children to .build() & .load() methods. Same as IntentProcessor,
+        # the setting in .load() should be from a pickled metadata file instead of using os.walk()
         for domain in path.get_domains(self._app_path):
 
             if domain in self._children:
@@ -820,6 +822,8 @@ class DomainProcessor(Processor):
         super().__init__(app_path, resource_loader)
         self.name = domain
         self.intent_classifier = IntentClassifier(self.resource_loader, domain)
+        # TODO: Move setting self._children to .build() & .load() methods. Same as IntentProcessor,
+        # the setting in .load() should be from a pickled metadata file instead of using os.walk()
         intents = path.get_intents(app_path, domain)
 
         # If there is only one intent in the domain, the classifier would not run
@@ -1171,8 +1175,7 @@ class IntentProcessor(Processor):
             self.progress_bar.refresh()
 
         # Create the entity processors
-        entity_types = self.entity_recognizer.entity_types
-        for entity_type in entity_types:
+        for entity_type in self.entity_recognizer.entity_types:
 
             if entity_type in self._children:
                 return
@@ -1209,8 +1212,7 @@ class IntentProcessor(Processor):
         )
 
         # Create the entity processors
-        entity_types = self.entity_recognizer.entity_types
-        for entity_type in entity_types:
+        for entity_type in self.entity_recognizer.entity_types:
 
             if entity_type in self._children:
                 continue
