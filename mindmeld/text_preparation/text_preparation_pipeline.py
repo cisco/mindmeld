@@ -530,15 +530,20 @@ class TextPreparationPipelineFactory:
         Returns:
             TextPreparationPipeline: A TextPreparationPipeline class.
         """
-        try:
-            app = get_app(app_path)
-            if app.text_preparation_pipeline:
-                logger.info(
-                    "Using custom text_preparation_pipeline from %s/__init__.py.", app_path
+        if app_path:
+            try:
+                app = get_app(app_path)
+                if hasattr(app, 'text_preparation_pipeline') and app.text_preparation_pipeline:
+                    logger.info(
+                        "Using custom text_preparation_pipeline from %s/__init__.py.", app_path
+                    )
+                    return app.text_preparation_pipeline
+            except MindMeldImportError:
+                logger.warning(
+                    "Error importing application from %s. Using default TextPreparationPipeline.",
+                    app_path
                 )
-                return app.text_preparation_pipeline
-        except MindMeldImportError: 
-            return TextPreparationPipelineFactory.create_from_app_config(app_path)
+        return TextPreparationPipelineFactory.create_from_app_config(app_path)
 
     @staticmethod
     def create_from_app_config(app_path):
