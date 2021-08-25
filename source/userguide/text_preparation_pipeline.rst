@@ -154,7 +154,7 @@ with the intended name, "prasanth reddy".
 
 
 This would transform the transcript "Let's start the meeting with croissant ready." to "Let's start the meeting with Prasanth Reddy."
-The steps to use a custom Preprocessor in your application are explained here.
+The steps to use a custom Preprocessor in your application are explained :ref:`here <custom-pipeline>`.
 
 
 Tokenization
@@ -238,15 +238,15 @@ Let's use the :attr:`SpacyTokenizer` to tokenize the Japanese translation of "Th
 
     from mindmeld.text_preparation.tokenizers import SpacyTokenizer
     
-    sentence_ja = "紳士が過ぎ去った、 なぜそれが起こったのか誰にも分かりません！"
-    spacy_tokenizer_ja = SpacyTokenizer(language="ja", spacy_model_size="lg")
+    sentence_ja = "背の高い男性"
+    spacy_tokenizer_ja = SpacyTokenizer(language="ja", spacy_model_size="sm")
     tokens = spacy_tokenizer_ja.tokenize(sentence_ja)
 
 We see that the original text is split semantically and not simply by whitespace.
 
 .. code:: python
 
-    ['紳士', 'が', '過ぎ', '去っ', 'た', '、', 'なぜ', 'それ', 'が', '起こっ', 'た', 'の', 'か', '誰', 'に', 'も', '分かり', 'ませ', 'ん', '！']
+    ['背', 'の', '高い', '男性']
 
 
 Creating a Custom Tokenizer
@@ -276,7 +276,7 @@ character is not a space. A custom tokenizer must extend from MindMeld's abstrac
 
 
 Note that any MindMeld tokenizer must return the final tokens as a list of dictionaries. Where each dictionary represents a single token and contains the "start" index of the token and the "text" of the token.
-Here is an example of the expected output for the tokens generated when tokenizing the phrase "Hi Andy": [{"start": 0, "text":"Hi"}, {"start": 3, "text":"Andy"}].
+Here is an example of the expected output for the tokens generated when tokenizing the phrase "Hi Andy": [{"start": 0, "text":"Hi"}, {"start": 3, "text":"Andy"}]. The starting indices here refer to the starting indices in the processed text.
 With this in mind, let's recreate MindMeld's :attr:`CharacterTokenizer` class which converts every individual character in a string into a separate token while skipping spaces.
 
 
@@ -308,7 +308,7 @@ This tokenizes the phrase "Hi Andy" in the following manner:
         {'start': 6, 'text': 'y'}
     ]
 
-The steps to use a custom Tokenizer in your application are explained here.
+The steps to use a custom Tokenizer in your application are explained :ref:`here <custom-pipeline>`.
 
 
 Normalization
@@ -474,7 +474,7 @@ With this in mind, let's recreate MindMeld's :attr:`Lowercase` normalizer class.
 
 
 This normalizer would transform the text "I Like to Run!" to "i like to run!".
-The steps to use a custom Normalizer in your application are explained here.
+The steps to use a custom Normalizer in your application are explained :ref:`here <custom-pipeline>`.
 
 
 .. note::
@@ -588,7 +588,9 @@ Let's create a stemmer that only removes the "-ing" suffix if found at the end o
 
 
 This stemmer would transform "jumping" to "jump".
-The steps to use a custom Stemmer in your application are explained here.
+The steps to use a custom Stemmer in your application are explained in the section below.
+
+.. _custom-pipeline:
 
 Using a Custom TextPreparationPipeline for your Application
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
