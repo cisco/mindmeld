@@ -27,8 +27,8 @@ TextPreparationPipeline Configuration
 The :attr:`DEFAULT_TEXT_PREPARATION_CONFIG` is shown below. Observe that various normalization classes
 have been pre-selected by default. To modify the selected components (or to use a subset of the normalization steps), duplicate the
 default config and rename it to :attr:`TEXT_PREPARATION_CONFIG`. Place this custom config in the :attr:`config.py` file for your application.
-If a custom configuration is not defined, a default is used. The config below is example of a default config specifically for English.
-The :attr:`normalizers` component includes 12 default MindMeld regex normalization rules in addtion to :attr:`Lowercase` and :attr:`ASCIIFold`.
+If a custom configuration is not defined, a default is used. The config below is an example of a default config specifically for English.
+The :attr:`normalizers` component includes 12 default MindMeld regex normalization rules in addition to :attr:`Lowercase` and :attr:`ASCIIFold`.
 
 .. code-block:: python
 
@@ -86,7 +86,7 @@ on the language of the application, if they are not explicitly defined in the co
 +--------------------+---------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
-Let's define the the parameters in the TextPreparationPipeline config:
+Let's define the parameters in the TextPreparationPipeline config:
 
 ``'preprocessors'`` (:class:`List[str]`): The preprocessor class to use. (Mindmeld does not currently offer default preprocessors.) 
 
@@ -160,7 +160,7 @@ The steps to use a custom Preprocessor in your application are explained here.
 Tokenization
 -------------
 
-Tokenization is the process of splitting the text of a queries into smaller chunks. MindMeld offers a number of ready-made tokenizers that you can use
+Tokenization is the process of splitting the text of a query into smaller chunks. MindMeld offers a number of ready-made tokenizers that you can use
 for your application. MindMeld supports the development of custom tokenizers as well.
 
 
@@ -491,8 +491,9 @@ based on the language of the application.
 EnglishNLTKStemmer
 ^^^^^^^^^^^^^^^^^^
 
-The :attr:`EnglishNLTKStemmer` stemmer uses the :attr:`PorterStemmer` from the nltk library. The porter stemmer implements a series of rules that determine common suffixes from sentences.
-This includes removing the letter "s" from plural words or "ing" from gerunds.
+The :attr:`EnglishNLTKStemmer` stemmer uses a modified version of the :attr:`PorterStemmer` from the nltk library.
+The Porter stemmer implements a series of rules that removes common suffixes, and this version of it removes inflectional suffixes but leaves (most) derivational suffixes in place.
+This includes removing the final letters "s"/"es" from plural words or "ing" from gerunds, but leaving more meaningful suffixes like "tion" and "ment" alone.
 
 Let's take a look at a few examples of the :attr:`EnglishNLTKStemmer`. First we'll make an instance of the stemmer:
 
@@ -501,22 +502,22 @@ Let's take a look at a few examples of the :attr:`EnglishNLTKStemmer`. First we'
     from mindmeld.text_preparation.stemmers import EnglishNLTKStemmer
     english_nltk_stemmer = EnglishNLTKStemmer()
 
-Now let's stem the words "running" and "pearls".
+Now let's stem the words "running" and "governments".
 
 .. code:: python
 
     >>> print(english_nltk_stemmer.stem_word("running"))
     >>> run
-    >>> print(english_nltk_stemmer.stem_word("pearls"))
-    >>> pearl
+    >>> print(english_nltk_stemmer.stem_word("governments"))
+    >>> government
 
-As expected, the stemmer removes "ing" from "running" and the "s" from "pearls" to create stemmed words.
+As expected, the stemmer removes "ing" from "running" and the "s" from "governments" to create stemmed words.
 
 
 SnowballNLTKStemmer
 ^^^^^^^^^^^^^^^^^^^
 
-The :attr:`SnowballNLTKStemmer` stemmer works in a similar manner to the :attr:`EnglishNLTKStemmer`, however, it offers support for a larger set of languages.
+The :attr:`SnowballNLTKStemmer` stemmer works in a similar manner to the :attr:`EnglishNLTKStemmer`, however, it removes more suffixes and offers support for a larger set of languages.
 Namely, the :attr:`SnowballNLTKStemmer` supports Danish (da), Dutch (nl), Finnish (fi), French (fr), German (de), Hungarian (hu), Italian (it), Norwegian (nb), Portuguese (pt), Romanian (ro), Russian (ru), Spanish (es) and Swedish (sv).
 
 To create an instance of the :attr:`SnowballNLTKStemmer`, we can use MindMeld's :attr:`StemmerFactory`.
@@ -526,16 +527,16 @@ To create an instance of the :attr:`SnowballNLTKStemmer`, we can use MindMeld's 
     from mindmeld.text_preparation.stemmers import StemmerFactory
     es_snowball_stemmer = StemmerFactory.get_stemmer_by_language("es")
 
-Now let's stem the words "corriendo" ("running") and "perlas" ("pearls").
+Now let's stem the words "corriendo" ("running") and "gobiernos" ("governments").
 
 .. code:: python
 
     >>> print(english_nltk_stemmer.stem_word("corriendo"))
     >>> corr
-    >>> print(english_nltk_stemmer.stem_word("perlas"))
-    >>> perl
+    >>> print(english_nltk_stemmer.stem_word("gobiernos"))
+    >>> gobi
 
-As expected, the stemmer removes "iendo" from "corriendo" and the "as" from "perlas" to create stemmed words.
+As expected, the stemmer removes "iendo" from "corriendo" and the "ernos" from "gobiernos" to create stemmed words.
 
 
 Creating a Custom Stemmer
@@ -595,7 +596,7 @@ As a recap, every MindMeld project is also a Python package and has an ``__init.
 This package also contains an *application container* -- a container for all of the logic and functionality for your application.
 This application container enumerates all of the dialogue states and their associated handlers, and should be defined as ``app`` in the application's Python package.
 To use a :attr:`TextPreparationPipeline` with custom components, we must pass in a custom object into the application container in ``__init.py__``.
-Let's first take a look at an example of a an ``__init.py__`` file before a custom :attr:`TextPreparationPipeline` used.
+Let's first take a look at an example of an ``__init.py__`` file before a custom :attr:`TextPreparationPipeline` used.
 
 .. code:: python
     :caption: root/__init__.py (Without a Custom Pipeline)

@@ -36,7 +36,7 @@ from ..components._config import (
 )
 from ..constants import UNICODE_SPACE_CATEGORY
 from ..path import get_app
-
+from ..exceptions import MindMeldImportError
 logger = logging.getLogger(__name__)
 
 
@@ -500,17 +500,19 @@ class TextPreparationPipelineFactory:
         Returns:
             TextPreparationPipeline: A TextPreparationPipeline class.
         """
-        app = get_app(app_path)
-        if (app.text_preparation_pipeline):
-            logger.info(
-                "Using custom text_preparation_pipeline from %s/__init__.py.", app_path
-            )
-            return app.text_preparation_pipeline
-        return TextPreparationPipelineFactory.create_from_app_config(app_path)
+        try:
+            app = get_app(app_path)
+            if app.text_preparation_pipeline:
+                logger.info(
+                    "Using custom text_preparation_pipeline from %s/__init__.py.", app_path
+                )
+                return app.text_preparation_pipeline
+        except MindMeldImportError: 
+            return TextPreparationPipelineFactory.create_from_app_config(app_path)
 
     @staticmethod
     def create_from_app_config(app_path):
-        """ Static method to create a TextPreparation pipeline based on the speficiations in
+        """ Static method to create a TextPreparation pipeline based on the specifications in
         the config.
 
         Args:
@@ -586,6 +588,7 @@ class TextPreparationPipelineFactory:
             if preprocessors
             else [NoOpPreprocessor()]
         )
+
         # Update Regex Normalization Exception Characters as Specified in the Config
         if keep_special_chars:
             RegexNormalizerRuleFactory.EXCEPTION_CHARS = keep_special_chars
