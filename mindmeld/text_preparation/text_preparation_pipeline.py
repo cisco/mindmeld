@@ -60,66 +60,96 @@ class TextPreparationPipeline:
         language: str = ENGLISH_LANGUAGE_CODE,
     ):
         """Creates a Pipeline instance."""
-        self.language = language
-        self.preprocessors = preprocessors or [NoOpPreprocessor()]
-        self.normalizers = normalizers or [NoOpNormalizer()]
-        self.tokenizer = tokenizer
-        self.stemmer = stemmer or NoOpStemmer()
+        self._language = language
+        self._preprocessors = preprocessors or [NoOpPreprocessor()]
+        self._normalizers = normalizers or [NoOpNormalizer()]
+        self._tokenizer = tokenizer
+        self._stemmer = stemmer or NoOpStemmer()
 
         if self.tokenizer is None:
             raise TextPreparationPipelineError("Tokenizer cannot be None.")
 
     # Getters
-    def get_tokenizer(self):
-        return self.tokenizer
+    @property
+    def language(self):
+        return self._language
 
-    def get_preprocessors(self):
-        return self.preprocessors
+    @property
+    def tokenizer(self):
+        return self._tokenizer
 
-    def get_normalizers(self):
-        return self.normalizers
+    @property
+    def preprocessors(self):
+        return self._preprocessors
 
-    def get_stemmer(self):
-        return self.stemmer
+    @property
+    def normalizers(self):
+        return self._normalizers
+
+    @property
+    def stemmer(self):
+        return self._stemmer
 
     # Setters
-    def set_tokenizer(self, tokenizer: Tokenizer):
+    @tokenizer.setter
+    def tokenizer(self, tokenizer: Tokenizer):
         """Set the tokenizer for the Text Preparation Pipeline
         Args:
             tokenizer (Tokenizer): Tokenizer to use.
         """
         if not isinstance(tokenizer, Tokenizer):
             raise TypeError(f"{tokenizer} must be a Tokenizer object.")
-        self.tokenizer = tokenizer
+        self._tokenizer = tokenizer
 
-    def set_preprocessors(self, preprocessors: List[Preprocessor]):
+    @preprocessors.setter
+    def preprocessors(self, preprocessors: List[Preprocessor]):
         """Set the preprocessors for the Text Preparation Pipeline
         Args:
-            preprocessors (List[Preprocessor]): Preprocessor to use.
+            preprocessors (List[Preprocessor]): Preprocessors to use.
         """
         for preprocessor in preprocessors:
             if not isinstance(preprocessor, Preprocessor):
                 raise TypeError(f"{preprocessor} must be a Preprocessor object.")
-        self.preprocessors = preprocessors
+        self._preprocessors = preprocessors
 
-    def set_normalizers(self, normalizers: List[Normalizer]):
+    def append_preprocessor(self, preprocessor: Preprocessor):
+        """Add a preprocessor to the Text Preparation Pipeline
+        Args:
+            preprocessor (List[Preprocessor]): Preprocessor to append to current Preprocessors.
+        """
+        if not isinstance(preprocessor, Preprocessor):
+            raise TypeError(f"{preprocessor} must be a Preprocessor object.")
+        self._preprocessors.append(preprocessor)
+
+    @normalizers.setter
+    def normalizers(self, normalizers: List[Normalizer]):
         """Set the normalizers for the Text Preparation Pipeline
         Args:
-            normalizers (List[Preprocessor]): Preprocessor to use.
+            normalizers (List[Normalizer]): Normalizers to use.
         """
         for normalizer in normalizers:
             if not isinstance(normalizer, Normalizer):
                 raise TypeError(f"{normalizer} must be a Normalizer object.")
-        self.normalizers = normalizers
+        self._normalizers = normalizers
 
-    def set_stemmer(self, stemmer: Stemmer):
+    def append_normalizer(self, normalizer: Normalizer):
+        """Add a normalizer to the Text Preparation Pipeline
+        Args:
+            normalizer (List[Normalizer]): Normalizer to append to current Normalizers.
+        """
+        if not isinstance(normalizer, Normalizer):
+            raise TypeError(f"{normalizer} must be a Normalizer object.")
+        self._normalizers.append(normalizer)
+
+    @stemmer.setter
+    def stemmer(self, stemmer: Stemmer):
         """Set the stemmer for the Text Preparation Pipeline
         Args:
             stemmer (Stemmer): Stemmer to use.
         """
         if not isinstance(stemmer, Stemmer):
             raise TypeError(f"{stemmer} must be a Stemmer object.")
-        self.stemmer = stemmer
+        self._stemmer = stemmer
 
     def preprocess(self, text):
         """
