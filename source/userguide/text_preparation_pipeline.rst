@@ -524,16 +524,16 @@ To create an instance of the :attr:`SnowballNLTKStemmer`, we can use MindMeld's 
 
 .. code:: python
 
-    from mindmeld.text_preparation.stemmers import StemmerFactory
-    es_snowball_stemmer = StemmerFactory.get_stemmer_by_language("es")
+    from mindmeld.text_preparation.stemmers import SnowballNLTKStemmer
+    es_snowball_stemmer = SnowballNLTKStemmer("spanish")
 
 Now let's stem the words "corriendo" ("running") and "gobiernos" ("governments").
 
 .. code:: python
 
-    >>> print(english_nltk_stemmer.stem_word("corriendo"))
+    >>> print(es_snowball_stemmer.stem_word("corriendo"))
     >>> corr
-    >>> print(english_nltk_stemmer.stem_word("gobiernos"))
+    >>> print(es_snowball_stemmer.stem_word("gobiernos"))
     >>> gobi
 
 As expected, the stemmer removes "iendo" from "corriendo" and the "ernos" from "gobiernos" to create stemmed words.
@@ -564,30 +564,31 @@ A custom stemmer must extend from MindMeld's abstract :attr:`Stemmer` class:
             """
             raise NotImplementedError
 
-Let's create a stemmer that only removes the "-ing" suffix if found at the end of a word. We'll call it the :attr:`GerundSuffixStemmer`.
+Let's create a stemmer that uses Spacy's lemmatization functionality to use lemmatized tokens. We'll call it the :attr:`SpacyLemmatizer`.
 
 .. code:: python
 
     from mindmeld.text_preparation.stemmers import Stemmer
 
-    class GerundSuffixStemmer(Stemmer):
-
+    class SpacyLemmatizer(Stemmer):
+    
+        def __init__(self):
+            self.nlp = spacy.load('en_core_web_sm')
+    
         def stem_word(self, word):
             """
-            Stemmer that removes the "-ing" suffix if found at the end of a word.
-
             Args:
                 word (str): The word to stem
-
+    
             Returns:
-                stemmed_word (str): A stemmed version of the word
+                stemmed_word (str): A lemmatized version of the word
             """
-            if word.endswith("ing"):
-                return word[:-len("ing")]
-            return word
+    
+            doc = self.nlp(word)
+            return " ".join([token.lemma_ for token in doc])
 
 
-This stemmer would transform "jumping" to "jump".
+The :attr:`SpacyLemmatizer` would transform "ran" to "run".
 The steps to use a custom Stemmer in your application are explained in the section below.
 
 .. _custom-pipeline:
