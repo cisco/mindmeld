@@ -17,6 +17,7 @@ from typing import List, Dict, Tuple, Union
 import re
 import unicodedata
 import json
+from hashlib import sha256
 
 from .normalizers import (
     Normalizer,
@@ -223,9 +224,8 @@ class TextPreparationPipeline:
         Returns:
             256 character hash representation of current TextPreparationPipeline config (str) .
         """
-        from ..resource_loader import CustomEncoder, Hasher
-        string = json.dumps(self, cls=CustomEncoder, sort_keys=True)
-        return Hasher(algorithm="sha256").hash(string=string)
+        string = json.dumps(self, cls=TPPJSONEncoder, sort_keys=True)
+        return sha256(string.encode()).hexdigest()
 
     @staticmethod
     def find_mindmeld_annotation_re_matches(text):
@@ -662,3 +662,21 @@ class TextPreparationPipelineFactory:
             raise TypeError(
                 f"{component} must be of type String or {expected_component_class.__name__}."
             )
+
+
+# Borrowed from https://chadrick-kwag.net/json-dumpingserializing-custom-python-classes/
+class TPPJSONEncoder(json.JSONEncoder):
+    """
+    Custom Encoder class defined to obtain recursive JSON representation of a TextPreparationPipeline.
+
+    Args:
+        None.
+
+    Returns:
+        Custom JSON Encoder class (json.JSONEncoder) .
+    """
+
+    def default(self, o):
+        if "tojson" in dir(o):
+            return o.tojson()
+        return json.JSONEncoder.default(self, o)

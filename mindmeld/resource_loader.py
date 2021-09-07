@@ -46,7 +46,6 @@ class ProcessedQueryList:
     ProcessedQueryList provides a memory efficient disk backed list representation
     for a list of queries.
     """
-
     def __init__(self, cache=None, elements=None):
         self._cache = cache
         self.elements = elements or []
@@ -178,7 +177,6 @@ class ProcessedQueryList:
         of arbitrary lists of data and presenting them as a
         ProcessedQueryList.Iterator to functions that require them.
         """
-
         def __init__(self, elements):
             self.source = None
             self.elements = elements
@@ -193,7 +191,6 @@ class ProcessedQueryList:
         A class to provide cache functionality for in-memory
         lists of ProcessedQuery objects
         """
-
         def __init__(self, queries):
             self.queries = queries
 
@@ -730,7 +727,6 @@ class ResourceLoader:
         """
         Compiles unigram frequency dictionary of normalized query tokens
         """
-
         def __init__(self, enable_stemming=False):
             self.enable_stemming = enable_stemming
             self.tokens = []
@@ -754,7 +750,6 @@ class ResourceLoader:
         """
         Compiles n-gram character frequency dictionary of normalized query tokens
         """
-
         def __init__(self, lengths, thresholds):
             self.lengths = lengths
             self.thresholds = list(thresholds) + [1] * (len(lengths) - len(thresholds))
@@ -771,9 +766,9 @@ class ResourceLoader:
                     )
                 query_text = re.sub(r"\d", "0", query.normalized_text)
                 character_tokens = [
-                    query_text[i: i + length]
+                    query_text[i : i + length]
                     for i in range(len(query_text))
-                    if len(query_text[i: i + length]) == length
+                    if len(query_text[i : i + length]) == length
                 ]
                 self.char_freq_dict.update(character_tokens)
 
@@ -784,7 +779,6 @@ class ResourceLoader:
         """
         Compiles n-gram frequency dictionary of normalized query tokens
         """
-
         def __init__(self, lengths, thresholds, enable_stemming=False):
             self.lengths = lengths
             self.thresholds = list(thresholds) + [1] * (len(lengths) - len(thresholds))
@@ -812,10 +806,10 @@ class ResourceLoader:
                                      [OUT_OF_BOUNDS_TOKEN]
 
                 for i in range(len(normalized_tokens)):
-                    ngram_query = " ".join(normalized_tokens[i: i + length])
+                    ngram_query = " ".join(normalized_tokens[i : i + length])
                     ngram_tokens.append(ngram_query)
                     if self.enable_stemming:
-                        stemmed_ngram_query = " ".join(stemmed_tokens[i: i + length])
+                        stemmed_ngram_query = " ".join(stemmed_tokens[i : i + length])
                         if stemmed_ngram_query != ngram_query:
                             ngram_tokens.append(stemmed_ngram_query)
                 self.word_freq_dict.update(ngram_tokens)
@@ -827,7 +821,6 @@ class ResourceLoader:
         """
         Compiles frequency dictionary of normalized and stemmed query strings
         """
-
         def __init__(self, enable_stemming=False):
             self.enable_stemming = enable_stemming
             self.query_dict = Counter()
@@ -1031,20 +1024,3 @@ class Hasher:
         except IOError:
             hash_obj.update("".encode("utf-8"))
         return hash_obj.hexdigest()
-
-
-# Borrowed from https://chadrick-kwag.net/json-dumpingserializing-custom-python-classes/
-class CustomEncoder(json.JSONEncoder):
-    """
-    Custom Encoder class defined to obtain recursive JSON representation of a TextPreparationPipeline.
-
-    Args:
-        None.
-
-    Returns:
-        Custom JSON Encoder class (json.JSONEncoder) .
-    """
-    def default(self, o):
-        if "tojson" in dir(o):
-            return o.tojson()
-        return json.JSONEncoder.default(self, o)
