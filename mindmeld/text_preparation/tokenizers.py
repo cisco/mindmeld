@@ -25,7 +25,6 @@ from ..constants import (
     SPACY_SUPPORTED_LANGUAGES,
 )
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -45,6 +44,9 @@ class Tokenizer(ABC):
             tokens (List[str]): List of tokens.
         """
         raise NotImplementedError("Subclasses must implement this method")
+
+    def tojson(self):
+        return {self.__class__.__name__: None}
 
 
 class NoOpTokenizer(Tokenizer):

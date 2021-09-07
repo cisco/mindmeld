@@ -31,6 +31,9 @@ class Stemmer(ABC):
         """
         raise NotImplementedError
 
+    def tojson(self):
+        return {self.__class__.__name__ : None}
+
 
 class NoOpStemmer(Stemmer):
     @property

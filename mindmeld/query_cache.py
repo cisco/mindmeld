@@ -24,6 +24,7 @@ import sqlite3
 
 from .path import GEN_FOLDER, QUERY_CACHE_DB_PATH
 from .core import ProcessedQuery
+from .text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +44,10 @@ class QueryCache:
 
     def __init__(self, app_path):
         # make generated directory if necessary
+        text_preparation_pipeline = TextPreparationPipelineFactory.create_from_app_path(
+            app_path
+        )
+        self.text_pipeline_hash = text_preparation_pipeline.get_hashid()
         gen_folder = GEN_FOLDER.format(app_path=app_path)
         if not os.path.isdir(gen_folder):
             os.makedirs(gen_folder)
@@ -53,7 +58,7 @@ class QueryCache:
 
         cursor = self.disk_connection.cursor()
 
-        if not self.compatible_version():
+        if not self.compatible_version() or not self.compatible_text_pipeline_config():
             cursor.execute("""
             DROP TABLE IF EXISTS queries;
             """)
@@ -68,11 +73,11 @@ class QueryCache:
         # Create table to store the data version
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS version
-        (version_number INTEGER PRIMARY KEY);
+        (version_number INTEGER PRIMARY KEY, text_pipeline_hash TEXT);
         """)
         cursor.execute("""
-        INSERT OR IGNORE INTO version values (?);
-        """, (ProcessedQuery.version,))
+        INSERT OR IGNORE INTO version values (?, ?);
+        """, (ProcessedQuery.version, self.text_pipeline_hash))
         self.disk_connection.commit()
 
         in_memory = bool(strtobool(os.environ.get("MM_QUERY_CACHE_IN_MEMORY", "1").lower()))
@@ -119,6 +124,24 @@ class QueryCache:
             cursor.execute("""
             SELECT version_number FROM version WHERE version_number=(?);
             """, (ProcessedQuery.version,))
+            if len(cursor.fetchall()) == 0:
+                # version does not match
+                return False
+            return True
+        except Exception:  # pylint: disable=broad-except
+            return False
+
+    def compatible_text_pipeline_config(self):
+        """
+        Checks to see if the cache db file exists and that the text preparation pipeline config
+        matches the current pipeline config.
+        """
+
+        cursor = self.disk_connection.cursor()
+        try:
+            cursor.execute("""
+            SELECT version_number FROM version WHERE text_pipeline_hash=(?);
+            """, (self.text_pipeline_hash,))
             if len(cursor.fetchall()) == 0:
                 # version does not match
                 return False
@@ -209,7 +232,7 @@ class QueryCache:
         is called. Exceptions may be thrown in the case of database corruption.
 
         The method caches the previously retrieved element because it is common
-        for a set of iterators (examples and lables) to retrieve the same row_id
+        for a set of iterators (examples and labels) to retrieve the same row_id
         in sequence.  The cache prevents extra db lookups in this case.
 
         Args:
