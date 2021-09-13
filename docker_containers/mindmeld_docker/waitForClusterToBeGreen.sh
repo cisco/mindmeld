@@ -4,7 +4,7 @@
 
 echo "Waiting For ElasticSearch Cluster To Be Available..."
 
-until $(curl -XGET 'http://localhost:9200/_cluster/health?wait_for_status=green' > /dev/null); do
+until $(curl -s -XGET 'http://localhost:9200/_cluster/health?wait_for_status=green' > /dev/null); do
     printf 'ElasticSearch cluster not in green state, trying again in 5 seconds... \n'
     sleep 5
 done
