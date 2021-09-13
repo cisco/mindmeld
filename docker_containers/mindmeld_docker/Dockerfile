@@ -53,6 +53,9 @@ RUN chown -R mindmeld:mindmeld /elasticsearch /data /var/log
 # Add Config Files
 COPY ./conf/elasticsearch.yml /elasticsearch/config/elasticsearch.yml
 
+# Add Cluster Status Script
+COPY ./waitForClusterToBeGreen.sh /waitForClusterToBeGreen.sh
+
 WORKDIR /root
 
 RUN curl -o /tmp/get-pip.py https://bootstrap.pypa.io/get-pip.py
@@ -90,4 +93,5 @@ ENTRYPOINT export LC_ALL=C.UTF-8 && \
     pip3 install mindmeld --upgrade && \
     su mindmeld -c "ES_JAVA_OPTS='-Xms1g -Xmx1g' /elasticsearch/bin/elasticsearch -d" && \
     mindmeld num-parse --start && \
+    /waitForClusterToBeGreen.sh && \
     python3 -m home_assistant run
