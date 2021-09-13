@@ -32,7 +32,16 @@ class Stemmer(ABC):
         raise NotImplementedError
 
     def tojson(self):
-        return {self.__class__.__name__ : None}
+        """
+        Method defined to obtain recursive JSON representation of a TextPreparationPipeline.
+
+        Args:
+            None.
+
+        Returns:
+            JSON representation of TextPreparationPipeline (dict) .
+        """
+        return {self.__class__.__name__: None}
 
 
 class NoOpStemmer(Stemmer):

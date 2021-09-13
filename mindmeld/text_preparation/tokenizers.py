@@ -46,6 +46,15 @@ class Tokenizer(ABC):
         raise NotImplementedError("Subclasses must implement this method")
 
     def tojson(self):
+        """
+        Method defined to obtain recursive JSON representation of a TextPreparationPipeline.
+
+        Args:
+            None.
+
+        Returns:
+            JSON representation of TextPreparationPipeline (dict) .
+        """
         return {self.__class__.__name__: None}
 
 
