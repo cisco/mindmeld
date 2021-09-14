@@ -168,16 +168,27 @@ def _bash_helper(command_list):
 @_app_cli.command("dvc", context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 @click.option(
-    "--init", is_flag=True, required=False, help="Instantiate DVC within a repository"
+    "--init",
+    is_flag=True,
+    required=False,
+    help="Instantiate DVC within a repository"
 )
 @click.option(
-    "--setup_dagshub", is_flag=True, required=False, help="Setup a central model registry with DAGsHub"
+    "--setup_dagshub",
+    is_flag=True,
+    required=False,
+    help="Setup a central model registry with DAGsHub"
 )
 @click.option(
-    "--save", is_flag=True, required=False, help="Save built models using dvc"
+    "--save",
+    is_flag=True,
+    required=False,
+    help="Save built models using dvc"
 )
 @click.option(
-    "--checkout", required=False, help="Checkout repo and models corresponding to git hash"
+    "--checkout",
+    required=False,
+    help="Checkout repo and models corresponding to git hash"
 )
 @click.option(
     "--help",
@@ -233,9 +244,14 @@ def dvc(ctx, init, setup_dagshub, save, checkout, help_, destroy):
         )
     elif setup_dagshub:
         click.clear()
-        click.secho('You will now set up a central model registry for you MindMeld project on DAGsHub.com',
-                    fg='blue', bg='white')
-        click.echo('====================================================================================')
+        click.secho(
+            'You will now set up a central model registry for you MindMeld project on DAGsHub.com',
+            fg='blue',
+            bg='white'
+        )
+        click.echo(
+            '===================================================================================='
+        )
         click.echo(
             '* If you don\'t have a DAGsHub account, sign up here <{0}>\n'
             '* After signing up, create a DAGsHub project by:\n'
