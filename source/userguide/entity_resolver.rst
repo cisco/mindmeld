@@ -448,7 +448,7 @@ Optional parameters in resolver configuration
 3. **sbert_cosine_similarity**
     |
 
-    ``'pretrained_name_or_abspath'`` (`type`: :class:`str`, `default`: `distilbert-base-nli-stsb-mean-tokens <https://huggingface.co/sentence-transformers/distilbert-base-nli-stsb-mean-tokens>`_)
+    ``'pretrained_name_or_abspath'`` (`type`: :class:`str`, `default`: `sentence-transformers/all-mpnet-base-v2 <https://huggingface.co/sentence-transformers/all-mpnet-base-v2>`_)
       |
 
       Name of a model from `Huggingface models <https://huggingface.co/models>`_ or a folder path to which the model is downloaded.
@@ -463,12 +463,12 @@ Optional parameters in resolver configuration
 
       Specifies if the underlying pytorch model should be quantized for smaller memory footprint as well as faster inference times, while (slightly) compromising on model's accuracy.
 
-    ``'concat_last_n_layers'`` (`type`: :class:`int`, `default`: `4`)
+    ``'concat_last_n_layers'`` (`type`: :class:`int`, `default`: `1`)
       |
 
       Since transformer architecture based BERT models have several layers stacked, this parameter specifies how many of the last `n` layers' representation needs to be concatenated. Generally, concatenating more layers improves performance but at the cost of inference time.
 
-    ``'normalize_token_embs'`` (`type`: :class:`bool`, `default`: `True`)
+    ``'normalize_token_embs'`` (`type`: :class:`bool`, `default`: `False`)
       |
 
       Specifies if the outputs (specified by ``'bert_output_type'``) are to be unit normalized.
@@ -479,16 +479,16 @@ Optional parameters in resolver configuration
 
       Specifies if lower cased text forms of canonical names and whitelist items are to be used for resolution. This can improve performance in some applications and with some types of BERT models.
 
-    ``'augment_average_synonyms_embeddings'`` (`type`: :class:`bool`, `default`: `True`)
+    ``'augment_average_synonyms_embeddings'`` (`type`: :class:`bool`, `default`: `False`)
       |
 
-      If specified `True`, representative synonyms whose embeddings are average of embeddings of all whitelist items are added to the synonyms data for improved resolution performnaces.
+      If specified `True`, representative synonyms whose embeddings are average of embeddings of all whitelist items are added to the synonyms data for improved resolution performances.
 
 
     ``'batch_size'`` (`type`: :class:`int`, `default`: `16`)
       |
 
-      Number of synonyms to group into a batch while training. Larger sizes might incur larger memory footprints.
+      Number of synonyms to group into a batch while training. Larger sizes might incur larger memory footprints but the embeddings will be computed faster.
 
 .. _configs_exact_match:
 
