@@ -186,8 +186,8 @@ class TaggerModel(Model):
                 return TaggerModel.ACCURACY_SCORING
             return get_seq_accuracy_scorer()
         elif (
-            scorer == TaggerModel.ACCURACY_SCORING and
-            classifier_type in TaggerModel.SEQUENCE_MODELS
+            scorer == TaggerModel.ACCURACY_SCORING
+            and classifier_type in TaggerModel.SEQUENCE_MODELS
         ):
             return get_seq_tag_accuracy_scorer()
         else:
