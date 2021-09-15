@@ -13,6 +13,7 @@ import pytest
 from mindmeld.core import ProcessedQuery, Query, NestedEntity
 from mindmeld.query_cache import QueryCache
 from mindmeld.resource_loader import ProcessedQueryList
+from mindmeld.text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
 
 
 def test_get_labeled_queries(resource_loader):
@@ -38,7 +39,9 @@ def test_flatten_query_tree(resource_loader):
     assert count == len(flattened)
 
     # verify that query trees built from different query_caches will raise an error
-    qmap["banking"]["transfer_money"].cache = QueryCache(app_path=resource_loader.app_path)
+    text_prep_pipeline = TextPreparationPipelineFactory.create_from_app_path(resource_loader.app_path)
+    qmap["banking"]["transfer_money"].cache = QueryCache(app_path=resource_loader.app_path,
+                                                         text_preparation_pipeline=text_prep_pipeline)
     with pytest.raises(ValueError):
         flattened = resource_loader.flatten_query_tree(qmap)
 
