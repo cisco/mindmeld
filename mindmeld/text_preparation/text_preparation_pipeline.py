@@ -664,6 +664,7 @@ class TextPreparationPipelineFactory:
                 f"{component} must be of type String or {expected_component_class.__name__}."
             )
 
+
 class TPPJSONEncoder(json.JSONEncoder):
     """
     Custom Encoder class defined to obtain recursive JSON representation of a TextPreparationPipeline.
