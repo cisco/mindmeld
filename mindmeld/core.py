@@ -492,10 +492,6 @@ class ProcessedQuery:
         confidence (dict): A dictionary of the class probas for the domain and intent classifier
     """
 
-    # version the cached data.  Bump this if any changes are made
-    # to the to_cache() and from_cache() functions for the core classes.
-    version = 4
-
     def __init__(
         self,
         query,

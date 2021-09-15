@@ -37,7 +37,7 @@ from ..components._config import (
     ENGLISH_LANGUAGE_CODE,
 )
 
-from ..constants import UNICODE_SPACE_CATEGORY
+from ..constants import UNICODE_SPACE_CATEGORY, DUCKLING_VERSION
 from .._version import get_mm_version
 
 logger = logging.getLogger(__name__)
@@ -206,7 +206,8 @@ class TextPreparationPipeline:
             JSON representation of TextPreparationPipeline (dict) .
         """
         return {
-            "version": get_mm_version(),
+            "duckling_version": DUCKLING_VERSION,
+            "mm_version": get_mm_version(),
             "language": self.language,
             "preprocessors": self.preprocessors,
             "normalizers": self.normalizers,
@@ -663,8 +664,6 @@ class TextPreparationPipelineFactory:
                 f"{component} must be of type String or {expected_component_class.__name__}."
             )
 
-
-# Borrowed from https://chadrick-kwag.net/json-dumpingserializing-custom-python-classes/
 class TPPJSONEncoder(json.JSONEncoder):
     """
     Custom Encoder class defined to obtain recursive JSON representation of a TextPreparationPipeline.
@@ -677,6 +676,6 @@ class TPPJSONEncoder(json.JSONEncoder):
     """
 
     def default(self, o):
-        if "tojson" in dir(o):
-            return o.tojson()
-        return json.JSONEncoder.default(self, o)
+        tojson = getattr(o, 'tojson', None)
+        if callable(tojson):
+            return tojson()
