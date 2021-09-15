@@ -75,7 +75,8 @@ class PlotManager:
 
         if not _is_module_available("matplotlib"):
             raise ModuleNotFoundError(
-                "Library not found: 'matplotlib'. Run 'pip install mindmeld[active_learning]' to install."
+                "Library not found: 'matplotlib'. "
+                "Run 'pip install mindmeld[active_learning]' to install."
             )
 
         self.plt = _get_module_or_attr("matplotlib.pyplot")

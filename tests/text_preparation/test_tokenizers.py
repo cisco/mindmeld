@@ -140,20 +140,20 @@ def test_spacy_tokenizer_ja_one(spacy_tokenizer_ja):
         {"start": 5, "text": "去っ"},
         {"start": 7, "text": "た"},
         {"start": 8, "text": "、"},
-        {"start": 9, "text": "なぜ"},
-        {"start": 11, "text": "それ"},
-        {"start": 13, "text": "が"},
-        {"start": 14, "text": "起こっ"},
-        {"start": 17, "text": "た"},
-        {"start": 18, "text": "の"},
-        {"start": 19, "text": "か"},
-        {"start": 20, "text": "誰"},
-        {"start": 21, "text": "に"},
-        {"start": 22, "text": "も"},
-        {"start": 23, "text": "分かり"},
-        {"start": 26, "text": "ませ"},
-        {"start": 28, "text": "ん"},
-        {"start": 29, "text": "！"},
+        {"start": 10, "text": "なぜ"},
+        {"start": 12, "text": "それ"},
+        {"start": 14, "text": "が"},
+        {"start": 15, "text": "起こっ"},
+        {"start": 18, "text": "た"},
+        {"start": 19, "text": "の"},
+        {"start": 20, "text": "か"},
+        {"start": 21, "text": "誰"},
+        {"start": 22, "text": "に"},
+        {"start": 23, "text": "も"},
+        {"start": 24, "text": "分かり"},
+        {"start": 27, "text": "ませ"},
+        {"start": 29, "text": "ん"},
+        {"start": 30, "text": "！"},
     ]
     assert tokenized_output == expected_output
 
@@ -164,8 +164,8 @@ def test_spacy_tokenizer_ja_two(spacy_tokenizer_ja):
         {"start": 0, "text": "株式"},
         {"start": 2, "text": "会社"},
         {"start": 4, "text": "ＫＡＤＯＫＡＷＡ"},
-        {"start": 12, "text": "Ｆｕｔｕｒｅ"},
-        {"start": 18, "text": "Ｐｕｂｌｉｓｈｉｎｇ"},
+        {"start": 13, "text": "Ｆｕｔｕｒｅ"},
+        {"start": 20, "text": "Ｐｕｂｌｉｓｈｉｎｇ"},
     ]
     assert tokenized_output == expected_output
 
@@ -237,3 +237,20 @@ def test_character_tokenizer_ja_three(character_tokenizer):
         {"start": 4, "text": "ポ"},
     ]
     assert tokenized_output == expected_output
+
+
+def test_tokenize(text_preparation_pipeline):
+    tokens = text_preparation_pipeline.tokenize_and_normalize(
+        "Test: Query for $500,000. Chyea!"
+    )
+
+    assert len(tokens)
+    assert tokens[0]["entity"] == "test"
+    assert tokens[0]["raw_entity"] == "Test:"
+    assert tokens[1]["raw_start"] == 6
+    assert tokens[3]["raw_entity"] == "$500,000."
+    assert tokens[3]["raw_start"] == 16
+    assert tokens[3]["entity"] == "$500,000"
+    assert tokens[4]["entity"] == "chyea"
+    assert tokens[4]["raw_entity"] == "Chyea!"
+    assert tokens[4]["raw_start"] == 26
