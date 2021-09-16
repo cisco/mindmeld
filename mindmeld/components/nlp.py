@@ -1652,7 +1652,7 @@ class EntityProcessor(Processor):
             incremental_timestamp=self.incremental_timestamp,
             load_cached=load_cached
         )
-        self.entity_resolver.fit()
+        self.entity_resolver.fit(clean=bool(self.incremental_timestamp))
         if isinstance(self.progress_bar, tqdm):
             self.progress_bar.update(1)
             self.progress_bar.refresh()
@@ -1685,7 +1685,7 @@ class EntityProcessor(Processor):
             incremental_model_path if incremental_timestamp else model_path
         )
         try:
-            self.entity_resolver.fit(clean=True if incremental_timestamp else False)
+            self.entity_resolver.fit(clean=False)
         except ElasticsearchConnectionError:
             logger.warning("Cannot connect to ES, so Entity Resolver is not loaded.")
 
