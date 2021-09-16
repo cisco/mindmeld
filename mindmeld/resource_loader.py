@@ -269,8 +269,9 @@ class ResourceLoader:
         Lazy load the query cache since it's not required for inference.
         """
         if not self._query_cache:
+            text_prep_hash = self.query_factory.text_preparation_pipeline.get_hashid()
             self._query_cache = QueryCache(app_path=self.app_path,
-                                           text_preparation_pipeline=self.query_factory.text_preparation_pipeline)
+                                           schema_version_hash=text_prep_hash)
         return self._query_cache
 
     @property

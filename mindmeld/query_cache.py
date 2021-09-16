@@ -41,9 +41,9 @@ class QueryCache:
             cursor.execute(statement)
         dest.commit()
 
-    def __init__(self, app_path, text_preparation_pipeline):
+    def __init__(self, app_path, schema_version_hash):
         # make generated directory if necessary
-        self.text_pipeline_hash = text_preparation_pipeline.get_hashid()
+        self.schema_version_hash = schema_version_hash
         gen_folder = GEN_FOLDER.format(app_path=app_path)
         if not os.path.isdir(gen_folder):
             os.makedirs(gen_folder)
@@ -69,11 +69,11 @@ class QueryCache:
         # Create table to store the data version
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS version
-        (text_pipeline_hash TEXT PRIMARY KEY, config_id INTEGER);
+        (schema_version_hash TEXT PRIMARY KEY);
         """)
         cursor.execute("""
-        INSERT OR IGNORE INTO version values (?, ?);
-        """, (self.text_pipeline_hash, 0))
+        INSERT OR IGNORE INTO version values (?);
+        """, (self.schema_version_hash,))
         self.disk_connection.commit()
 
         in_memory = bool(strtobool(os.environ.get("MM_QUERY_CACHE_IN_MEMORY", "1").lower()))
@@ -118,8 +118,8 @@ class QueryCache:
         cursor = self.disk_connection.cursor()
         try:
             row = cursor.execute("""
-            SELECT COUNT(config_id) FROM version WHERE text_pipeline_hash=(?);
-            """, (self.text_pipeline_hash,)).fetchone()
+            SELECT COUNT(schema_version_hash) FROM version WHERE schema_version_hash=(?);
+            """, (self.schema_version_hash,)).fetchone()
             return row[0] > 0
         except sqlite3.Error:  # pylint: disable=broad-except
             return False
