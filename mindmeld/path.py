@@ -46,6 +46,10 @@ GEN_INTENT_FOLDER = os.path.join(GEN_DOMAIN_FOLDER, "{intent}")
 GEN_INTENT_CHECKPOINT_FOLDER = os.path.join(GEN_DOMAIN_CHECKPOINT_FOLDER, "{intent}")
 ENTITY_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, "entity.pkl")
 ENTITY_MODEL_CHECKPOINT_PATH = os.path.join(GEN_INTENT_CHECKPOINT_FOLDER, "entity.pkl")
+RESOLVER_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, "{entity}-resolver.pkl")
+RESOLVER_MODEL_CHECKPOINT_PATH = os.path.join(
+    GEN_INTENT_CHECKPOINT_FOLDER, "{entity}-resolver.pkl"
+)
 ROLE_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, "{entity}-role.pkl")
 ROLE_MODEL_CHECKPOINT_PATH = os.path.join(
     GEN_INTENT_CHECKPOINT_FOLDER, "{entity}-role.pkl"
@@ -54,18 +58,16 @@ GAZETTEER_PATH = os.path.join(GEN_FOLDER, "gaz-{entity}.pkl")
 GEN_INDEXES_FOLDER = os.path.join(GEN_FOLDER, "indexes")
 GEN_INDEX_FOLDER = os.path.join(GEN_INDEXES_FOLDER, "{index}")
 RANKING_MODEL_PATH = os.path.join(GEN_INDEX_FOLDER, "ranking.pkl")
+GEN_QUESTION_ANSWERERS_FOLDER = os.path.join(GEN_FOLDER, "question_answerers")
+GEN_QUESTION_ANSWERER_INDICES_CACHE = os.path.join(GEN_QUESTION_ANSWERERS_FOLDER, "{uid}.pkl")
+NATIVE_QUESTION_ANSWERER_INDICES_CACHE_PATH = os.path.join(
+    os.path.expanduser("~"), ".cache/mindmeld"
+)
 DEPRECATED_GEN_EMBEDDER_MODEL_PATH = os.path.join(
     GEN_INDEXES_FOLDER, "{embedder_type}_{model_name}_cache.pkl"
 )
 GEN_EMBEDDER_MODEL_PATH = os.path.join(
     GEN_INDEXES_FOLDER, "{model_id}_cache.pkl"
-)
-GEN_ENTITY_RESOLVERS_FOLDER = os.path.join(GEN_FOLDER, "entity_resolvers")
-GEN_ENTITY_RESOLVER_CACHE = os.path.join(GEN_ENTITY_RESOLVERS_FOLDER, "{uid}.pkl")
-GEN_QUESTION_ANSWERERS_FOLDER = os.path.join(GEN_FOLDER, "question_answerers")
-GEN_QUESTION_ANSWERER_INDICES_CACHE = os.path.join(GEN_QUESTION_ANSWERERS_FOLDER, "{uid}.pkl")
-NATIVE_QUESTION_ANSWERER_INDICES_CACHE_PATH = os.path.join(
-    os.path.expanduser("~"), ".cache/mindmeld"
 )
 
 # Domains sub tree for labeled queries
@@ -442,6 +444,30 @@ def get_role_model_paths(
 
 
 @safe_path
+def get_resolver_model_path(
+    app_path, domain, intent, entity
+):
+    """Gets the path to the entity resolver model
+
+    Args:
+        app_path (str): The path to the app data.
+        domain (str): A domain under the application.
+        intent (str): A intent under the domain.
+        entity (str): An entity under the intent
+
+    Returns:
+        (str) The main model path
+
+    """
+    main_path = RESOLVER_MODEL_PATH.format(
+        app_path=app_path, domain=domain, intent=intent, entity=entity
+    )
+    main_path = _resolve_model_name(main_path)
+
+    return main_path
+
+
+@safe_path
 def get_gazetteer_data_path(app_path, gaz_name, model_name=None):
     """Gets path to the saved gazetteer pickle.
 
@@ -572,20 +598,6 @@ def get_question_answerer_index_cache_file_path(app_path, uid):
         (str) The path for the .pkl cache.
     """
     return GEN_QUESTION_ANSWERER_INDICES_CACHE.format(app_path=app_path, uid=uid)
-
-
-@safe_path
-def get_entity_resolver_cache_file_path(app_path, uid):
-    """Gets the path to the entity resolver cache file for a given entity type and a chosen model type.
-
-    Args:
-        app_path (str): The path to the app data.
-        uid (str): A unique filename for the .pkl file
-
-    Returns:
-        (str) The path for the .pkl cache.
-    """
-    return GEN_ENTITY_RESOLVER_CACHE.format(app_path=app_path, uid=uid)
 
 
 @safe_path

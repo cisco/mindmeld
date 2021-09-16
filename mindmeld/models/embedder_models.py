@@ -54,18 +54,26 @@ class Embedder(ABC):
 
     class EmbeddingsCache:
 
-        def __init__(self, cache_path):
-            self.cache_path = cache_path
-            self.load()
+        def __init__(self, cache_path=None):
+            """
+            Args:
+                cache_path: A .pkl cache path to dump the embeddings cache
+            """
+            self.reset()
+            if cache_path:
+                self.cache_path = os.path.abspath(cache_path)
+                self.load()
 
         def reset(self):
             self.data = OrderedDict()
 
-        def load(self):
+        def load(self, cache_path=None):
             """Loads the cache file."""
 
-            if os.path.exists(self.cache_path) and os.path.getsize(self.cache_path) > 0:
-                with open(self.cache_path, "rb") as fp:
+            cache_path = os.path.abspath(cache_path or self.cache_path)
+
+            if os.path.exists(cache_path) and os.path.getsize(cache_path) > 0:
+                with open(cache_path, "rb") as fp:
                     data = pickle.load(fp)
 
                 if (
@@ -89,32 +97,32 @@ class Embedder(ABC):
                         logger.error(msg)
                     self.data = data
 
-        def clear(self):
+        def clear(self, cache_path=None):
             """Deletes the cache file."""
 
-            self.reset()
+            cache_path = os.path.abspath(cache_path or self.cache_path)
 
-            if os.path.exists(self.cache_path):
-                os.remove(self.cache_path)
-                msg = f"Embedder cache cleared at {self.cache_path}"
+            if os.path.exists(cache_path):
+                os.remove(cache_path)
+                msg = f"Embedder cache cleared at {cache_path}"
                 logger.info(msg)
 
-        def dump(self):
+        def dump(self, cache_path=None):
             """Dumps the cache to disk."""
 
+            cache_path = os.path.abspath(cache_path or self.cache_path)
+
             if self.data:
-                folder = os.path.split(self.cache_path)[0]
-                if folder and not os.path.exists(folder):
-                    os.makedirs(folder)
+                os.makedirs(os.path.dirname(cache_path), exist_ok=True)
                 data = {
                     "_texts": [*self.data.keys()],
                     "_texts_embeddings": np.array([*self.data.values()])
                 }
-                with open(self.cache_path, "wb") as fp:
+                with open(cache_path, "wb") as fp:
                     pickle.dump(data, fp)
                     fp.close()
 
-                msg = f"Embedder cache dumped at {self.cache_path}"
+                msg = f"Embedder cache dumped at {cache_path}"
                 logger.info(msg)
 
             else:
@@ -156,31 +164,32 @@ class Embedder(ABC):
 
         Args:
             app_path: Path of the app used to create cache folder to dump encodings
-            cache_path: Path where the embeddings are to be saved. If provided, discards app_path
+            cache_path: A .pkl path where the embeddings are to be saved.
+                        If provided, discards app_path information.
         """
         self.app_path = app_path
         self.cache_path = cache_path
+
+        self._model_id = None  # to be set in _load() method
         self.model = self._load(**kwargs)  # load model before obtaining the cache path
 
+        # determine cache_path and load a caching object
         if self.cache_path is None and self.app_path is None:
             raise ValueError("Atleast one of 'app_path' or 'cache_path' must be valid")
-
-        # deprecated usage: determine path from `embedder_type` and `model_name` (eg. QA module)
         if not self.cache_path:
+            # deprecated usage: determine path from `embedder_type` and `model_name` (eg. QA module)
             deprecated_cache_path = path.get_embedder_cache_file_path(
                 self.app_path, kwargs.get("embedder_type", "default"),
                 kwargs.get("model_name", "default")
             )
             if os.path.exists(deprecated_cache_path) and os.path.getsize(deprecated_cache_path) > 0:
                 self.cache_path = deprecated_cache_path
-
-        # new usage: determine cache path for the model using model_id (eg. ER module)
         if not self.cache_path:
-            # implies a previously used path name has no data and hence, is safe to change
+            # new usage: determine cache path for the model using model_id (eg. ER module)
+            #   implies a previously used path name has no data and hence, is safe to change
             #   default cache path for this model (backwards compatability required only for
             #   loading previously dumped embeddings data)
-            self.cache_path = self.get_app_cache_path(app_path=self.app_path)
-
+            self.cache_path = self.get_cache_path(app_path=self.app_path)
         self.cache = Embedder.EmbeddingsCache(self.cache_path)
 
     def __repr__(self):
@@ -207,6 +216,11 @@ class Embedder(ABC):
 
         return encoded
 
+    def get_cache_path(self, app_path):
+        # Inside an app, this path is generally something like:
+        #   '.generated/indexes/{model_id}_cache.pkl'
+        return path.get_embedder_cache_file_path(app_path, self.get_model_id)
+
     def add_to_cache(self, mean_or_max_pooled_whitelist_embs):
         """Manually add some max-pooled or mean-pooled embeddings to cache. This method is created
         to entertain storing superficial text-encoding pairs (superficial because the encodings are
@@ -230,20 +244,30 @@ class Embedder(ABC):
                 logger.warning(msg)
             self.cache[key] = value
 
-    def dump_cache(self):
-        self.cache.dump()
+    def dump_cache(self, cache_path=None):
+        self.cache.dump(cache_path=cache_path)
 
-    def clear_cache(self):
-        self.cache.clear()
+    # deprecated method, same functionality as 'dump_cache' method
+    def dump(self, cache_path=None):
+        msg = f"DeprecationWarning: Use {self.__class__.__name__}.dump_cache() instead of " \
+              f"{self.__class__.__name__}.dump()"
+        warnings.warn(msg, DeprecationWarning)
+        self.dump_cache(cache_path=cache_path)
 
-    def find_similarity(self,
-                        src_texts,
-                        tgt_texts=None,
-                        top_n=20,
-                        scores_normalizer=None,
-                        _sim_func=None,
-                        _return_as_dict=False,
-                        _no_sort=False):
+    def load_cache(self, cache_path=None):
+        self.cache.load(cache_path=cache_path)
+
+    def clear_cache(self, cache_path=None):
+        self.cache.clear(cache_path=cache_path)
+
+    def reset_cache(self, cache_path=None):
+        self.cache.clear(cache_path=cache_path)
+        self.cache.reset()
+
+    def find_similarity(
+        self, src_texts, tgt_texts=None, top_n=20, scores_normalizer=None,
+        _sim_func=None, _return_as_dict=False, _no_sort=False
+    ):
         """Computes the cosine similarity
 
         Args:
@@ -364,12 +388,18 @@ class Embedder(ABC):
 
         return similarity_scores
 
-    # deprecated method
-    def dump(self):
-        msg = f"DeprecationWarning: Use {self.__class__.__name__}.dump_cache() instead of " \
-              f"{self.__class__.__name__}.dump()"
-        warnings.warn(msg, DeprecationWarning)
-        self.dump_cache()
+    @staticmethod
+    def get_hashid(**kwargs):
+        string = json.dumps(kwargs, sort_keys=True)
+        return Hasher(algorithm="sha1").hash(string=string)
+
+    @property
+    def get_model_id(self):
+        if not self._model_id:
+            msg = "Embedder models need to have model ids to uniquely identify each model with a " \
+                  "specific configuration. It can be set through the instance attribute '_model_id'"
+            raise ValueError(msg)
+        return self._model_id
 
     @abstractmethod
     def _load(self, **kwargs):
@@ -402,10 +432,6 @@ class Embedder(ABC):
             getattr(self, "encode")(text_list)
 
         raise NotImplementedError
-
-    @staticmethod
-    def get_app_cache_path(app_path):
-        return path.get_embedder_cache_file_path(app_path, "default")
 
 
 class BertEmbedder(Embedder):  # pylint: disable=too-many-instance-attributes
@@ -441,19 +467,25 @@ class BertEmbedder(Embedder):  # pylint: disable=too-many-instance-attributes
             normalize_token_embs (bool): if the (sub-)token embs are to be individually normalized
         """
 
-        # deprecated configs
+        # deprecated configs keys, must be removed in future versions
         self.model_name = kwargs.get("model_name")
         if self.model_name:
             msg = "The argument 'model_name' is deprecated and will be removed in future " \
                   "versions. Consider replacing it with 'pretrained_name_or_abspath'"
             warnings.warn(msg, DeprecationWarning)
+            if kwargs.get("pretrained_name_or_abspath"):
+                msg = f"Must pass-in one of 'pretrained_name_or_abspath' or 'model_name' while " \
+                      f"instantiating a {self.__class__.__name__} class."
+                raise ValueError(msg)
 
-        # configs to load the model
+        # configs that uniquely identify the model
         self.pretrained_name_or_abspath = self.model_name or kwargs.get(
             "pretrained_name_or_abspath", BertEmbedder.DEFAULT_BERT
         )
         self.bert_output_type = kwargs.get("bert_output_type", "mean")
         self.quantize_model = kwargs.get("quantize_model", False)
+        self._concat_last_n_layers = kwargs.get("concat_last_n_layers", 1)
+        self._normalize_token_embs = kwargs.get("normalize_token_embs", False)
 
         # runtime configs for the model
         self._batch_size = kwargs.get("batch_size", 8)
@@ -462,8 +494,6 @@ class BertEmbedder(Embedder):  # pylint: disable=too-many-instance-attributes
         self._convert_to_numpy = kwargs.get("convert_to_numpy", True)
         self._convert_to_tensor = kwargs.get("convert_to_tensor", False)
         self.device = kwargs.get("device", "cuda" if _torch("is_available", sub="cuda") else "cpu")
-        self._concat_last_n_layers = kwargs.get("concat_last_n_layers", 1)
-        self._normalize_token_embs = kwargs.get("normalize_token_embs", False)
 
         super().__init__(app_path, **kwargs)
 
@@ -496,11 +526,6 @@ class BertEmbedder(Embedder):  # pylint: disable=too-many-instance-attributes
             raise ValueError(f"Not supported model {model} to obtain number of layers")
 
         return num_layers
-
-    @staticmethod
-    def get_hashid(**kwargs):
-        string = json.dumps(kwargs, sort_keys=True)
-        return Hasher(algorithm="sha1").hash(string=string)
 
     @staticmethod
     def _get_sentence_transformers_encoder(name_or_path,
@@ -664,12 +689,14 @@ class BertEmbedder(Embedder):  # pylint: disable=too-many-instance-attributes
                 "Must install the extra [bert] by running `pip install mindmeld[bert]` "
                 "to use the built in bert embedder.")
 
-        model_hashid = self.get_hashid(
+        self._model_id = str(self.get_hashid(
             pretrained_name_or_abspath=self.pretrained_name_or_abspath,
             bert_output_type=self.bert_output_type,
-            quantize_model=self.quantize_model
-        )
-        model = BertEmbedder.CACHE_MODELS.get(model_hashid, None)
+            quantize_model=self.quantize_model,
+            concat_last_n_layers=self._concat_last_n_layers,
+            normalize_token_embs=self._normalize_token_embs
+        ))
+        model = BertEmbedder.CACHE_MODELS.get(self._model_id, None)
 
         if not model:
 
@@ -701,9 +728,7 @@ class BertEmbedder(Embedder):  # pylint: disable=too-many-instance-attributes
                       f"Please check the model name and retry."
                 raise Exception(msg)
 
-            BertEmbedder.CACHE_MODELS.update({model_hashid: model})
-
-        self.model_id = str(model_hashid)
+            BertEmbedder.CACHE_MODELS.update({self._model_id: model})
 
         return model
 
@@ -773,9 +798,6 @@ class BertEmbedder(Embedder):  # pylint: disable=too-many-instance-attributes
 
         return results
 
-    def get_app_cache_path(self, app_path):
-        return path.get_embedder_cache_file_path(app_path, self.model_id)
-
 
 class GloveEmbedder(Embedder):
     """
@@ -803,6 +825,11 @@ class GloveEmbedder(Embedder):
         token_pretrained_embedding_filepath = kwargs.get(
             "token_pretrained_embedding_filepath"
         )
+        self._model_id = str(self.get_hashid(
+            token_embedding_dimension=token_embedding_dimension,
+            token_pretrained_embedding_filepath=os.path.abspath(
+                token_pretrained_embedding_filepath),
+        ))
         return WordSequenceEmbedding(
             0,
             token_embedding_dimension,

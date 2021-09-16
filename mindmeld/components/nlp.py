@@ -1674,18 +1674,18 @@ class EntityProcessor(Processor):
         self.role_classifier.unload()
 
     def _load(self, incremental_timestamp=None):
+        model_path, incremental_model_path = path.get_role_model_paths(
+            self._app_path,
+            self.domain,
+            self.intent,
+            self.type,
+            timestamp=incremental_timestamp,
+        )
+        self.role_classifier.load(
+            incremental_model_path if incremental_timestamp else model_path
+        )
         try:
-            model_path, incremental_model_path = path.get_role_model_paths(
-                self._app_path,
-                self.domain,
-                self.intent,
-                self.type,
-                timestamp=incremental_timestamp,
-            )
-            self.role_classifier.load(
-                incremental_model_path if incremental_timestamp else model_path
-            )
-            self.entity_resolver.load()
+            self.entity_resolver.fit(clean=True if incremental_timestamp else False)
         except ElasticsearchConnectionError:
             logger.warning("Cannot connect to ES, so Entity Resolver is not loaded.")
 
