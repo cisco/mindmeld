@@ -1440,7 +1440,7 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
             "augment_lower_case": self._aug_lower_case,
             "augment_title_case": self._aug_title_case,
             "augment_normalized": self._aug_normalized,
-            "augment_max_synonyms_embeddings": self._aug_max_syn_embs,
+            "augment_max_synonyms_embeddings": self._aug_avg_syn_embs,
         }
 
     def _fit(self, clean, entity_map):
@@ -1566,7 +1566,7 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
         self._aug_lower_case = _resolver_configs["augment_lower_case"]
         self._aug_title_case = _resolver_configs["augment_title_case"]
         self._aug_normalized = _resolver_configs["augment_normalized"]
-        self._aug_max_syn_embs = _resolver_configs["augment_max_synonyms_embeddings"]
+        self._aug_avg_syn_embs = _resolver_configs["augment_max_synonyms_embeddings"]
 
         head, ext = os.path.splitext(path)
         embedder_cache_path = head + ".embedder_cache" + ext
