@@ -186,7 +186,7 @@ class SystemEntityRecognizer(ABC):
     @abstractmethod
     def get_candidates_for_text(self, text, entity_types=None, **kwargs):
         """Identifies candidate system entities in the given text.
-
+find . -type f -name '*.o' -delete
         Args:
             text (str): The text to examine
             entity_types (list of str): The entity types to consider

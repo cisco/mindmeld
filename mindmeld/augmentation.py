@@ -17,6 +17,7 @@ import logging
 import re
 import string
 import random
+import warnings
 
 from abc import ABC, abstractmethod
 from tqdm import tqdm
@@ -220,7 +221,9 @@ class EnglishParaphraser(Augmentor):
             resource_loader=resource_loader,
         )
 
-        self.query_factory = QueryFactory.create_query_factory(app_path)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.query_factory = QueryFactory.create_query_factory(app_path=app_path, duckling=True)
         PegasusTokenizer = _get_module_or_attr("transformers", "PegasusTokenizer")
         PegasusForConditionalGeneration = _get_module_or_attr(
             "transformers", "PegasusForConditionalGeneration"
@@ -294,7 +297,9 @@ class EnglishParaphraser(Augmentor):
             new_paraphrase_text.append(new_entity.text)
             previous_end = span.end + 1
         new_paraphrase_text.append(paraphrase_text[previous_end:])
-        processed_query = self._resource_loader.query_factory.create_query(''.join(new_paraphrase_text))
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            processed_query = self.query_factory.create_query(''.join(new_paraphrase_text))
         final_entities = []
         for (entity, span) in replaced_spans_entities:
             query_entity = QueryEntity.from_query(query=processed_query, span=span, entity=entity)
