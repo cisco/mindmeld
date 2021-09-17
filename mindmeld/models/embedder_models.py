@@ -219,7 +219,7 @@ class Embedder(ABC):
     def get_cache_path(self, app_path):
         # Inside an app, this path is generally something like:
         #   '.generated/indexes/{model_id}_cache.pkl'
-        return path.get_embedder_cache_file_path(app_path, self.get_model_id)
+        return path.get_embedder_cache_file_path(app_path, self.model_id)
 
     def add_to_cache(self, mean_or_max_pooled_whitelist_embs):
         """Manually add some max-pooled or mean-pooled embeddings to cache. This method is created
@@ -394,7 +394,7 @@ class Embedder(ABC):
         return Hasher(algorithm="sha1").hash(string=string)
 
     @property
-    def get_model_id(self):
+    def model_id(self):
         if not self._model_id:
             msg = "Embedder models need to have model ids to uniquely identify each model with a " \
                   "specific configuration. It can be set through the instance attribute '_model_id'"

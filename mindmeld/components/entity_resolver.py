@@ -1436,7 +1436,7 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
     @property
     def _resolver_configs(self):
         return {
-            "embedder_model_id": self._embedder_model.get_model_id(),
+            "embedder_model_id": self._embedder_model.model_id,
             "augment_lower_case": self._aug_lower_case,
             "augment_title_case": self._aug_title_case,
             "augment_normalized": self._aug_normalized,
@@ -1556,7 +1556,7 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
             _resolver_configs = pickle.load(fp)
             fp.close()
         embedder_model_id = _resolver_configs["embedder_model_id"]
-        if embedder_model_id != self._embedder_model.get_model_id():
+        if embedder_model_id != self._embedder_model.model_id:
             msg = f"Unable to resolve the embedder model configurations. Found mismatched " \
                   f"configuartions between configs in the loaded pickle file and the configs " \
                   f"specified while instantiating {self.__class__.__name__}. Delete the related " \
