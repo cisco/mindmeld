@@ -54,7 +54,7 @@ class QueryCache:
 
         cursor = self.disk_connection.cursor()
 
-        if not self.compatible_version_or_text_prep_pipeline():
+        if not self.compatible_version():
             cursor.execute("""
             DROP TABLE IF EXISTS queries;
             """)
@@ -109,7 +109,7 @@ class QueryCache:
 
         self.disk_connection.close()
 
-    def compatible_version_or_text_prep_pipeline(self):
+    def compatible_version(self):
         """
         Checks to see if the cache db file exists and that the data version
         matches the current data version.
