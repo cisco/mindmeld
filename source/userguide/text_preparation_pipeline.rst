@@ -358,7 +358,7 @@ By default, MindMeld uses 12 Regex-based normalization rules when normalizing te
 | ReplaceSpecialCharsBetweenLettersWithSpace          | Replaces special characters between letters and letters with a space.                            | "Coding all^^!#%%hours seven##%days"  | "Coding all hours seven days" |
 +-----------------------------------------------------+--------------------------------------------------------------------------------------------------+---------------------------------------+-------------------------------+
 
-The last 5 rules above remove special characters in different contexts. These special characters can be specified in the config using the key, :attr:`keep_special_chars`.
+The last 5 rules (:attr:`ReplacePunctuationAtWordStartWithSpace`, :attr:`ReplacePunctuationAtWordEndWithSpace`, :attr:`ReplaceSpecialCharsBetweenLettersAndDigitsWithSpace`, :attr:`ReplaceSpecialCharsBetweenDigitsAndLettersWithSpace`, :attr:`ReplaceSpecialCharsBetweenLettersWithSpace`) above remove special characters in different contexts. These special characters can be specified in the config using the key, :attr:`keep_special_chars`.
 By default, :attr:`keep_special_chars` includes :attr:`@`, :attr:`[`, :attr:`]` and :attr:`'` represented as a single string. A custom set of special characters can be specified in :attr:`config.py`.
 
 
