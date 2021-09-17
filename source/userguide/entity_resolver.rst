@@ -523,7 +523,7 @@ In case of **tfidf_cosine_similarity** and **exact_match** resolvers, since ther
 
 .. note::
 
-   Unlike the other NLP components, there exists no `.dump()` method for resolver models since there is no necessity to save model weights to disk. On a similar note, the `.load()` method does not load any model weights and simply redirects to the `.fit()` method with `clean=False`.
+   To `clean` fit an entity resolver when building the entire NLP pipeline, calling the :meth:`nlp.build()` with argument `incremental=True` triggers a clean build of the underlying entity resolvers.
 
 .. _context_aware_resolution:
 

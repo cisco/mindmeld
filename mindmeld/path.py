@@ -47,9 +47,6 @@ GEN_INTENT_CHECKPOINT_FOLDER = os.path.join(GEN_DOMAIN_CHECKPOINT_FOLDER, "{inte
 ENTITY_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, "entity.pkl")
 ENTITY_MODEL_CHECKPOINT_PATH = os.path.join(GEN_INTENT_CHECKPOINT_FOLDER, "entity.pkl")
 RESOLVER_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, "{entity}-resolver.pkl")
-RESOLVER_MODEL_CHECKPOINT_PATH = os.path.join(
-    GEN_INTENT_CHECKPOINT_FOLDER, "{entity}-resolver.pkl"
-)
 ROLE_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, "{entity}-role.pkl")
 ROLE_MODEL_CHECKPOINT_PATH = os.path.join(
     GEN_INTENT_CHECKPOINT_FOLDER, "{entity}-role.pkl"
