@@ -702,7 +702,12 @@ class NestedEntity:
         def _get_form_details(query_span, offset, form_in, form_out):
             span_out = query.transform_span(query_span, form_in, form_out)
             full_text = query.get_text_form(form_out)
+            orig_text = span_out.slice(full_text)
+
+            span_out = query.transform_span(query_span, form_in, 2)
+            full_text = query.get_text_form(2)
             text = span_out.slice(full_text)
+
             # The span range is till the span_out or max to the second last char
             tok_start = 0
             span_range = min(span_out.start, len(full_text) - 1)
@@ -711,7 +716,13 @@ class NestedEntity:
                 next_char = full_text[idx + 1]
                 if not current_char.isspace() and next_char.isspace():
                     tok_start += 1
-            tok_span = Span(tok_start, tok_start - 1 + len(text.split()))
+
+            text_token_len = max(len(text.split()), 1)
+            tok_span = Span(tok_start, tok_start - 1 + text_token_len)
+
+            span_out = query.transform_span(query_span, form_in, form_out)
+            full_text = query.get_text_form(form_out)
+
             # convert span from query's indexing to parent's indexing
             if offset is not None:
                 offset_out = query.transform_index(offset, form_in, form_out)
@@ -719,7 +730,8 @@ class NestedEntity:
                 tok_offset = len(full_text[:offset_out].split())
                 tok_span.shift(-tok_offset)
 
-            return text, span_out, tok_span
+            return orig_text, span_out, tok_span
+
 
         if span:
             query_span = (
@@ -742,12 +754,15 @@ class NestedEntity:
                 ]
             )
         )
-
+        #print(">>>>>>>>>>>>>>>>>>")
         if entity is None:
+            print("ENTITY IS NONE")
             if entity_type is None:
                 raise ValueError("Either 'entity' or 'entity_type' must be specified")
+            print(texts[0])
             entity = Entity(texts[0], entity_type, role=role)
-
+            print(entity)
+        #print(">>>>>>>>>>>>>>>>>>")
         return cls(texts, spans, tok_spans, entity, children)
 
     @staticmethod
