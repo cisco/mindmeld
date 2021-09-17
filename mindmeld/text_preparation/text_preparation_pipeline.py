@@ -225,7 +225,7 @@ class TextPreparationPipeline:
         Returns:
             256 character hash representation of current TextPreparationPipeline config (str) .
         """
-        string = json.dumps(self, cls=TPPJSONEncoder, sort_keys=True)
+        string = json.dumps(self, cls=TextPreparationPipelineJSONEncoder, sort_keys=True)
         return sha256(string.encode()).hexdigest()
 
     @staticmethod
@@ -665,7 +665,7 @@ class TextPreparationPipelineFactory:
             )
 
 
-class TPPJSONEncoder(json.JSONEncoder):
+class TextPreparationPipelineJSONEncoder(json.JSONEncoder):
     """
     Custom Encoder class defined to obtain recursive JSON representation of a TextPreparationPipeline.
 
@@ -680,3 +680,6 @@ class TPPJSONEncoder(json.JSONEncoder):
         tojson = getattr(o, 'tojson', None)
         if callable(tojson):
             return tojson()
+        else:
+            raise TextPreparationPipelineError(
+                f"Missing tojson() for {o.__class__.__name__} to create query cache hash.")
