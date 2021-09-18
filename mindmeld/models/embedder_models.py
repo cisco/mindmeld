@@ -70,7 +70,7 @@ class Embedder(ABC):
         def load(self, cache_path=None):
             """Loads the cache file."""
 
-            cache_path = os.path.abspath(cache_path or self.cache_path)
+            cache_path = self._get_cache_path(cache_path)
 
             if os.path.exists(cache_path) and os.path.getsize(cache_path) > 0:
                 with open(cache_path, "rb") as fp:
@@ -100,7 +100,7 @@ class Embedder(ABC):
         def clear(self, cache_path=None):
             """Deletes the cache file."""
 
-            cache_path = os.path.abspath(cache_path or self.cache_path)
+            cache_path = self._get_cache_path(cache_path)
 
             if os.path.exists(cache_path):
                 os.remove(cache_path)
@@ -110,7 +110,7 @@ class Embedder(ABC):
         def dump(self, cache_path=None):
             """Dumps the cache to disk."""
 
-            cache_path = os.path.abspath(cache_path or self.cache_path)
+            cache_path = self._get_cache_path(cache_path)
 
             if self.data:
                 os.makedirs(os.path.dirname(cache_path), exist_ok=True)
@@ -128,6 +128,13 @@ class Embedder(ABC):
             else:
                 msg = "No embedding data exists to dump. Ignoring dumping."
                 logger.warning(msg)
+
+        def _get_cache_path(self, cache_path):
+            cache_path = cache_path or self.cache_path
+            if not cache_path:
+                msg = f"Invalid cache path '({cache_path})' provided for {self.__class__.__name__}."
+                raise ValueError(msg)
+            return os.path.abspath(cache_path)
 
         def get(self, text, default=None):
             return self.__getitem__(text, default)
@@ -175,8 +182,11 @@ class Embedder(ABC):
 
         # determine cache_path and load a caching object
         if self.cache_path is None and self.app_path is None:
-            raise ValueError("Atleast one of 'app_path' or 'cache_path' must be valid")
-        if not self.cache_path:
+            msg = f"{self.__class__.__name__} embedder instantiated without a valid cache path. " \
+                  f"This will lead to an error if you try to dump the encodings cache. To have a " \
+                  f"valid cache dump location, pass-in 'app_path' or 'cache_path' argument."
+            logger.error(msg)
+        if self.app_path and not self.cache_path:
             # deprecated usage: determine path from `embedder_type` and `model_name` (eg. QA module)
             deprecated_cache_path = path.get_embedder_cache_file_path(
                 self.app_path, kwargs.get("embedder_type", "default"),
@@ -184,12 +194,14 @@ class Embedder(ABC):
             )
             if os.path.exists(deprecated_cache_path) and os.path.getsize(deprecated_cache_path) > 0:
                 self.cache_path = deprecated_cache_path
-        if not self.cache_path:
+        if self.app_path and not self.cache_path:
             # new usage: determine cache path for the model using model_id (eg. ER module)
             #   implies a previously used path name has no data and hence, is safe to change
             #   default cache path for this model (backwards compatability required only for
             #   loading previously dumped embeddings data)
-            self.cache_path = self.get_cache_path(app_path=self.app_path)
+            # Inside an app folder, this path is generally something like:
+            #   '.generated/indexes/{model_id}_cache.pkl'
+            self.cache_path = path.get_embedder_cache_file_path(self.app_path, self.model_id)
         self.cache = Embedder.EmbeddingsCache(self.cache_path)
 
     def __repr__(self):
@@ -215,11 +227,6 @@ class Embedder(ABC):
                 self.cache[text_to_encode[i]] = model_encoded_text[i]
 
         return encoded
-
-    def get_cache_path(self, app_path):
-        # Inside an app, this path is generally something like:
-        #   '.generated/indexes/{model_id}_cache.pkl'
-        return path.get_embedder_cache_file_path(app_path, self.model_id)
 
     def add_to_cache(self, mean_or_max_pooled_whitelist_embs):
         """Manually add some max-pooled or mean-pooled embeddings to cache. This method is created
@@ -391,7 +398,7 @@ class Embedder(ABC):
     @staticmethod
     def get_hashid(**kwargs):
         string = json.dumps(kwargs, sort_keys=True)
-        return Hasher(algorithm="sha1").hash(string=string)
+        return Hasher(algorithm="sha256").hash(string=string)
 
     @property
     def model_id(self):

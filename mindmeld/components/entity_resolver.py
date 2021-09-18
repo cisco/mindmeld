@@ -189,7 +189,7 @@ class EntityResolver:
         )
 
 
-class BaseEntityResolver(ABC):
+class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
     """
     Base class for Entity Resolvers
     """
@@ -209,12 +209,18 @@ class BaseEntityResolver(ABC):
             resource_loader or ResourceLoader.create_resource_loader(app_path=self.app_path)
         )
 
-        self._processed_entity_map = None
         self._is_system_entity = Entity.is_system_entity(self.type)
         self._no_trainable_canonical_entity_map = False
         self.dirty = False  # bool, True if exists any unsaved data/model that can be saved
         self.ready = False  # bool, True if the model is already fitted or loaded
         self.hash = None
+
+        # resources for creating and maintaining processed entity map
+        self._aug_lower_case = None
+        self._aug_title_case = None
+        self._aug_normalized = None
+        self._normalize_aliases = None
+        self.processed_entity_map = None
 
     def __repr__(self):
         msg = "<{} ready: {!r}, dirty: {!r}, app_path: {!r}, entity_type: {!r}>"
@@ -330,15 +336,15 @@ class BaseEntityResolver(ABC):
         """
         config_string = json.dumps(self._resolver_configs, sort_keys=True)
         strings = sorted([json.dumps(ent_obj, sort_keys=True) for ent_obj in entities_data])
-        return Hasher(algorithm="sha1").hash_list(strings=[*strings, config_string])
+        return Hasher(algorithm="sha256").hash_list(strings=[*strings, config_string])
 
-    def process_entities(self,
-                         entities,
-                         normalizer=None,
-                         augment_lower_case=False,
-                         augment_title_case=False,
-                         augment_normalized=False,
-                         normalize_aliases=False):
+    def _process_entities(self,
+                          entities,
+                          normalizer=None,
+                          augment_lower_case=False,
+                          augment_title_case=False,
+                          augment_normalized=False,
+                          normalize_aliases=False):
         """
         Loads in the mapping.json file and stores the synonym mappings in a item_map
             and a synonym_map
@@ -396,6 +402,28 @@ class BaseEntityResolver(ABC):
                 syn_map[alias] = list(set(cnames_for_syn))
 
         return {"items": item_map, "synonyms": syn_map}
+
+    def get_processed_entity_map(self, entity_map):
+        """
+        Processes the entity map into a format suitable for indexing and similarity searching
+
+        Args:
+            entity_map (Dict[str, Union[str, List]]): Entity map if passed in directly instead of
+                loading from a file path
+
+        Returns:
+            processed_entity_map (Dict): A processed entity map better suited for indexing and
+                querying
+        """
+
+        return self._process_entities(
+            entity_map.get("entities", []),
+            normalizer=self._resource_loader.query_factory.normalize,
+            augment_lower_case=self._aug_lower_case,
+            augment_title_case=self._aug_title_case,
+            augment_normalized=self._aug_normalized,
+            normalize_aliases=self._normalize_aliases
+        )
 
     def fit(self, clean=False, entity_map=None):
         """Fits the resolver model, if required
@@ -506,43 +534,6 @@ class BaseEntityResolver(ABC):
 
         return self._trim_and_sort_results(results, top_n)
 
-    def dump(self, path):
-        """
-        Dumps the state of the entity resolver. The state for embedder model is the cached
-        embeddings whereas for text features based resolvers, (if required,) it will generally be a
-        serialized pickle of the underlying model/algorithm and the data associated.
-
-        In general, this method leads to creation of three files:
-            - .pkl: pickle of the underlying model/algo state (not required for Elasticsearch)
-            - .configs.pkl: pickle of the resolver's configuarble parameters
-            - .pkl.hash: a hash string obtained from a combination of KB data and the config params
-
-        Args:
-            path (str): A .pkl file path where the resolver will be dumped. The model hash will be
-                dumped at {path}.hash file path.
-        """
-        self._dump(path)
-
-        hash_path = path + ".hash"
-        os.makedirs(os.path.dirname(hash_path), exist_ok=True)
-        with open(hash_path, "w") as hash_file:
-            hash_file.write(self.hash)
-
-        self.dirty = False
-
-    def load(self, path):
-        """
-        Loads state of the entity resolver. The state for embedder model is the cached embeddings
-        whereas for text features based resolvers, (if required,) it will generally be a serialized
-        pickle of the underlying model/algorithm.
-
-        Args:
-            path (str): A .pkl file path where the resolver has been dumped
-        """
-        self._load(path)
-        self.ready = True
-        self.dirty = False
-
     @abstractmethod
     def _fit(self, clean, entity_map):
         """Fits the entity resolver model
@@ -569,11 +560,72 @@ class BaseEntityResolver(ABC):
         """
         raise NotImplementedError
 
-    @abstractmethod
+    def dump(self, path, cache_kb=True):
+        """
+        Dumps the state of the entity resolver. The state for embedder model is the cached
+        embeddings whereas for text features based resolvers, (if required,) it will generally be a
+        serialized pickle of the underlying model/algorithm and the data associated.
+
+        In general, this method leads to creation of three files:
+            - .pkl: pickle of the underlying model/algo state (not required for Elasticsearch)
+            - .configs.pkl: pickle of the resolver's configuarble parameters
+            - .pkl.hash: a hash string obtained from a combination of KB data and the config params
+
+        Args:
+            path (str): A .pkl file path where the resolver will be dumped. The model hash will be
+                dumped at {path}.hash file path.
+            cache_kb (bool, default: True): If True, saves the processed entity map in disk and
+                loads it back when the load method is called. If False, the resolver model/algorithm
+                is dumped but not the processed entity map necessitating the need to manualy set it
+                upon loading (useful in cases like NativeQuestionAnswerer!)
+        """
+
+        # dump underlying resolver model/algorithm/embeddings
+        self._dump(path)
+
+        # save data hash; useful for avoiding re-fitting the resolver on unchanged data
+        hash_path = path + ".hash"
+        os.makedirs(os.path.dirname(hash_path), exist_ok=True)
+        with open(hash_path, "w") as hash_file:
+            hash_file.write(self.hash)
+
+        # dump processed entity map that will be used to retrieve results during prediction
+        if cache_kb:
+            head, ext = os.path.splitext(path)
+            ent_map_path = head + ".processed_entity_map" + ext
+            with open(ent_map_path, "wb") as fp:
+                pickle.dump(self.processed_entity_map, fp)
+                fp.close()
+
+        self.dirty = False
+
     def _dump(self, path):
         raise NotImplementedError
 
-    @abstractmethod
+    def load(self, path):
+        """
+        Loads state of the entity resolver. The state for embedder model is the cached embeddings
+        whereas for text features based resolvers, (if required,) it will generally be a serialized
+        pickle of the underlying model/algorithm.
+
+        Args:
+            path (str): A .pkl file path where the resolver has been dumped
+        """
+
+        # load processed entity map if it exists
+        head, ext = os.path.splitext(path)
+        ent_map_path = head + ".processed_entity_map" + ext
+        if os.path.exists(ent_map_path):
+            with open(ent_map_path, "rb") as fp:
+                self.processed_entity_map = pickle.load(fp)
+                fp.close()
+
+        # load underlying resolver model/algorithm/embeddings
+        self._load(path)
+
+        self.ready = True
+        self.dirty = False
+
     def _load(self, path):
         raise NotImplementedError
 
@@ -595,6 +647,7 @@ class ExactMatchEntityResolver(BaseEntityResolver):
         self._aug_lower_case = settings.get("augment_lower_case", False)
         self._aug_title_case = settings.get("augment_title_case", False)
         self._aug_normalized = settings.get("augment_normalized", False)
+        self._normalize_aliases = True
 
     @property
     def _resolver_configs(self):
@@ -602,6 +655,7 @@ class ExactMatchEntityResolver(BaseEntityResolver):
             "augment_lower_case": self._aug_lower_case,
             "augment_title_case": self._aug_title_case,
             "augment_normalized": self._aug_normalized,
+            "normalize_aliases": self._normalize_aliases,
         }
 
     def _fit(self, clean, entity_map):
@@ -610,15 +664,7 @@ class ExactMatchEntityResolver(BaseEntityResolver):
             msg = f"clean=True ignored while fitting {self.__class__.__name__}"
             logger.info(msg)
 
-        entities = entity_map.get("entities", [])
-        self._processed_entity_map = self.process_entities(
-            entities,
-            normalizer=self._resource_loader.query_factory.normalize,
-            augment_lower_case=self._aug_lower_case,
-            augment_title_case=self._aug_title_case,
-            augment_normalized=self._aug_normalized,
-            normalize_aliases=True
-        )
+        self.processed_entity_map = self.get_processed_entity_map(entity_map)
 
     def _predict(self, nbest_entities, allowed_cnames=None):
         """Looks for exact name in the synonyms data
@@ -628,7 +674,7 @@ class ExactMatchEntityResolver(BaseEntityResolver):
 
         normed = self._resource_loader.query_factory.normalize(entity.text)
         try:
-            cnames = self._processed_entity_map["synonyms"][normed]
+            cnames = self.processed_entity_map["synonyms"][normed]
         except (KeyError, TypeError):
             logger.warning(
                 "Failed to resolve entity %r for type %r", entity.text, entity.type
@@ -646,7 +692,7 @@ class ExactMatchEntityResolver(BaseEntityResolver):
         for cname in cnames:
             if allowed_cnames and cname not in allowed_cnames:
                 continue
-            for item in self._processed_entity_map["items"][cname]:
+            for item in self.processed_entity_map["items"][cname]:
                 item_value = copy.copy(item)
                 item_value.pop("whitelist", None)
                 values.append(item_value)
@@ -654,9 +700,6 @@ class ExactMatchEntityResolver(BaseEntityResolver):
         return values
 
     def _dump(self, path):
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        joblib.dump(self._processed_entity_map, path)
-
         head, ext = os.path.splitext(path)
         resolver_config_path = head + ".config" + ext
         with open(resolver_config_path, "wb") as fp:
@@ -672,8 +715,9 @@ class ExactMatchEntityResolver(BaseEntityResolver):
         self._aug_lower_case = _resolver_configs["augment_lower_case"]
         self._aug_title_case = _resolver_configs["augment_title_case"]
         self._aug_normalized = _resolver_configs["augment_normalized"]
+        self._normalize_aliases = _resolver_configs["normalize_aliases"]
 
-        self._processed_entity_map = joblib.load(path)
+        self.processed_entity_map = joblib.load(path)
 
 
 class ElasticsearchEntityResolver(BaseEntityResolver):
@@ -1074,7 +1118,12 @@ class ElasticsearchEntityResolver(BaseEntityResolver):
 
             return results
 
-    def _dump(self, path):
+    def dump(self, path, **_kwargs):
+        """
+        Args:
+            path (str): A .pkl file path where the resolver will be dumped. The model hash will be
+                dumped at {path}.hash file path.
+        """
         os.makedirs(os.path.dirname(path), exist_ok=True)
         head, ext = os.path.splitext(path)
         resolver_config_path = head + ".config" + ext
@@ -1082,16 +1131,37 @@ class ElasticsearchEntityResolver(BaseEntityResolver):
             pickle.dump(self._resolver_configs, fp)
             fp.close()
 
-    def _load(self, path):
-        """Loads the trained entity resolution model from disk."""
+        hash_path = path + ".hash"
+        os.makedirs(os.path.dirname(hash_path), exist_ok=True)
+        with open(hash_path, "w") as hash_file:
+            hash_file.write(self.hash)
 
-        # load config
-        head, ext = os.path.splitext(path)
-        resolver_config_path = head + ".config" + ext
-        with open(resolver_config_path, "rb") as fp:
-            _resolver_configs = pickle.load(fp)
-            fp.close()
-        self._use_double_metaphone = _resolver_configs["use_double_metaphone"]
+        self.dirty = False
+
+    def load(self, path=None):
+        """
+        Args:
+            path (str): A .pkl file path where the resolver has been dumped, if dumped by
+                calling .dump()
+        """
+        # Before adding the dump+load functionality, other entity resolvers' `load` method simply
+        # was redirecting to the `fit` method whereas for ES resolver, it is doing something
+        # different- hence the load method is overwritten for the ES resolver
+
+        # backwards compatability:
+        # previous versions of the code might try to access the `load` method upon creating indices
+        # w/o dumping the config or w/o passing the `path` argument
+        try:
+            head, ext = os.path.splitext(path)
+            resolver_config_path = head + ".config" + ext
+            with open(resolver_config_path, "rb") as fp:
+                _resolver_configs = pickle.load(fp)
+                fp.close()
+            self._use_double_metaphone = _resolver_configs["use_double_metaphone"]
+        except (TypeError, FileNotFoundError):
+            msg = f"Unable to load previously used configs for the {self.__class__.__name__} " \
+                  f"resolver while loading."
+            logger.warning(msg)
 
         # elasticsearch loading
         try:
@@ -1117,6 +1187,9 @@ class ElasticsearchEntityResolver(BaseEntityResolver):
         except _getattr("elasticsearch", "ElasticsearchException") as e:
             raise EntityResolverError from e
 
+        self.ready = True
+        self.dirty = False
+
 
 class TfIdfSparseCosSimEntityResolver(BaseEntityResolver):
     """
@@ -1132,6 +1205,7 @@ class TfIdfSparseCosSimEntityResolver(BaseEntityResolver):
         self._aug_title_case = settings.get("augment_title_case", False)
         self._aug_normalized = settings.get("augment_normalized", False)
         self._aug_max_syn_embs = settings.get("augment_max_synonyms_embeddings", True)
+        self._normalize_aliases = False
 
         self.ngram_length = 5  # max number of character ngrams to consider; 3 for elasticsearch
         self._analyzer = kwargs.get("analyzer") or self._char_ngrams_plus_words_analyzer
@@ -1145,8 +1219,9 @@ class TfIdfSparseCosSimEntityResolver(BaseEntityResolver):
             "augment_lower_case": self._aug_lower_case,
             "augment_title_case": self._aug_title_case,
             "augment_normalized": self._aug_normalized,
+            "normalize_aliases": self._normalize_aliases,
             "augment_max_synonyms_embeddings": self._aug_max_syn_embs,
-            "ngram_length": self.ngram_length
+            "ngram_length": self.ngram_length,
         }
 
     def _fit(self, clean, entity_map):
@@ -1155,24 +1230,17 @@ class TfIdfSparseCosSimEntityResolver(BaseEntityResolver):
             msg = f"clean=True ignored while fitting {self.__class__.__name__}"
             logger.info(msg)
 
-        entities = entity_map.get("entities", [])
-        self._processed_entity_map = self.process_entities(
-            entities,
-            normalizer=self._resource_loader.query_factory.normalize,
-            augment_lower_case=self._aug_lower_case,
-            augment_title_case=self._aug_title_case,
-            augment_normalized=self._aug_normalized,
-        )
+        self.processed_entity_map = self.get_processed_entity_map(entity_map)
 
         # obtain sparse matrix
         synonyms = {v: k for k, v in
-                    dict(enumerate(set(self._processed_entity_map["synonyms"]))).items()}
+                    dict(enumerate(set(self.processed_entity_map["synonyms"]))).items()}
         synonyms_embs = self._vectorizer.fit_transform([*synonyms.keys()])
 
         # encode artificial synonyms if required
         if self._aug_max_syn_embs:
             # obtain cnames to synonyms mapping
-            synonym2cnames = self._processed_entity_map["synonyms"]
+            synonym2cnames = self.processed_entity_map["synonyms"]
             cname2synonyms = {}
             for syn, cnames in synonym2cnames.items():
                 for cname in cnames:
@@ -1226,11 +1294,11 @@ class TfIdfSparseCosSimEntityResolver(BaseEntityResolver):
             scored_items = self.find_similarity(top_entity.text, _no_sort=True)
             values = []
             for synonym, score in scored_items:
-                cnames = self._processed_entity_map["synonyms"][synonym]
+                cnames = self.processed_entity_map["synonyms"][synonym]
                 for cname in cnames:
                     if allowed_cnames and cname not in allowed_cnames:
                         continue
-                    for item in self._processed_entity_map["items"][cname]:
+                    for item in self.processed_entity_map["items"][cname]:
                         item_value = copy.copy(item)
                         item_value.pop("whitelist", None)
                         item_value.update({"score": score})
@@ -1254,7 +1322,6 @@ class TfIdfSparseCosSimEntityResolver(BaseEntityResolver):
     def _dump(self, path):
         os.makedirs(os.path.dirname(path), exist_ok=True)
         resolver_state = {
-            "processed_entity_map": self._processed_entity_map,
             "unique_synonyms": self._unique_synonyms,  # caching unique syns for finding similarity
             "syn_tfidf_matrix": self._syn_tfidf_matrix,  # caching sparse vectors of synonyms
             "vectorizer": self._vectorizer,  # caching vectorizer
@@ -1276,11 +1343,11 @@ class TfIdfSparseCosSimEntityResolver(BaseEntityResolver):
         self._aug_lower_case = _resolver_configs["augment_lower_case"]
         self._aug_title_case = _resolver_configs["augment_title_case"]
         self._aug_normalized = _resolver_configs["augment_normalized"]
+        self._normalize_aliases = _resolver_configs["normalize_aliases"]
         self._aug_max_syn_embs = _resolver_configs["augment_max_synonyms_embeddings"]
         self.ngram_length = _resolver_configs["ngram_length"]
 
         resolver_state = joblib.load(path)
-        self._processed_entity_map = resolver_state["processed_entity_map"]
         self._unique_synonyms = resolver_state["unique_synonyms"]
         self._syn_tfidf_matrix = resolver_state["syn_tfidf_matrix"]
         self._vectorizer = resolver_state["vectorizer"]
@@ -1430,6 +1497,7 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
         self._aug_title_case = settings.get("augment_title_case", False)
         self._aug_normalized = settings.get("augment_normalized", False)
         self._aug_avg_syn_embs = settings.get("augment_average_synonyms_embeddings", True)
+        self._normalize_aliases = False
 
         self._embedder_model = create_embedder_model(self.app_path, er_config)
 
@@ -1440,6 +1508,7 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
             "augment_lower_case": self._aug_lower_case,
             "augment_title_case": self._aug_title_case,
             "augment_normalized": self._aug_normalized,
+            "normalize_aliases": self._normalize_aliases,
             "augment_max_synonyms_embeddings": self._aug_avg_syn_embs,
         }
 
@@ -1449,23 +1518,16 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
             msg = f"clean=True ignored while fitting {self.__class__.__name__}"
             logger.info(msg)
 
-        entities = entity_map.get("entities", [])
-        self._processed_entity_map = self.process_entities(
-            entities,
-            normalizer=self._resource_loader.query_factory.normalize,
-            augment_lower_case=self._aug_lower_case,
-            augment_title_case=self._aug_title_case,
-            augment_normalized=self._aug_normalized,
-        )
+        self.processed_entity_map = self.get_processed_entity_map(entity_map)
 
         # load embeddings from cache if exists, encode any other synonyms if required
-        self._embedder_model.get_encodings([*self._processed_entity_map["synonyms"].keys()])
+        self._embedder_model.get_encodings([*self.processed_entity_map["synonyms"].keys()])
 
         # encode artificial synonyms if required
         if self._aug_avg_syn_embs:
             # obtain cnames to synonyms mapping
             cname2synonyms = {}
-            for syn, cnames in self._processed_entity_map["synonyms"].items():
+            for syn, cnames in self.processed_entity_map["synonyms"].items():
                 for cname in cnames:
                     cname2synonyms[cname] = cname2synonyms.get(cname, []) + [syn]
             # create and add superficial data
@@ -1475,8 +1537,8 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
                     continue
                 pooled_cname = f"{cname} - SYNONYMS AVERAGE"
                 # update synonyms map 'cause such synonyms don't actually exist in mapping.json file
-                if pooled_cname not in self._processed_entity_map["synonyms"]:
-                    self._processed_entity_map["synonyms"][pooled_cname] = [cname]
+                if pooled_cname not in self.processed_entity_map["synonyms"]:
+                    self.processed_entity_map["synonyms"][pooled_cname] = [cname]
                 # obtain encoding and update cache
                 # TODO: asumption that embedding cache has __getitem__ can be addressed
                 if pooled_cname in self._embedder_model.cache:
@@ -1499,7 +1561,7 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
 
         allowed_syns = None
         if allowed_cnames:
-            syn2cnames = self._processed_entity_map["synonyms"]
+            syn2cnames = self.processed_entity_map["synonyms"]
             allowed_syns = [syn for syn, cnames in syn2cnames.items()
                             if any([cname in allowed_cnames for cname in cnames])]
 
@@ -1508,11 +1570,11 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
                 top_entity.text, tgt_texts=allowed_syns, _no_sort=True)
             values = []
             for synonym, score in scored_items:
-                cnames = self._processed_entity_map["synonyms"][synonym]
+                cnames = self.processed_entity_map["synonyms"][synonym]
                 for cname in cnames:
                     if allowed_cnames and cname not in allowed_cnames:
                         continue
-                    for item in self._processed_entity_map["items"][cname]:
+                    for item in self.processed_entity_map["items"][cname]:
                         item_value = copy.copy(item)
                         item_value.pop("whitelist", None)
                         item_value.update({"score": score})
@@ -1534,8 +1596,6 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
         return values
 
     def _dump(self, path):
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        joblib.dump(self._processed_entity_map, path)
 
         # delete the temporary cache and dump it in the asked cache path
         self._embedder_model.clear_cache()
@@ -1566,13 +1626,12 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
         self._aug_lower_case = _resolver_configs["augment_lower_case"]
         self._aug_title_case = _resolver_configs["augment_title_case"]
         self._aug_normalized = _resolver_configs["augment_normalized"]
+        self._normalize_aliases = _resolver_configs["normalize_aliases"]
         self._aug_avg_syn_embs = _resolver_configs["augment_max_synonyms_embeddings"]
 
         head, ext = os.path.splitext(path)
         embedder_cache_path = head + ".embedder_cache" + ext
         self._embedder_model.load_cache(cache_path=embedder_cache_path)
-
-        self._processed_entity_map = joblib.load(path)
 
     def _predict_batch(self, nbest_entities_list, batch_size):
 
@@ -1593,9 +1652,9 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
             for scored_items in scored_items_list:
                 values = []
                 for synonym, score in scored_items:
-                    cnames = self._processed_entity_map["synonyms"][synonym]
+                    cnames = self.processed_entity_map["synonyms"][synonym]
                     for cname in cnames:
-                        for item in self._processed_entity_map["items"][cname]:
+                        for item in self.processed_entity_map["items"][cname]:
                             item_value = copy.copy(item)
                             item_value.pop("whitelist", None)
                             item_value.update({"score": score})
