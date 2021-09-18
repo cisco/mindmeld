@@ -165,6 +165,7 @@ def _bash_helper(command_list):
     return True, None
 
 
+# pylint: disable=too-many-return-statements
 @_app_cli.command("dvc", context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 @click.option(

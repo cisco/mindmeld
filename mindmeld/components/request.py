@@ -100,7 +100,8 @@ def deserialize_to_lists_of_list_of_immutable_maps(values):
     return tuple([deserialize_to_list_immutable_maps(value) for value in values])
 
 
-@attr.s(frozen=True, kw_only=True)  # pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes
+@attr.s(frozen=True, kw_only=True)
 class Request:
     """
     The Request is an object passed in through the Dialogue Manager and contains all the

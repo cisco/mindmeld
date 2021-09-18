@@ -607,8 +607,10 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
             elif isinstance(value, str) and "," in value and len(value.split(",")) == 2:
                 # eg. "37.77,122.41"
                 return value.strip()
-            elif (isinstance(value, list) and len(value) == 2
-                  and isinstance(value[0], numbers.Number) and isinstance(value[1], numbers.Number)):
+            elif (isinstance(value, list)
+                  and len(value) == 2
+                  and isinstance(value[0], numbers.Number)
+                  and isinstance(value[1], numbers.Number)):
                 # eg. [37.77, 122.41]
                 return ",".join([str(_value) for _value in value])
 
