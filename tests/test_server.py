@@ -106,37 +106,15 @@ def test_parse_endpoint_multiple_requests(client):
                     "locale": "en_US",
                     "target_dialogue_state": "transfer_money_handler",
                     "time_zone": '',
-                    "timestamp": 0
                 },
             },
             "Bad request {'text': 'hello', "
             "'params': {'allowed_intents': [], 'dynamic_resource': {}, "
             "'language': 'en', 'locale': 'en_US', 'target_dialogue_state': "
-            "'transfer_money_handler', 'time_zone': '', 'timestamp': 0}} caused "
+            "'transfer_money_handler', 'time_zone': ''}} caused "
             "error {'params': {'time_zone': ['Invalid time_zone param:  "
             "is not a valid time zone.']}}"
         ),
-        (
-            {
-                "text": "hello",
-                "history": [
-                    {
-                        "dialogue_state": "transfer_money_handler",
-                        "directives": [],
-                        "form": {},
-                        "frame": {},
-                        "history": [],
-                        "params": {},
-                        "request": {},
-                        "slots": {}
-                    }
-                ],
-            },
-            "Bad request {'text': 'hello', 'history': [{'dialogue_state': "
-            "'transfer_money_handler', 'directives': [], 'form': {}, 'frame': {}, "
-            "'history': [], 'params': {}, 'request': {}, 'slots': {}}]} "
-            "caused error {'request': {'text': ['Missing data for required field.']}}"
-        )
     ],
 )
 def test_invalid_requests(client, request_body, error_message):

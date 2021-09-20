@@ -12,12 +12,18 @@
 # limitations under the License.
 
 """This module contains some helper functions for the models package"""
+import json
+import logging
+import os
 import re
+from tempfile import mkstemp
 
+import nltk
 from sklearn.metrics import make_scorer
-
+from ..text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
 from ..gazetteer import Gazetteer
-from ..tokenizer import Tokenizer
+
+logger = logging.getLogger(__name__)
 
 FEATURE_MAP = {}
 MODEL_MAP = {}
@@ -34,7 +40,6 @@ ENTITY_EXAMPLE_TYPE = "entity"
 CLASS_LABEL_TYPE = "class"
 ENTITIES_LABEL_TYPE = "entities"
 
-
 # resource/requirements names
 GAZETTEER_RSC = "gazetteers"
 QUERY_FREQ_RSC = "q_freq"
@@ -45,6 +50,8 @@ WORD_NGRAM_FREQ_RSC = "w_ngram_freq"
 CHAR_NGRAM_FREQ_RSC = "c_ngram_freq"
 SENTIMENT_ANALYZER = "vader_classifier"
 OUT_OF_BOUNDS_TOKEN = "<$>"
+OUT_OF_VOCABULARY = "OOV"
+IN_VOCABULARY = "IV"
 DEFAULT_SYS_ENTITIES = [
     "sys_time",
     "sys_temperature",
@@ -72,10 +79,26 @@ def create_model(config):
         ValueError: When model configuration is invalid
     """
     try:
-        return MODEL_MAP[config.model_type](config)
+        return MODEL_MAP["auto"].from_config(config)
     except KeyError as e:
         msg = "Invalid model configuration: Unknown model type {!r}"
         raise ValueError(msg.format(config.model_type)) from e
+
+
+def load_model(path):
+    """Loads a model from a specified path
+
+    Args:
+        path (str): A path where the model configuration is pickled along with other metadata
+
+    Returns:
+        dict: metadata loaded from the path, which contains the configured model in 'model' key
+            and the model configs in 'model_config' key along with other keys
+
+    Raises:
+        ValueError: When model configuration is invalid
+    """
+    return MODEL_MAP["auto"].from_path(path)
 
 
 def create_annotator(config):
@@ -127,18 +150,31 @@ def get_label_encoder(config):
 
 
 def create_embedder_model(app_path, config):
-    """Creates and loads the embedder model."""
-    embedder_config = config.get("model_settings", {})
-    embedding_fields = embedder_config.get("embedding_fields", [])
-    if len(embedding_fields) == 0:
-        # No embedding fields specified in the app config, continuing without embedder model.
-        return None
-    try:
-        embedder_type = embedder_config["embedder_type"]
-    except KeyError as e:
-        raise ValueError(
-            "Invalid model configuration: No provided embedder type."
-        ) from e
+    """Creates and loads an embedder model
+
+    Args:
+        config (dict): Model settings passed in as a dictionary with
+            'embedder_type' being a required key
+
+    Returns:
+        Embedder: An instance of appropriate embedder class
+
+    Raises:
+        ValueError: When model configuration is invalid or required key is missing
+    """
+
+    if "model_settings" in config and config["model_settings"]:
+        # when config = {"model_settings": {"embedder_type": ..., "..": ...}}
+        embedder_config = config["model_settings"]
+    else:
+        # when config = {"embedder_type": ..., "..": ...}}
+        embedder_config = config
+
+    embedder_type = embedder_config.get("embedder_type")
+    if not embedder_type:
+        raise KeyError(
+            "Missing required argument in config supplied to create embedder model: 'embedder_type'"
+        )
 
     try:
         return EMBEDDER_MAP[embedder_type](app_path, **embedder_config)
@@ -293,6 +329,23 @@ def get_ngram(tokens, start, length):
     return " ".join(ngram_tokens)
 
 
+def get_ngrams_upto_n(tokens, n):
+    """This function returns a generator that returns ngram tuples with length upto n
+
+    Args:
+        tokens (list of str): Word tokens.
+        n (int): The length of n-gram upto which the ngram tokens are generated
+
+    Returns:
+        tuple: ngram, (token index start, token index end)
+    """
+    if n == 0:
+        return []
+    for length, i in enumerate(range(1, n + 1)):
+        for idx, j in enumerate(nltk.ngrams(tokens, i)):
+            yield j, (idx, idx + length)
+
+
 def get_seq_accuracy_scorer():
     """
     Returns a scorer that can be used by sklearn's GridSearchCV based on the
@@ -382,7 +435,7 @@ def entity_seqs_equal(expected, predicted):
     return True
 
 
-def merge_gazetteer_resource(resource, dynamic_resource, tokenizer):
+def merge_gazetteer_resource(resource, dynamic_resource, text_preparation_pipeline):
     """
     Returns a new resource that is a merge between the original resource and the dynamic
     resource passed in for only the gazetteer values
@@ -390,7 +443,7 @@ def merge_gazetteer_resource(resource, dynamic_resource, tokenizer):
     Args:
         resource (dict): The original resource built from the app
         dynamic_resource (dict): The dynamic resource passed in
-        tokenizer (Tokenizer): This component is used to normalize entities in dyn gaz
+        text_preparation_pipeline (TextPreparationPipeline): For text tokenization and normalization
 
     Returns:
         dict: The merged resource
@@ -408,14 +461,14 @@ def merge_gazetteer_resource(resource, dynamic_resource, tokenizer):
             # If the entity type is in the dyn gaz, we merge the data. Else,
             # just pass by reference the original resource data
             if entity_type in dynamic_resource[key]:
-                new_gaz = Gazetteer(entity_type)
+                new_gaz = Gazetteer(entity_type, text_preparation_pipeline)
                 # We deep copy here since shallow copying will also change the
                 # original resource's data during the '_update_entity' op.
                 new_gaz.from_dict(resource[key][entity_type])
 
                 for entity in dynamic_resource[key][entity_type]:
                     new_gaz._update_entity(
-                        tokenizer.normalize(entity),
+                        text_preparation_pipeline.normalize(entity),
                         dynamic_resource[key][entity_type][entity],
                     )
 
@@ -426,21 +479,26 @@ def merge_gazetteer_resource(resource, dynamic_resource, tokenizer):
     return return_obj
 
 
-def ingest_dynamic_gazetteer(resource, dynamic_resource=None, tokenizer=None):
+def ingest_dynamic_gazetteer(resource, dynamic_resource=None, text_preparation_pipeline=None):
     """Ingests dynamic gazetteers from the app and adds them to the resource
 
     Args:
         resource (dict): The original resource
         dynamic_resource (dict, optional): The dynamic resource that needs to be ingested
-        tokenizer (Tokenizer): This used to normalize the entities in the dynamic resource
+        text_preparation_pipeline (TextPreparationPipeline): For text tokenization and normalization
 
     Returns:
         (dict): A new resource with the ingested dynamic resource
     """
     if not dynamic_resource or GAZETTEER_RSC not in dynamic_resource:
         return resource
-    tokenizer = tokenizer or Tokenizer()
-    workspace_resource = merge_gazetteer_resource(resource, dynamic_resource, tokenizer)
+    text_preparation_pipeline = (
+        text_preparation_pipeline
+        or TextPreparationPipelineFactory.create_default_text_preparation_pipeline()
+    )
+    workspace_resource = merge_gazetteer_resource(
+        resource, dynamic_resource, text_preparation_pipeline
+    )
     return workspace_resource
 
 
@@ -463,3 +521,62 @@ def requires(resource):
         return func
 
     return add_resource
+
+
+class FileBackedList:
+    """
+    FileBackedList implements an interface for simple list use cases
+    that is backed by a temporary file on disk.  This is useful for
+    simple list processing in a memory efficient way.
+    """
+
+    def __init__(self):
+        self.num_lines = 0
+        self.file_handle = None
+        fd, self.filename = mkstemp()
+        os.close(fd)
+
+    def __len__(self):
+        return self.num_lines
+
+    def append(self, line):
+        if self.file_handle is None:
+            self.file_handle = open(self.filename, "w")
+        self.file_handle.write(json.dumps(line))
+        self.file_handle.write("\n")
+        self.num_lines += 1
+
+    def __del__(self):
+        if self.file_handle:
+            self.file_handle.close()
+        os.unlink(self.filename)
+
+    def __iter__(self):
+        # Flush out any remaining data to be written
+        if self.file_handle:
+            self.file_handle.close()
+            self.file_handle = None
+        return FileBackedList.Iterator(self)
+
+    class Iterator:
+        def __init__(self, source):
+            self.source = source
+            self.file_handle = open(source.filename, "r")
+
+        def __len__(self):
+            return len(self.source)
+
+        def __next__(self):
+            try:
+                line = next(self.file_handle)
+                return json.loads(line)
+            except Exception as e:
+                self.file_handle.close()
+                self.file_handle = None
+                if not isinstance(e, StopIteration):
+                    logger.error("Error reading from FileBackedList")
+                raise
+
+        def __del__(self):
+            if self.file_handle:
+                self.file_handle.close()

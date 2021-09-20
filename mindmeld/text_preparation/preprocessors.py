@@ -33,18 +33,47 @@ class Preprocessor(ABC):
         """
         pass
 
-    @abstractmethod
-    def get_char_index_map(self, raw_text, processed_text):
+    def tojson(self):
         """
-        Generates character index mapping from processed query to raw query.
-
-        See the Tokenizer class for a similar implementation.
+        Method defined to obtain recursive JSON representation of a TextPreparationPipeline.
 
         Args:
-            raw_text (str)
-            processed_text (str)
+            None.
 
         Returns:
-            (dict, dict): A tuple consisting of two maps, forward and backward
+            JSON representation of Preprocessor (dict) .
         """
-        pass
+        return {self.__class__.__name__: None}
+
+
+class NoOpPreprocessor(Preprocessor):
+    """
+    NoOpPreprocessor object
+    """
+
+    def process(self, text):
+        """
+        Args:
+            text (str)
+
+        Returns:
+            (str)
+        """
+        return text
+
+
+class PreprocessorFactory:
+    """Preprocessor Factory Class"""
+
+    @staticmethod
+    def get_preprocessor(preprocessor: str):
+        """A static method to get a Preprocessor
+
+        Args:
+            preprocessor (str): Name of the desired Preprocessor class
+        Returns:
+            (Preprocessor): Preprocessor Class
+        """
+        if preprocessor == NoOpPreprocessor.__name__:
+            return NoOpPreprocessor()
+        raise TypeError(f"{preprocessor} is not a valid Preprocessor type.")

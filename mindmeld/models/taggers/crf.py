@@ -14,16 +14,23 @@
 """
 This module contains the CRF entity recognizer.
 """
+from distutils.util import strtobool
 import logging
+import os
 
 import numpy as np
 from sklearn_crfsuite import CRF
 
 from .taggers import Tagger, extract_sequence_features
+from ..helpers import FileBackedList
 
 logger = logging.getLogger(__name__)
 
 ZERO = 1e-20
+
+STORE_CRF_FEATURES_IN_MEMORY = bool(
+    strtobool(os.environ.get("MM_CRF_FEATURES_IN_MEMORY", "1").lower())
+)
 
 
 class ConditionalRandomFields(Tagger):
@@ -66,7 +73,7 @@ class ConditionalRandomFields(Tagger):
             list of tuples of (mindmeld.core.QueryEntity): a list of predicted labels \
              with confidence scores
         """
-        X, _, _ = self.extract_features(examples, config, resources)
+        X, _, _ = self.extract_features(examples, config, resources, in_memory=True)
         seq = self._clf.predict(X)
         marginals_dict = self._clf.predict_marginals(X)
         marginal_tuples = []
@@ -77,7 +84,13 @@ class ConditionalRandomFields(Tagger):
             marginal_tuples.append(query_marginal_tuples)
         return marginal_tuples
 
-    def extract_features(self, examples, config, resources, y=None, fit=True):
+    def extract_features(self,
+                         examples,
+                         config,
+                         resources,
+                         y=None,
+                         fit=False,
+                         in_memory=STORE_CRF_FEATURES_IN_MEMORY):
         """Transforms a list of examples into a feature matrix.
 
         Args:
@@ -90,7 +103,7 @@ class ConditionalRandomFields(Tagger):
             (list of list of str): features in CRF suite format
         """
         # Extract features and classes
-        feats = []
+        feats = [] if in_memory else FileBackedList()
         for _, example in enumerate(examples):
             feats.append(self.extract_example_features(example, config, resources))
         X = self._preprocess_data(feats, fit)
@@ -126,7 +139,8 @@ class ConditionalRandomFields(Tagger):
         if fit:
             self._feat_binner.fit(X)
 
-        new_X = []
+        # We want to use a list for in-memory and a LineGenerator for disk based
+        new_X = X.__class__()
         for feat_seq in self._feat_binner.transform(X):
             feat_list = []
             for feature in feat_seq:

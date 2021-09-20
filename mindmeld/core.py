@@ -16,6 +16,9 @@ import logging
 from typing import Optional, List, Dict
 import immutables
 
+from .constants import SYSTEM_ENTITY_PREFIX
+
+
 TEXT_FORM_RAW = 0
 TEXT_FORM_PROCESSED = 1
 TEXT_FORM_NORMALIZED = 2
@@ -100,6 +103,16 @@ class Span:
         self.start = start
         self.end = end
 
+    def to_cache(self):
+        return {
+            "start": self.start,
+            "end": self.end
+        }
+
+    @staticmethod
+    def from_cache(obj):
+        return Span(**obj)
+
     def to_dict(self):
         """Converts the span into a dictionary"""
         return {"start": self.start, "end": self.end}
@@ -127,6 +140,25 @@ class Span:
     def has_overlap(self, other):
         """Determines whether two spans overlap."""
         return self.end >= other.start and other.end >= self.start
+
+    @staticmethod
+    def get_largest_non_overlapping_candidates(spans):
+        """Finds the set of the largest non-overlapping candidates.
+
+        Args:
+            spans (list): List of tuples representing candidate spans (start_index, end_index + 1).
+        Returns:
+            selected_spans (list): List of the largest non-overlapping spans.
+        """
+        spans.sort(reverse=True)
+        selected_spans = []
+        for span in spans:
+            has_overlaps = [
+                span.has_overlap(selected_span) for selected_span in selected_spans
+            ]
+            if not any(has_overlaps):
+                selected_spans.append(span)
+        return selected_spans
 
     def __iter__(self):
         for index in range(self.start, self.end + 1):
@@ -229,6 +261,44 @@ class Query:
         self._timestamp = timestamp
         self.stemmed_tokens = stemmed_tokens or tuple()
 
+    def char_maps_to_cache(self):
+        # dump the tuple keys to a string and trim the ( ) symbols from the end
+        return {str(k)[1:-1] : v for k,v in self._char_maps.items()}
+
+    def to_cache(self):
+        return {
+            "raw_text": self.text,
+            "processed_text": self.processed_text,
+            "normalized_tokens": self._normalized_tokens,
+            "char_maps": self.char_maps_to_cache(),
+            "locale": self._locale,
+            "language": self._language,
+            "time_zone": self._time_zone,
+            "timestamp": self._timestamp,
+            "stemmed_tokens": self.stemmed_tokens,
+            "system_entity_candidates": [e.to_cache() for e in self.system_entity_candidates]
+        }
+
+    @staticmethod
+    def char_maps_from_cache(obj):
+        result = {}
+        for k,v in obj.items():
+            # Convert string key back into tuple
+            tuple_key = tuple(map(int, k.split(",")))
+            # Convert string key for dicts back into integer
+            result[tuple_key] = {int(k2): v2 for k2, v2 in v.items()}
+        return result
+
+    @staticmethod
+    def from_cache(obj):
+        system_entity_candidates = obj.pop("system_entity_candidates")
+        obj["char_maps"] = Query.char_maps_from_cache(obj["char_maps"])
+        result = Query(**obj)
+        result.system_entity_candidates = [
+            Entity.from_cache_typed(e) for e in system_entity_candidates
+        ]
+        return result
+
     @property
     def text(self):
         """The original input text"""
@@ -278,6 +348,12 @@ class Query:
         this parameter is ignored.
         """
         return self._timestamp
+
+    def get_verbose_normalized_tokens(self):
+        """This function returns a list of dictionaries containing details of each normalized
+        token
+        """
+        return self._normalized_tokens
 
     def get_text_form(self, form):
         """Programmatically retrieves text by form
@@ -332,7 +408,6 @@ class Query:
         """
         if form_in not in TEXT_FORMS or form_out not in TEXT_FORMS:
             raise ValueError("Invalid text form")
-
         if form_in > form_out:
             while form_in > form_out:
                 index = self._unprocess_index(index, form_in)
@@ -375,6 +450,17 @@ class Query:
         except KeyError as e:
             raise ValueError("Invalid index {}".format(index)) from e
 
+    def get_token_ngram_raw_ngram_span(self, tokens, start_token_index, end_token_index):
+        token_ngram = tuple(
+            [token['entity'] for token in tokens[start_token_index:end_token_index + 1]]
+        )
+        last_raw_start = tokens[end_token_index]['raw_start']
+        last_raw_entity = tokens[end_token_index]['entity']
+        first_raw_start = tokens[start_token_index]['raw_start']
+        result_span = Span(first_raw_start, last_raw_start + len(last_raw_entity) - 1)
+        raw_ngram = self.text[result_span.start: result_span.end + 1]
+        return token_ngram, raw_ngram, result_span
+
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return self.__dict__ == other.__dict__
@@ -405,8 +491,6 @@ class ProcessedQuery:
         nbest_aligned_entities (list): A list of lists of aligned entities
         confidence (dict): A dictionary of the class probas for the domain and intent classifier
     """
-
-    # TODO: look into using __slots__
 
     def __init__(
         self,
@@ -458,6 +542,47 @@ class ProcessedQuery:
         if self.confidence:
             base["confidences"] = self.confidence
         return base
+
+    def to_cache(self):
+        obj = {
+            "query": self.query.to_cache(),
+            "domain": self.domain,
+            "intent": self.intent,
+            "entities": [e.to_cache() for e in self.entities],
+            "is_gold": self.is_gold,
+            "confidence": self.confidence
+        }
+        if self.nbest_transcripts_queries:
+            obj["nbest_transcripts_queries"] = [
+                q.to_cache() for q in self.nbest_transcripts_queries
+            ]
+        if self.nbest_transcripts_entities:
+            obj["nbest_transcripts_entities"] = [
+                e.to_cache() for e in self.nbest_transcripts_entities
+            ]
+        if self.nbest_aligned_entities:
+            obj["nbest_aligned_entities"] = [
+                e.to_cache() for e in self.nbest_aligned_entities
+            ]
+        return obj
+
+    @staticmethod
+    def from_cache(obj):
+        obj["query"] = Query.from_cache(obj["query"])
+        obj["entities"] = [Entity.from_cache_typed(e) for e in obj["entities"]]
+        if "nbest_transcripts_queries" in obj:
+            obj["nbest_transcripts_queries"] = [
+                Query.from_cache(q) for q in obj["nbest_transcripts_queries"]
+            ]
+        if "nbest_transcripts_entities" in obj:
+            obj["nbest_transcripts_entities"] = [
+                Entity.from_cache_typed(e) for e in obj["nbest_transcripts_entities"]
+            ]
+        if "nbest_aligned_entities" in obj:
+            obj["nbest_aligned_entities"] = [
+                Entity.from_cache_typed(e) for e in obj["nbest_aligned_entities"]
+            ]
+        return ProcessedQuery(**obj)
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -511,6 +636,27 @@ class NestedEntity:
         else:
             self.children = None
 
+    def to_cache(self):
+        obj = {
+            "class": self.__class__.__name__,
+            "texts": self._texts,
+            "spans": [s.to_cache() for s in self._spans],
+            "token_spans": [s.to_cache() for s in self._token_spans],
+            "entity": self.entity.to_cache(),
+        }
+        if self.children:
+            obj["children"] = [e.to_cache() for e in self.children]
+        return obj
+
+    @staticmethod
+    def from_cache(obj):
+        obj["spans"] = [Span.from_cache(s) for s in obj["spans"]]
+        obj["token_spans"] = [Span.from_cache(s) for s in obj["token_spans"]]
+        obj["entity"] = Entity.from_cache_typed(obj["entity"])
+        if "children" in obj:
+            obj["children"] = [Entity.from_cache_typed(e) for e in obj["children"]]
+        return NestedEntity(**obj)
+
     def with_children(self, children):
         """Creates a copy of this entity with the provided children"""
         return self.__class__(
@@ -553,9 +699,15 @@ class NestedEntity:
             span_out = query.transform_span(query_span, form_in, form_out)
             full_text = query.get_text_form(form_out)
             text = span_out.slice(full_text)
-            tok_start = len(full_text[: span_out.start].split())
+            # The span range is till the span_out or max to the second last char
+            tok_start = 0
+            span_range = min(span_out.start, len(full_text) - 1)
+            for idx, current_char in enumerate(full_text[:span_range]):
+                # Increment the counter only if a whitespace follows a non-whitespace
+                next_char = full_text[idx + 1]
+                if not current_char.isspace() and next_char.isspace():
+                    tok_start += 1
             tok_span = Span(tok_start, tok_start - 1 + len(text.split()))
-
             # convert span from query's indexing to parent's indexing
             if offset is not None:
                 offset_out = query.transform_index(offset, form_in, form_out)
@@ -593,6 +745,29 @@ class NestedEntity:
             entity = Entity(texts[0], entity_type, role=role)
 
         return cls(texts, spans, tok_spans, entity, children)
+
+    @staticmethod
+    def get_largest_non_overlapping_entities(candidates, get_span_func):
+        """
+        This function filters out overlapping entity spans
+
+        Args:
+            candidates (iterable): A iterable of candidates to filter based on span
+            get_span_func (function): A function that accesses the span from each candidate
+
+        Returns:
+            list: A list of non-overlapping candidates
+        """
+        final_spans = Span.get_largest_non_overlapping_candidates(
+            [get_span_func(candidate) for candidate in candidates])
+
+        final_candidates = []
+        for span in final_spans:
+            for candidate in candidates:
+                if span == get_span_func(candidate):
+                    final_candidates.append(candidate)
+                    break
+        return final_candidates
 
     def to_dict(self):
         """Converts the query entity into a dictionary"""
@@ -737,6 +912,41 @@ class Entity:
         self.is_system_entity = self.__class__.is_system_entity(entity_type)
 
     @staticmethod
+    def value_to_cache(value):
+        result = value
+        if value is not None:
+            result = value.copy()
+            if "children" in value:
+                result["children"] = [e.to_cache() for e in value["children"]]
+        return result
+
+    def to_cache(self):
+        return {
+            "class": self.__class__.__name__,
+            "text": self.text,
+            "entity_type": self.type,
+            "role": self.role,
+            "value": self.value_to_cache(self.value),
+            "display_text": self.display_text,
+            "confidence": self.confidence
+        }
+
+    @staticmethod
+    def from_cache(obj):
+        if "children" in obj:
+            obj["children"] = [Entity.from_cache_typed(e) for e in obj["children"]]
+        return Entity(**obj)
+
+    @staticmethod
+    def from_cache_typed(obj):
+        """
+        Function to instantiate a cached Entity by the class type
+        which was serialized when it's to_cache() function was called.
+        """
+        entity_class = obj.pop("class")
+        return Entity.entity_class_map[entity_class].from_cache(obj)
+
+    @staticmethod
     def is_system_entity(entity_type):  # pylint: disable=method-hidden
         """Checks whether the provided entity type is a MindMeld-recognized system entity.
 
@@ -746,7 +956,7 @@ class Entity:
         Returns:
             bool: True if the entity is a system entity type, else False
         """
-        return entity_type.startswith("sys_")
+        return entity_type.startswith(SYSTEM_ENTITY_PREFIX)
 
     def to_dict(self):
         """Converts the entity into a dictionary"""
@@ -771,6 +981,13 @@ class Entity:
     def __repr__(self):
         text = self.display_text or self.text
         return "<{} {!r} ({!r})>".format(self.__class__.__name__, text, self.type)
+
+
+Entity.entity_class_map = {
+    Entity.__name__: Entity,
+    QueryEntity.__name__: QueryEntity,
+    NestedEntity.__name__: NestedEntity
+}
 
 
 class FormEntity:

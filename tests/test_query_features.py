@@ -55,8 +55,8 @@ EPSILON = math.pow(10, -5)
             [
                 "char_ngram|length:1|ngram:e",
                 "char_ngram|length:1|ngram:t",
-                "char_ngram|length:2|ngram:s e",
-                "char_ngram|length:2|ngram:e t",
+                "char_ngram|length:2|ngram:se",
+                "char_ngram|length:2|ngram:et",
             ],
             [2, 2, 1, 1],
             None,
@@ -122,7 +122,7 @@ def test_domain_query_features(
             "C": 10,
         },
         "features": {
-            "char-ngrams": {"lengths": [1, 2], "thresholds": [0]},
+            "char-ngrams": {"lengths": [1, 2], "thresholds": [1]},
             "bag-of-words": {"lengths": [1, 2]},
             "sys-candidates": {},
             "word-shape": {},
@@ -142,8 +142,8 @@ def test_domain_query_features(
     extracted_features = domain_classifier.view_extracted_features(
         query, dynamic_resource=dynamic_resource
     )
-    for feature_key, expected_value in zip(feature_keys, expected_feature_values):
 
+    for feature_key, expected_value in zip(feature_keys, expected_feature_values):
         if isinstance(expected_value, float):
             assert abs(expected_value - extracted_features[feature_key]) < EPSILON
         else:
@@ -254,7 +254,7 @@ def test_sentiment_query_feature(
                 "sys_candidate|type:sys_interval|granularity:hour|pos:0|log_len",
                 "sys_candidate|type:sys_time|granularity:hour|pos:0|log_len",
             ],
-            [math.log(10), math.log(3)],
+            [math.log((28 / 2) + 1), math.log(2 + 1)],
             -1,
         ),
         # Test for sys_candidate features for normalized text
@@ -264,7 +264,7 @@ def test_sentiment_query_feature(
                 "sys_candidate|type:sys_interval|granularity:hour|pos:0|log_len",
                 "sys_candidate|type:sys_time|granularity:hour|pos:0|log_len",
             ],
-            [math.log(10), math.log(3)],
+            [math.log((28 / 2) + 1), math.log(2 + 1)],
             -1,
         ),
     ],
@@ -295,11 +295,11 @@ def test_entity_query_features(
             "in-gaz-ngram-seq": {},
             "bag-of-words-seq": {
                 "ngram_lengths_to_start_positions": {1: [-1, 0, 1], 2: [-1, 0, 1]},
-                "thresholds": [0],
+                "thresholds": [1],
             },
             "char-ngrams-seq": {
                 "ngram_lengths_to_start_positions": {1: [-1, 0, 1], 2: [-1, 0, 1]},
-                "thresholds": [0],
+                "thresholds": [1],
             },
             "sys-candidates-seq": {"start_positions": [0]},
         },
@@ -427,7 +427,7 @@ def test_entity_query_features(
                 "00",
                 "elm",
                 "on 00",
-                "00 elm",
+                "OOV",
                 "elm street",
                 "o",
                 "n",
@@ -440,8 +440,8 @@ def test_entity_query_features(
                 "00",
                 "el",
                 "lm",
-                1,
                 0.6931471805599453,
+                1.0986122886681098,
             ],
             4,
         ),
@@ -472,11 +472,11 @@ def test_entity_gaz_query_features(
             "in-gaz-ngram-seq": {},
             "bag-of-words-seq": {
                 "ngram_lengths_to_start_positions": {1: [-1, 0, 1], 2: [-1, 0, 1]},
-                "thresholds": [0],
+                "thresholds": [1],
             },
             "char-ngrams-seq": {
                 "ngram_lengths_to_start_positions": {1: [-1, 0, 1], 2: [-1, 0, 1]},
-                "thresholds": [0],
+                "thresholds": [1],
             },
             "sys-candidates-seq": {"start_positions": [0]},
         },
@@ -523,3 +523,43 @@ def test_entity_no_context_detection(
     entities = entity_recognizer.predict(query)
     assert len(entities) > 0
     assert entities[0].entity.type == expected_entity_type
+
+
+def test_query_token_span_features(kwik_e_mart_nlp):
+    feature_name = "sys_candidate|type:sys_amount-of-money|granularity:None|pos"
+    er = kwik_e_mart_nlp.domains['banking'].intents['transfer_money'].entity_recognizer
+
+    output_features = er.view_extracted_features('$2')
+    expected_features = [
+        f'{feature_name}:0|log_len',
+        f'{feature_name}:0'
+    ]
+    unexpected_features = [
+        f'{feature_name}:1|log_len',
+        f'{feature_name}:1'
+    ]
+
+    for feat in expected_features:
+        assert feat in output_features[0]
+
+    for feat in unexpected_features:
+        assert feat not in output_features[0]
+
+    assert output_features[0][expected_features[1]] == math.log(len('$2') + 1)
+    assert math.isclose(output_features[0][expected_features[0]], math.log(1.5 + 1), rel_tol=1e-04)
+
+    output_features = er.view_extracted_features('$20 5')
+
+    assert output_features[0][f'{feature_name}:0'] == math.log(6 + 1)
+    assert math.isclose(output_features[0][f'{feature_name}:0|log_len'],
+                        math.log(3.833 + 1), rel_tol=1e-04)
+    assert output_features[0][f'{feature_name}:1'] == math.log(5 + 1)
+    assert math.isclose(output_features[0][f'{feature_name}:1|log_len'],
+                        math.log(3.8 + 1), rel_tol=1e-04)
+
+    assert output_features[1][f'{feature_name}:-1'] == math.log(6 + 1)
+    assert math.isclose(output_features[1][f'{feature_name}:-1|log_len'],
+                        math.log(3.833 + 1), rel_tol=1e-04)
+    assert output_features[1][f'{feature_name}:0'] == math.log(5 + 1)
+    assert math.isclose(output_features[1][f'{feature_name}:0|log_len'],
+                        math.log(3.8 + 1), rel_tol=1e-04)

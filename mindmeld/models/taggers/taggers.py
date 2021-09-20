@@ -30,7 +30,6 @@ from ..helpers import ENABLE_STEMMING, get_feature_extractor
 
 logger = logging.getLogger(__name__)
 
-
 START_TAG = "START"
 B_TAG = "B"
 I_TAG = "I"
@@ -181,22 +180,26 @@ class Tagger:
         del X
         pass
 
+    @property
+    def is_serializable(self):
+        # The default is True since < MM 3.2.0 models are serializable by default
+        return True
+
     @staticmethod
-    def dump(model_path, config):
+    def dump(model_path):
         """
-        Since traditional SKLearn models are easily serializable, we can
-        use JobLib to serialize them. So we alter the context object to make
-        this explicit.
+        Dumps any tagger specific data to disk and returns a model_path (modified if required).
+        This is a no-op since we do not have to do anything special to dump default serializable
+        models for SKLearn.
 
         Args:
             model_path (str): The path to dump the model to
-
-        Returns:
-            config (dict): The altered config object
         """
         del model_path
-        config["serializable"] = True
-        return config
+
+    @staticmethod
+    def unload():
+        pass
 
     @staticmethod
     def load(model_path):

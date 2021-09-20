@@ -15,26 +15,12 @@ import pytest
 from mindmeld import markup
 from mindmeld.models import CLASS_LABEL_TYPE, QUERY_EXAMPLE_TYPE, ModelConfig
 from mindmeld.models.text_models import TextModel
-from mindmeld.query_factory import QueryFactory
-from mindmeld.resource_loader import ResourceLoader
-from mindmeld.tokenizer import Tokenizer
+from mindmeld.resource_loader import ResourceLoader, ProcessedQueryList
 
 APP_NAME = "kwik_e_mart"
 APP_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), APP_NAME
 )
-
-
-@pytest.fixture
-def tokenizer():
-    """A tokenizer for normalizing text"""
-    return Tokenizer()
-
-
-@pytest.fixture
-def query_factory(tokenizer):
-    """For creating queries"""
-    return QueryFactory(tokenizer)
 
 
 @pytest.fixture
@@ -77,7 +63,7 @@ class TestTextModel:
         for intent in data_dict:
             for text in data_dict[intent]:
                 labeled_data.append(markup.load_query(text, intent=intent))
-        cls.labeled_data = labeled_data
+        cls.labeled_data = ProcessedQueryList.from_in_memory_list(labeled_data)
 
     def test_fit(self, resource_loader):
         """Tests that a basic fit succeeds"""
@@ -96,8 +82,8 @@ class TestTextModel:
             }
         )
         model = TextModel(config)
-        examples = [q.query for q in self.labeled_data]
-        labels = [q.intent for q in self.labeled_data]
+        examples = self.labeled_data.queries()
+        labels = self.labeled_data.intents()
         model.initialize_resources(resource_loader, examples, labels)
         model.fit(examples, labels)
 
@@ -124,8 +110,8 @@ class TestTextModel:
             }
         )
         model = TextModel(config)
-        examples = [q.query for q in self.labeled_data]
-        labels = [q.intent for q in self.labeled_data]
+        examples = self.labeled_data.queries()
+        labels = self.labeled_data.intents()
         model.initialize_resources(resource_loader, examples, labels)
         model.fit(examples, labels)
 
@@ -148,8 +134,8 @@ class TestTextModel:
             }
         )
         model = TextModel(config)
-        examples = [q.query for q in self.labeled_data]
-        labels = [q.intent for q in self.labeled_data]
+        examples = self.labeled_data.queries()
+        labels = self.labeled_data.intents()
         model.initialize_resources(resource_loader, examples, labels)
         model.fit(examples, labels)
 
@@ -171,14 +157,14 @@ class TestTextModel:
             }
         )
         model = TextModel(config)
-        examples = [q.query for q in self.labeled_data]
-        labels = [q.intent for q in self.labeled_data]
+        examples = self.labeled_data.queries()
+        labels = self.labeled_data.intents()
         model.initialize_resources(resource_loader, examples, labels)
         model.fit(examples, labels)
 
         expected_features = {
             "bag_of_words|length:1|ngram:hi": 1,
-            "bag_of_words|length:1|ngram:there": 1,
+            "bag_of_words|length:1|ngram:OOV": 1,
         }
         extracted_features = model.view_extracted_features(
             markup.load_query("hi there").query

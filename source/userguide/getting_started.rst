@@ -474,6 +474,8 @@ Here's an example usage:
 Troubleshooting
 ---------------
 
+.. _ES docs: https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-delete-index.html
+
 +---------------+---------------------------------------------+-----------------------------------------------+
 |    Context    |    Error                                    |    Resolution                                 |
 +===============+=============================================+===============================================+
@@ -486,6 +488,17 @@ Troubleshooting
 |               |                                             | If you're using Docker, you can               |
 |               |                                             | increase memory to 4GB from                   |
 |               |                                             | *Preferences | Advanced*.                     |
++---------------+---------------------------------------------+-----------------------------------------------+
+| Elasticsearch | ``KnowledgeBaseError``                      | If error is due to maximum shards open, run   |
+|               |                                             | ``curl -XDELETE 'http://localhost:9200/_all'``|
+|               |                                             | to delete all existing shards from all apps.  |
+|               |                                             | Alternatively, to delete an app specific      |
+|               |                                             | indices, run                                  |
+|               |                                             | ``curl -XDELETE 'localhost:9200/<app_name>*'``|
+|               |                                             | For example, to delete indices of             |
+|               |                                             | a hr_assistant application, one can run       |
+|               |                                             | ``curl -XDELETE localhost:9200/hr_assistant*``|
+|               |                                             | For more details, see `ES docs`_              |
 +---------------+---------------------------------------------+-----------------------------------------------+
 | Numerical     | ``OS is incompatible with duckling binary`` | Run the numerical parser via                  |
 | Parser        |                                             | Docker.                                       |
@@ -512,3 +525,15 @@ MindMeld supports parallel processing via process forking when the input is a li
 MM_SYS_ENTITY_REQUEST_TIMEOUT
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 This variable sets the request timeout value for the :ref:`system entity recognition service <configuring-system-entities>` . The default float value is ``1.0 seconds``.
+
+MM_QUERY_CACHE_IN_MEMORY
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+MindMeld maintains a cache of preprocessed training examples to speed up the training process.  This variable controls whether the query cache is maintained in-memory or only on disk.  Setting this to ``0`` will save memory during training, but will negatively impact performance for configurations with slow disk access.  Defaults to ``1``.
+
+MM_QUERY_CACHE_WRITE_SIZE
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This variable works in conjunction with ``MM_QUERY_CACHE_IN_MEMORY``.  If the in-memory cache is enabled, this variable sets the number of in-memory cached examples that are batched up before they are synchronized to disk.  This allows for better write performance by doing bulk rather than individual writes.  Defaults to ``1000``.
+
+MM_CRF_FEATURES_IN_MEMORY
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The CRF model used by MindMeld can generate very large feature sets.  This can cause high memory usage for some datasets.  This variable controls whether these feature sets are stored in-memory or on disk. Defaults to ``1``

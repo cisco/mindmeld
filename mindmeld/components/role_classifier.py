@@ -15,14 +15,16 @@
 This module contains the role classifier component of the MindMeld natural language processor.
 """
 import logging
+import pickle
 
 from sklearn.externals import joblib
 
-from ..constants import DEFAULT_TRAIN_SET_REGEX
-from ..core import Query
-from ..models import CLASS_LABEL_TYPE, ENTITY_EXAMPLE_TYPE, create_model
 from ._config import get_classifier_config
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
+from ..constants import DEFAULT_TRAIN_SET_REGEX
+from ..core import Query
+from ..models import CLASS_LABEL_TYPE, ENTITY_EXAMPLE_TYPE, create_model, load_model
+from ..resource_loader import ProcessedQueryList
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +76,11 @@ class RoleClassifier(Classifier):
         )
         return super()._get_model_config(loaded_config, **kwargs)
 
-    def fit(self, queries=None, label_set=None, incremental_timestamp=None, **kwargs):
+    def fit(self,
+            queries=None,
+            label_set=None,
+            incremental_timestamp=None,
+            load_cached=True, **kwargs):
         """Trains a statistical model for role classification using the provided training examples.
 
         Args:
@@ -92,22 +98,24 @@ class RoleClassifier(Classifier):
 
         # create model with given params
         model_config = self._get_model_config(**kwargs)
-        model = create_model(model_config)
 
-        if not label_set:
-            label_set = model_config.train_label_set
-            label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
+        label_set = label_set or model_config.train_label_set or DEFAULT_TRAIN_SET_REGEX
+        queries = self._resolve_queries(queries, label_set)
 
-        new_hash = self._get_model_hash(model_config, queries, label_set)
+        new_hash = self._get_model_hash(model_config, queries)
         cached_model = self._resource_loader.hash_to_model_path.get(new_hash)
 
         if incremental_timestamp and cached_model:
-            logger.info("No need to fit. Loading previous model.")
-            self.load(cached_model)
-            return
+            logger.info("No need to fit. Previous model is cached.")
+            if load_cached:
+                # load() sets self.ready = True
+                self.load(cached_model)
+                return True
+            return False
 
-        # Load labeled data
-        examples, labels = self._get_queries_and_labels(queries, label_set=label_set)
+        # These examples and labels are flat lists, not
+        # a ProcessedQueryList.Iterator
+        examples, labels = self._get_examples_and_labels(queries)
 
         if examples:
             # Build roles set
@@ -115,7 +123,8 @@ class RoleClassifier(Classifier):
             for label in labels:
                 self.roles.add(label)
 
-            model.initialize_resources(self._resource_loader, queries, labels)
+            model = create_model(model_config)
+            model.initialize_resources(self._resource_loader, examples, labels)
             model.fit(examples, labels)
             self._model = model
             self.config = ClassifierConfig.from_model_config(self._model.config)
@@ -124,9 +133,7 @@ class RoleClassifier(Classifier):
 
         self.ready = True
         self.dirty = True
-
-    def _data_dump_payload(self):
-        return {"model": self._model, "roles": self.roles}
+        return True
 
     def dump(self, model_path, incremental_model_path=None):
         """Persists the trained role classification model to disk.
@@ -144,6 +151,15 @@ class RoleClassifier(Classifier):
         )
         super().dump(model_path, incremental_model_path)
 
+    def _dump(self, path):
+        rc_data = {"roles": self.roles}
+        pickle.dump(rc_data, open(self._get_classifier_resources_save_path(path), "wb"))
+
+    def unload(self):
+        self._model = None
+        self.roles = set()
+        self.ready = False
+
     def load(self, model_path):
         """Loads the trained role classification model from disk.
 
@@ -156,19 +172,18 @@ class RoleClassifier(Classifier):
             self.intent,
             self.entity_type,
         )
+
+        # underlying model specific load
+        self._model = load_model(model_path)
+
+        # classifier specific load
         try:
+            rc_data = pickle.load(open(self._get_classifier_resources_save_path(model_path), "rb"))
+        except FileNotFoundError:  # backwards compatability for previous version's saved models
             rc_data = joblib.load(model_path)
-            self._model = rc_data["model"]
-            self.roles = rc_data["roles"]
-        except (OSError, IOError):
-            logger.error(
-                "Unable to load %s. Pickle file cannot be read from %r",
-                self.__class__.__name__,
-                model_path,
-            )
-            return
-            # msg = 'Unable to load {}. Pickle file cannot be read from {!r}'
-            # raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path))
+        self.roles = rc_data["roles"]
+
+        # validate and register resources
         if self._model is not None:
             if not hasattr(self._model, "mindmeld_version"):
                 msg = (
@@ -183,8 +198,11 @@ class RoleClassifier(Classifier):
                 self._model.config.resolve_config(self._get_model_config())
 
             gazetteers = self._resource_loader.get_gazetteers()
-            tokenizer = self._resource_loader.get_tokenizer()
-            self._model.register_resources(gazetteers=gazetteers, tokenizer=tokenizer)
+            text_preparation_pipeline = self._resource_loader.get_text_preparation_pipeline()
+            self._model.register_resources(
+                gazetteers=gazetteers,
+                text_preparation_pipeline=text_preparation_pipeline
+            )
             self.config = ClassifierConfig.from_model_config(self._model.config)
 
         self.hash = self._load_hash(model_path)
@@ -213,8 +231,11 @@ class RoleClassifier(Classifier):
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query)
         gazetteers = self._resource_loader.get_gazetteers()
-        tokenizer = self._resource_loader.get_tokenizer()
-        self._model.register_resources(gazetteers=gazetteers, tokenizer=tokenizer)
+        text_preparation_pipeline = self._resource_loader.get_text_preparation_pipeline()
+        self._model.register_resources(
+            gazetteers=gazetteers,
+            text_preparation_pipeline=text_preparation_pipeline
+        )
         return self._model.predict([(query, entities, entity_index)])[0]
 
     def predict_proba(
@@ -239,9 +260,11 @@ class RoleClassifier(Classifier):
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query)
         gazetteers = self._resource_loader.get_gazetteers()
-        tokenizer = self._resource_loader.get_tokenizer()
-        self._model.register_resources(gazetteers=gazetteers, tokenizer=tokenizer)
-
+        text_preparation_pipeline = self._resource_loader.get_text_preparation_pipeline()
+        self._model.register_resources(
+            gazetteers=gazetteers,
+            text_preparation_pipeline=text_preparation_pipeline
+        )
         predict_proba_result = self._model.predict_proba(
             [(query, entities, entity_index)]
         )
@@ -267,50 +290,33 @@ class RoleClassifier(Classifier):
         if not isinstance(query, Query):
             query = self._resource_loader.query_factory.create_query(query)
         gazetteers = self._resource_loader.get_gazetteers()
-        tokenizer = self._resource_loader.get_tokenizer()
-        self._model.register_resources(gazetteers=gazetteers, tokenizer=tokenizer)
+        text_preparation_pipeline = self._resource_loader.get_text_preparation_pipeline()
+        self._model.register_resources(
+            gazetteers=gazetteers,
+            text_preparation_pipeline=text_preparation_pipeline
+        )
         return self._model._extract_features((query, entities, entity_index))
 
-    def _get_query_tree(
-        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False
-    ):
-        """Returns the set of queries to train on
-
-        Args:
-            queries (list, optional): A list of ProcessedQuery objects, to
-                train. If not specified, a label set will be loaded.
-            label_set (list, optional): A label set to load. If not specified,
-                the default training set will be loaded.
-            raw (bool, optional): When True, raw query strings will be returned
-
-        Returns:
-            List: list of queries
-        """
-        if queries:
-            return self._build_query_tree(
-                queries, domain=self.domain, intent=self.intent, raw=raw
-            )
-
-        return self._resource_loader.get_labeled_queries(
-            domain=self.domain, intent=self.intent, label_set=label_set, raw=raw
+    def _get_queries_from_label_set(self, label_set=DEFAULT_TRAIN_SET_REGEX):
+        return self._resource_loader.get_flattened_label_set(
+            domain=self.domain,
+            intent=self.intent,
+            label_set=label_set
         )
 
-    def _get_queries_and_labels(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
+    def _get_examples_and_labels(self, queries):
         """Returns a set of queries and their labels based on the label set
 
         Args:
-            queries (list, optional): A list of ProcessedQuery objects, to
+            queries (list): A list of ProcessedQuery objects, to
                 train on. If not specified, a label set will be loaded.
-            label_set (list, optional): A label set to load. If not specified,
-                the default training set will be loaded.
+        Returns:
+            tuple(list(Any), list(Any))
         """
-        query_tree = self._get_query_tree(queries, label_set=label_set)
-        queries = self._resource_loader.flatten_query_tree(query_tree)
-
         # build list of examples -- entities of this role classifier's type
         examples = []
         labels = []
-        for query in queries:
+        for query in queries.processed_queries():
             for idx, entity in enumerate(query.entities):
                 if entity.entity.type == self.entity_type and entity.entity.role:
                     examples.append((query.query, query.entities, idx))
@@ -328,16 +334,14 @@ class RoleClassifier(Classifier):
                 )
             raise ValueError("One or more invalid entity annotations, expecting role")
 
-        return examples, labels
+        return (ProcessedQueryList.ListIterator(examples),
+                ProcessedQueryList.ListIterator(labels))
 
-    def _get_queries_and_labels_hash(
-        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX
-    ):
-        query_tree = self._get_query_tree(queries, label_set=label_set, raw=True)
-        queries = self._resource_loader.flatten_query_tree(query_tree)
-        hashable_queries = [
-            self.domain + "###" + self.intent + "###" + self.entity_type + "###"
-        ] + sorted(queries)
+    def _get_examples_and_labels_hash(self, queries):
+        hashable_queries = (
+            [self.domain + "###" + self.intent + "###" + self.entity_type + "###"] +
+            sorted(list(queries.raw_queries()))
+        )
         return self._resource_loader.hash_list(hashable_queries)
 
     def inspect(self, query, gold_label=None, dynamic_resource=None):

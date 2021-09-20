@@ -20,9 +20,8 @@ import logging
 import os
 import warnings
 
-from .. import path
 from .schemas import validate_language_code, validate_locale_code
-from ..constants import CURRENCY_SYMBOLS
+from .. import path
 
 logger = logging.getLogger(__name__)
 
@@ -44,9 +43,7 @@ CONFIG_DEPRECATION_MAPPING = {
 
 DEFAULT_DOMAIN_CLASSIFIER_CONFIG = {
     "model_type": "text",
-    "model_settings": {
-        "classifier_type": "logreg",
-    },
+    "model_settings": {"classifier_type": "logreg"},
     "param_selection": {
         "type": "k-fold",
         "k": 10,
@@ -104,9 +101,32 @@ DEFAULT_ENTITY_RECOGNIZER_CONFIG = {
     },
 }
 
-DEFAULT_ENTITY_RESOLVER_CONFIG = {"model_type": "text_relevance"}
+DEFAULT_ENTITY_RESOLVER_CONFIG = {
+    "model_type": "resolver",
+    "model_settings": {"resolver_type": "text_relevance", },
+}
 
-DEFAULT_QUESTION_ANSWERER_CONFIG = {"model_type": "keyword"}
+DEFAULT_ROLE_CLASSIFIER_CONFIG = {
+    "model_type": "text",
+    "model_settings": {"classifier_type": "logreg"},
+    "params": {"C": 100, "penalty": "l1"},
+    "features": {
+        "bag-of-words-before": {
+            "ngram_lengths_to_start_positions": {1: [-2, -1], 2: [-2, -1]}
+        },
+        "bag-of-words-after": {
+            "ngram_lengths_to_start_positions": {1: [0, 1], 2: [0, 1]}
+        },
+        "other-entities": {},
+    },
+}
+
+DEFAULT_QUESTION_ANSWERER_CONFIG = {
+    "model_type": "elasticsearch",
+    "model_settings": {
+        "query_type": "keyword"
+    }
+}
 
 ENGLISH_LANGUAGE_CODE = "en"
 ENGLISH_US_LOCALE = "en_US"
@@ -114,7 +134,6 @@ DEFAULT_LANGUAGE_CONFIG = {
     "language": ENGLISH_LANGUAGE_CODE,
     "locale": ENGLISH_US_LOCALE,
 }
-
 
 # ElasticSearch mapping to define text analysis settings for text fields.
 # It defines specific index configuration for synonym indices. The common index configuration
@@ -184,10 +203,7 @@ PHONETIC_ES_SYNONYM_MAPPING = {
                         "type": "text",
                         "analyzer": "keyword_match_analyzer",
                     },
-                    "char_ngram": {
-                        "type": "text",
-                        "analyzer": "char_ngram_analyzer",
-                    },
+                    "char_ngram": {"type": "text", "analyzer": "char_ngram_analyzer", },
                     "double_metaphone": {
                         "type": "text",
                         "analyzer": "phonetic_analyzer",
@@ -234,21 +250,6 @@ PHONETIC_ES_SYNONYM_MAPPING = {
     },
 }
 
-DEFAULT_ROLE_CLASSIFIER_CONFIG = {
-    "model_type": "text",
-    "model_settings": {"classifier_type": "logreg"},
-    "params": {"C": 100, "penalty": "l1"},
-    "features": {
-        "bag-of-words-before": {
-            "ngram_lengths_to_start_positions": {1: [-2, -1], 2: [-2, -1]}
-        },
-        "bag-of-words-after": {
-            "ngram_lengths_to_start_positions": {1: [0, 1], 2: [0, 1]}
-        },
-        "other-entities": {},
-    },
-}
-
 DEFAULT_ES_INDEX_TEMPLATE_NAME = "mindmeld_default"
 
 # Default ES index template that contains the base index configuration shared across different
@@ -273,10 +274,7 @@ DEFAULT_ES_INDEX_TEMPLATE = {
                                 "type": "text",
                                 "analyzer": "keyword_match_analyzer",
                             },
-                            "processed_text": {
-                                "type": "text",
-                                "analyzer": "english",
-                            },
+                            "processed_text": {"type": "text", "analyzer": "english", },
                             "char_ngram": {
                                 "type": "text",
                                 "analyzer": "char_ngram_analyzer",
@@ -405,7 +403,6 @@ DEFAULT_ES_INDEX_TEMPLATE = {
     },
 }
 
-
 # Elasticsearch mapping to define knowledge base index specific configuration:
 # - dynamic field mapping to index all synonym whitelist in fields with "$whitelist" suffix.
 # - location field
@@ -467,35 +464,78 @@ DEFAULT_NLP_CONFIG = {
 DEFAULT_AUGMENTATION_CONFIG = {
     "augmentor_class": "EnglishParaphraser",
     "batch_size": 8,
-    "paths": [
-        {
-            "domains": ".*",
-            "intents": ".*",
-            "files": ".*",
-        }
-    ],
-    "path_suffix": "-augment.txt"
+    "paths": [{"domains": ".*", "intents": ".*", "files": ".*", }],
+    "path_suffix": "-augment.txt",
 }
 
 DEFAULT_AUTO_ANNOTATOR_CONFIG = {
     "annotator_class": "MultiLingualAnnotator",
     "overwrite": False,
     "annotation_rules": [
-        {
-            "domains": ".*",
-            "intents": ".*",
-            "files": ".*",
-            "entities": ".*",
-        }
+        {"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*", }
     ],
     "unannotate_supported_entities_only": True,
     "unannotation_rules": None,
     "translator": "NoOpTranslator",
 }
 
-DEFAULT_TOKENIZER_CONFIG = {
-    # populated in the `get_tokenizer_config` func
-    "allowed_patterns": [],
+DEFAULT_ACTIVE_LEARNING_CONFIG = {
+    "output_folder": None,
+    "pre_tuning": {
+        "train_pattern": ".*train.*.txt",
+        "test_pattern": ".*test.*.txt",
+        "train_seed_pct": 0.20,
+    },
+    "tuning": {
+        "n_classifiers": 3,
+        "n_epochs": 5,
+        "batch_size": 100,
+        "tuning_level": "domain",
+        "tuning_strategies": [
+            "LeastConfidenceSampling",
+            "MarginSampling",
+            "EntropySampling",
+            "RandomSampling",
+            "DisagreementSampling",
+            "EnsembleSampling",
+            "KLDivergenceSampling",
+        ],
+    },
+    "tuning_output": {
+        "save_sampled_queries": True,
+        "aggregate_statistic": "accuracy",
+        "class_level_statistic": "f_beta",
+    },
+    "query_selection": {
+        "selection_strategy": "EntropySampling",
+        "log_usage_pct": 1.00,
+        "labeled_logs_pattern": None,
+        "unlabeled_logs_path": "logs.txt",
+    },
+}
+
+DEFAULT_NORMALIZERS = [
+    'RemoveAposAtEndOfPossesiveForm',
+    'RemoveAdjacentAposAndSpace',
+    'RemoveBeginningSpace',
+    'RemoveTrailingSpace',
+    'ReplaceSpacesWithSpace',
+    'ReplaceUnderscoreWithSpace',
+    'SeparateAposS',
+    'ReplacePunctuationAtWordStartWithSpace',
+    'ReplacePunctuationAtWordEndWithSpace',
+    'ReplaceSpecialCharsBetweenLettersAndDigitsWithSpace',
+    'ReplaceSpecialCharsBetweenDigitsAndLettersWithSpace',
+    'ReplaceSpecialCharsBetweenLettersWithSpace',
+    'Lowercase',
+    'ASCIIFold'
+]
+
+DEFAULT_EN_TEXT_PREPARATION_CONFIG = {
+    "preprocessors": [],
+    "normalizers": DEFAULT_NORMALIZERS,
+    "tokenizer": "WhiteSpaceTokenizer",
+    "stemmer": "EnglishNLTKStemmer"
 }
 
 
@@ -659,7 +699,7 @@ def get_classifier_config(
     try:
         module_conf = _get_config_module(app_path)
 
-    except (OSError, IOError):
+    except (TypeError, OSError, IOError):
         logger.info(
             "No app configuration file found. Using default %s model configuration",
             clf_type,
@@ -938,7 +978,7 @@ def get_nlp_config(app_path=None, config=None):
     try:
         module_conf = _get_config_module(app_path)
     except (OSError, IOError):
-        logger.info("No app configuration file found.")
+        logger.info("No app configuration file found. Using default nlp config.")
         return _get_default_nlp_config()
 
     # Try provider first
@@ -1004,105 +1044,46 @@ def get_auto_annotator_config(app_path=None):
         return DEFAULT_AUTO_ANNOTATOR_CONFIG
 
 
-def _get_default_regex(exclude_from_norm):
-    """Gets the default special character regex for the Tokenizer config.
-
-    Args:
-        exclude_from_norm (optional) - list of chars to exclude from normalization
-
-    Returns:
-        list: default special character regex list
-    """
-    # List of regex's for matching and tokenizing when keep_special_chars=True
-    keep_special_regex_list = []
-
-    exception_chars = "\@\[\]\|\{\}'"  # noqa: W605
-
-    to_exclude = CURRENCY_SYMBOLS + "".join(exclude_from_norm or [])
-
-    letter_pattern_str = "[^\W\d_]+"  # noqa: W605
-
-    # Make keep special regex list
-    keep_special_regex_list.append(
-        "?P<start>^[^\w\d&" + to_exclude + exception_chars + "]+"  # noqa: W605
-    )
-    keep_special_regex_list.append(
-        "?P<end>[^\w\d&" + to_exclude + exception_chars + "]+$"  # noqa: W605
-    )
-    keep_special_regex_list.append(
-        "?P<pattern1>(?P<pattern1_replace>"  # noqa: W605
-        + letter_pattern_str
-        + ")"
-        + "[^\w\d\s&"  # noqa: W605
-        + exception_chars
-        + "]+(?=[\d]+)"  # noqa: W605
-    )
-    keep_special_regex_list.append(
-        "?P<pattern2>(?P<pattern2_replace>[\d]+)[^\w\d\s&"  # noqa: W605
-        + exception_chars
-        + "]+"
-        + "u(?="
-        + letter_pattern_str
-        + ")"
-    )
-    keep_special_regex_list.append(
-        "?P<pattern3>(?P<pattern3_replace>"
-        + letter_pattern_str
-        + ")"  # noqa: W605
-        + "[^\w\d\s&"  # noqa: W605
-        + exception_chars
-        + "]+"
-        + "(?="  # noqa: W605
-        + letter_pattern_str
-        + ")"
-    )
-    keep_special_regex_list.append(
-        "?P<escape1>(?P<escape1_replace>[\w\d]+)"  # noqa: W605
-        + "[^\w\d\s"  # noqa: W605
-        + exception_chars
-        + "]+"
-        + "(?=\|)"  # noqa: W605
-    )
-    keep_special_regex_list.append(
-        "?P<escape2>(?P<escape2_replace>[\]\}]+)"  # noqa: W605
-        + "[^\w\d\s"  # noqa: W605
-        + exception_chars
-        + "]+(?=s)"
-    )
-
-    keep_special_regex_list.append("?P<underscore>_")  # noqa: W605
-    keep_special_regex_list.append("?P<begspace>^\s+")  # noqa: W605
-    keep_special_regex_list.append("?P<trailspace>\s+$")  # noqa: W605
-    keep_special_regex_list.append("?P<spaceplus>\s+")  # noqa: W605
-    keep_special_regex_list.append("?P<apos_space> '|' ")  # noqa: W605
-    keep_special_regex_list.append("?P<apos_s>(?<=[^\\s])'[sS]")  # noqa: W605
-    # handle the apostrophes used at the end of a possessive form, e.g. dennis'
-    keep_special_regex_list.append("?P<apos_poss>(^'(?=\S)|(?<=\S)'$)")  # noqa: W605
-
-    return keep_special_regex_list
-
-
-def get_tokenizer_config(app_path=None, exclude_from_norm=None):
-    """Gets the tokenizer configuration for the app at the specified path.
+def get_active_learning_config(app_path=None):
+    """Gets the active learning configuration for the app at the specified path.
 
     Args:
         app_path (str, optional): The location of the MindMeld app
-        exclude_from_norm (list, optional): chars to exclude from normalization
 
     Returns:
-        dict: The tokenizer configuration.
+        dict: The active learning configuration.
     """
-    DEFAULT_TOKENIZER_CONFIG["default_allowed_patterns"] = _get_default_regex(
-        exclude_from_norm
-    )
 
     if not app_path:
-        return DEFAULT_TOKENIZER_CONFIG
+        return DEFAULT_ACTIVE_LEARNING_CONFIG
+    try:
+        active_learning_config = getattr(
+            _get_config_module(app_path),
+            "ACTIVE_LEARNING_CONFIG",
+            DEFAULT_ACTIVE_LEARNING_CONFIG,
+        )
+        return active_learning_config
+    except (OSError, IOError, AttributeError):
+        logger.info("No app configuration file found.")
+        return DEFAULT_ACTIVE_LEARNING_CONFIG
+
+
+def get_text_preparation_config(app_path=None):
+    """Gets the text preparation configuration for the app at the specified path.
+
+    Args:
+        app_path (str, optional): The location of the MindMeld app
+
+    Returns:
+        dict: The text preparation pipeline configuration.
+    """
+    if not app_path:
+        return DEFAULT_EN_TEXT_PREPARATION_CONFIG
     try:
         tokenizer_config = getattr(
-            _get_config_module(app_path), "TOKENIZER_CONFIG", DEFAULT_TOKENIZER_CONFIG
+            _get_config_module(app_path), "TEXT_PREPARATION_CONFIG"
         )
         return tokenizer_config
     except (OSError, IOError, AttributeError):
-        logger.info("No app configuration file found.")
-        return DEFAULT_TOKENIZER_CONFIG
+        logger.info("No app configuration file found. Using default text_preparation_config.")
+        return {"normalizers": DEFAULT_NORMALIZERS}

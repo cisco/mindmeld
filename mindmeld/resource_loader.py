@@ -33,14 +33,187 @@ from .exceptions import MindMeldError
 from .gazetteer import Gazetteer
 from .models.helpers import (CHAR_NGRAM_FREQ_RSC, ENABLE_STEMMING, GAZETTEER_RSC, QUERY_FREQ_RSC,
                              SENTIMENT_ANALYZER, SYS_TYPES_RSC, WORD_FREQ_RSC, WORD_NGRAM_FREQ_RSC,
-                             mask_numerics)
+                             OUT_OF_BOUNDS_TOKEN, mask_numerics)
 from .path import MODEL_CACHE_PATH
 from .query_cache import QueryCache
 from .query_factory import QueryFactory
 
 logger = logging.getLogger(__name__)
 
-ENABLE_STEMMING_ARGS = "enable_stemming"
+
+class ProcessedQueryList:
+    """
+    ProcessedQueryList provides a memory efficient disk backed list representation
+    for a list of queries.
+    """
+
+    def __init__(self, cache=None, elements=None):
+        self._cache = cache
+        self.elements = elements or []
+
+    @property
+    def cache(self):
+        return self._cache
+
+    @cache.setter
+    def cache(self, cache):
+        self._cache = cache
+
+    def append(self, query_id):
+        self.elements.append(query_id)
+
+    def extend(self, query_ids):
+        self.elements.extend(query_ids)
+
+    def __len__(self):
+        return len(self.elements)
+
+    def __bool__(self):
+        return bool(len(self))
+
+    def processed_queries(self):
+        return ProcessedQueryList.Iterator(self)
+
+    def raw_queries(self):
+        return ProcessedQueryList.RawQueryIterator(self)
+
+    def queries(self):
+        return ProcessedQueryList.QueryIterator(self)
+
+    def entities(self):
+        return ProcessedQueryList.EntitiesIterator(self)
+
+    def domains(self):
+        return ProcessedQueryList.DomainIterator(self)
+
+    def intents(self):
+        return ProcessedQueryList.IntentIterator(self)
+
+    @staticmethod
+    def from_in_memory_list(queries):
+        """
+        Creates a ProcessedQueryList wrapper around an
+        in-memory list of ProcessedQuery objects
+
+        Args:
+            queries (list(ProcessedQuery)): queries to wrap
+        Returns:
+            ProcessedQueryList object
+        """
+        return ProcessedQueryList(
+            cache=ProcessedQueryList.MemoryCache(queries),
+            elements=list(range(len(queries)))
+        )
+
+    class Iterator:
+        def __init__(self, source, cached=False):
+            self.source = source
+            self.elements = source.elements
+            self.result_cache = [] if not cached else [None] * len(source)
+            self.iter_idx = -1
+
+        def __iter__(self):
+            self.iter_idx = -1
+            return self
+
+        def __next__(self):
+            self.iter_idx += 1
+            if self.iter_idx == len(self):
+                raise StopIteration
+            if self.result_cache and self.result_cache[self.iter_idx] is not None:
+                return self.result_cache[self.iter_idx]
+            result = self[self.iter_idx]
+            if self.result_cache:
+                self.result_cache[self.iter_idx] = result
+            return result
+
+        def __len__(self):
+            return len(self.elements)
+
+        def __getitem__(self, key):
+            """
+            Override this function for getting other types of cached data.
+            """
+            return self.source.cache.get(self.elements[key])
+
+        def reorder(self, indices):
+            self.elements = [self.elements[i] for i in indices]
+            if self.result_cache:
+                self.result_cache = [self.result_cache[i] for i in indices]
+
+    class RawQueryIterator(Iterator):
+        def __getitem__(self, key):
+            return self.source.cache.get_raw_query(self.elements[key])
+
+    class QueryIterator(Iterator):
+        def __getitem__(self, key):
+            return self.source.cache.get_query(self.elements[key])
+
+    class EntitiesIterator(Iterator):
+        def __getitem__(self, key):
+            return self.source.cache.get_entities(self.elements[key])
+
+    class DomainIterator(Iterator):
+        def __init__(self, source):
+            # Caches the elements in memory if they are backed by sqlite3
+            cached = not isinstance(source.cache, ProcessedQueryList.MemoryCache)
+            super().__init__(source, cached=cached)
+
+        def __getitem__(self, key):
+            return self.source.cache.get_domain(self.elements[key])
+
+    class IntentIterator(Iterator):
+        def __init__(self, source):
+            # Caches the elements in memory if they are backed by sqlite3
+            cached = not isinstance(source.cache, ProcessedQueryList.MemoryCache)
+            super().__init__(source, cached=cached)
+
+        def __getitem__(self, key):
+            return self.source.cache.get_intent(self.elements[key])
+
+    class ListIterator(Iterator):
+        """
+        ListIterator is a wrapper around a in memory list that supports the same
+        functionality as a ProcessedQueryList.Iterator.  This allows building
+        of arbitrary lists of data and presenting them as a
+        ProcessedQueryList.Iterator to functions that require them.
+        """
+
+        def __init__(self, elements):
+            self.source = None
+            self.elements = elements
+            self.result_cache = None
+            self.iter_idx = -1
+
+        def __getitem__(self, key):
+            return self.elements[key]
+
+    class MemoryCache:
+        """
+        A class to provide cache functionality for in-memory
+        lists of ProcessedQuery objects
+        """
+
+        def __init__(self, queries):
+            self.queries = queries
+
+        def get(self, row_id):
+            return self.queries[row_id]
+
+        def get_raw_query(self, row_id):
+            return self.get(row_id).query.text
+
+        def get_query(self, row_id):
+            return self.get(row_id).query
+
+        def get_entities(self, row_id):
+            return self.get(row_id).entities
+
+        def get_domain(self, row_id):
+            return self.get(row_id).domain
+
+        def get_intent(self, row_id):
+            return self.get(row_id).intent
 
 
 class ResourceLoader:
@@ -81,16 +254,25 @@ class ResourceLoader:
         #         'modified': '',  # the time the file was last modified
         #         'loaded': '',  # the time the file was last loaded
         #         'queries': [],  # the queries loaded from the file
-        #         'loaded_raw': '',  # the time the raw queries were last loaded
-        #         'raw_queries': []  # the time the raw queries were last loaded
         #       }
         #     }
         #   }
         # }
         self.file_to_query_info = {}
         self._hasher = Hasher()
-        self.query_cache = query_cache or QueryCache(app_path=self.app_path)
+        self._query_cache = query_cache
         self._hash_to_model_path = None
+
+    @property
+    def query_cache(self):
+        """
+        Lazy load the query cache since it's not required for inference.
+        """
+        if not self._query_cache:
+            text_prep_hash = self.query_factory.text_preparation_pipeline.get_hashid()
+            self._query_cache = QueryCache(app_path=self.app_path,
+                                           schema_version_hash=text_prep_hash)
+        return self._query_cache
 
     @property
     def hash_to_model_path(self):
@@ -99,14 +281,13 @@ class ResourceLoader:
             self._load_cached_models()
         return self._hash_to_model_path
 
-    def get_gazetteers(self, force_reload=False, **kwargs):
+    def get_gazetteers(self, force_reload=False):
         """Gets gazetteers for all entities.
 
         Returns:
             dict: Gazetteer data keyed by entity type
         """
         # TODO: get role gazetteers
-        del kwargs
         entity_types = path.get_entity_types(self.app_path)
         return {
             entity_type: self.get_gazetteer(entity_type, force_reload=force_reload)
@@ -131,13 +312,14 @@ class ResourceLoader:
 
         return self._entity_files[gaz_name]["gazetteer"]["data"]
 
-    def get_tokenizer(self):
+    def get_text_preparation_pipeline(self):
         """Get the tokenizer from the query_factory attribute
 
         Returns:
-            tokenizer (Tokenizer): The resource loaders tokenizer
+            text_preparation_pipeline (TextPreparationPipeline): Class responsible for
+                the normalization and tokenization of text.
         """
-        return self.query_factory.tokenizer
+        return self.query_factory.text_preparation_pipeline
 
     @staticmethod
     def get_sentiment_analyzer():
@@ -201,7 +383,7 @@ class ResourceLoader:
         logger.info("Building gazetteer '%s'", gaz_name)
 
         # TODO: support role gazetteers
-        gaz = Gazetteer(gaz_name, exclude_ngrams)
+        gaz = Gazetteer(gaz_name, self.get_text_preparation_pipeline(), exclude_ngrams)
 
         entity_data_path = path.get_entity_gaz_path(self.app_path, gaz_name)
         gaz.update_with_entity_data_file(
@@ -227,7 +409,7 @@ class ResourceLoader:
         Args:
             gaz_name (str): The name of the entity the gazetteer corresponds to
         """
-        gaz = Gazetteer(gaz_name)
+        gaz = Gazetteer(gaz_name, self.get_text_preparation_pipeline())
         gaz_path = path.get_gazetteer_data_path(self.app_path, gaz_name)
         gaz.load(gaz_path)
         self._entity_files[gaz_name]["gazetteer"]["data"] = gaz.to_dict()
@@ -279,8 +461,11 @@ class ResourceLoader:
                 hash_val = open(file_path, "r").read()
                 classifier_file_path = file_path.split(".hash")[0]
                 if not os.path.exists(classifier_file_path):
-                    logger.warning("Could not find the serialized model")
-                    continue
+                    # In some cases, there exists hash file but without a corresponding serialized
+                    # model; which implies that a model was probably not required (eg. only 1 domain
+                    # in case of domain classifier or only 1 intent in an intent classifier or no
+                    # entity types for an entity recognizer)
+                    logger.info("Could not find the serialized model")
                 self._hash_to_model_path[hash_val] = classifier_file_path
 
     def _gaz_needs_build(self, gaz_name):
@@ -288,6 +473,11 @@ class ResourceLoader:
             build_time = self._entity_files[gaz_name]["gazetteer"]["modified"]
         except KeyError:
             # gazetteer hasn't been built
+            return True
+
+        # We changed the value type for the pop_dict dict, so we check to make sure its a tuple
+        pop_dict = self._entity_files[gaz_name]['gazetteer'].get('data', {}).get('pop_dict')
+        if pop_dict and not all(isinstance(elem, tuple) for elem in list(pop_dict.keys())):
             return True
 
         data_modified = self._entity_files[gaz_name]["entity_data"]["modified"]
@@ -353,7 +543,7 @@ class ResourceLoader:
             file_table["gazetteer"]["modified"] = 0.0
 
     def get_labeled_queries(
-        self, domain=None, intent=None, label_set=None, force_reload=False, raw=False
+        self, domain=None, intent=None, label_set=None, force_reload=False
     ):
         """Gets labeled queries from the cache, or loads them from disk.
 
@@ -361,7 +551,6 @@ class ResourceLoader:
             domain (str): The domain of queries to load
             intent (str): The intent of queries to load
             force_reload (bool): Will not load queries from the cache when True
-            raw (bool): Will return raw query strings instead of ProcessedQuery objects when true
 
         Returns:
             dict: ProcessedQuery objects (or strings) loaded from labeled query files, organized by
@@ -369,24 +558,23 @@ class ResourceLoader:
         """
         label_set = label_set or DEFAULT_TRAIN_SET_REGEX
         query_tree = {}
-        loaded_key = "loaded_raw" if raw else "loaded"
         file_iter = self._traverse_labeled_queries_files(domain, intent, label_set)
         for a_domain, an_intent, filename in file_iter:
             file_info = self.file_to_query_info[filename]
             if force_reload or (
-                not file_info[loaded_key]
-                or file_info[loaded_key] < file_info["modified"]
+                not file_info["loaded"]
+                or file_info["loaded"] < file_info["modified"]
             ):
                 # file is out of date, load it
-                self.load_query_file(a_domain, an_intent, filename, raw=raw)
+                self.load_query_file(a_domain, an_intent, filename)
 
             if a_domain not in query_tree:
                 query_tree[a_domain] = {}
 
             if an_intent not in query_tree[a_domain]:
-                query_tree[a_domain][an_intent] = []
+                query_tree[a_domain][an_intent] = ProcessedQueryList(self.query_cache)
             queries = query_tree[a_domain][an_intent]
-            queries.extend(file_info["raw_queries" if raw else "queries"])
+            queries.extend(file_info["query_ids"])
         return query_tree
 
     @staticmethod
@@ -400,11 +588,23 @@ class ResourceLoader:
         Returns:
             list: A list of Query objects.
         """
-        flattened = []
+        flattened = ProcessedQueryList()
         for _, intent_queries in query_tree.items():
             for _, queries in intent_queries.items():
-                flattened.extend(queries)
+                if not flattened.cache:
+                    flattened.cache = queries.cache
+                elif flattened.cache != queries.cache:
+                    logger.error("query_tree is built from incompatible query_caches")
+                    raise ValueError("query_tree is built from incompatible query_caches")
+                flattened.extend(queries.elements)
         return flattened
+
+    def get_flattened_label_set(
+        self, domain=None, intent=None, label_set=None, force_reload=False
+    ):
+        return self.flatten_query_tree(
+            self.get_labeled_queries(domain, intent, label_set, force_reload)
+        )
 
     def _traverse_labeled_queries_files(
         self, domain=None, intent=None, file_pattern=DEFAULT_TRAIN_SET_REGEX
@@ -455,7 +655,7 @@ class ResourceLoader:
             logger.warning("No matches were found for the given compiled pattern")
         return matched_paths
 
-    def load_query_file(self, domain, intent, file_path, raw=False):
+    def load_query_file(self, domain, intent, file_path):
         """Loads the queries from the specified file.
 
         Args:
@@ -464,45 +664,37 @@ class ResourceLoader:
             file_path (str): The name of the query file
 
         """
-        logger.info("Loading %squeries from file %s", "raw " if raw else "", file_path)
+        logger.info("Loading queries from file %s", file_path)
 
         file_data = self.file_to_query_info[file_path]
-        if raw:
-            # Only load
-            queries = []
-            for query in markup.read_query_file(file_path):
-                queries.append(query)
-            file_data["raw_queries"] = queries
-            file_data["loaded_raw"] = time.time()
-        else:
-            queries = markup.load_query_file(
-                file_path,
-                self.query_factory,
-                self.app_path,
-                domain,
-                intent,
-                is_gold=True,
-                query_cache=self.query_cache,
-            )
+        query_ids = markup.cache_query_file(
+            file_path,
+            self.query_cache,
+            self.query_factory,
+            self.app_path,
+            domain,
+            intent,
+            is_gold=True
+        )
+        for _id in query_ids:
             try:
-                self._check_query_entities(queries)
+                self._check_query_entities(self.query_cache.get(_id))
             except MindMeldError as exc:
                 logger.warning(exc.message)
-            file_data["queries"] = queries
-            file_data["loaded"] = time.time()
+        file_data["query_ids"] = query_ids
+        file_data["loaded"] = time.time()
 
-    def _check_query_entities(self, queries):
+    def _check_query_entities(self, query):
         entity_types = path.get_entity_types(self.app_path)
-        for query in queries:
-            for entity in query.entities:
-                if (
-                    entity.entity.type not in entity_types
-                    and not entity.entity.is_system_entity
-                ):
-                    msg = "Unknown entity {!r} found in query {!r}"
-                    raise MindMeldError(
-                        msg.format(entity.entity.type, query.query.text)
-                    )
+        for entity in query.entities:
+            if (
+                entity.entity.type not in entity_types
+                and not entity.entity.is_system_entity
+            ):
+                msg = "Unknown entity {!r} found in query {!r}"
+                raise MindMeldError(
+                    msg.format(entity.entity.type, query.query.text)
+                )
 
     def _update_query_file_dates(self, query_tree):
         # We can just use this if it this is the first check
@@ -514,7 +706,6 @@ class ResourceLoader:
                     new_query_files[filename] = {
                         "modified": query_tree[domain][intent][filename],
                         "loaded": None,
-                        "loaded_raw": None,
                     }
 
         all_filenames = set(new_query_files.keys())
@@ -537,106 +728,133 @@ class ResourceLoader:
             # file existed before and now -> update
             old_file_info["modified"] = new_file_info["modified"]
 
-    def _build_word_freq_dict(self, **kwargs):  # pylint: disable=no-self-use
-        """Compiles unigram frequency dictionary of normalized query tokens
-
-        Args:
-            queries (list of Query): A list of all queries
+    class WordFreqBuilder:
         """
-        enable_stemming = kwargs.get(ENABLE_STEMMING_ARGS)
+        Compiles unigram frequency dictionary of normalized query tokens
+        """
 
-        # Unigram frequencies
-        tokens = []
+        def __init__(self, enable_stemming=False):
+            self.enable_stemming = enable_stemming
+            self.tokens = []
 
-        for query in kwargs.get("queries"):
+        def add(self, query):
             for i in range(len(query.normalized_tokens)):
                 tok = query.normalized_tokens[i]
-                tokens.append(mask_numerics(tok))
-                if enable_stemming:
+                self.tokens.append(mask_numerics(tok))
+                if self.enable_stemming:
                     # We only add stemmed tokens that are not the same
                     # as the original token to reduce the impact on
                     # word frequencies
                     stemmed_tok = query.stemmed_tokens[i]
                     if stemmed_tok != tok:
-                        tokens.append(mask_numerics(stemmed_tok))
+                        self.tokens.append(mask_numerics(stemmed_tok))
 
-        freq_dict = Counter(tokens)
-        return freq_dict
+        def get_resource(self):
+            return Counter(self.tokens)
 
-    def _build_char_ngram_freq_dict(self, **kwargs):  # pylint: disable=no-self-use
-        """Compiles n-gram character frequency dictionary of normalized query tokens
-
-        Args:
-            queries (list of Query): A list of all queries
+    class CharNgramFreqBuilder:
         """
-        char_freq_dict = Counter()
-        for length, threshold in zip(kwargs.get("lengths"), kwargs.get("thresholds")):
-            if threshold > 0:
-                for q in kwargs.get("queries"):
-                    character_tokens = [
-                        q.normalized_text[i : i + length]
-                        for i in range(len(q.normalized_text))
-                        if len(q.normalized_text[i : i + length]) == length
-                    ]
-                    char_freq_dict.update(character_tokens)
-        return char_freq_dict
-
-    def _build_word_ngram_freq_dict(self, **kwargs):  # pylint: disable=no-self-use
-        """Compiles n-gram frequency dictionary of normalized query tokens
-
-        Args:
-            queries (list of Query): A list of all queries
+        Compiles n-gram character frequency dictionary of normalized query tokens
         """
-        enable_stemming = kwargs.get(ENABLE_STEMMING_ARGS)
-        word_freq_dict = Counter()
-        for length, threshold in zip(kwargs.get("lengths"), kwargs.get("thresholds")):
-            if threshold > 0:
+
+        def __init__(self, lengths, thresholds):
+            self.lengths = lengths
+            self.thresholds = list(thresholds) + [1] * (len(lengths) - len(thresholds))
+            self.char_freq_dict = Counter()
+
+        def add(self, query):
+            for length, threshold in zip(self.lengths, self.thresholds):
+                # Minimum value of thresholds must be one to include all ngrams in train files
+                # i.e, no ngram in our dictionary can occur less than once in our training data
+                if threshold < 1:
+                    logger.warning(
+                        "Threshold value of n-grams cannot be less than 1."
+                        "Resetting to 1 to extract all character ngrams in the domain",
+                    )
+                query_text = re.sub(r"\d", "0", query.normalized_text)
+                character_tokens = [
+                    query_text[i: i + length]
+                    for i in range(len(query_text))
+                    if len(query_text[i: i + length]) == length
+                ]
+                self.char_freq_dict.update(character_tokens)
+
+        def get_resource(self):
+            return self.char_freq_dict
+
+    class WordNgramFreqBuilder:
+        """
+        Compiles n-gram frequency dictionary of normalized query tokens
+        """
+
+        def __init__(self, lengths, thresholds, enable_stemming=False):
+            self.lengths = lengths
+            self.thresholds = list(thresholds) + [1] * (len(lengths) - len(thresholds))
+            self.enable_stemming = enable_stemming
+            self.word_freq_dict = Counter()
+
+        def add(self, query):
+            for length, threshold in zip(self.lengths, self.thresholds):
+                # Minimum value of thresholds must be one to include all ngrams in train files
+                # i.e, no ngram in our dictionary can occur less than once in our training data
+                if threshold < 1:
+                    logger.warning(
+                        "Threshold value of n-grams cannot be less than 1."
+                        "Resetting to 1 to extract all ngrams in the domain",
+                    )
+
                 ngram_tokens = []
-                for query in kwargs.get("queries"):
-                    for i in range(len(query.normalized_tokens)):
-                        ngram_query = " ".join(query.normalized_tokens[i : i + length])
-                        ngram_tokens.append(ngram_query)
-                        if enable_stemming:
-                            stemmed_ngram_query = " ".join(
-                                query.stemmed_tokens[i : i + length]
-                            )
-                            if stemmed_ngram_query != ngram_query:
-                                ngram_tokens.append(stemmed_ngram_query)
-                word_freq_dict.update(ngram_tokens)
-        return word_freq_dict
+                # Adding OOB token for entity bow feature extractor
+                normalized_tokens = [OUT_OF_BOUNDS_TOKEN] + \
+                                    [re.sub(r"\d", "0", tok) for tok in query.normalized_tokens] + \
+                                    [OUT_OF_BOUNDS_TOKEN]
+                if self.enable_stemming:
+                    stemmed_tokens = [OUT_OF_BOUNDS_TOKEN] + \
+                                     [re.sub(r"\d", "0", tok) for tok in query.stemmed_tokens] + \
+                                     [OUT_OF_BOUNDS_TOKEN]
 
-    def _build_query_freq_dict(self, **kwargs):  # pylint: disable=no-self-use
-        """Compiles frequency dictionary of normalized and stemmed query strings
+                for i in range(len(normalized_tokens)):
+                    ngram_query = " ".join(normalized_tokens[i: i + length])
+                    ngram_tokens.append(ngram_query)
+                    if self.enable_stemming:
+                        stemmed_ngram_query = " ".join(stemmed_tokens[i: i + length])
+                        if stemmed_ngram_query != ngram_query:
+                            ngram_tokens.append(stemmed_ngram_query)
+                self.word_freq_dict.update(ngram_tokens)
 
-        Args:
-            queries (list of Query): A list of all queries
+        def get_resource(self):
+            return self.word_freq_dict
+
+    class QueryFreqBuilder:
         """
-        enable_stemming = kwargs.get(ENABLE_STEMMING_ARGS)
+        Compiles frequency dictionary of normalized and stemmed query strings
+        """
 
-        # Whole query frequencies, with singletons removed
-        query_dict = Counter()
-        stemmed_query_dict = Counter()
+        def __init__(self, enable_stemming=False):
+            self.enable_stemming = enable_stemming
+            self.query_dict = Counter()
+            self.stemmed_query_dict = Counter()
 
-        for query in kwargs.get("queries"):
-            query_dict.update(["<{}>".format(query.normalized_text)])
+        def add(self, query):
+            self.query_dict.update(["<{}>".format(query.normalized_text)])
 
-            if enable_stemming:
-                stemmed_query_dict.update(["<{}>".format(query.stemmed_text)])
+            if self.enable_stemming:
+                self.stemmed_query_dict.update(["<{}>".format(query.stemmed_text)])
 
-        for query in query_dict:
-            if query_dict[query] < 2:
-                query_dict[query] = 0
+        def get_resource(self):
+            for query in self.query_dict:
+                if self.query_dict[query] < 2:
+                    self.query_dict[query] = 0
 
-        if enable_stemming:
-            for query in stemmed_query_dict:
-                if stemmed_query_dict[query] < 2:
-                    stemmed_query_dict[query] = 0
-            query_dict += stemmed_query_dict
+            if self.enable_stemming:
+                for query in self.stemmed_query_dict:
+                    if self.stemmed_query_dict[query] < 2:
+                        self.stemmed_query_dict[query] = 0
+            self.query_dict += self.stemmed_query_dict
 
-        query_dict += Counter()
-        return query_dict
+            return self.query_dict
 
-    def _get_sys_entity_types(self, **kwargs):  # pylint: disable=no-self-use
+    def get_sys_entity_types(self, labels):  # pylint: disable=no-self-use
         """Get all system entity types from the entity labels.
 
         Args:
@@ -644,23 +862,11 @@ class ResourceLoader:
         """
         # Build entity types set
         entity_types = set()
-        for label in kwargs.get("labels"):
+        for label in labels:
             for entity in label:
                 entity_types.add(entity.entity.type)
 
         return set((t for t in entity_types if Entity.is_system_entity(t)))
-
-    def load_feature_resource(self, name, **kwargs):
-        """Load specified resource for feature extractor.
-
-        Args:
-            name (str): resource name
-        """
-        resource_loader = self.FEATURE_RSC_MAP.get(name)
-        if resource_loader:
-            return resource_loader(self, **kwargs)
-        else:
-            raise ValueError("Invalid resource name {!r}.".format(name))
 
     def hash_feature_resource(self, name):
         """Hashes the named resource.
@@ -700,32 +906,22 @@ class ResourceLoader:
         return self._hasher.hash_list(items)
 
     @staticmethod
-    def create_resource_loader(app_path, query_factory=None, preprocessor=None):
+    def create_resource_loader(app_path, query_factory=None, text_preparation_pipeline=None):
         """Creates the resource loader for the app at app path.
 
         Args:
             app_path (str): The path to the directory containing the app's data
             query_factory (QueryFactory): The app's query factory
-            preprocessor (Preprocessor): The app's preprocessor
+            text_preparation_pipeline (TextPreparationPipeline): The app's text preparation
+                pipeline.
 
         Returns:
             ResourceLoader: a resource loader
         """
         query_factory = query_factory or QueryFactory.create_query_factory(
-            app_path, preprocessor=preprocessor
+            app_path, text_preparation_pipeline=text_preparation_pipeline
         )
-        query_cache = QueryCache(app_path)
-        return ResourceLoader(app_path, query_factory, query_cache)
-
-    # resource loader map
-    FEATURE_RSC_MAP = {
-        GAZETTEER_RSC: get_gazetteers,
-        WORD_FREQ_RSC: _build_word_freq_dict,
-        CHAR_NGRAM_FREQ_RSC: _build_char_ngram_freq_dict,
-        WORD_NGRAM_FREQ_RSC: _build_word_ngram_freq_dict,
-        QUERY_FREQ_RSC: _build_query_freq_dict,
-        SYS_TYPES_RSC: _get_sys_entity_types,
-    }
+        return ResourceLoader(app_path, query_factory)
 
     RSC_HASH_MAP = {
         GAZETTEER_RSC: get_gazetteers_hash,

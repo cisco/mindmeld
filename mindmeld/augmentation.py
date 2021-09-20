@@ -74,6 +74,7 @@ class AugmentorFactory:
                 ],
             )
             path_suffix = self.config.get("path_suffix", "-augment.txt")
+            register_all_augmentors()
             return AUGMENTATION_MAP[self.config["augmentor_class"]](
                 batch_size=batch_size,
                 language=self.language,
@@ -366,7 +367,9 @@ class MultiLingualParaphraser(Augmentor):
             **self.default_forward_params,
         )
 
-        template = lambda text: f">>{self.language_code}<< {text}"
+        def template(text):
+            return f">>{self.language_code}<< {text}"
+
         translated_queries = [template(query) for query in set(translated_queries)]
 
         reverse_translated_queries = self._translate(
@@ -386,5 +389,6 @@ class MultiLingualParaphraser(Augmentor):
         return augmented_queries
 
 
-register_augmentor("EnglishParaphraser", EnglishParaphraser)
-register_augmentor("MultiLingualParaphraser", MultiLingualParaphraser)
+def register_all_augmentors():
+    register_augmentor("EnglishParaphraser", EnglishParaphraser)
+    register_augmentor("MultiLingualParaphraser", MultiLingualParaphraser)

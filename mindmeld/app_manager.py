@@ -78,7 +78,7 @@ class ApplicationManager:
         es_host=None,
         request_class=None,
         responder_class=None,
-        preprocessor=None,
+        text_preparation_pipeline=None,
         async_mode=False,
     ):
         self.async_mode = async_mode
@@ -93,7 +93,7 @@ class ApplicationManager:
             resource_loader = question_answerer.resource_loader
         else:
             resource_loader = ResourceLoader.create_resource_loader(
-                app_path, preprocessor=preprocessor
+                app_path, text_preparation_pipeline=text_preparation_pipeline
             )
 
         self._query_factory = resource_loader.query_factory
@@ -149,7 +149,7 @@ class ApplicationManager:
 
         # We reset the current turn's responder's params
         response = self.responder_class(
-            frame=frame,
+            frame=dict(frame),
             form={},
             params=Params(),
             slots={},

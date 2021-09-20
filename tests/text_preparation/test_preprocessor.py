@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+test Preprocessor
+----------------------------------
+
+Tests for Preprocessors in the `text_preparation.preprocessors` module.
+"""
+
 import pytest
 
 

@@ -19,13 +19,11 @@ import logging
 import os
 from abc import ABC, abstractmethod
 
-from sklearn.externals import joblib
-
-from .. import markup
 from ..constants import DEFAULT_TEST_SET_REGEX, DEFAULT_TRAIN_SET_REGEX
 from ..core import Query
 from ..exceptions import ClassifierLoadError
-from ..models import ModelConfig, create_model
+from ..models import ModelConfig, create_model, load_model
+from ..resource_loader import ProcessedQueryList
 
 logger = logging.getLogger(__name__)
 
@@ -150,13 +148,19 @@ class Classifier(ABC):
         self.config = None
         self.hash = ""
 
-    def fit(self, queries=None, label_set=None, incremental_timestamp=None, **kwargs):
+    def fit(self,
+            queries=None,
+            label_set=None,
+            incremental_timestamp=None,
+            load_cached=True,
+            **kwargs):
         """Trains a statistical model for classification using the provided training examples and
         model configuration.
 
         Args:
-            queries (list of ProcessedQuery): The labeled queries to use as training data
-            label_set (list, optional): A label set to load. If not specified, the default
+            queries (list(ProcessedQuery) or ProcessedQueryList, optional): A list of queries
+                 to train on. If not specified the queries will be loaded from the label_set.
+            label_set (str): A label set to load. If not specified, the default
                  training set will be loaded.
             incremental_timestamp (str, optional): The timestamp folder to cache models in
             model_type (str, optional): The type of machine learning model to use. If omitted, the
@@ -180,6 +184,11 @@ class Classifier(ABC):
                 values are either a kwargs dict which will be passed into the
                 feature extractor function, or a callable which will be used as to
                 extract features.
+            load_cached (bool): If the model is cached on disk, load it into memory.
+
+        Returns:
+            True if model was loaded and fit, False if a valid cached model exists but was not
+            loaded (controlled by the load_cached arg).
 
         Examples:
             Fit using default the configuration.
@@ -212,42 +221,64 @@ class Classifier(ABC):
         model_config = self._get_model_config(**kwargs)
         model = create_model(model_config)
 
-        if not label_set:
-            label_set = model_config.train_label_set
-            label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
+        # resolve query set
+        label_set = label_set or model_config.train_label_set or DEFAULT_TRAIN_SET_REGEX
+        queries = self._resolve_queries(queries, label_set)
 
-        new_hash = self._get_model_hash(model_config, queries, label_set)
+        new_hash = self._get_model_hash(model_config, queries)
         cached_model = self._resource_loader.hash_to_model_path.get(new_hash)
 
         if incremental_timestamp and cached_model:
-            logger.info("No need to fit. Loading previous model.")
-            self.load(cached_model)
-            return
+            logger.info("No need to fit.  Previous model is cached.")
+            if load_cached:
+                self.load(cached_model)
+                return True
+            return False
 
-        queries, classes = self._get_queries_and_labels(queries, label_set)
+        examples, labels = self._get_examples_and_labels(queries)
 
-        if not queries:
+        if not examples:
             logger.warning(
                 "Could not fit model since no relevant examples were found. "
                 'Make sure the labeled queries for training are placed in "%s" '
                 "files in your MindMeld project.",
                 label_set,
             )
-            return
-
-        if len(set(classes)) <= 1:
-            phrase = ["are no classes", "is only one class"][len(set(classes))]
+            return True
+        num_labels = len(set(labels))
+        if num_labels <= 1:
+            phrase = ["are no classes", "is only one class"][num_labels]
             logger.info("Not doing anything for fit since there %s.", phrase)
-            return
+            return True
 
-        model.initialize_resources(self._resource_loader, queries, classes)
-        model.fit(queries, classes)
+        model.initialize_resources(self._resource_loader, examples, labels)
+        model.fit(examples, labels)
         self._model = model
         self.config = ClassifierConfig.from_model_config(self._model.config)
         self.hash = new_hash
 
         self.ready = True
         self.dirty = True
+        return True
+
+    def _resolve_queries(self, queries=None, label_set=None):
+        """
+        Resolve queries and/or label_set into a ProcessedQueryList.
+        queries is preferred over label_set.
+
+        Args:
+            queries (ProcessedQueryList or list(ProcessedQuery): A set of queries to use for
+                the operation.
+            label_set (str): The label set to load queries from
+
+        Returns:
+            ProcessedQueryList: The set of queries
+        """
+        if not queries:
+            queries = self._get_queries_from_label_set(label_set)
+        elif not isinstance(queries, ProcessedQueryList):
+            queries = ProcessedQueryList.from_in_memory_list(queries)
+        return queries
 
     def predict(self, query, time_zone=None, timestamp=None, dynamic_resource=None):
         """Predicts a class label for the given query using the trained classification model
@@ -308,26 +339,23 @@ class Classifier(ABC):
         """Evaluates the trained classification model on the given test data
 
         Args:
-            queries (list of ProcessedQuery): The labeled queries to use as test data. If none
-                are provided, the test label set will be used.
+            queries (Optional(list(ProcessedQuery))): optional list of queries to evaluate
             label_set (str): The label set to use for evaluation.
 
         Returns:
             ModelEvaluation: A ModelEvaluation object that contains evaluation results
         """
-        model_config = self._get_model_config()
-
-        if not label_set:
-            label_set = model_config.test_label_set
-            label_set = label_set if label_set else DEFAULT_TEST_SET_REGEX
-
         if not self._model:
             logger.error("You must fit or load the model before running evaluate.")
             return None
 
-        queries, labels = self._get_queries_and_labels(queries, label_set=label_set)
+        model_config = self._get_model_config()
+        label_set = label_set or model_config.test_label_set or DEFAULT_TEST_SET_REGEX
+        queries = self._resolve_queries(queries, label_set)
 
-        if not queries:
+        examples, labels = self._get_examples_and_labels(queries)
+
+        if not examples:
             logger.info(
                 "Could not evaluate model since no relevant examples were found. Make sure "
                 'the labeled queries for evaluation are placed in "%s" files '
@@ -336,7 +364,7 @@ class Classifier(ABC):
             )
             return None
 
-        evaluation = self._model.evaluate(queries, labels)
+        evaluation = self._model.evaluate(examples, labels)
         return evaluation
 
     def inspect(self, query, gold_label=None, dynamic_resource=None):
@@ -392,12 +420,6 @@ class Classifier(ABC):
                 model_config.pop("params", None)
         return ModelConfig(**model_config)
 
-    def _data_dump_payload(self):
-        return self._model
-
-    def _create_and_dump_payload(self, path):
-        joblib.dump(self._data_dump_payload(), path)
-
     def dump(self, model_path, incremental_model_path=None):
         """Persists the trained classification model to disk.
 
@@ -410,19 +432,43 @@ class Classifier(ABC):
             if not path:
                 continue
 
-            # make directory if necessary
-            folder = os.path.dirname(path)
-            if not os.path.isdir(folder):
-                os.makedirs(folder)
+            # classifier specific dump
+            self._dump(path)
 
-            self._create_and_dump_payload(path)
+            # model specific dump
+            if self._model:
+                # sometimes a model might be NoneType, eg. in role classifiers, in which case,
+                # no dumping is required. While loading such models, the model_path (.pkl)
+                # will not be found and the helpers.load_model() will return None, which makes it
+                # backwards compatible to loading a NoneType model
+                self._model.dump(path)
 
             hash_path = path + ".hash"
+            os.makedirs(os.path.dirname(hash_path), exist_ok=True)
             with open(hash_path, "w") as hash_file:
                 hash_file.write(self.hash)
 
             if path == model_path:
                 self.dirty = False
+
+    def _dump(self, path):
+        pass
+
+    @staticmethod
+    def _get_classifier_resources_save_path(model_path):
+        head, ext = os.path.splitext(model_path)
+        classifier_resources_save_path = head + ".classifier_resources" + ext
+        os.makedirs(os.path.dirname(classifier_resources_save_path), exist_ok=True)
+        return classifier_resources_save_path
+
+    def unload(self):
+        """
+        Unloads the model from memory. This helps reduce memory requirements while
+        training other models.
+        """
+        self._model = None
+        self.config = None
+        self.ready = False
 
     def load(self, model_path):
         """Loads the trained classification model from disk
@@ -430,11 +476,10 @@ class Classifier(ABC):
         Args:
             model_path (str): The location on disk where the model is stored
         """
-        try:
-            self._model = joblib.load(model_path)
-        except (OSError, IOError) as e:
-            msg = "Unable to load {}. Pickle at {!r} cannot be read."
-            raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path)) from e
+
+        self._model = load_model(model_path)
+
+        # validate and initialize resources
         if self._model is not None:
             if not hasattr(self._model, "mindmeld_version"):
                 msg = (
@@ -466,104 +511,53 @@ class Classifier(ABC):
             model_hash = hash_file.read()
         return model_hash
 
-    @staticmethod
-    def _build_query_tree(queries, domain=None, intent=None, raw=False):
-        """Build a query tree from a list of ProcessedQueries. The tree is
-        organized by domain then by intent.
-
-        Args:
-            queries (list): list of ProcessedQuery
-            domain (str, optional): The domain to filter on
-            intent (str, optional): The intent to filter on
-            raw (bool, optional): If true, the leaves of the query tree are
-                strings associated with the ProcessedQueries, else the leaves
-                are ProcessedQueries
-        """
-        query_tree = {}
-        for query in queries:
-
-            if domain and query.domain != domain:
-                continue
-
-            if intent and query.intent != intent:
-                continue
-
-            if query.domain not in query_tree:
-                query_tree[query.domain] = {}
-            if query.intent not in query_tree[query.domain]:
-                query_tree[query.domain][query.intent] = []
-
-            if raw:
-                query_tree[query.domain][query.intent].append(markup.dump_query(query))
-            else:
-                query_tree[query.domain][query.intent].append(query)
-
-        return query_tree
-
     @abstractmethod
-    def _get_query_tree(
-        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False
-    ):
-        """Returns the set of queries to train on
+    def _get_queries_from_label_set(self, label_set=DEFAULT_TRAIN_SET_REGEX):
+        """Returns the set of queries loaded from the label_set
 
         Args:
-            queries (list, optional): A list of ProcessedQuery objects, to
-                train. If not specified, a label set will be loaded.
             label_set (list, optional): A label set to load. If not specified,
                 the default training set will be loaded.
-            raw (bool, optional): When True, raw query strings will be returned
-
         Returns:
-            List: list of queries
+            ProcessedQueryList
         """
         raise NotImplementedError("Subclasses must implement this method")
 
     @abstractmethod
-    def _get_queries_and_labels(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
-        """Returns the set of queries and their labels to train on
-
-        Args:
-            queries (list, optional): A list of ProcessedQuery objects, to
-                train. If not specified, a label set will be loaded.
-            label_set (list, optional): A label set to load. If not specified,
-                the default training set will be loaded.
-        """
-        raise NotImplementedError("Subclasses must implement this method")
-
-    @abstractmethod
-    def _get_queries_and_labels_hash(
-        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX
-    ):
+    def _get_examples_and_labels_hash(self, queries):
         """Returns a hashed string representing the labeled queries
 
         Args:
-            queries (list, optional): A list of ProcessedQuery objects, to
-                train. If not specified, a label set will be loaded.
-            label_set (list, optional): A label set to load. If not specified,
-                the default training set will be loaded.
+            queries (ProcessedQueryList): The queries used to fit this model
         """
         raise NotImplementedError("Subclasses must implement this method")
 
-    def _get_model_hash(
-        self, model_config, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX
-    ):
+    @abstractmethod
+    def _get_examples_and_labels(self, queries):
+        """Extracts examples and lables extracted from the queries
+
+        Args:
+            queries (ProcessedQueryList): The queries to extract examples and lables from
+
+        Returns:
+            tuple(ProcessedQueryList.Iterator(Any),
+                  ProcessedQueryList.Iterator(Any)): A tuple of iterators
+                [0]: the examples, [1]: the labels
+        """
+
+    def _get_model_hash(self, model_config, queries):
         """Returns a hash representing the inputs into the model
 
         Args:
             model_config (ModelConfig): The model configuration
-            queries (list, optional): A list of ProcessedQuery objects, to
-                train. If not specified, a label set will be loaded.
-            label_set (list, optional): A label set to load. If not specified,
-                the default training set will be loaded.
+            queries (ProcessedQueryList): The queries used to fit this model
 
         Returns:
             str: The hash
         """
 
         # Hash queries
-        queries_hash = self._get_queries_and_labels_hash(
-            queries=queries, label_set=label_set
-        )
+        queries_hash = self._get_examples_and_labels_hash(queries)
 
         # Hash config
         config_hash = self._resource_loader.hash_string(model_config.to_json())

@@ -34,27 +34,27 @@ import distro
 import requests
 from tqdm import tqdm
 
-# Loads augmentor and annotator registration helper methods implicitly. Unused in this file.
-from . import augmentation  # noqa: F401 pylint: disable=W0611
-from .augmentation import AugmentorFactory
+from .active_learning.alp import ActiveLearningPipelineFactory
+
+from .augmentation import AugmentorFactory, register_all_augmentors
 from .auto_annotator import register_all_annotators
 from . import markup, path
 from ._util import blueprint
 from ._version import current as __version__
 from .components import Conversation, QuestionAnswerer
 from .components._config import (
+    get_active_learning_config,
     get_augmentation_config,
     get_auto_annotator_config,
     get_language_config,
 )
 from .constants import BINARIES_URL, DUCKLING_VERSION, UNANNOTATE_ALL_RULE
 from .converter import DialogflowConverter, RasaConverter
-from .exceptions import KnowledgeBaseConnectionError, KnowledgeBaseError, MindMeldError
+from .exceptions import ElasticsearchKnowledgeBaseConnectionError, KnowledgeBaseError, MindMeldError
 from .models.helpers import create_annotator
 from .path import (
     MODEL_CACHE_PATH,
-    QUERY_CACHE_PATH,
-    QUERY_CACHE_TMP_PATH,
+    QUERY_CACHE_DB_PATH,
     get_generated_data_folder,
     get_dvc_local_remote_path,
 )
@@ -72,7 +72,7 @@ if sys.version_info < (3, 6):
         " official support for Python 3.5 in the next release. Please consider migrating"
         " your application to Python 3.6 and above."
     )
-    logger.warning(deprecation_msg)
+    warnings.warn(deprecation_msg)
 
 DVC_INIT_ERROR_MESSAGE = "you are not inside of a DVC repository"
 DVC_ADD_DOES_NOT_EXIST_MESSAGE = "does not exist"
@@ -541,14 +541,9 @@ def clean(ctx, query_cache, model_cache, days):
         )
     if query_cache:
         try:
-            main_cache_location = QUERY_CACHE_PATH.format(app_path=app.app_path)
-            tmp_cache_location = QUERY_CACHE_TMP_PATH.format(app_path=app.app_path)
-
+            main_cache_location = QUERY_CACHE_DB_PATH.format(app_path=app.app_path)
             if os.path.exists(main_cache_location):
                 os.remove(main_cache_location)
-
-            if os.path.exists(tmp_cache_location):
-                os.remove(tmp_cache_location)
 
             logger.info("Query cache deleted")
         except FileNotFoundError:
@@ -636,7 +631,7 @@ def load_index(ctx, es_host, app_namespace, index_name, data_file, app_path):
             es_host,
             app_path=app_path,
         )
-    except (KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
+    except (ElasticsearchKnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
         logger.error(ex.message)
         ctx.exit(1)
 
@@ -678,8 +673,8 @@ def num_parser(start, port):
         # Download the binary from the cloud if the binary does not already exist OR
         # the binary is out of date.
         if os.path.exists(exec_path):
-            hash_digest = hashlib.md5(open(exec_path, "rb").read()).hexdigest()
-            if hash_digest != path.DUCKLING_PATH_TO_MD5_MAPPINGS[exec_path]:
+            hash_digest = hashlib.sha256(open(exec_path, "rb").read()).hexdigest()
+            if hash_digest != path.DUCKLING_PATH_TO_SHA_MAPPINGS[exec_path]:
                 os.remove(exec_path)
 
         if not os.path.exists(exec_path):
@@ -795,16 +790,18 @@ def _get_auto_annotator_config(app_path, overwrite=False, unannotate_all=False):
 
 @shared_cli.command("augment", context_settings=CONTEXT_SETTINGS)
 @click.option(
-    "--app-path",
+    "--app_path",
     required=True,
     help="The application's path.",
 )
 @click.option(
+    "-l",
     "--language",
     help="Augmentation language code. Follows ISO 639-1 format.",
 )
 def augment(app_path, language):
     """Runs the data augmentation command."""
+    register_all_augmentors()
     config = get_augmentation_config(app_path=app_path)
     language = language or get_language_config(app_path=app_path)[0]
     resource_loader = ResourceLoader.create_resource_loader(app_path)
@@ -815,6 +812,115 @@ def augment(app_path, language):
     ).create_augmentor()
     augmentor.augment()
     logger.info("Augmentation Complete.")
+
+
+@shared_cli.command("active_learning", context_settings=CONTEXT_SETTINGS)
+# Params Used for Both Select and Train
+@click.option("--app-path", type=str, help="Path to the MindMeld application")
+@click.option(
+    "--batch_size", type=int, help="Number of queries to select each iteration."
+)
+@click.option(
+    "--tuning_level",
+    type=str,
+    help="The hierarchy level to run strategy tuning ('domain' or 'intent').",
+)
+@click.option(
+    "--output_folder",
+    type=str,
+    help="Folder to store output.",
+)
+# Params Specific to Strategy Tuning
+@click.option(
+    "--tune",
+    is_flag=True,
+    default=False,
+    help="Execute active learning tuning.",
+)
+@click.option(
+    "--train_seed_pct",
+    type=float,
+    help="Percentage of training data to use as the initial seed.",
+)
+@click.option("--n_epochs", type=int, help="Number of epochs.")
+@click.option("--plot", is_flag=True, default=True, help="Whether to plot results.")
+# Params Specific to Selection
+@click.option(
+    "--select",
+    is_flag=True,
+    default=False,
+    help="Execute active learning log query selection.",
+)
+@click.option(
+    "--strategy",
+    type=str,
+    help="Select a single strategy instead of the strategies listed in the config.",
+)
+@click.option(
+    "--unlabeled_logs_path",
+    type=str,
+    help="Path to the log folder to select queries from.",
+)
+@click.option(
+    "--log_usage_pct", type=float, help="Percent of logs to use for selection."
+)
+@click.option(
+    "--labeled_logs_pattern",
+    type=str,
+    help="Pattern for labeled logs. Will override an unlabeled logs path.",
+)
+def active_learning(  # pylint: disable=R0913
+    app_path,
+    batch_size,
+    tuning_level,
+    output_folder,
+    tune,
+    train_seed_pct,
+    n_epochs,
+    plot,
+    select,
+    strategy,
+    unlabeled_logs_path,
+    log_usage_pct,
+    labeled_logs_pattern,
+):
+    """Command to run active learning training or selection."""
+    if not (tune or select):
+        raise AssertionError("'tune' or 'select' must be passed in as a paramter.")
+    config = get_active_learning_config(app_path=app_path)
+    config["app_path"] = app_path or config.get("app_path")
+    if batch_size:
+        config["tuning"]["batch_size"] = batch_size
+    if tuning_level:
+        config["tuning"]["tuning_level"] = tuning_level
+    config["output_folder"] = output_folder or config.get("output_folder")
+    if not output_folder:
+        raise AssertionError(
+            "An 'output_folder' must be defined in either the CLI command or the config."
+        )
+    if train_seed_pct:
+        config["pre_tuning"]["train_seed_pct"] = train_seed_pct
+    if n_epochs:
+        config["tuning"]["n_epochs"] = n_epochs
+    if strategy:
+        if tune:
+            config["tuning"]["tuning_strategies"] = [strategy]
+        elif select:
+            config["query_selection"]["selection_strategy"] = strategy
+    if unlabeled_logs_path:
+        config["query_selection"]["unlabeled_logs_path"] = unlabeled_logs_path
+    if log_usage_pct:
+        config["query_selection"]["log_usage_pct"] = log_usage_pct
+    if labeled_logs_pattern:
+        config["query_selection"]["labeled_logs_pattern"] = labeled_logs_pattern
+
+    alp = ActiveLearningPipelineFactory.create_from_config(config)
+    if tune:
+        alp.tune_strategies()
+        if plot:
+            alp.plot()
+    elif select:
+        alp.select_queries()
 
 
 #
@@ -841,7 +947,7 @@ def setup_blueprint(ctx, es_host, skip_kb, blueprint_name, app_path):
     except ValueError as ex:
         logger.error(ex)
         ctx.exit(1)
-    except (KnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
+    except (ElasticsearchKnowledgeBaseConnectionError, KnowledgeBaseError) as ex:
         logger.error(ex.message)
         ctx.exit(1)
 

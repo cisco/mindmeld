@@ -15,14 +15,15 @@
 This module contains the entity recognizer component of the MindMeld natural language processor.
 """
 import logging
+import pickle
 
 from sklearn.externals import joblib
 
-from ..constants import DEFAULT_TRAIN_SET_REGEX
-from ..core import Entity, Query
-from ..models import ENTITIES_LABEL_TYPE, QUERY_EXAMPLE_TYPE, create_model
 from ._config import get_classifier_config
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError
+from ..constants import DEFAULT_TRAIN_SET_REGEX
+from ..core import Entity, Query
+from ..models import ENTITIES_LABEL_TYPE, QUERY_EXAMPLE_TYPE, create_model, load_model
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +54,7 @@ class EntityRecognizer(Classifier):
         self.domain = domain
         self.intent = intent
         self.entity_types = set()
+        # TODO: Deprecate the var self._model_config as the configs are already dumped by models
         self._model_config = None
 
     def _get_model_config(self, **kwargs):  # pylint: disable=arguments-differ
@@ -71,62 +73,77 @@ class EntityRecognizer(Classifier):
         )
         return super()._get_model_config(loaded_config, **kwargs)
 
-    def fit(self, queries=None, label_set=None, incremental_timestamp=None, **kwargs):
-        """Trains the entity recognition model using the provided training queries.
+    def get_entity_types(self, queries=None, label_set=None, **kwargs):
 
-        Args:
-            queries (list[ProcessedQuery]): The labeled queries to use as training data.
-            label_set (list, optional): A label set to load. If not specified, use the default.
-            incremental_timestamp (str, optional): The timestamp folder to cache models in.
-        """
+        if not label_set:
+            label_set = self._get_model_config(**kwargs).train_label_set
+            label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
+
+        # Load labeled data
+        queries = self._resolve_queries(queries, label_set)
+        queries, labels = self._get_examples_and_labels(queries)
+
+        # Build entity types set
+        entity_types = set()
+        for label in labels:
+            for entity in label:
+                entity_types.add(entity.entity.type)
+
+        return entity_types
+
+    def fit(self,
+            queries=None,
+            label_set=None,
+            incremental_timestamp=None,
+            load_cached=True,
+            **kwargs):
         logger.info(
             "Fitting entity recognizer: domain=%r, intent=%r", self.domain, self.intent
         )
-
         # create model with given params
         self._model_config = self._get_model_config(**kwargs)
-        model = create_model(self._model_config)
 
-        if not label_set:
-            label_set = self._model_config.train_label_set
-            label_set = label_set if label_set else DEFAULT_TRAIN_SET_REGEX
+        label_set = label_set or self._model_config.train_label_set or DEFAULT_TRAIN_SET_REGEX
+        queries = self._resolve_queries(queries, label_set)
 
-        new_hash = self._get_model_hash(self._model_config, queries, label_set)
+        new_hash = self._get_model_hash(self._model_config, queries)
         cached_model = self._resource_loader.hash_to_model_path.get(new_hash)
+        # After PR 356, entity.pkl file is not created when there are no entity types,
+        # similar to not having domain.pkl or intent.pkl when there are less than 2 domains
+        # or 2 intents respectively.
+        # Before this PR, not doing this dump leads to `cached_model=None` in above line.
+        # After this PR, this will be set to `cached_model=<>.pkl` path and the self.load() takes
+        # care of loading a NoneType model. Had it been `cached_model=None` like previously, the
+        # following code skips the `load_cached` check and directly attempts to create a new model.
+        # This is not an issue in domain and intent classifiers as the .fit() method is not called
+        # when there are less than 2 domains/intents.
 
         if incremental_timestamp and cached_model:
-            logger.info("No need to fit. Loading previous model.")
-            self.load(cached_model)
-            return
+            logger.info("No need to fit.  Previous model is cached.")
+            if load_cached:
+                self.load(cached_model)
+                return True
+            return False
 
         # Load labeled data
-        queries, labels = self._get_queries_and_labels(queries, label_set=label_set)
+        examples, labels = self._get_examples_and_labels(queries)
 
-        # Build entity types set
-        self.entity_types = set()
-        for label in labels:
-            for entity in label:
-                self.entity_types.add(entity.entity.type)
+        if examples:
+            # Build entity types set
+            self.entity_types = {entity.entity.type for label in labels for entity in label}
 
-        model.initialize_resources(self._resource_loader, queries, labels)
-        model.fit(queries, labels)
-        self._model = model
-        self.config = ClassifierConfig.from_model_config(self._model.config)
+            if self.entity_types:
+                model = create_model(self._model_config)
+                model.initialize_resources(self._resource_loader, examples, labels)
+                model.fit(examples, labels)
+                self._model = model
+                self.config = ClassifierConfig.from_model_config(self._model.config)
+
         self.hash = new_hash
 
         self.ready = True
         self.dirty = True
-
-    def _data_dump_payload(self):
-        return {
-            "entity_types": self.entity_types,
-            "w_ngram_freq": self._model.get_resource("w_ngram_freq"),
-            "c_ngram_freq": self._model.get_resource("c_ngram_freq"),
-            "model_config": self._model_config,
-        }
-
-    def _create_and_dump_payload(self, path):
-        self._model.dump(path, self._data_dump_payload())
+        return True
 
     def dump(self, model_path, incremental_model_path=None):
         """Save the model.
@@ -141,6 +158,27 @@ class EntityRecognizer(Classifier):
         )
         super().dump(model_path, incremental_model_path)
 
+    def _dump(self, path):
+        er_data = {
+            "entity_types": self.entity_types,
+            "model_config": self._model_config,
+        }
+        if self._model:
+            er_data.update({
+                "w_ngram_freq": self._model.get_resource("w_ngram_freq"),
+                "c_ngram_freq": self._model.get_resource("c_ngram_freq"),
+            })
+        pickle.dump(er_data, open(self._get_classifier_resources_save_path(path), "wb"))
+
+    def unload(self):
+        logger.info(
+            "Unloading entity recognizer: domain=%r, intent=%r", self.domain, self.intent
+        )
+        self.entity_types = None
+        self._model_config = None
+        self._model = None
+        self.ready = False
+
     def load(self, model_path):
         """Loads the trained entity recognition model from disk.
 
@@ -150,25 +188,19 @@ class EntityRecognizer(Classifier):
         logger.info(
             "Loading entity recognizer: domain=%r, intent=%r", self.domain, self.intent
         )
+
+        # underlying model specific load
+        self._model = load_model(model_path)
+
+        # classifier specific load
         try:
+            er_data = pickle.load(open(self._get_classifier_resources_save_path(model_path), "rb"))
+        except FileNotFoundError:  # backwards compatability for previous version's saved models
             er_data = joblib.load(model_path)
+        self.entity_types = er_data["entity_types"]
+        self._model_config = er_data["model_config"]
 
-            self.entity_types = er_data["entity_types"]
-            self._model_config = er_data.get("model_config")
-
-            # The default is True since < MM 3.2.0 models are serializable by default
-            is_serializable = er_data.get("serializable", True)
-
-            if is_serializable:
-                # Load the model in directly from the dictionary since its serializable
-                self._model = er_data["model"]
-            else:
-                self._model = create_model(self._model_config)
-                self._model.load(model_path, er_data)
-        except (OSError, IOError) as e:
-            msg = "Unable to load {}. Pickle file cannot be read from {!r}"
-            raise ClassifierLoadError(msg.format(self.__class__.__name__, model_path)) from e
-
+        # validate and register resources
         if self._model is not None:
             if not hasattr(self._model, "mindmeld_version"):
                 msg = (
@@ -184,7 +216,7 @@ class EntityRecognizer(Classifier):
                 self._model.config.resolve_config(self._get_model_config())
 
             gazetteers = self._resource_loader.get_gazetteers()
-            tokenizer = self._resource_loader.get_tokenizer()
+            text_preparation_pipeline = self._resource_loader.get_text_preparation_pipeline()
             sys_types = set(
                 (t for t in self.entity_types if Entity.is_system_entity(t))
             )
@@ -197,7 +229,7 @@ class EntityRecognizer(Classifier):
                 sys_types=sys_types,
                 w_ngram_freq=w_ngram_freq,
                 c_ngram_freq=c_ngram_freq,
-                tokenizer=tokenizer,
+                text_preparation_pipeline=text_preparation_pipeline,
             )
             self.config = ClassifierConfig.from_model_config(self._model.config)
 
@@ -261,53 +293,21 @@ class EntityRecognizer(Classifier):
         predict_proba_result = self._model.predict_proba([query])
         return predict_proba_result
 
-    def _get_query_tree(
-        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX, raw=False
-    ):
-        """Returns the set of queries to train on
-
-        Args:
-            queries (list, optional): A list of ProcessedQuery objects, to
-                train. If not specified, a label set will be loaded.
-            label_set (list, optional): A label set to load. If not specified,
-                the default training set will be loaded.
-            raw (bool, optional): When True, raw query strings will be returned
-
-        Returns:
-            List: list of queries
-        """
-        if queries:
-            return self._build_query_tree(
-                queries, domain=self.domain, intent=self.intent, raw=raw
-            )
-
-        return self._resource_loader.get_labeled_queries(
-            domain=self.domain, intent=self.intent, label_set=label_set, raw=raw
+    def _get_queries_from_label_set(self, label_set=DEFAULT_TRAIN_SET_REGEX):
+        return self._resource_loader.get_flattened_label_set(
+            domain=self.domain,
+            intent=self.intent,
+            label_set=label_set
         )
 
-    def _get_queries_and_labels(self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX):
-        """Returns a set of queries and their labels based on the label set
+    def _get_examples_and_labels(self, queries):
+        return (queries.queries(), queries.entities())
 
-        Args:
-            queries (list, optional): A list of ProcessedQuery objects, to
-                train. If not specified, a label set will be loaded.
-            label_set (list, optional): A label set to load. If not specified,
-                the default training set will be loaded.
-        """
-        query_tree = self._get_query_tree(queries, label_set=label_set)
-        queries = self._resource_loader.flatten_query_tree(query_tree)
-        raw_queries = [q.query for q in queries]
-        labels = [q.entities for q in queries]
-        return raw_queries, labels
-
-    def _get_queries_and_labels_hash(
-        self, queries=None, label_set=DEFAULT_TRAIN_SET_REGEX
-    ):
-        query_tree = self._get_query_tree(queries, label_set=label_set, raw=True)
-        queries = self._resource_loader.flatten_query_tree(query_tree)
-        hashable_queries = [
-            self.domain + "###" + self.intent + "###entity###"
-        ] + sorted(queries)
+    def _get_examples_and_labels_hash(self, queries):
+        hashable_queries = (
+            [self.domain + "###" + self.intent + "###entity###"] +
+            sorted(list(queries.raw_queries()))
+        )
         return self._resource_loader.hash_list(hashable_queries)
 
     def inspect(self, query, gold_label=None, dynamic_resource=None):

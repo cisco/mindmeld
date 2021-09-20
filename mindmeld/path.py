@@ -32,8 +32,7 @@ APP_PATH = "{app_path}"
 # Generated folder structure for models
 GEN_FOLDER = os.path.join(APP_PATH, ".generated")
 MODEL_CACHE_PATH = os.path.join(GEN_FOLDER, "cached_models")
-QUERY_CACHE_PATH = os.path.join(GEN_FOLDER, "query_cache.pkl")
-QUERY_CACHE_TMP_PATH = os.path.join(GEN_FOLDER, "query_cache_tmp.pkl")
+QUERY_CACHE_DB_PATH = os.path.join(GEN_FOLDER, "query_cache.db")
 DOMAIN_MODEL_PATH = os.path.join(GEN_FOLDER, "domain.pkl")
 GEN_DOMAINS_FOLDER = os.path.join(GEN_FOLDER, "domains")
 GEN_TIMESTAMP_FOLDER = os.path.join(MODEL_CACHE_PATH, "{timestamp}")
@@ -55,8 +54,18 @@ GAZETTEER_PATH = os.path.join(GEN_FOLDER, "gaz-{entity}.pkl")
 GEN_INDEXES_FOLDER = os.path.join(GEN_FOLDER, "indexes")
 GEN_INDEX_FOLDER = os.path.join(GEN_INDEXES_FOLDER, "{index}")
 RANKING_MODEL_PATH = os.path.join(GEN_INDEX_FOLDER, "ranking.pkl")
-GEN_EMBEDDER_MODEL_PATH = os.path.join(
+DEPRECATED_GEN_EMBEDDER_MODEL_PATH = os.path.join(
     GEN_INDEXES_FOLDER, "{embedder_type}_{model_name}_cache.pkl"
+)
+GEN_EMBEDDER_MODEL_PATH = os.path.join(
+    GEN_INDEXES_FOLDER, "{model_id}_cache.pkl"
+)
+GEN_ENTITY_RESOLVERS_FOLDER = os.path.join(GEN_FOLDER, "entity_resolvers")
+GEN_ENTITY_RESOLVER_CACHE = os.path.join(GEN_ENTITY_RESOLVERS_FOLDER, "{uid}.pkl")
+GEN_QUESTION_ANSWERERS_FOLDER = os.path.join(GEN_FOLDER, "question_answerers")
+GEN_QUESTION_ANSWERER_INDICES_CACHE = os.path.join(GEN_QUESTION_ANSWERERS_FOLDER, "{uid}.pkl")
+NATIVE_QUESTION_ANSWERER_INDICES_CACHE_PATH = os.path.join(
+    os.path.expanduser("~"), ".cache/mindmeld"
 )
 
 # Domains sub tree for labeled queries
@@ -88,9 +97,6 @@ RESOURCES_FOLDER = os.path.join(PACKAGE_ROOT, "resources")
 DEFAULT_PROCESSOR_CONFIG_PATH = os.path.join(
     RESOURCES_FOLDER, "default_processor_config.json"
 )
-DEFAULT_TOKENIZER_CONFIG_PATH = os.path.join(
-    RESOURCES_FOLDER, "default_tokenizer_config.json"
-)
 ASCII_FOLDING_DICT_PATH = os.path.join(RESOURCES_FOLDER, "ascii_folding_dict.txt")
 
 DUCKLING_UBUNTU16_PATH = os.path.join(
@@ -99,23 +105,25 @@ DUCKLING_UBUNTU16_PATH = os.path.join(
 DUCKLING_UBUNTU18_PATH = os.path.join(
     RESOURCES_FOLDER, "duckling-x86_64-linux-ubuntu-18"
 )
-DUCKLING_CENTOS8_PATH = os.path.join(RESOURCES_FOLDER, "duckling-x86_64-centos-8-core")
+DUCKLING_UBUNTU20_PATH = os.path.join(
+    RESOURCES_FOLDER, "duckling-x86_64-linux-ubuntu-20"
+)
 DUCKLING_OSX_PATH = os.path.join(RESOURCES_FOLDER, "duckling-x86_64-osx")
-DUCKLING_UBUNTU16_MD5 = "1e58b4e91d580d98c8ac4f5a69b0ebd1"
-DUCKLING_UBUNTU18_MD5 = "b9c4891b27731df97d7f01c33441a91c"
-DUCKLING_OSX_MD5 = "d01753261e6e7940b533f09dc17d0c19"
-DUCKLING_CENTOS8_MD5 = "f840176c2b96c0037edd9524faac5e93"
+DUCKLING_UBUNTU16_SHA = "70439797ccc968fae54b1a828bbe193701fc9b1a908b579f3c4f80f9c0473442"
+DUCKLING_UBUNTU18_SHA = "47e36db9bc30a67aac0144ef95e49cbd149ffaebcea474c793c5dd013e192352"
+DUCKLING_UBUNTU20_SHA = "8cf176080001c0ba37f8405d6262e33915a751295f3165ab9e7518f685852e90"
+DUCKLING_OSX_SHA = "a5e746b7b695f07b4eaf09e5c6f7c972afda26d1159992fa69bcc72fad1b953a"
 DUCKLING_OS_MAPPINGS = {
     "ubuntu-16.04": DUCKLING_UBUNTU16_PATH,
     "ubuntu-18.04": DUCKLING_UBUNTU18_PATH,
+    "ubuntu-20.04": DUCKLING_UBUNTU20_PATH,
     "darwin": DUCKLING_OSX_PATH,
-    "centos-8-core": DUCKLING_CENTOS8_PATH,
 }
-DUCKLING_PATH_TO_MD5_MAPPINGS = {
-    DUCKLING_UBUNTU16_PATH: DUCKLING_UBUNTU16_MD5,
-    DUCKLING_UBUNTU18_PATH: DUCKLING_UBUNTU18_MD5,
-    DUCKLING_OSX_PATH: DUCKLING_OSX_MD5,
-    DUCKLING_CENTOS8_PATH: DUCKLING_CENTOS8_MD5,
+DUCKLING_PATH_TO_SHA_MAPPINGS = {
+    DUCKLING_UBUNTU16_PATH: DUCKLING_UBUNTU16_SHA,
+    DUCKLING_UBUNTU18_PATH: DUCKLING_UBUNTU18_SHA,
+    DUCKLING_UBUNTU20_PATH: DUCKLING_UBUNTU20_SHA,
+    DUCKLING_OSX_PATH: DUCKLING_OSX_SHA,
 }
 
 EMBEDDINGS_FOLDER_PATH = os.path.join(MINDMELD_ROOT, "data")
@@ -133,6 +141,14 @@ USER_CONFIG_PATH = os.path.join(USER_CONFIG_DIR, "config")
 BLUEPRINTS_PATH = os.path.join(USER_CONFIG_DIR, "blueprints")
 BLUEPRINT_PATH = os.path.join(BLUEPRINTS_PATH, "{name}")
 
+# Active Learning (AL)
+AL_EXPERIMENT_FOLDER = "{experiment_folder}"
+AL_PARAMS_PATH = os.path.join(AL_EXPERIMENT_FOLDER, "params.json")
+AL_RESULTS_FOLDER = os.path.join(AL_EXPERIMENT_FOLDER, "results")
+AL_ACCURACIES_PATH = os.path.join(AL_RESULTS_FOLDER, "accuracies.json")
+AL_SELECTED_QUERIES_PATH = os.path.join(AL_RESULTS_FOLDER, "selected_queries.json")
+AL_PLOTS_FOLDER = os.path.join(AL_EXPERIMENT_FOLDER, "plots")
+
 logger = logging.getLogger(__name__)
 
 
@@ -143,10 +159,11 @@ def safe_path(func):
     @wraps(func)
     def _wrapper(*args, **kwargs):
         res = func(*args, **kwargs)
+        # Replace with relpath to avoid replacing : (root dir) with _ in Windows
         if isinstance(res, tuple):
-            return tuple(map(lambda x: x.replace(":", "_") if x else x, res))
+            return tuple(map(lambda x: os.path.relpath(x).replace(":", "_") if x else x, res))
         elif isinstance(res, str):
-            return res.replace(":", "_")
+            return os.path.relpath(res).replace(":", "_")
         else:
             return res
 
@@ -519,22 +536,56 @@ def get_ranking_file_path(app_path, index):
 
 
 @safe_path
-def get_embedder_cache_file_path(app_path, embedder_type, model_name):
+def get_embedder_cache_file_path(app_path, embedder_type, model_name=None):
     """Gets the path to the model_cache.json file for a given embedder model.
 
     Args:
         app_path (str): The path to the app data.
         embedder_type (str): The name of the embedder type.
-        model_name (str): The name of the specific trained model.
+        model_name (str, optional): The name of the specific trained model.
 
     Returns:
         (str) The path for the json cached of the embedded values.
     """
-    return GEN_EMBEDDER_MODEL_PATH.format(
-        app_path=app_path,
-        embedder_type=embedder_type,
-        model_name=model_name,
-    )
+    if model_name:
+        return DEPRECATED_GEN_EMBEDDER_MODEL_PATH.format(
+            app_path=app_path,
+            embedder_type=embedder_type,
+            model_name=model_name,
+        )
+    else:
+        return GEN_EMBEDDER_MODEL_PATH.format(
+            app_path=app_path,
+            model_id=embedder_type
+        )
+
+
+@safe_path
+def get_question_answerer_index_cache_file_path(app_path, uid):
+    """Gets the path to the question answerer index cache file.
+
+    Args:
+        app_path (str): The path to the app data.
+        uid (str): A unique filename for the .pkl file
+
+    Returns:
+        (str) The path for the .pkl cache.
+    """
+    return GEN_QUESTION_ANSWERER_INDICES_CACHE.format(app_path=app_path, uid=uid)
+
+
+@safe_path
+def get_entity_resolver_cache_file_path(app_path, uid):
+    """Gets the path to the entity resolver cache file for a given entity type and a chosen model type.
+
+    Args:
+        app_path (str): The path to the app data.
+        uid (str): A unique filename for the .pkl file
+
+    Returns:
+        (str) The path for the .pkl cache.
+    """
+    return GEN_ENTITY_RESOLVER_CACHE.format(app_path=app_path, uid=uid)
 
 
 @safe_path

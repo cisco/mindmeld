@@ -40,3 +40,7 @@ DOMAIN_MODEL_CONFIG = {
         "average-token-length": {},  # Custom feature
     },
 }
+
+TEXT_PREPARATION_CONFIG = {
+    "tokenizer": "WhiteSpaceTokenizer",
+}

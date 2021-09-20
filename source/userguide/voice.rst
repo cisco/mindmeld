@@ -1,6 +1,8 @@
 Dealing with Voice Inputs
 =========================
 
+.. _dealing_with_voice_inputs:
+
 MindMeld provides all the functionality required to build a text-based natural language
 chat interface. However, you might also want to support voice interactions with your application
 or build for a platform where voice is the only input modality. For such applications, you can
@@ -260,7 +262,7 @@ corresponding to the ``resolve_entities_using_nbest_transcripts`` key. The forma
 domain.
 
 MindMeld will limit running the n-best enhanced entity resolution to the domains and intents you
-have specified. This is an optimization to avoid unnecessary processing of a factor of 
+have specified. This is an optimization to avoid unnecessary processing of a factor of
 `n` for queries without entities of interest. While the code is parallelized for minimal latency
 increase, there will be an increase in memory usage from the domains and intents for which n-best
 entity processing is run. You can control the parallel processing behavior using the

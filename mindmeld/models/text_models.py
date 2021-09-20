@@ -17,10 +17,12 @@ of text.
 """
 import logging
 import operator
+import os
 import random
 
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.externals import joblib
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
@@ -29,33 +31,31 @@ from sklearn.preprocessing import MaxAbsScaler, StandardScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
+from .evaluation import EvaluatedExample, StandardModelEvaluation
 from .helpers import (
     CHAR_NGRAM_FREQ_RSC,
     QUERY_FREQ_RSC,
     WORD_FREQ_RSC,
     WORD_NGRAM_FREQ_RSC,
-    register_model,
 )
-from .model import EvaluatedExample, Model, StandardModelEvaluation
-
-_NEG_INF = -1e10
-
-# classifier types
-LOG_REG_TYPE = "logreg"
-DECISION_TREE_TYPE = "dtree"
-RANDOM_FOREST_TYPE = "rforest"
-SVM_TYPE = "svm"
-SUPER_LEARNER_TYPE = "super-learner"
-BASE_MODEL_TYPES = [LOG_REG_TYPE, DECISION_TREE_TYPE, RANDOM_FOREST_TYPE, SVM_TYPE]
-
-# default model scoring type
-ACCURACY_SCORING = "accuracy"
-
+from .model import ModelConfig, Model, PytorchModel
 
 logger = logging.getLogger(__name__)
 
 
 class TextModel(Model):
+    # classifier types
+    LOG_REG_TYPE = "logreg"
+    DECISION_TREE_TYPE = "dtree"
+    RANDOM_FOREST_TYPE = "rforest"
+    SVM_TYPE = "svm"
+    ALLOWED_CLASSIFIER_TYPES = [LOG_REG_TYPE, DECISION_TREE_TYPE, RANDOM_FOREST_TYPE, SVM_TYPE]
+
+    # default model scoring type
+    ACCURACY_SCORING = "accuracy"
+
+    _NEG_INF = -1e10
+
     def __init__(self, config):
         super().__init__(config)
         self._class_encoder = SKLabelEncoder()
@@ -91,10 +91,10 @@ class TextModel(Model):
         classifier_type = self.config.model_settings["classifier_type"]
         try:
             return {
-                LOG_REG_TYPE: LogisticRegression,
-                DECISION_TREE_TYPE: DecisionTreeClassifier,
-                RANDOM_FOREST_TYPE: RandomForestClassifier,
-                SVM_TYPE: SVC,
+                TextModel.LOG_REG_TYPE: LogisticRegression,
+                TextModel.DECISION_TREE_TYPE: DecisionTreeClassifier,
+                TextModel.RANDOM_FOREST_TYPE: RandomForestClassifier,
+                TextModel.SVM_TYPE: SVC,
             }[classifier_type]
         except KeyError as e:
             msg = "{}: Classifier type {!r} not recognized"
@@ -105,80 +105,7 @@ class TextModel(Model):
         Returns the scorer to use based on the selection settings and classifier type,
         defaulting to accuracy.
         """
-        return selection_settings.get("scoring", ACCURACY_SCORING)
-
-    def evaluate(self, examples, labels):
-        """Evaluates a model against the given examples and labels
-
-        Args:
-            examples: A list of examples to predict
-            labels: A list of expected labels
-
-        Returns:
-            ModelEvaluation: an object containing information about the \
-                evaluation
-        """
-        # TODO: also expose feature weights?
-        predictions = self.predict_proba(examples)
-
-        # Create a model config object for the current effective config (after param selection)
-        config = self._get_effective_config()
-
-        evaluations = [
-            EvaluatedExample(
-                e, labels[i], predictions[i][0], predictions[i][1], config.label_type
-            )
-            for i, e in enumerate(examples)
-        ]
-
-        model_eval = StandardModelEvaluation(config, evaluations)
-        return model_eval
-
-    def fit(self, examples, labels, params=None):
-        """Trains this model.
-
-        This method inspects instance attributes to determine the classifier
-        object and cross-validation strategy, and then fits the model to the
-        training examples passed in.
-
-        Args:
-            examples (list): A list of examples.
-            labels (list): A parallel list to examples. The gold labels
-                for each example.
-            params (dict, optional): Parameters to use when training. Parameter
-                selection will be bypassed if this is provided
-
-        Returns:
-            (TextModel): Returns self to match classifier scikit-learn \
-                interfaces.
-        """
-        params = params or self.config.params
-        skip_param_selection = params is not None or self.config.param_selection is None
-
-        # Shuffle to prevent order effects
-        indices = list(range(len(labels)))
-        random.shuffle(indices)
-        examples = [examples[i] for i in indices]
-        labels = [labels[i] for i in indices]
-
-        distinct_labels = set(labels)
-        if len(set(distinct_labels)) <= 1:
-            return self
-
-        # Extract features and classes
-        y = self._label_encoder.encode(labels)
-        X, y, groups = self.get_feature_matrix(examples, y, fit=True)
-
-        if skip_param_selection:
-            self._clf = self._fit(X, y, params)
-            self._current_params = params
-        else:
-            # run cross validation to select params
-            best_clf, best_params = self._fit_cv(X, y, groups)
-            self._clf = best_clf
-            self._current_params = best_params
-
-        return self
+        return selection_settings.get("scoring", TextModel.ACCURACY_SCORING)
 
     def select_params(self, examples, labels, selection_settings=None):
         y = self._label_encoder.encode(labels)
@@ -201,16 +128,6 @@ class TextModel(Model):
         params = self._clean_params(model_class, params)
         return model_class(**params).fit(examples, labels)
 
-    def predict(self, examples, dynamic_resource=None):
-        X, _, _ = self.get_feature_matrix(examples, dynamic_resource=dynamic_resource)
-        y = self._clf.predict(X)
-        predictions = self._class_encoder.inverse_transform(y)
-        return self._label_encoder.decode(predictions)
-
-    def predict_proba(self, examples, dynamic_resource=None):
-        X, _, _ = self.get_feature_matrix(examples, dynamic_resource=dynamic_resource)
-        return self._predict_proba(X, self._clf.predict_proba)
-
     def predict_log_proba(self, examples, dynamic_resource=None):
         X, _, _ = self.get_feature_matrix(examples, dynamic_resource=dynamic_resource)
         predictions = self._predict_proba(X, self._clf.predict_log_proba)
@@ -220,13 +137,8 @@ class TextModel(Model):
             _, probas = row
             for label, proba in probas.items():
                 if proba == -np.Infinity:
-                    probas[label] = _NEG_INF
+                    probas[label] = TextModel._NEG_INF
         return predictions
-
-    def view_extracted_features(self, example, dynamic_resource=None):
-        return self._extract_features(
-            example, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer
-        )
 
     def _get_feature_weight(self, feat_name, label_class):
         """Retrieves the feature weight from the coefficient matrix. If there are only two
@@ -277,7 +189,8 @@ class TextModel(Model):
         pred_label = self.predict([example], dynamic_resource=dynamic_resource)[0]
         pred_class = self._class_encoder.transform([pred_label])
         features = self._extract_features(
-            example, dynamic_resource=dynamic_resource, tokenizer=self.tokenizer
+            example, dynamic_resource=dynamic_resource,
+            text_preparation_pipeline=self.text_preparation_pipeline
         )
 
         logging.info("Predicted: %s.", pred_label)
@@ -371,7 +284,7 @@ class TextModel(Model):
         feats = []
         for idx, example in enumerate(examples):
             feats.append(
-                self._extract_features(example, dynamic_resource, self.tokenizer)
+                self._extract_features(example, dynamic_resource, self.text_preparation_pipeline)
             )
             groups.append(idx)
 
@@ -473,5 +386,127 @@ class TextModel(Model):
         }.get(scale_type)
         return scaler
 
+    def evaluate(self, examples, labels):
+        """Evaluates a model against the given examples and labels
 
-register_model("text", TextModel)
+        Args:
+            examples: A list of examples to predict
+            labels: A list of expected labels
+
+        Returns:
+            ModelEvaluation: an object containing information about the \
+                evaluation
+        """
+        # TODO: also expose feature weights?
+        predictions = self.predict_proba(examples)
+
+        # Create a model config object for the current effective config (after param selection)
+        config = self._get_effective_config()
+
+        evaluations = [
+            EvaluatedExample(
+                e, labels[i], predictions[i][0], predictions[i][1], config.label_type
+            )
+            for i, e in enumerate(examples)
+        ]
+
+        model_eval = StandardModelEvaluation(config, evaluations)
+        return model_eval
+
+    def fit(self, examples, labels, params=None):
+        """Trains this model.
+
+        This method inspects instance attributes to determine the classifier
+        object and cross-validation strategy, and then fits the model to the
+        training examples passed in.
+
+        Args:
+            examples (ProcessedQueryList.*Iterator): A list of examples.
+            labels (ProcessedQueryList.*Iterator): A parallel list to examples. The gold labels
+                for each example.
+            params (dict, optional): Parameters to use when training. Parameter
+                selection will be bypassed if this is provided
+
+        Returns:
+            (TextModel): Returns self to match classifier scikit-learn \
+                interfaces.
+        """
+        params = params or self.config.params
+        skip_param_selection = params is not None or self.config.param_selection is None
+
+        # Shuffle to prevent order effects
+        indices = list(range(len(labels)))
+        random.shuffle(indices)
+        examples.reorder(indices)
+        labels.reorder(indices)
+        distinct_labels = set(labels)
+        if len(set(distinct_labels)) <= 1:
+            return self
+
+        # Extract features and classes
+        y = self._label_encoder.encode(labels)
+        X, y, groups = self.get_feature_matrix(examples, y, fit=True)
+
+        if skip_param_selection:
+            self._clf = self._fit(X, y, params)
+            self._current_params = params
+        else:
+            # run cross validation to select params
+            best_clf, best_params = self._fit_cv(X, y, groups)
+            self._clf = best_clf
+            self._current_params = best_params
+
+        return self
+
+    def predict(self, examples, dynamic_resource=None):
+        X, _, _ = self.get_feature_matrix(examples, dynamic_resource=dynamic_resource)
+        y = self._clf.predict(X)
+        predictions = self._class_encoder.inverse_transform(y)
+        return self._label_encoder.decode(predictions)
+
+    def predict_proba(self, examples, dynamic_resource=None):
+        X, _, _ = self.get_feature_matrix(examples, dynamic_resource=dynamic_resource)
+        return self._predict_proba(X, self._clf.predict_proba)
+
+    def view_extracted_features(self, example, dynamic_resource=None):
+        return self._extract_features(
+            example, dynamic_resource=dynamic_resource,
+            text_preparation_pipeline=self.text_preparation_pipeline
+        )
+
+    @classmethod
+    def load(cls, path):
+        metadata = joblib.load(path)
+
+        # backwards compatability check for RoleClassifiers
+        if isinstance(metadata, dict):
+            return metadata["model"]
+
+        # in this case, metadata = model which was serialized and dumped
+        return metadata
+
+    def _dump(self, path):
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        joblib.dump(self, path)
+
+
+class PytorchTextModel(PytorchModel):
+    ALLOWED_CLASSIFIER_TYPES = ["embedder", "cnn", "lstm"]
+    pass
+
+
+class AutoTextModel:
+
+    @staticmethod
+    def get_model_class(config: ModelConfig):
+
+        CLASSES = [TextModel, PytorchTextModel]
+        classifier_type = config.model_settings["classifier_type"]
+
+        for _class in CLASSES:
+            if classifier_type in _class.ALLOWED_CLASSIFIER_TYPES:
+                return _class
+
+        msg = f"Invalid 'classifier_type': {classifier_type}. " \
+              f"Allowed types are: {[_class.ALLOWED_CLASSIFIER_TYPES for _class in CLASSES]}"
+        raise ValueError(msg)

@@ -106,6 +106,10 @@ TEST_ENTITY_RECOGNIZER_CONFIG = {
     "test_label_set": "testtrain.*\.txt",  # noqa: W605
 }
 
+TEXT_PREPARATION_CONFIG = {
+    "tokenizer": "WhiteSpaceTokenizer"
+}
+
 
 def get_entity_recognizer_config(domain, intent):
     if domain == "store_info" and intent == "get_store_hours":
