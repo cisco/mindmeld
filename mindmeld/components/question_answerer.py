@@ -2026,7 +2026,9 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         # bug-fix: previously, '_embedder_model' is created only when 'model_type' is 'embedder'
         self._embedder_model = None
         if "embedder" in self.query_type:
-            self._embedder_model = create_embedder_model(self.app_path, self.model_settings)
+            _app_path = self.app_path or DEFAULT_APP_PATH
+            # An app path is necessary for creating a cache path for dumping embeddings cache
+            self._embedder_model = create_embedder_model(_app_path, self.model_settings)
 
     @property
     def _es_client(self):

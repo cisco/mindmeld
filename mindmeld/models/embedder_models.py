@@ -60,8 +60,9 @@ class Embedder(ABC):
                 cache_path: A .pkl cache path to dump the embeddings cache
             """
             self.reset()
-            if cache_path:
-                self.cache_path = os.path.abspath(cache_path)
+            self.cache_path = cache_path
+            if self.cache_path:
+                self.cache_path = os.path.abspath(self.cache_path)
                 self.load()
 
         def reset(self):
