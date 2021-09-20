@@ -29,7 +29,6 @@ from string import punctuation
 
 import numpy as np
 import scipy
-from sklearn.externals import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
 from tqdm.auto import trange
 
@@ -154,7 +153,7 @@ class EntityResolverFactory:
 
         return ENTITY_RESOLVER_MODEL_MAPPINGS.get(resolver_type)(
             app_path,
-            entity_type=entity_type,
+            entity_type,
             config=er_config,
             resource_loader=resource_loader,
             **kwargs)
@@ -179,13 +178,12 @@ class EntityResolver:
             )
     """
 
-    def __new__(cls, app_path, resource_loader, entity_type, es_host=None, es_client=None):
+    def __new__(cls, app_path, resource_loader, entity_type, **kwargs):
         msg = "Entity Resolver should now be loaded using EntityResolverFactory. " \
               "See https://www.mindmeld.com/docs/userguide/entity_resolver.html for more details."
         warnings.warn(msg, DeprecationWarning)
         return EntityResolverFactory.create_resolver(
-            app_path, entity_type, resource_loader=resource_loader,
-            es_host=es_host, es_client=es_client
+            app_path, entity_type, resource_loader=resource_loader, **kwargs
         )
 
 
@@ -253,11 +251,11 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
             _id = ent_object.get("id")
             cname = ent_object.get("cname")
             whitelist = list(dict.fromkeys(ent_object.get("whitelist", [])))
-            if not cname and not whitelist:
+            if cname is None and len(whitelist) == 0:
                 msg = f"Found no canonical name field 'cname' while processing KB objects. " \
                       f"The observed KB entity object is: {ent_object}"
                 raise ValueError(msg)
-            if not cname:
+            elif cname is None and len(whitelist):
                 cname = whitelist[0]
                 whitelist = whitelist[1:]
             if _id in all_ids:
@@ -640,8 +638,8 @@ class ExactMatchEntityResolver(BaseEntityResolver):
     Resolver class based on exact matching
     """
 
-    def __init__(self, app_path, **kwargs):
-        super().__init__(app_path, **kwargs)
+    def __init__(self, app_path, entity_type, **kwargs):
+        super().__init__(app_path, entity_type, **kwargs)
 
         settings = kwargs.pop("config", {}).get("model_settings", {})
         self._aug_lower_case = settings.get("augment_lower_case", False)
@@ -717,8 +715,6 @@ class ExactMatchEntityResolver(BaseEntityResolver):
         self._aug_normalized = _resolver_configs["augment_normalized"]
         self._normalize_aliases = _resolver_configs["normalize_aliases"]
 
-        self.processed_entity_map = joblib.load(path)
-
 
 class ElasticsearchEntityResolver(BaseEntityResolver):
     """
@@ -729,8 +725,8 @@ class ElasticsearchEntityResolver(BaseEntityResolver):
     ES_SYNONYM_INDEX_PREFIX = "synonym"
     """The prefix of the ES index."""
 
-    def __init__(self, app_path, **kwargs):
-        super().__init__(app_path, **kwargs)
+    def __init__(self, app_path, entity_type, **kwargs):
+        super().__init__(app_path, entity_type, **kwargs)
 
         self._es_host = kwargs.get("es_host")
         self._es_config = {"client": kwargs.get("es_client"), "pid": os.getpid()}
@@ -1197,8 +1193,8 @@ class TfIdfSparseCosSimEntityResolver(BaseEntityResolver):
     scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html
     """
 
-    def __init__(self, app_path, **kwargs):
-        super().__init__(app_path, **kwargs)
+    def __init__(self, app_path, entity_type, **kwargs):
+        super().__init__(app_path, entity_type, **kwargs)
 
         settings = kwargs.pop("config", {}).get("model_settings", {})
         self._aug_lower_case = settings.get("augment_lower_case", True)
@@ -1209,7 +1205,7 @@ class TfIdfSparseCosSimEntityResolver(BaseEntityResolver):
 
         self.ngram_length = 5  # max number of character ngrams to consider; 3 for elasticsearch
         self._analyzer = kwargs.get("analyzer") or self._char_ngrams_plus_words_analyzer
-        self._vectorizer = TfidfVectorizer(analyzer=self._analyzer, lowercase=False)
+        self._vectorizer = None
         self._syn_tfidf_matrix = None
         self._unique_synonyms = []
 
@@ -1231,6 +1227,8 @@ class TfIdfSparseCosSimEntityResolver(BaseEntityResolver):
             logger.info(msg)
 
         self.processed_entity_map = self.get_processed_entity_map(entity_map)
+
+        self._vectorizer = TfidfVectorizer(analyzer=self._analyzer, lowercase=False)
 
         # obtain sparse matrix
         synonyms = {v: k for k, v in
@@ -1320,13 +1318,16 @@ class TfIdfSparseCosSimEntityResolver(BaseEntityResolver):
         return values
 
     def _dump(self, path):
+
         os.makedirs(os.path.dirname(path), exist_ok=True)
         resolver_state = {
             "unique_synonyms": self._unique_synonyms,  # caching unique syns for finding similarity
             "syn_tfidf_matrix": self._syn_tfidf_matrix,  # caching sparse vectors of synonyms
             "vectorizer": self._vectorizer,  # caching vectorizer
         }
-        joblib.dump(resolver_state, path)
+        with open(path, "wb") as fp:
+            pickle.dump(resolver_state, fp)
+            fp.close()
 
         head, ext = os.path.splitext(path)
         resolver_config_path = head + ".config" + ext
@@ -1347,7 +1348,9 @@ class TfIdfSparseCosSimEntityResolver(BaseEntityResolver):
         self._aug_max_syn_embs = _resolver_configs["augment_max_synonyms_embeddings"]
         self.ngram_length = _resolver_configs["ngram_length"]
 
-        resolver_state = joblib.load(path)
+        with open(path, "rb") as fp:
+            resolver_state = pickle.load(fp)
+            fp.close()
         self._unique_synonyms = resolver_state["unique_synonyms"]
         self._syn_tfidf_matrix = resolver_state["syn_tfidf_matrix"]
         self._vectorizer = resolver_state["vectorizer"]
@@ -1472,7 +1475,7 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
     Resolver class for embedder models that create dense embeddings
     """
 
-    def __init__(self, app_path, **kwargs):
+    def __init__(self, app_path, entity_type, **kwargs):
         """
         Args:
             app_path (str): App's path to cache embeddings
@@ -1489,7 +1492,7 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
                         allowed choices are "min_max_scaler", "standard_scaler"
                     batch_size: can be set based on machine capabilities and RAM
         """
-        super().__init__(app_path, **kwargs)
+        super().__init__(app_path, entity_type, **kwargs)
 
         er_config = kwargs.pop("config", {})
         settings = er_config.get("model_settings", {})
@@ -1499,7 +1502,15 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
         self._aug_avg_syn_embs = settings.get("augment_average_synonyms_embeddings", True)
         self._normalize_aliases = False
 
-        self._embedder_model = create_embedder_model(self.app_path, er_config)
+        self._embedder_cache_path = kwargs.get("embedder_cache_path")
+
+        # No `app_path` specified because we now have dump and load methods that take a caching path
+        # as argument. Previously, we just dumped and loaded from a default cache_path ascertained
+        # by that embedder model itself (through model_id and app_poth) i.e. one path for all usages
+        # of that particular embedder model. However, with the introduction of dump and load method
+        # to resolvers, one-path-for-all is no longer an optimal solution and is deprecated.
+        # Note that we do not specify any `cache_path` key field as well in the er_config here!
+        self._embedder_model = create_embedder_model(app_path=None, config=er_config)
 
     @property
     def _resolver_configs(self):
@@ -1510,6 +1521,7 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
             "augment_normalized": self._aug_normalized,
             "normalize_aliases": self._normalize_aliases,
             "augment_max_synonyms_embeddings": self._aug_avg_syn_embs,
+            "embedder_cache_path": self._embedder_cache_path,
         }
 
     def _fit(self, clean, entity_map):
@@ -1546,11 +1558,16 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
                 pooled_encoding = np.mean(self._embedder_model.get_encodings(syns), axis=0)
                 self._embedder_model.add_to_cache({pooled_cname: pooled_encoding})
 
-        # dump cache to a path ascertained by embedder (based on its model_id and app_path)
-        # this cache will be cleared in case the .dump() method is called, however, we still dump it
-        # because resolvers can be used in both NLP pipeline (w/o invoking the dump functionality)
-        # as well as in native Question Answerer pipeline (w/ invoking the dump functionality)
-        self._embedder_model.dump_cache()
+        # Dump the embedder cache if a valid embedder_cache_path is passed-in. Because we didn't
+        # provide an `app_path` during embedder model initialization previously, the embedder
+        # doesn't have a default cache path and relies on the path provided to dump_cache() method
+        # as below. Note that this cache will be cleared in case the .dump() method is called upon
+        # fitting. Nevertheless, we still dump it because resolvers can be used in both NLP pipeline
+        # (w/o invoking the dump functionality but specifying an embedder_cache_path) as well as
+        # in places like native Question Answerer pipeline (w/ invoking the dump functionality
+        # explicitly).
+        if self._embedder_cache_path:
+            self._embedder_model.dump_cache(cache_path=self._embedder_cache_path)
 
     def _predict(self, nbest_entities, allowed_cnames=None):
         """Predicts the resolved value(s) for the given entity using cosine similarity.
@@ -1597,11 +1614,14 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
 
     def _dump(self, path):
 
-        # delete the temporary cache and dump it in the asked cache path
-        self._embedder_model.clear_cache()
+        # dump embeddings cache
+        if self._embedder_cache_path:
+            # delete the temporary cache as the dump method is explicitly called
+            self._embedder_model.clear_cache(cache_path=self._embedder_cache_path)
         head, ext = os.path.splitext(path)
         embedder_cache_path = head + ".embedder_cache" + ext
         self._embedder_model.dump_cache(cache_path=embedder_cache_path)
+        self._embedder_cache_path = embedder_cache_path
 
         head, ext = os.path.splitext(path)
         resolver_config_path = head + ".config" + ext
@@ -1628,10 +1648,9 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
         self._aug_normalized = _resolver_configs["augment_normalized"]
         self._normalize_aliases = _resolver_configs["normalize_aliases"]
         self._aug_avg_syn_embs = _resolver_configs["augment_max_synonyms_embeddings"]
+        self._embedder_cache_path = _resolver_configs["embedder_cache_path"]
 
-        head, ext = os.path.splitext(path)
-        embedder_cache_path = head + ".embedder_cache" + ext
-        self._embedder_model.load_cache(cache_path=embedder_cache_path)
+        self._embedder_model.load_cache(cache_path=self._embedder_cache_path)
 
     def _predict_batch(self, nbest_entities_list, batch_size):
 
@@ -1703,7 +1722,7 @@ class SentenceBertCosSimEntityResolver(EmbedderCosSimEntityResolver):
     https://github.com/UKPLab/sentence-transformers
     """
 
-    def __init__(self, app_path, **kwargs):
+    def __init__(self, app_path, entity_type, **kwargs):
         """
         This wrapper class allows creation of a BERT base embedder class
         (currently based on sentence-transformers)
@@ -1747,7 +1766,7 @@ class SentenceBertCosSimEntityResolver(EmbedderCosSimEntityResolver):
                 },
             }
         })
-        super().__init__(app_path, **kwargs)
+        super().__init__(app_path, entity_type, **kwargs)
 
 
 ENTITY_RESOLVER_MODEL_MAPPINGS = {

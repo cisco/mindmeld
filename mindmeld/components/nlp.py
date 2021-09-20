@@ -1638,7 +1638,8 @@ class EntityProcessor(Processor):
         self.entity_resolver = EntityResolverFactory.create_resolver(
             app_path,
             entity_type,
-            resource_loader=self.resource_loader
+            resource_loader=self.resource_loader,
+            embedder_cache_path=path.get_resolver_model_path(app_path, domain, intent, entity_type)
         )
 
         self.progress_bar = progress_bar

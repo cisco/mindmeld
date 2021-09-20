@@ -57,7 +57,7 @@ GEN_INDEX_FOLDER = os.path.join(GEN_INDEXES_FOLDER, "{index}")
 RANKING_MODEL_PATH = os.path.join(GEN_INDEX_FOLDER, "ranking.pkl")
 GEN_QUESTION_ANSWERERS_FOLDER = os.path.join(GEN_FOLDER, "question_answerers")
 GEN_QUESTION_ANSWERER_INDICES_CACHE = os.path.join(GEN_QUESTION_ANSWERERS_FOLDER, "{uid}.pkl")
-NATIVE_QUESTION_ANSWERER_INDICES_CACHE_PATH = os.path.join(
+NATIVE_QUESTION_ANSWERER_INDICES_CACHE_DEFAULT_FOLDER = os.path.join(
     os.path.expanduser("~"), ".cache/mindmeld"
 )
 DEPRECATED_GEN_EMBEDDER_MODEL_PATH = os.path.join(
