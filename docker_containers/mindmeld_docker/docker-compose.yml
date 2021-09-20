@@ -1,0 +1,8 @@
+version: "3"
+services:
+  mindmeld:
+    build: .
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+      - "7150:7150"

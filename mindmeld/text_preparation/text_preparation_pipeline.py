@@ -16,6 +16,8 @@ import logging
 from typing import List, Dict, Tuple, Union
 import re
 import unicodedata
+import json
+from hashlib import sha256
 
 from .normalizers import (
     Normalizer,
@@ -34,9 +36,10 @@ from ..components._config import (
     get_language_config,
     ENGLISH_LANGUAGE_CODE,
 )
-from ..constants import UNICODE_SPACE_CATEGORY
-from ..path import get_app
+from ..constants import UNICODE_SPACE_CATEGORY, DUCKLING_VERSION
 from ..exceptions import MindMeldImportError
+from ..path import get_app
+from .._version import get_mm_version
 logger = logging.getLogger(__name__)
 
 
@@ -275,6 +278,39 @@ class TextPreparationPipeline:
         """
         return self.stemmer.stem_word(word)
 
+    def tojson(self):
+        """
+        Method defined to obtain recursive JSON representation of a TextPreparationPipeline.
+
+        Args:
+            None.
+
+        Returns:
+            JSON representation of TextPreparationPipeline (dict) .
+        """
+        return {
+            "duckling_version": DUCKLING_VERSION,
+            "mm_version": get_mm_version(),
+            "language": self.language,
+            "preprocessors": self.preprocessors,
+            "normalizers": self.normalizers,
+            "tokenizer": self.tokenizer,
+            "stemmer": self.stemmer
+        }
+
+    def get_hashid(self):
+        """
+        Method defined to obtain Hash value of TextPreparationPipeline.
+
+        Args:
+            None.
+
+        Returns:
+            256 character hash representation of current TextPreparationPipeline config (str) .
+        """
+        string = json.dumps(self, cls=TextPreparationPipelineJSONEncoder, sort_keys=True)
+        return sha256(string.encode()).hexdigest()
+
     @staticmethod
     def find_mindmeld_annotation_re_matches(text):
         """
@@ -329,7 +365,7 @@ class TextPreparationPipeline:
 
         if prev_entity_end < len(text):
             # Adds the remainder of the text after the last end brace } "function(post_entity_text)"
-            modified_text.append(function(text[prev_entity_end : len(text)]))
+            modified_text.append(function(text[prev_entity_end: len(text)]))
 
         return "".join(modified_text)
 
@@ -377,7 +413,7 @@ class TextPreparationPipeline:
         if prev_entity_end < len(text):
             # Add tokens from the text after the last MindMeld entity
             tokens_after_last_entity = self.tokenizer.tokenize(
-                text[prev_entity_end : len(text)]
+                text[prev_entity_end: len(text)]
             )
             TextPreparationPipeline.offset_token_start_values(
                 tokens=tokens_after_last_entity, offset=prev_entity_end
@@ -576,7 +612,7 @@ class TextPreparationPipelineFactory:
         stemmer = (
             "NoOpStemmer"
             if "stemmer" in text_preparation_config
-            and not text_preparation_config["stemmer"]
+               and not text_preparation_config["stemmer"]
             else text_preparation_config.get("stemmer")
         )
         return TextPreparationPipelineFactory.create_text_preparation_pipeline(
@@ -739,3 +775,23 @@ class TextPreparationPipelineFactory:
             raise TypeError(
                 f"{component} must be of type String or {expected_component_class.__name__}."
             )
+
+
+class TextPreparationPipelineJSONEncoder(json.JSONEncoder):
+    """
+    Custom Encoder class defined to obtain recursive JSON representation of a TextPreparationPipeline.
+
+    Args:
+        None.
+
+    Returns:
+        Custom JSON Encoder class (json.JSONEncoder) .
+    """
+
+    def default(self, o):
+        tojson = getattr(o, 'tojson', None)
+        if callable(tojson):
+            return tojson()
+        else:
+            raise TextPreparationPipelineError(
+                f"Missing tojson() for {o.__class__.__name__} to create query cache hash.")
