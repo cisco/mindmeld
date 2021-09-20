@@ -118,6 +118,7 @@ Contents
    userguide/custom_features
    userguide/kb
    userguide/dm
+   userguide/text_preparation_pipeline
    userguide/active_learning
    userguide/augmentation
    userguide/auto_annotator
