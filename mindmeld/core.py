@@ -12,6 +12,7 @@
 # limitations under the License.
 
 """This module contains a collection of the core data structures used in MindMeld."""
+from copy import deepcopy
 import logging
 from typing import Optional, List, Dict
 import immutables
@@ -699,29 +700,70 @@ class NestedEntity:
 
         """
 
-        def _get_form_details(query_span, offset, form_in, form_out):
-            span_out = query.transform_span(query_span, form_in, form_out)
-            full_text = query.get_text_form(form_out)
-            orig_text = span_out.slice(full_text)
+        def _get_token_start(full_norm_text, span_out):
+            """ Calculate the start of a token using the normalized tokens
+            combined as a string and delimited by space.
 
-            span_out = query.transform_span(query_span, form_in, 2)
-            full_text = query.get_text_form(2)
-            text = span_out.slice(full_text)
-
+            Args:
+                full_norm_text (str): Normalized tokens combined by space as a single string.
+                span_out (Span): Span of the token of interest in the full_norm_text.
+            Return:
+                tok_start (int): The starting token index.
+            """
             # The span range is till the span_out or max to the second last char
             tok_start = 0
-            span_range = min(span_out.start, len(full_text) - 1)
-            for idx, current_char in enumerate(full_text[:span_range]):
+            span_range = min(span_out.start, len(full_norm_text) - 1)
+            for idx, current_char in enumerate(full_norm_text[:span_range]):
                 # Increment the counter only if a whitespace follows a non-whitespace
-                next_char = full_text[idx + 1]
+                next_char = full_norm_text[idx + 1]
                 if not current_char.isspace() and next_char.isspace():
                     tok_start += 1
+            return tok_start
 
-            text_token_len = max(len(text.split()), 1)
-            tok_span = Span(tok_start, tok_start - 1 + text_token_len)
+        def _get_token_span(query_span, form_in):
+            """ Get the token span of text based on the normalized token sentence.
+            Token span should be calculated based on the normalized token sentence
+            as this approach is more robust to sentences that are not space delimited.
 
+            Args:
+                query_span (Span): The text span for the token of interest
+                form_in (int): Integer value representing starting text format
+            Returns:
+                tok_span (Span): Span of normalized tokens for the given text.
+            """
+            # Creating a copy to avoid modifying the original query object
+            query_for_norm_transformation = deepcopy(query)
+
+            span_out = query_for_norm_transformation.transform_span(query_span, form_in, TEXT_FORM_NORMALIZED)
+            full_norm_text = query_for_norm_transformation.get_text_form(TEXT_FORM_NORMALIZED)
+            norm_token_text = span_out.slice(full_norm_text)
+            tok_start = _get_token_start(full_norm_text, span_out)
+
+            # Using a min token len of 1 avoids token span of (x, x - 1) which can become negative.
+            norm_token_text_len = len(norm_token_text.split()) or 1
+            tok_span = Span(
+                start= tok_start,
+                end= tok_start + norm_token_text_len - 1
+            )
+            return tok_span
+
+        def _get_form_details(query_span, offset, form_in, form_out):
+            """ Get the transformed text, transformed text span, and token index span
+            for a given text token. By default, the normalized text form is used when
+            calculating the token index span as it accounts for custom tokenization.
+
+            Args:
+                query_span (Span): The text span for the token of interest
+                form_in (int): Integer value representing starting text format
+            Returns:
+                text (str): The transformed version of the input text.
+                span_out (Span): Span of the token of interest in the full_norm_text.
+                tok_span (Span): Span of normalized tokens for the given text.
+            """
             span_out = query.transform_span(query_span, form_in, form_out)
             full_text = query.get_text_form(form_out)
+            text = span_out.slice(full_text)
+            tok_span = _get_token_span(query_span, form_in)
 
             # convert span from query's indexing to parent's indexing
             if offset is not None:
@@ -729,9 +771,7 @@ class NestedEntity:
                 span_out = span_out.shift(-offset_out)
                 tok_offset = len(full_text[:offset_out].split())
                 tok_span.shift(-tok_offset)
-
-            return orig_text, span_out, tok_span
-
+            return text, span_out, tok_span
 
         if span:
             query_span = (
@@ -754,15 +794,10 @@ class NestedEntity:
                 ]
             )
         )
-        #print(">>>>>>>>>>>>>>>>>>")
         if entity is None:
-            print("ENTITY IS NONE")
             if entity_type is None:
                 raise ValueError("Either 'entity' or 'entity_type' must be specified")
-            print(texts[0])
             entity = Entity(texts[0], entity_type, role=role)
-            print(entity)
-        #print(">>>>>>>>>>>>>>>>>>")
         return cls(texts, spans, tok_spans, entity, children)
 
     @staticmethod
