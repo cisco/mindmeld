@@ -58,9 +58,9 @@ class QueryFactory:
         elif duckling:
             self.system_entity_recognizer = DucklingRecognizer.get_instance()
         else:
-            #logger.warning(
-            #    "No System Entity Recognizer selected, set 'duckling=True' for DucklingRecognizer",
-            #)
+            logger.warning(
+                "No System Entity Recognizer selected, set 'duckling=True' for DucklingRecognizer",
+            )
             self.system_entity_recognizer = NoOpSystemEntityRecognizer.get_instance()
 
     def create_query(
@@ -191,9 +191,9 @@ class QueryFactory:
         elif duckling:
             sys_entity_recognizer = DucklingRecognizer.get_instance()
         else:
-            #logger.warning(
-            #    "No System Entity Recognizer selected, set 'duckling=True' for DucklingRecognizer",
-            #)
+            logger.warning(
+                "No System Entity Recognizer selected, set 'duckling=True' for DucklingRecognizer",
+            )
             sys_entity_recognizer = NoOpSystemEntityRecognizer.get_instance()
         return QueryFactory(
             text_preparation_pipeline=text_preparation_pipeline,
