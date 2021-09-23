@@ -803,7 +803,6 @@ def augment(app_path, language):
     """Runs the data augmentation command."""
     register_all_augmentors()
     config = get_augmentation_config(app_path=app_path)
-    config["app_path"] = app_path
     language = language or get_language_config(app_path=app_path)[0]
     resource_loader = ResourceLoader.create_resource_loader(app_path)
     augmentor = AugmentorFactory(
