@@ -70,3 +70,6 @@ mindmeld/resources/duckling-*
 
 # MindMeld Generated Data
 mindmeld/data/
+
+# Pytest data
+tests/converter/mm_rasa_converted_project/*

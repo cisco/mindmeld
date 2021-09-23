@@ -41,8 +41,9 @@ class QueryCache:
             cursor.execute(statement)
         dest.commit()
 
-    def __init__(self, app_path):
+    def __init__(self, app_path, schema_version_hash):
         # make generated directory if necessary
+        self.schema_version_hash = schema_version_hash
         gen_folder = GEN_FOLDER.format(app_path=app_path)
         if not os.path.isdir(gen_folder):
             os.makedirs(gen_folder)
@@ -68,11 +69,11 @@ class QueryCache:
         # Create table to store the data version
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS version
-        (version_number INTEGER PRIMARY KEY);
+        (schema_version_hash TEXT PRIMARY KEY);
         """)
         cursor.execute("""
         INSERT OR IGNORE INTO version values (?);
-        """, (ProcessedQuery.version,))
+        """, (self.schema_version_hash,))
         self.disk_connection.commit()
 
         in_memory = bool(strtobool(os.environ.get("MM_QUERY_CACHE_IN_MEMORY", "1").lower()))
@@ -116,14 +117,11 @@ class QueryCache:
 
         cursor = self.disk_connection.cursor()
         try:
-            cursor.execute("""
-            SELECT version_number FROM version WHERE version_number=(?);
-            """, (ProcessedQuery.version,))
-            if len(cursor.fetchall()) == 0:
-                # version does not match
-                return False
-            return True
-        except Exception:  # pylint: disable=broad-except
+            row = cursor.execute("""
+            SELECT COUNT(schema_version_hash) FROM version WHERE schema_version_hash=(?);
+            """, (self.schema_version_hash,)).fetchone()
+            return row[0] > 0
+        except sqlite3.Error:  # pylint: disable=broad-except
             return False
 
     @staticmethod
@@ -209,7 +207,7 @@ class QueryCache:
         is called. Exceptions may be thrown in the case of database corruption.
 
         The method caches the previously retrieved element because it is common
-        for a set of iterators (examples and lables) to retrieve the same row_id
+        for a set of iterators (examples and labels) to retrieve the same row_id
         in sequence.  The cache prevents extra db lookups in this case.
 
         Args:

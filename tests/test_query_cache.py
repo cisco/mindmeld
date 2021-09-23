@@ -13,13 +13,16 @@ import os
 import sqlite3
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
+from hashlib import sha256
 
 from mindmeld.core import ProcessedQuery
 from mindmeld.query_cache import QueryCache
+from mindmeld.text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
 
 
 def test_query_cache_has_the_correct_format(kwik_e_mart_app_path):
-    cache = QueryCache(kwik_e_mart_app_path)
+    text_prep_pipeline = TextPreparationPipelineFactory.create_from_app_path(kwik_e_mart_app_path)
+    cache = QueryCache(kwik_e_mart_app_path, text_prep_pipeline.get_hashid())
     key = QueryCache.get_key("store_info", "help", "User manual")
     row_id = cache.key_to_row_id(key)
     assert row_id is not None
@@ -46,7 +49,8 @@ def test_disk_query_cache(processed_queries):
     environ = {"MM_QUERY_CACHE_IN_MEMORY": "0"}
 
     with TemporaryDirectory() as tmpdir, patch.dict(os.environ, environ):
-        cache = QueryCache(tmpdir)
+        text_prep_pipeline = TextPreparationPipelineFactory.create_from_app_path(tmpdir)
+        cache = QueryCache(tmpdir, text_prep_pipeline.get_hashid())
 
         # Verify that there is no in-memory caching
         assert cache.memory_connection is None
@@ -64,7 +68,8 @@ def test_memory_query_cache(processed_queries):
     }
 
     with TemporaryDirectory() as tmpdir, patch.dict(os.environ, environ):
-        cache = QueryCache(tmpdir)
+        text_prep_pipeline = TextPreparationPipelineFactory.create_from_app_path(tmpdir)
+        cache = QueryCache(tmpdir, text_prep_pipeline.get_hashid())
 
         # Verify that there is in-memory caching
         assert cache.memory_connection is not None

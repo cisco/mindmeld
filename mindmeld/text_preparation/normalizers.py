@@ -22,7 +22,6 @@ from ..path import ASCII_FOLDING_DICT_PATH
 
 logger = logging.getLogger(__name__)
 
-
 ASCII_CUTOFF = ord("\u0080")
 
 
@@ -41,6 +40,18 @@ class Normalizer(ABC):
             normalized_text (str): Normalized Text.
         """
         raise NotImplementedError("Subclasses must implement this method")
+
+    def tojson(self):
+        """
+        Method defined to obtain recursive JSON representation of a TextPreparationPipeline.
+
+        Args:
+            None.
+
+        Returns:
+            JSON representation of Preprocessor (dict) .
+        """
+        return {self.__class__.__name__: None}
 
 
 class NoOpNormalizer(Normalizer):
@@ -235,9 +246,11 @@ class RegexNormalizerRule(Normalizer):
     def normalize(self, s):
         return self._expr.sub(self.replacement, s)
 
+    def tojson(self):
+        return {self.__class__.__name__ + "##" + self.pattern + "##" + self.replacement: None}
+
 
 class RegexNormalizerRuleFactory:
-
     # exception_chars is a class var so that updates are accessible throughout the application
     EXCEPTION_CHARS = r"\@\[\]'"
 
