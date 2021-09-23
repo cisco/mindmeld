@@ -720,21 +720,24 @@ class NestedEntity:
                     tok_start += 1
             return tok_start
 
-        def _get_token_span(query_span, form_in):
+        def _get_token_span(query_span, form_in, offset):
             """ Get the token span of text based on the normalized token sentence.
             Token span should be calculated based on the normalized token sentence
             as this approach is more robust to sentences that are not space delimited.
 
             Args:
-                query_span (Span): The text span for the token of interest
-                form_in (int): Integer value representing starting text format
+                query_span (Span): The text span for the token of interest.
+                form_in (int): Integer value representing starting text format.
+                offset (int): Offset the final indexing to parent's indexing.
             Returns:
                 tok_span (Span): Span of normalized tokens for the given text.
             """
             # Creating a copy to avoid modifying the original query object
             query_for_norm_transformation = deepcopy(query)
 
-            span_out = query_for_norm_transformation.transform_span(query_span, form_in, TEXT_FORM_NORMALIZED)
+            span_out = query_for_norm_transformation.transform_span(
+                query_span, form_in, TEXT_FORM_NORMALIZED
+            )
             full_norm_text = query_for_norm_transformation.get_text_form(TEXT_FORM_NORMALIZED)
             norm_token_text = span_out.slice(full_norm_text)
             tok_start = _get_token_start(full_norm_text, span_out)
@@ -742,9 +745,18 @@ class NestedEntity:
             # Using a min token len of 1 avoids token span of (x, x - 1) which can become negative.
             norm_token_text_len = len(norm_token_text.split()) or 1
             tok_span = Span(
-                start= tok_start,
-                end= tok_start + norm_token_text_len - 1
+                start=tok_start,
+                end=tok_start + norm_token_text_len - 1
             )
+
+            # convert span from query's indexing to parent's indexing
+            if offset is not None:
+                offset_out = query_for_norm_transformation.transform_index(
+                    offset, form_in, TEXT_FORM_NORMALIZED
+                )
+                tok_offset = len(full_norm_text[:offset_out].split())
+                tok_span.shift(-tok_offset)
+
             return tok_span
 
         def _get_form_details(query_span, offset, form_in, form_out):
@@ -754,7 +766,9 @@ class NestedEntity:
 
             Args:
                 query_span (Span): The text span for the token of interest
+                offset (int): Offset the final indexing to parent's indexing.
                 form_in (int): Integer value representing starting text format
+                form_out (int): Integer value representing final text format
             Returns:
                 text (str): The transformed version of the input text.
                 span_out (Span): Span of the token of interest in the full_norm_text.
@@ -763,14 +777,13 @@ class NestedEntity:
             span_out = query.transform_span(query_span, form_in, form_out)
             full_text = query.get_text_form(form_out)
             text = span_out.slice(full_text)
-            tok_span = _get_token_span(query_span, form_in)
+            tok_span = _get_token_span(query_span, form_in, offset)
 
             # convert span from query's indexing to parent's indexing
             if offset is not None:
                 offset_out = query.transform_index(offset, form_in, form_out)
                 span_out = span_out.shift(-offset_out)
-                tok_offset = len(full_text[:offset_out].split())
-                tok_span.shift(-tok_offset)
+
             return text, span_out, tok_span
 
         if span:
