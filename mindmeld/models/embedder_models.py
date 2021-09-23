@@ -384,7 +384,7 @@ class BertEmbedder(Embedder):
     Encoder class for bert models based on https://github.com/UKPLab/sentence-transformers
     """
 
-    DEFAULT_BERT = "bert-base-nli-mean-tokens"
+    DEFAULT_BERT = "sentence-transformers/bert-base-nli-mean-tokens"
 
     def __init__(self, app_path, **kwargs):
         """

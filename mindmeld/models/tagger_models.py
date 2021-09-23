@@ -26,7 +26,7 @@ from .helpers import (
     ingest_dynamic_gazetteer,
 )
 from .model import ModelConfig, Model, PytorchModel
-from .nn_utils import token_classification_modules as nn_modules
+from .nn_utils import token_classification as nn_modules
 from .taggers.crf import ConditionalRandomFields
 from .taggers.memm import MemmModel
 from ..exceptions import MindMeldError
@@ -503,6 +503,9 @@ class PytorchTaggerModel(PytorchModel):
             )
             return self
 
+        if not examples:
+            return self
+
         # Encode classes
         self._label_encoder = get_label_encoder(self.config)
         y = self._label_encoder.encode(labels, examples=examples)
@@ -517,6 +520,7 @@ class PytorchTaggerModel(PytorchModel):
 
         params = params or self.config.params
         examples = [ex.normalized_text for ex in examples]
+        self._validate_training_data(examples, y)
 
         self._clf = self._get_model_constructor()()  # gets the class name only
         self._clf.fit(examples, y, **params)
@@ -583,8 +587,19 @@ class PytorchTaggerModel(PytorchModel):
 
         return model
 
+    def _validate_training_data(self, examples, labels):
+        super()._validate_training_data(examples, labels)
 
-class AutoTaggerModel:
+        for ex, label_tokens in zip(examples, labels):
+            ex_tokens = ex.split(" ")
+            if len(ex_tokens) != len(label_tokens):
+                msg = f"Number of tokens in a sentence ({len(ex_tokens)}) must be same as the" \
+                      f"number of tokens in the corresponding token labels " \
+                      f"({len(label_tokens)}) for sentence '{ex}' with labels '{labels}'"
+                raise AssertionError(msg)
+
+
+class TaggerModelFactory:
 
     @staticmethod
     def get_model_class(config: ModelConfig):

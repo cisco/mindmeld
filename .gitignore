@@ -70,3 +70,9 @@ mindmeld/resources/duckling-*
 
 # MindMeld Generated Data
 mindmeld/data/
+
+#
+.DS_Store
+data/
+rfcs/
+tests/converter/mm_rasa_converted_project/

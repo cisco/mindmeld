@@ -54,6 +54,10 @@ class GloVeEmbeddingsContainer:
 
     To facilitate not loading the large glove embedding file to memory everytime a new container is
     created, a class-level attribute with a hashmap is created.
+
+    TODO: refactor the call-signature similar to other containers by accepting
+    `pretrained_path_or_name` instead of token dimension and filepath. Also deprecate these two
+    arguments.
     """
     CONTAINER_LOOKUP = {}
 
@@ -204,7 +208,12 @@ class SentenceTransformersContainer:
     """
     CONTAINER_LOOKUP = {}
 
-    def __init__(self, pretrained_name_or_abspath, bert_output_type="mean", quantize_model=False):
+    def __init__(
+        self,
+        pretrained_name_or_abspath,
+        bert_output_type="mean",
+        quantize_model=False
+    ):
         self.pretrained_name_or_abspath = pretrained_name_or_abspath
         self.bert_output_type = bert_output_type
         self.quantize_model = quantize_model
@@ -213,18 +222,57 @@ class SentenceTransformersContainer:
         string_to_hash = json.dumps({
             "pretrained_name_or_abspath": self.pretrained_name_or_abspath,
             "bert_output_type": self.bert_output_type,
-            "quantize_model": self.quantize_model
+            "quantize_model": self.quantize_model,
         }, sort_keys=True)
         self.model_id = Hasher(algorithm="sha1").hash(string=string_to_hash)
 
-        self._model_bunch = self._extract_model()
+        self._model_bunch = None
 
-    def get_model_bunch(self):
-        return self._model_bunch
+    def _extract_model(self):
+        """
+        Looks up the model in the class' lookup dict and returns the found value if available. If
+        not found, calls Huggingface APIs to download the model and then loads the model to the
+        lookup and returns the model.
+        """
+
+        model = SentenceTransformersContainer.CONTAINER_LOOKUP.get(self.model_id)
+
+        if not model:
+            info_msg = ""
+            for name in [
+                self.pretrained_name_or_abspath,
+                f"sentence-transformers/{self.pretrained_name_or_abspath}"
+            ]:
+                try:
+                    model = self._get_strans_encoder(
+                        name,
+                        output_type=self.bert_output_type,
+                        quantize=self.quantize_model
+                    )
+                    info_msg += f"Successfully initialized name/path `{name}` directly through " \
+                                f"huggingface-transformers. "
+                except OSError:
+                    info_msg += f"Could not initialize name/path `{name}` directly through " \
+                                f"huggingface-transformers. "
+                if model:
+                    break
+            logger.info(info_msg)
+
+            if not model:
+                msg = f"Could not resolve the name/path `{self.pretrained_name_or_abspath}`. " \
+                      f"Please check the model name and retry."
+                raise Exception(msg)
+
+            SentenceTransformersContainer.CONTAINER_LOOKUP[self.model_id] = model
+
+        return SentenceTransformersContainer.CONTAINER_LOOKUP[self.model_id]
 
     @staticmethod
-    def _get_strans_encoder(name_or_path, output_type="mean", quantize=True,
-                            return_components=False):
+    def _get_strans_encoder(
+        name_or_path,
+        output_type="mean",
+        quantize=False
+    ):
         """
         Retrieves a sentence-transformer model and returns it along with its transformer and
         pooling components.
@@ -233,17 +281,11 @@ class SentenceTransformersContainer:
             name_or_path: name or path to load a huggingface model
             output_type: type of pooling required
             quantize: if the model needs to be qunatized or not
-            return_components: if True, returns the Transformer and Poooling components of the
-                                sentence-bert model in a Bunch data type,
-                                else just returns the sentence-bert model
 
         Returns:
-            Union[
-                sentence_transformers.SentenceTransformer,
-                Bunch(sentence_transformers.Transformer,
-                      sentence_transformers.Pooling,
-                      sentence_transformers.SentenceTransformer)
-            ]
+            Bunch(sentence_transformers.Transformer,
+                  sentence_transformers.Pooling,
+                  sentence_transformers.SentenceTransformer)
         """
 
         if not _is_module_available("sentence_transformers"):
@@ -254,13 +296,17 @@ class SentenceTransformersContainer:
         strans_models = _getattr("sentence_transformers.models")
         strans = _getattr("sentence_transformers", "SentenceTransformer")
 
-        transformer_model = strans_models.Transformer(name_or_path,
-                                                      model_args={"output_hidden_states": True})
-        pooling_model = strans_models.Pooling(transformer_model.get_word_embedding_dimension(),
-                                              pooling_mode_cls_token=output_type == "cls",
-                                              pooling_mode_max_tokens=False,
-                                              pooling_mode_mean_tokens=output_type == "mean",
-                                              pooling_mode_mean_sqrt_len_tokens=False)
+        transformer_model = strans_models.Transformer(
+            name_or_path,
+            model_args={"output_hidden_states": True}
+        )
+        pooling_model = strans_models.Pooling(
+            transformer_model.get_word_embedding_dimension(),
+            pooling_mode_cls_token=output_type == "cls",
+            pooling_mode_max_tokens=False,
+            pooling_mode_mean_tokens=output_type == "mean",
+            pooling_mode_mean_sqrt_len_tokens=False
+        )
         sbert_model = strans(modules=[transformer_model, pooling_model])
 
         if quantize:
@@ -281,46 +327,27 @@ class SentenceTransformersContainer:
                 sbert_model, {torch_nn_linear}, dtype=torch_qint8
             ) if sbert_model else None
 
-        if return_components:
-            return Bunch(
-                transformer_model=transformer_model,
-                pooling_model=pooling_model,
-                sbert_model=sbert_model
-            )
+        return Bunch(
+            transformer_model=transformer_model,
+            pooling_model=pooling_model,
+            sbert_model=sbert_model
+        )
 
-        return sbert_model
+    def get_model_bunch(self):
+        # if already looked up, return it
+        if self._model_bunch:
+            return self._model_bunch
+        self._model_bunch = self._extract_model()
+        return self._model_bunch
 
-    def _extract_model(self):
-        model = SentenceTransformersContainer.CONTAINER_LOOKUP.get(self.model_id)
+    def get_sbert_model(self):
+        return self.get_model_bunch().sbert_model
 
-        if not model:
+    def get_pooling_model(self):
+        return self.get_model_bunch().pooling_model
 
-            info_msg = ""
-            for name in [f"sentence-transformers/{self.pretrained_name_or_abspath}",
-                         self.pretrained_name_or_abspath]:
-                try:
-                    model = self._get_strans_encoder(name, output_type=self.bert_output_type,
-                                                     quantize=self.quantize_model,
-                                                     return_components=True)
-                    info_msg += f"Successfully initialized name/path `{name}` directly through " \
-                                f"huggingface-transformers. "
-                except OSError:
-                    info_msg += f"Could not initialize name/path `{name}` directly through " \
-                                f"huggingface-transformers. "
-
-                if model:
-                    break
-
-            logger.info(info_msg)
-
-            if not model:
-                msg = f"Could not resolve the name/path `{self.pretrained_name_or_abspath}`. " \
-                      f"Please check the model name and retry."
-                raise Exception(msg)
-
-            SentenceTransformersContainer.CONTAINER_LOOKUP[self.model_id] = model
-
-        return SentenceTransformersContainer.CONTAINER_LOOKUP[self.model_id]
+    def get_transformer_model(self):
+        return self.get_model_bunch().transformer_model
 
 
 class HuggingfaceTransformersContainer:
@@ -332,9 +359,34 @@ class HuggingfaceTransformersContainer:
     """
     CONTAINER_LOOKUP = {}
 
-    def __init__(self, pretrained_model_name_or_path, quantize_model=False, reload=False):
+    def __init__(
+        self,
+        pretrained_model_name_or_path,
+        quantize_model=False,
+        cache_lookup=True,
+        from_configs=False
+    ):
+
+        if not _is_module_available("transformers"):
+            msg = "Must install extra [transformers] by running " \
+                  "'pip install mindmeld[transformers]'"
+            raise ImportError(msg)
+
+        if from_configs:
+            if cache_lookup:
+                msg = "Cannot set both 'cache_lookup' and 'from_configs' to True at the same " \
+                      "time. Loading from Huggingface model configs returns a model without " \
+                      "pretrained weights' initialization."
+                raise ValueError(msg)
+            if quantize_model:
+                msg = "Huggingface model loaded from configs will be quantized instead of a " \
+                      "model loaded from pretrained weights"
+                logger.warning(msg)
+
         self.pretrained_model_name_or_path = pretrained_model_name_or_path
         self.quantize_model = quantize_model
+        self.cache_lookup = cache_lookup
+        self.from_configs = from_configs
 
         # get model name hash
         string_to_hash = json.dumps({
@@ -343,32 +395,68 @@ class HuggingfaceTransformersContainer:
         }, sort_keys=True)
         self.model_id = Hasher(algorithm="sha1").hash(string=string_to_hash)
 
-        self._reload = reload
-        self._model_bunch = self._extract_model()
-
-    def get_model_bunch(self):
-        return self._model_bunch
+        self._model_bunch = None
 
     def _extract_model(self):
-        if self.model_id not in HuggingfaceTransformersContainer.CONTAINER_LOOKUP or self._reload:
-            try:
-                config = _getattr("transformers", "AutoConfig").from_pretrained(
-                    self.pretrained_model_name_or_path)
-                tokenizer = _getattr("transformers", "AutoTokenizer").from_pretrained(
-                    self.pretrained_model_name_or_path)
-                model = _getattr("transformers", "AutoModel").from_pretrained(
-                    self.pretrained_model_name_or_path)
-            except ImportError as e:
-                msg = "Must install extra [transformers] by running " \
-                      "'pip install mindmeld[transformers]'"
-                raise ImportError(msg) from e
 
-            model_bunch = Bunch(
-                config=config,
-                tokenizer=tokenizer,
-                model=model
+        if self.cache_lookup:
+            model = HuggingfaceTransformersContainer.CONTAINER_LOOKUP.get(self.model_id)
+        else:
+            model = None
+
+        if not model:
+
+            try:
+                if self.from_configs:
+                    config = self.get_transformer_model_config()
+                    transformer_model = _getattr("transformers", "AutoModel").from_config(config)
+                else:
+                    transformer_model = _getattr("transformers", "AutoModel").from_pretrained(
+                        self.pretrained_model_name_or_path)
+            except OSError as e:
+                msg = f"Could not resolve the name/path `{self.pretrained_model_name_or_path}`. " \
+                      f"Please check the model name/path and retry."
+                raise OSError(msg) from e
+
+            if self.quantize_model:
+                if not _is_module_available("torch"):
+                    raise ImportError("`torch` library required to quantize models") from None
+
+                torch_qint8 = _getattr("torch", "qint8")
+                torch_nn_linear = _getattr("torch.nn", "Linear")
+                torch_quantize_dynamic = _getattr("torch.quantization", "quantize_dynamic")
+
+                transformer_model = torch_quantize_dynamic(
+                    transformer_model, {torch_nn_linear}, dtype=torch_qint8)
+
+            model = Bunch(
+                config=self.get_transformer_model_config(),
+                tokenizer=self.get_transformer_model_tokenizer(),
+                transformer_model=transformer_model
             )
 
-            HuggingfaceTransformersContainer.CONTAINER_LOOKUP[self.model_id] = model_bunch
+        # return the model without adding to lookup if the flag is set to False
+        if not self.cache_lookup:
+            return model
 
+        HuggingfaceTransformersContainer.CONTAINER_LOOKUP[self.model_id] = model
         return HuggingfaceTransformersContainer.CONTAINER_LOOKUP[self.model_id]
+
+    def get_model_bunch(self):
+        # if already looked up/loaded, return it
+        if self._model_bunch:
+            return self._model_bunch
+        # either a bunch from lookup or newly loaded bunch if cache_lookup is False
+        self._model_bunch = self._extract_model()
+        return self._model_bunch
+
+    def get_transformer_model_config(self):
+        return _getattr("transformers", "AutoConfig").from_pretrained(
+            self.pretrained_model_name_or_path)
+
+    def get_transformer_model_tokenizer(self):
+        return _getattr("transformers", "AutoTokenizer").from_pretrained(
+            self.pretrained_model_name_or_path)
+
+    def get_transformer_model(self):
+        return self.get_model_bunch().transformer_model

@@ -39,7 +39,7 @@ from .helpers import (
     WORD_NGRAM_FREQ_RSC,
 )
 from .model import ModelConfig, Model, PytorchModel
-from .nn_utils import sequence_classification_modules as nn_modules
+from .nn_utils import sequence_classification as nn_modules
 
 logger = logging.getLogger(__name__)
 
@@ -547,7 +547,7 @@ class PytorchTextModel(PytorchModel):
 
     def fit(self, examples, labels, params=None):
 
-        if len(set(labels)) <= 1:
+        if len(set(labels)) <= 1 or not examples:
             return self
 
         # Encode classes
@@ -557,6 +557,7 @@ class PytorchTextModel(PytorchModel):
 
         params = params or self.config.params
         examples = [ex.normalized_text for ex in examples]
+        self._validate_training_data(examples, y)
 
         self._clf = self._get_model_constructor()()  # gets the class name and then initializes
         self._clf.fit(examples, y, **params)
@@ -620,7 +621,7 @@ class PytorchTextModel(PytorchModel):
         return model
 
 
-class AutoTextModel:
+class TextModelFactory:
 
     @staticmethod
     def get_model_class(config: ModelConfig):

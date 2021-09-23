@@ -19,17 +19,14 @@ import logging
 from abc import abstractmethod
 from typing import Dict
 
-from .input_encoders import (
-    SeqClsEncoderForEmbLayer,
-    SeqClsEncoderWithPlmLayer
-)
+from .classification import BaseClassification
 from .layers import (
     EmbeddingLayer,
     CnnLayer,
     LstmLayer,
     PoolingLayer
 )
-from .nn_base_modules import ClassificationBase
+from ..containers import HuggingfaceTransformersContainer
 
 try:
     import torch
@@ -41,7 +38,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-class SequenceClassificationBase(ClassificationBase):
+class BaseSequenceClassification(BaseClassification):
     """Base class that defines all the necessary elements to succesfully train/infer
      custom pytorch modules wrapped on top of this base class. Classes derived from
      this base can be trained for sequence classification.
@@ -51,40 +48,21 @@ class SequenceClassificationBase(ClassificationBase):
         "output_keep_prob": 0.7
     }
 
-    def __init__(self):
-        super().__init__()
-
-        # default encoder; have to either fit ot load to use it
-        self.encoder = SeqClsEncoderForEmbLayer()
-
-    def _get_subclasses_default_params(self):
+    def _get_default_params(self):
         return {
-            **SequenceClassificationBase.DEFAULT_PARAMS,
+            **BaseSequenceClassification.DEFAULT_PARAMS,
             **self.__class__.DEFAULT_PARAMS
         }
 
-    def _init_encoder(self, examples, **params):
-        use_character_embeddings = params.pop("use_character_embeddings", False)
-        if use_character_embeddings:
-            tokenizer_type = params.get("tokenizer_type", "char-tokenizer")
-            # Ensure that the params do not contain both `use_character_embeddings` as well as
-            # `tokenizer_type` params and that they are contradicting
-            if tokenizer_type != "char-tokenizer":
-                msg = "To use character embeddings, 'tokenizer_type' must be 'char-tokenizer'. " \
-                      "Other values passed thorugh params are not allowed."
-                raise ValueError(msg)
-            params.update({"tokenizer_type": tokenizer_type})
-        self.encoder.fit(examples=examples, **params)
-        params.update({
-            "num_tokens": self.encoder.get_num_tokens(),
-            "emb_dim": self.encoder.get_emb_dim(),
-            "padding_idx": self.encoder.get_pad_token_idx(),
-            "embedding_weights": self.encoder.get_embedding_weights()
-        })
-        return params
+    def _batch_encode_labels(self, labels, split_lengths):
+        # for sequence classification, the length of an example doesn't matter as we have only one
+        # label for each example. hence, no need to do any padding or validation checks.
+        del split_lengths
+        return torch.as_tensor(labels, dtype=torch.long)
 
-    def _init_forward_graph(self):
+    def _init_graph(self):
 
+        # initialize the beginning layers of the graph
         self._init_core()
 
         # init the underlying params and architectural components
@@ -182,7 +160,7 @@ class SequenceClassificationBase(ClassificationBase):
         raise NotImplementedError
 
 
-class EmbedderForSequenceClassification(SequenceClassificationBase):
+class EmbedderForSequenceClassification(BaseSequenceClassification):
     """An embedder pooling module that operates on a batched sequence of token ids. The
     tokens could be characters or words or sub-words. This module finally outputs one 1D
     representation for each instance in the batch (i.e. [BS, EMB_DIM]).
@@ -199,7 +177,7 @@ class EmbedderForSequenceClassification(SequenceClassificationBase):
         "update_embeddings": True,
         "embedder_output_keep_prob": 0.7,
         "embedder_output_pooling_type": "mean",
-        "output_keep_prob": 1.0,
+        "output_keep_prob": 1.0,  # set to 1.0 due to the shallowness of the architecture
     }
 
     def _init_core(self):
@@ -228,7 +206,7 @@ class EmbedderForSequenceClassification(SequenceClassificationBase):
         return batch_data_dict
 
 
-class CnnForSequenceClassification(SequenceClassificationBase):
+class CnnForSequenceClassification(BaseSequenceClassification):
     """A CNN module that operates on a batched sequence of token ids. The tokens could be
     characters or words or sub-words. This module finally outputs one 1D representation
     for each instance in the batch (i.e. [BS, EMB_DIM]).
@@ -271,7 +249,7 @@ class CnnForSequenceClassification(SequenceClassificationBase):
         return batch_data_dict
 
 
-class LstmForSequenceClassification(SequenceClassificationBase):
+class LstmForSequenceClassification(BaseSequenceClassification):
     """A LSTM module that operates on a batched sequence of token ids. The tokens could be
     characters or words or sub-words. This module finally outputs one 1D representation
     for each instance in the batch (i.e. [BS, EMB_DIM]).
@@ -328,84 +306,13 @@ class LstmForSequenceClassification(SequenceClassificationBase):
         return batch_data_dict
 
 
-class BertForSequenceClassification(SequenceClassificationBase):
+class BertForSequenceClassification(BaseSequenceClassification):
     DEFAULT_PARAMS = {
+        "tokenizer_type": "huggingface_pretrained-tokenizer",
         "embedder_output_keep_prob": 0.7,
         "embedder_output_pooling_type": "first",
-        "output_keep_prob": 1.0,
+        "output_keep_prob": 1.0,  # unnecessary upon using `embedder_output_keep_prob`
     }
-
-    def __init__(self):
-        super().__init__()
-
-        # overwrite default encoder
-        self.encoder = SeqClsEncoderWithPlmLayer()
-
-    def _init_core(self):
-
-        self.dropout = nn.Dropout(
-            p=1 - self.params.embedder_output_keep_prob
-        )
-        if self.params.embedder_output_pooling_type != "first":
-            self.emb_layer_pooling = PoolingLayer(
-                self.params.embedder_output_pooling_type
-            )
-        self.out_dim = self.params.emb_dim
-
-    def _forward_core(self, batch_data_dict):
-
-        if self.params.embedder_output_pooling_type != "first":
-
-            last_hidden_state = batch_data_dict["last_hidden_state"]  # [BS, SEQ_LEN, EMD_DIM]
-            last_hidden_state = self.dropout(last_hidden_state)
-            seq_lengths = batch_data_dict["seq_lengths"]  # [BS]
-            encodings = self.emb_layer_pooling(last_hidden_state, seq_lengths)  # [BS, self.out_dim]
-        else:
-            pooler_output = batch_data_dict["pooler_output"]  # [BS, self.out_dim]
-            encodings = self.dropout(pooler_output)
-
-        batch_data_dict.update({"seq_embs": encodings})
-
-        return batch_data_dict
-
-    def _create_optimizer(self):
-        params = list(self.named_parameters())
-        no_decay = ["bias", 'LayerNorm.bias', "LayerNorm.weight",
-                    'layer_norm.bias', 'layer_norm.weight']
-        optimizer_grouped_parameters = [
-            {'params': [p for n, p in params if not any(nd in n for nd in no_decay)],
-             'weight_decay': 0.01},
-            {'params': [p for n, p in params if any(nd in n for nd in no_decay)],
-             'weight_decay': 0.0}
-        ]
-        optimizer = getattr(torch.optim, self.params.optimizer)(
-            optimizer_grouped_parameters,
-            lr=self.params.learning_rate,
-            eps=1e-08,
-            weight_decay=0.01
-        )
-        return optimizer
-
-    def _create_optimizer_and_scheduler(self, num_training_steps):
-
-        num_warmup_steps = min(0.1 * num_training_steps, self.params.num_warmup_steps)
-        self.params.update({"num_warmup_steps": num_warmup_steps})
-
-        # https://github.com/huggingface/transformers/blob/master/src/transformers/optimization.py
-        # refer `get_linear_schedule_with_warmup` method
-        def lr_lambda(current_step: int):
-            if current_step < num_warmup_steps:
-                return float(current_step) / float(max(1, num_warmup_steps))
-            return max(
-                0.0, float(num_training_steps - current_step) / float(
-                    max(1, num_training_steps - num_warmup_steps))
-            )
-
-        # load a torch optimizer
-        optimizer = self._create_optimizer()
-        # load a lr scheduler
-        scheduler = getattr(torch.optim.lr_scheduler, "LambdaLR")(optimizer, lr_lambda)
-        return optimizer, scheduler
 
     def fit(self, examples, labels, **params):
         # overriding base class' method to set params, and then calling base class' .fit()
@@ -439,3 +346,93 @@ class BertForSequenceClassification(SequenceClassificationBase):
         params.update({"embedder_type": "bert"})
 
         super().fit(examples, labels, **params)
+
+    def _create_optimizer_and_scheduler(self, num_training_steps):
+
+        num_warmup_steps = min(int(0.1 * num_training_steps), self.params.num_warmup_steps)
+        self.params.update({"num_warmup_steps": num_warmup_steps})
+
+        # https://github.com/huggingface/transformers/blob/master/src/transformers/optimization.py
+        # refer `get_linear_schedule_with_warmup` method
+        def lr_lambda(current_step: int):
+            if current_step < num_warmup_steps:
+                return float(current_step) / float(max(1, num_warmup_steps))
+            return max(
+                0.0, float(num_training_steps - current_step) / float(
+                    max(1, num_training_steps - num_warmup_steps))
+            )
+
+        # load a torch optimizer
+        optimizer = self._create_optimizer()
+        # load a lr scheduler
+        scheduler = getattr(torch.optim.lr_scheduler, "LambdaLR")(optimizer, lr_lambda)
+        return optimizer, scheduler
+
+    def _create_optimizer(self):
+        params = list(self.named_parameters())
+        no_decay = ["bias", 'LayerNorm.bias', "LayerNorm.weight",
+                    'layer_norm.bias', 'layer_norm.weight']
+        optimizer_grouped_parameters = [
+            {'params': [p for n, p in params if not any(nd in n for nd in no_decay)],
+             'weight_decay': 0.01},
+            {'params': [p for n, p in params if any(nd in n for nd in no_decay)],
+             'weight_decay': 0.0}
+        ]
+        optimizer = getattr(torch.optim, self.params.optimizer)(
+            optimizer_grouped_parameters,
+            lr=self.params.learning_rate,
+            eps=1e-08,
+            weight_decay=0.01
+        )
+        return optimizer
+
+    def _init_core(self):
+
+        self.bert_model = HuggingfaceTransformersContainer(
+            self.params.pretrained_model_name_or_path,
+            cache_lookup=False
+        ).get_transformer_model()
+        self.dropout = nn.Dropout(
+            p=1 - self.params.embedder_output_keep_prob
+        )
+        if self.params.embedder_output_pooling_type != "first":
+            self.emb_layer_pooling = PoolingLayer(
+                self.params.embedder_output_pooling_type
+            )
+        self.out_dim = self.params.emb_dim
+
+    def _forward_core(self, batch_data_dict):
+
+        bert_outputs = self.bert_model(**batch_data_dict["hgf_encodings"], return_dict=True)
+
+        if self.params.embedder_output_pooling_type != "first":
+            last_hidden_state = bert_outputs.get("last_hidden_state")  # [BS, SEQ_LEN, EMD_DIM]
+            if last_hidden_state is None:
+                msg = f"The choice of pretrained bert model " \
+                      f"({self.params.pretrained_model_name_or_path}) " \
+                      f"has no key 'last_hidden_state' in its output dictionary"
+                raise ValueError(msg)
+            last_hidden_state = self.dropout(last_hidden_state)
+            seq_lengths = batch_data_dict["seq_lengths"]  # [BS]
+            encodings = self.emb_layer_pooling(last_hidden_state, seq_lengths)  # [BS, self.out_dim]
+        else:
+            pooler_output = bert_outputs.get("pooler_output")  # [BS, self.out_dim]
+            if pooler_output is None:
+                msg = f"The choice of pretrained bert model " \
+                      f"({self.params.pretrained_model_name_or_path}) " \
+                      "has no key 'pooler_output' in its output dictionary. " \
+                      "Considering to obtain " \
+                      "the first embedding of last_hidden_state."
+                logger.error(msg)
+                last_hidden_state = bert_outputs.get("last_hidden_state")  # [BS, SEQ_LEN, EMD_DIM]
+                if last_hidden_state is None:
+                    msg = f"The choice of pretrained bert model " \
+                          f"({self.params.pretrained_model_name_or_path}) " \
+                          f"has no key 'last_hidden_state' in its output dictionary"
+                    raise ValueError(msg)
+                pooler_output = last_hidden_state[:, 0, :]  # [BS, self.out_dim]
+            encodings = self.dropout(pooler_output)
+
+        batch_data_dict.update({"seq_embs": encodings})
+
+        return batch_data_dict

@@ -17,13 +17,9 @@ Custom modules built on top of nn layers that can do sequence classification
 
 import logging
 from abc import abstractmethod
-from typing import Dict
+from typing import Dict, List
 
-from .input_encoders import (
-    TokenClsEncoderForEmbLayer,
-    TokenClsDualEncoderForEmbLayers,
-    TokenClsEncoderWithPlmLayer
-)
+from .classification import BaseClassification
 from .layers import (
     EmbeddingLayer,
     CnnLayer,
@@ -31,7 +27,7 @@ from .layers import (
     PoolingLayer,
     SplittingAndPoolingLayer
 )
-from .nn_base_modules import ClassificationBase
+from ..containers import HuggingfaceTransformersContainer
 
 try:
     import torch
@@ -44,7 +40,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-class TokenClassificationBase(ClassificationBase):
+class BaseTokenClassification(BaseClassification):
     """Base class that defines all the necessary elements to succesfully train/infer
      custom pytorch modules wrapped on top of this base class. Classes derived from
      this base can be trained for sequence tagging aka. token classification.
@@ -53,39 +49,37 @@ class TokenClassificationBase(ClassificationBase):
     DEFAULT_PARAMS = {
         "output_keep_prob": 0.7,
         "use_crf_layer": True,
+        "patience": 10,  # observed in benchmarking that more patience is better when using crf
+        "token_spans_pooling_type":
+            "first",  # if words split in subgroups, tells which subword representation to consider
     }
 
-    def __init__(self):
-        super().__init__()
-
-        # default encoder; have to either fit ot load to use it
-        self.encoder = TokenClsEncoderForEmbLayer()
-
-    def _get_subclasses_default_params(self):
+    def _get_default_params(self):
         return {
-            **TokenClassificationBase.DEFAULT_PARAMS,
+            **BaseTokenClassification.DEFAULT_PARAMS,
             **self.__class__.DEFAULT_PARAMS
         }
 
-    def _init_encoder(self, examples, **params):
-        self.encoder.fit(examples=examples, **params)
-        params.update({
-            "num_tokens": self.encoder.get_num_tokens(),
-            "emb_dim": self.encoder.get_emb_dim(),
-            "padding_idx": self.encoder.get_pad_token_idx(),
-            "embedding_weights": self.encoder.get_embedding_weights(),
-            "label_padding_idx": self.encoder.get_pad_label_idx()
-        })
-        return params
+    def _batch_encode_labels(self, labels: List[int], split_lengths: int):
+        # for token classification, the length of an example matters (i.e number of words in it)
+        # as the labels are one-to-one mapped each example. Hence, we need to do padding.
 
-    def _init_forward_graph(self):
+        def _trim_or_pad(label_sequence, required_seq_length):
+            if len(label_sequence) > required_seq_length:
+                return label_sequence[:required_seq_length]
+            else:
+                return labels + [self.params.label_padding_idx] * (
+                    required_seq_length - len(label_sequence))
+
+        required_seq_length = max([sum(label_seq) for label_seq in labels])
+        return torch.as_tensor(
+            [_trim_or_pad(label_seq, required_seq_length) for label_seq in labels],
+            dtype=torch.long
+        )
+
+    def _init_graph(self):
 
         self._init_core()
-
-        add_terminals = self.params.pop("add_terminals", False)
-        if add_terminals:
-            msg = "Setting param 'add_terminals' to True is not supported with token classification"
-            raise NotImplementedError(msg)
 
         # init the underlying params and architectural components
         try:
@@ -98,6 +92,10 @@ class TokenClassificationBase(ClassificationBase):
             raise ValueError(msg) from e
 
         # init the peripheral architecture params and architectural components
+        if self.params.add_terminals:
+            self.span_pooling_layer = SplittingAndPoolingLayer(
+                self.params.token_spans_pooling_type
+            )
         if not self.params.num_labels:
             msg = f"Invalid number of labels ({self.params.num_labels}) inputted to '{self.name}'"
             raise ValueError(msg)
@@ -113,8 +111,8 @@ class TokenClassificationBase(ClassificationBase):
             if self.params.num_labels >= 2:
                 # cross-entropy criterion
                 self.classifier_head = nn.Linear(self.out_dim, self.params.num_labels)
-                self.criterion = nn.CrossEntropyLoss(reduction='mean',
-                                                     ignore_index=self.label_padding_idx)
+                self.criterion = nn.CrossEntropyLoss(
+                    reduction='mean', ignore_index=self.params.label_padding_idx)
             else:
                 msg = f"Invalid number of labels specified: {self.params.num_labels}. " \
                       f"A valid number is equal to or greater than 2"
@@ -128,6 +126,15 @@ class TokenClassificationBase(ClassificationBase):
         batch_data_dict = self._forward_core(batch_data_dict)
 
         token_embs = batch_data_dict["token_embs"]
+
+        # strip the terminals if required; note they are not acccounted in the label padding process
+        if self.params.add_terminals:
+            token_embs = self.span_pooling_layer(
+                token_embs,
+                batch_data_dict["split_lengths"],  # List[List[Int]],
+                discard_terminals=self.params.add_terminals
+            )  # [BS, SEQ_LEN`, EMD_DIM], and the SEQ_LEN` matches the width of labels upon padding
+
         token_embs = self.dense_layer_dropout(token_embs)
         logits = self.classifier_head(token_embs)
         batch_data_dict.update({"logits": logits})
@@ -136,7 +143,8 @@ class TokenClassificationBase(ClassificationBase):
         if targets is not None:
             if self.params.use_crf_layer:
                 # create a mask to ignore token positions that are padded
-                mask = torch.as_tensor(targets != self.label_padding_idx, dtype=torch.uint8)
+                mask = torch.as_tensor(targets != self.params.label_padding_idx,
+                                       dtype=torch.uint8).to(self.params.device)
                 loss = - self.crf_layer(logits, targets, mask=mask)  # negative log likelihood
             else:
                 loss = self.criterion(logits.view(-1, logits.shape[-1]), targets.view(-1))
@@ -156,11 +164,11 @@ class TokenClassificationBase(ClassificationBase):
                 # find predictions
                 if self.params.use_crf_layer:
                     # create a mask to ignore token positions that are padded
-                    mask = torch.as_tensor(
-                        pad_sequence([torch.as_tensor([1] * length_) for length_ in
-                                      batch_data_dict["seq_lengths"]], batch_first=True),
-                        dtype=torch.uint8
-                    )
+                    mask = torch.as_tensor(pad_sequence([
+                        torch.as_tensor([1] * length_)
+                        for length_ in batch_data_dict["seq_lengths"]],
+                        batch_first=True
+                    ), dtype=torch.uint8).to(self.params.device)  # [BS] -> [BS, SEQ_LEN]
                     this_preds = self.crf_layer.decode(this_logits, mask=mask)  # -> List[List[int]]
                 else:
                     this_preds = torch.argmax(this_logits, dim=-1).tolist()
@@ -190,7 +198,7 @@ class TokenClassificationBase(ClassificationBase):
                         pad_sequence([torch.as_tensor([1] * length_) for length_ in
                                       batch_data_dict["seq_lengths"]], batch_first=True),
                         dtype=torch.uint8
-                    )
+                    ).to(self.params.device)
                     this_preds = self.crf_layer.decode(this_logits, mask=mask)  # -> List[List[int]]
                 else:
                     this_preds = torch.argmax(this_logits, dim=-1).tolist()
@@ -213,12 +221,12 @@ class TokenClassificationBase(ClassificationBase):
         raise NotImplementedError
 
 
-class EmbedderForTokenClassification(TokenClassificationBase):
+class EmbedderForTokenClassification(BaseTokenClassification):
     DEFAULT_PARAMS = {
         "padding_idx": None,
         "update_embeddings": True,
         "embedder_output_keep_prob": 0.7,
-        "output_keep_prob": 1.0,
+        "output_keep_prob": 1.0,  # set to 1.0 due to the shallowness of the architecture
     }
 
     def _init_core(self):
@@ -235,14 +243,13 @@ class EmbedderForTokenClassification(TokenClassificationBase):
     def _forward_core(self, batch_data_dict):
         seq_ids = batch_data_dict["seq_ids"]  # [BS, SEQ_LEN]
 
-        encodings = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, self.out_dim]
+        token_embs = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, self.out_dim]
 
-        batch_data_dict.update({"token_embs": encodings})
-
+        batch_data_dict.update({"token_embs": token_embs})
         return batch_data_dict
 
 
-class LstmForTokenClassification(TokenClassificationBase):
+class LstmForTokenClassification(BaseTokenClassification):
     """A LSTM module that operates on a batched sequence of token ids. The tokens could be
     characters or words or sub-words. This module uses an additional input that determines
     how the sequence of embeddings obtained after the LSTM layers for each instance in the
@@ -287,16 +294,17 @@ class LstmForTokenClassification(TokenClassificationBase):
         seq_ids = batch_data_dict["seq_ids"]  # [BS, SEQ_LEN]
         seq_lengths = batch_data_dict["seq_lengths"]  # [BS]
 
-        encodings = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, EMD_DIM]
-        encodings = self.lstm_layer(encodings, seq_lengths)  # [BS, SEQ_LEN, self.out_dim]
+        token_embs = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, EMD_DIM]
+        token_embs = self.lstm_layer(token_embs, seq_lengths)  # [BS, SEQ_LEN, self.out_dim]
 
-        batch_data_dict.update({"token_embs": encodings})
+        batch_data_dict.update({"token_embs": token_embs})
 
         return batch_data_dict
 
 
-class CharLstmWithWordLstmForTokenClassification(TokenClassificationBase):
+class CharLstmWithWordLstmForTokenClassification(BaseTokenClassification):
     DEFAULT_PARAMS = {
+        "tokenizer_type": "whitespace_and_char-tokenizer",
         "padding_idx": None,
         "update_embeddings": True,
         "embedder_output_keep_prob": 0.7,
@@ -312,19 +320,19 @@ class CharLstmWithWordLstmForTokenClassification(TokenClassificationBase):
         "word_level_character_embedding_size": None
     }
 
-    def __init__(self):
-        super().__init__()
+    def _prepare_input_encoder(self, examples, **params):
+        params = super()._prepare_input_encoder(examples, **params)
 
-        # default encoder; have to either fit ot load to use it
-        self.encoder = TokenClsDualEncoderForEmbLayers()
-
-    def _init_encoder(self, examples, **params):
-        params = super()._init_encoder(examples, **params)
+        # update params without which can become ambiguous when loading a model
         params.update({
-            "char_num_tokens": self.encoder.get_char_num_tokens(),
-            "char_emb_dim": self.encoder.get_char_emb_dim(),
+            "add_terminals": False,  # cannot add terminals as they cannot be broken down into chars
+            "char_num_tokens": len(self.encoder.get_char_vocab()),
             "char_padding_idx": self.encoder.get_char_pad_token_idx(),
+            "char_add_terminals": params.get("char_add_terminals"),
+            "char_padding_length": params.get("char_padding_length"),
+            "char_emb_dim": params.get("char_emb_dim", 50),
         })
+
         return params
 
     def _init_core(self):
@@ -398,15 +406,17 @@ class CharLstmWithWordLstmForTokenClassification(TokenClassificationBase):
 
         word_encs = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, self.emb_dim]
         char_plus_word_encs = torch.cat((char_encs, word_encs), dim=-1)  # [BS, SEQ_LEN, sum(both)]
-        encodings = self.lstm_layer(char_plus_word_encs, seq_lengths)  # [BS, SEQ_LEN, self.out_dim]
+        token_embs = self.lstm_layer(char_plus_word_encs,
+                                     seq_lengths)  # [BS, SEQ_LEN, self.out_dim]
 
-        batch_data_dict.update({"token_embs": encodings})
+        batch_data_dict.update({"token_embs": token_embs})
 
         return batch_data_dict
 
 
-class CharCnnWithWordLstmForTokenClassification(TokenClassificationBase):
+class CharCnnWithWordLstmForTokenClassification(BaseTokenClassification):
     DEFAULT_PARAMS = {
+        "tokenizer_type": "whitespace_and_char-tokenizer",
         "padding_idx": None,
         "update_embeddings": True,
         "embedder_output_keep_prob": 0.7,
@@ -420,19 +430,19 @@ class CharCnnWithWordLstmForTokenClassification(TokenClassificationBase):
         "word_level_character_embedding_size": None
     }
 
-    def __init__(self):
-        super().__init__()
+    def _prepare_input_encoder(self, examples, **params):
+        params = super()._prepare_input_encoder(examples, **params)
 
-        # default encoder; have to either fit ot load to use it
-        self.encoder = TokenClsDualEncoderForEmbLayers()
-
-    def _init_encoder(self, examples, **params):
-        params = super()._init_encoder(examples, **params)
+        # update params without which can become ambiguous when loading a model
         params.update({
-            "char_num_tokens": self.encoder.get_char_num_tokens(),
-            "char_emb_dim": self.encoder.get_char_emb_dim(),
+            "add_terminals": False,  # cannot add terminals as they cannot be broken down into chars
+            "char_num_tokens": len(self.encoder.get_char_vocab()),
             "char_padding_idx": self.encoder.get_char_pad_token_idx(),
+            "char_add_terminals": params.get("char_add_terminals"),
+            "char_padding_length": params.get("char_padding_length"),
+            "char_emb_dim": params.get("char_emb_dim", 50),
         })
+
         return params
 
     def _init_core(self):
@@ -496,88 +506,21 @@ class CharCnnWithWordLstmForTokenClassification(TokenClassificationBase):
 
         word_encs = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, self.emb_dim]
         char_plus_word_encs = torch.cat((char_encs, word_encs), dim=-1)  # [BS, SEQ_LEN, sum(both)]
-        encodings = self.lstm_layer(char_plus_word_encs, seq_lengths)  # [BS, SEQ_LEN, self.out_dim]
+        token_embs = self.lstm_layer(char_plus_word_encs,
+                                     seq_lengths)  # [BS, SEQ_LEN, self.out_dim]
 
-        batch_data_dict.update({"token_embs": encodings})
+        batch_data_dict.update({"token_embs": token_embs})
 
         return batch_data_dict
 
 
-class BertForTokenClassification(TokenClassificationBase):
+class BertForTokenClassification(BaseTokenClassification):
     DEFAULT_PARAMS = {
+        "tokenizer_type": "huggingface_pretrained-tokenizer",
         "embedder_output_keep_prob": 0.7,
-        "token_spans_pooling_type": "first",
-        "output_keep_prob": 1.0,
-        "use_crf_layer": False
+        "output_keep_prob": 1.0,  # unnecessary upon using `embedder_output_keep_prob`
+        "use_crf_layer": False,  # Following BERT paper's best results
     }
-
-    def __init__(self):
-        super().__init__()
-
-        # overwrite default encoder
-        self.encoder = TokenClsEncoderWithPlmLayer()
-
-    def _init_core(self):
-
-        self.dropout = nn.Dropout(
-            p=1 - self.params.embedder_output_keep_prob
-        )
-        self.span_pooling_layer = SplittingAndPoolingLayer(
-            self.params.token_spans_pooling_type
-        )
-        self.out_dim = self.params.emb_dim
-
-    def _forward_core(self, batch_data_dict):
-        split_lengths = batch_data_dict["split_lengths"]  # List[List[Int]]
-        last_hidden_state = batch_data_dict["last_hidden_state"]  # [BS, SEQ_LEN, EMD_DIM]
-
-        last_hidden_state = self.dropout(last_hidden_state)
-
-        encodings = self.span_pooling_layer(
-            last_hidden_state, split_lengths
-        )  # [BS, SEQ_LEN`, EMD_DIM]
-        batch_data_dict.update({"token_embs": encodings})
-
-        return batch_data_dict
-
-    def _create_optimizer(self):
-        params = list(self.named_parameters())
-        no_decay = ["bias", 'LayerNorm.bias', "LayerNorm.weight",
-                    'layer_norm.bias', 'layer_norm.weight']
-        optimizer_grouped_parameters = [
-            {'params': [p for n, p in params if not any(nd in n for nd in no_decay)],
-             'weight_decay': 0.01},
-            {'params': [p for n, p in params if any(nd in n for nd in no_decay)],
-             'weight_decay': 0.0}
-        ]
-        optimizer = getattr(torch.optim, self.params.optimizer)(
-            optimizer_grouped_parameters,
-            lr=self.params.learning_rate,
-            eps=1e-08,
-            weight_decay=0.01
-        )
-        return optimizer
-
-    def _create_optimizer_and_scheduler(self, num_training_steps):
-
-        num_warmup_steps = min(0.1 * num_training_steps, self.params.num_warmup_steps)
-        self.params.update({"num_warmup_steps": num_warmup_steps})
-
-        # https://github.com/huggingface/transformers/blob/master/src/transformers/optimization.py
-        # refer `get_linear_schedule_with_warmup` method
-        def lr_lambda(current_step: int):
-            if current_step < num_warmup_steps:
-                return float(current_step) / float(max(1, num_warmup_steps))
-            return max(
-                0.0, float(num_training_steps - current_step) / float(
-                    max(1, num_training_steps - num_warmup_steps))
-            )
-
-        # load a torch optimizer
-        optimizer = self._create_optimizer()
-        # load a lr scheduler
-        scheduler = getattr(torch.optim.lr_scheduler, "LambdaLR")(optimizer, lr_lambda)
-        return optimizer, scheduler
 
     def fit(self, examples, labels, **params):
         # overriding base class' method to set params, and then calling base class' .fit()
@@ -611,3 +554,66 @@ class BertForTokenClassification(TokenClassificationBase):
         params.update({"embedder_type": "bert"})
 
         super().fit(examples, labels, **params)
+
+    def _create_optimizer(self):
+        params = list(self.named_parameters())
+        no_decay = ["bias", 'LayerNorm.bias', "LayerNorm.weight",
+                    'layer_norm.bias', 'layer_norm.weight']
+        optimizer_grouped_parameters = [
+            {'params': [p for n, p in params if not any(nd in n for nd in no_decay)],
+             'weight_decay': 0.01},
+            {'params': [p for n, p in params if any(nd in n for nd in no_decay)],
+             'weight_decay': 0.0}
+        ]
+        optimizer = getattr(torch.optim, self.params.optimizer)(
+            optimizer_grouped_parameters,
+            lr=self.params.learning_rate,
+            eps=1e-08,
+            weight_decay=0.01
+        )
+        return optimizer
+
+    def _create_optimizer_and_scheduler(self, num_training_steps):
+
+        num_warmup_steps = min(int(0.1 * num_training_steps), self.params.num_warmup_steps)
+        self.params.update({"num_warmup_steps": num_warmup_steps})
+
+        # https://github.com/huggingface/transformers/blob/master/src/transformers/optimization.py
+        # refer `get_linear_schedule_with_warmup` method
+        def lr_lambda(current_step: int):
+            if current_step < num_warmup_steps:
+                return float(current_step) / float(max(1, num_warmup_steps))
+            return max(
+                0.0, float(num_training_steps - current_step) / float(
+                    max(1, num_training_steps - num_warmup_steps))
+            )
+
+        # load a torch optimizer
+        optimizer = self._create_optimizer()
+        # load a lr scheduler
+        scheduler = getattr(torch.optim.lr_scheduler, "LambdaLR")(optimizer, lr_lambda)
+        return optimizer, scheduler
+
+    def _init_core(self):
+
+        self.bert_model = HuggingfaceTransformersContainer(
+            self.params.pretrained_model_name_or_path,
+            cache_lookup=False
+        ).get_transformer_model()
+        self.dropout = nn.Dropout(
+            p=1 - self.params.embedder_output_keep_prob
+        )
+        self.out_dim = self.params.emb_dim
+
+    def _forward_core(self, batch_data_dict):
+        bert_outputs = self.bert_model(**batch_data_dict["hgf_encodings"], return_dict=True)
+        last_hidden_state = bert_outputs.get("last_hidden_state")  # [BS, SEQ_LEN, EMD_DIM]
+        if last_hidden_state is None:
+            msg = f"The choice of pretrained bert model " \
+                  f"({self.params.pretrained_model_name_or_path}) " \
+                  f"has no key 'last_hidden_state' in its output dictionary"
+            raise ValueError(msg)
+
+        last_hidden_state = self.dropout(last_hidden_state)
+        batch_data_dict.update({"token_embs": last_hidden_state})
+        return batch_data_dict

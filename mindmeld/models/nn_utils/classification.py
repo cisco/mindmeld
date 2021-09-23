@@ -31,7 +31,9 @@ from .helpers import (
     get_disk_space_of_model,
     get_num_weights_of_model
 )
+from .input_encoders import InputEncoderFactory
 from .._util import _get_module_or_attr
+from ..containers import GloVeEmbeddingsContainer
 from ...core import Bunch
 from ...path import USER_CONFIG_DIR
 
@@ -47,23 +49,31 @@ except ImportError:
     pass
 
 SEED = 6174
+LABEL_PAD_TOKEN_IDX = -1  # value set based on default label padding idx in pytorch
 
 logger = logging.getLogger(__name__)
 
 
-class ClassificationBase(nn_module):
+class BaseClassification(nn_module):
+    """
+    A base class for sequence and token classifiation using deep neural nets. The trainable examples
+    inputted to the methods of this class are generally in the form of strings or list of strings.
+    """
     DEFAULT_PARAMS = {
         "device": "cuda" if is_cuda_available else "cpu",
         "number_of_epochs": 100,
-        "patience": 10,
+        "patience": 7,
         "batch_size": 32,
         "gradient_accumulation_steps": 1,
         "max_grad_norm": None,
         "optimizer": "Adam",
         "learning_rate": 0.001,
         "validation_metric": "accuracy",  # or 'f1'
-        "verbose": True,  # to print progress to stdout/log file
-        "dev_split_ratio": 0.8
+        "dev_split_ratio": 0.2
+    }
+    EMBEDDER_TYPE_TO_ALLOWED_TOKENIZER_TYPES = {
+        "glove": ["whitespace-tokenizer", ],
+        "bert": ["huggingface_pretrained-tokenizer", ]
     }
 
     def __init__(self):
@@ -72,144 +82,99 @@ class ClassificationBase(nn_module):
         self.name = self.__class__.__name__
         self.params = Bunch()
         self.params["name"] = self.name
-
-        self.ready = False  # True when .fit() is called or loaded from a checkpoint
-        self.dirty = False  # True when weights saved in a temp folder & to be moved to dump_folder
-
         self.encoder = None
+
+        self.ready = False  # True when .fit() is called or loaded from a checkpoint, else False
+        self.dirty = False  # True when the model weights aren't saved to disk yet, else False
 
     def __repr__(self):
         return f"<{self.name}> ready:{self.ready} dirty:{self.dirty}"
 
+    def get_default_params(self) -> Dict:
+        return {
+            **BaseClassification.DEFAULT_PARAMS,
+            **self._get_default_params(),
+        }
+
     def who_am_i(self) -> str:
-        msg = f"Who Am I: <{self.name}> " \
-              f"ready: {self.ready} dirty: {self.dirty} device:{self.params.device}\n" \
-              f"\tNumber of weights (trainable, all): {get_num_weights_of_model(self)} \n" \
+        msg = f"{self.name} " \
+              f"ready:{self.ready} dirty:{self.dirty} device:{self.params.device}\n" \
+              f"\tNumber of weights (trainable, all):{get_num_weights_of_model(self)} \n" \
               f"\tDisk Size (in MB): {get_disk_space_of_model(self):.4f}"
         logger.info(msg)
         return msg
 
-    # methods to load and dump resources, common across sub-classes
-
-    def dump(self, path):
-        # resolve path and create associated folder if required
-        path = os.path.abspath(os.path.splitext(path)[0]) + ".pytorch_model"
-        os.makedirs(path, exist_ok=True)
-
-        # save weights
-        torch.save(self.state_dict(), os.path.join(path, "pytorch_model.bin"))
-
-        # save encoder
-        self.encoder.dump(path)
-
-        # save params
-        with open(os.path.join(path, "params.json"), "w") as fp:
-            json.dump(dict(self.params), fp, indent=4)
-            fp.close()
-        msg = f"{self.name} model weights are dumped successfully"
-        logger.info(msg)
-
-        self.dirty = False
-
-    @classmethod
-    def load(cls, path):
-        # resolve path
-        path = os.path.abspath(os.path.splitext(path)[0]) + ".pytorch_model"
-
-        # create instance and populate with params
-        module = cls()
-        with open(os.path.join(path, "params.json"), "r") as fp:
-            all_params = json.load(fp)
-            fp.close()
-
-        # validate name
-        if module.name != all_params["name"]:
-            msg = f"The name of the loaded model ({all_params['name']}) from the path '{path}' " \
-                  f"is different from the name of the module instantiated ({module.name})"
-            raise AssertionError(msg)
-
-        # load resources
-        module.encoder = module.encoder.load(path)  # .load() is a classmethod here
-        module.params.update(dict(all_params))
-        module._init_forward_graph()
-
-        # load weights
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        if device != module.params.device:
-            msg = f"Model was trained on '{module.params.device}' but is being loaded on {device}"
-            module.params.device = device
-            logger.warning(msg)
-        module.load_state_dict(torch.load(os.path.join(path, "pytorch_model.bin"),
-                                          map_location=torch.device(device)))
-        msg = f"{module.name} model weights are loaded successfully"
-        logger.info(msg)
-
-        module.ready = True
-        module.dirty = False
-        return module
-
-    # methods for gpu usage and data loading
-
-    def _to_device(self, batch_data_dict: Dict) -> Dict:
+    def batch_data_to_device(self, batch_data_dict: Dict) -> Dict:
+        """method for gpu usage and data loading"""
         for k, v in batch_data_dict.items():
             if v is not None and isinstance(v, torch.Tensor):
                 batch_data_dict[k] = v.to(self.params.device)
+            elif isinstance(v, list):
+                batch_data_dict[k] = [
+                    vv.to(self.params.device) if isinstance(vv, torch.Tensor) else vv for vv in v
+                ]
+            elif isinstance(v, dict):
+                batch_data_dict[k] = self.batch_data_to_device(batch_data_dict[k])
         return batch_data_dict
 
-    # methods for training
-
     def fit(self, examples, labels, **params):  # pylint: disable=too-many-locals
+        """
+        Trains the underlying neural model on the inputted data and finally retains the best scored
+        model among all iterations.
+
+        Because of possibly large sized neural models, instead of retaining a copy of best set of
+        model weights on RAM, it is advisable to dump them in a temporary folder and upon training,
+        load the best checkpointed weights.
+        """
 
         if self.ready:
             msg = "The model is already fitted or is loaded from a file. Aborting re-fitting."
             logger.error(msg)
 
-        # fit an encoder and update params
-        params = self._init_encoder(examples, **params)
+        # update params upon preparing encoder and embedder
+        params = {**self.get_default_params(), **params}
+        params = self._prepare_input_encoder(examples, **params)
+        params = self._prepare_embedder(**params)
 
-        # update number of labels
+        # update params upon identifying unique labels
         try:
             num_labels = len(set(labels))
         except TypeError:  # raised in cased on token classification
             num_labels = len(set(sum(labels, [])))
         params.update({"num_labels": num_labels})
 
-        # update label pad idx; used by token classifiers in crf masks and for evaluation
-        try:
+        # update params with label pad idx
+        try:  # used by token classifiers in crf masks and for training/evaluation
             self.label_padding_idx = params["label_padding_idx"]
             params.update({"label_padding_idx": params["label_padding_idx"]})
         except KeyError:  # raised in cased on sequence classification
             pass
 
-        # use all default params ans inputted params to update self.params
-        self.params.update({**self.get_default_params(), **params})
+        # use all default params and inputted params to update self.params
+        self.params.update(params)
 
-        # init the graph
-        self._init_forward_graph()
-
-        # move model to device
+        # init the graph and move model to device, inputs are moved to device on-the-go
+        self._init_graph()
         self.to(self.params.device)
-
-        # print model stats
         self.who_am_i()
 
-        # create temp folder and a save path
-        # dumping into a temp folder instead of keeping in memory to reduce memory usage
-        temp_folder = os.path.join(USER_CONFIG_DIR, "pytorch_models", str(uuid.uuid4()))
-        os.makedirs(temp_folder, exist_ok=True)
+        # dumping weights during training process into a temp folder instead of keeping in
+        # memory to reduce memory usage
+        temp_folder = os.path.join(USER_CONFIG_DIR, "tmp", "pytorch_models", str(uuid.uuid4()))
         temp_weights_save_path = os.path.join(temp_folder, "pytorch_model.bin")
+        os.makedirs(temp_folder, exist_ok=True)
 
-        # split into train, dev splits and get data loaders
+        # split input data into train & dev splits, and get data loaders
         indices = np.arange(len(examples))
         np.random.seed(SEED)
         np.random.shuffle(indices)
         train_examples, train_labels = zip(*[
             (examples[i], labels[i])
-            for i in indices[:int(self.params.dev_split_ratio * len(indices))]
+            for i in indices[:int((1.0 - self.params.dev_split_ratio) * len(indices))]
         ])
         dev_examples, dev_labels = zip(*[
             (examples[i], labels[i])
-            for i in indices[int(self.params.dev_split_ratio * len(indices)):]
+            for i in indices[int((1.0 - self.params.dev_split_ratio) * len(indices)):]
         ])
 
         # create an optimizer and attach all model params to it
@@ -219,14 +184,17 @@ class ClassificationBase(nn_module):
         )
         optimizer, scheduler = self._create_optimizer_and_scheduler(num_training_steps)
 
-        # training and dev validation
-        self.verbose = self.params.pop("verbose", True)
+        # training w/ validation
         best_dev_score, best_dev_epoch = -np.inf, -1
         msg = f"Beginning to train for {self.params.number_of_epochs} number of epochs"
         logger.info(msg)
         if self.params.number_of_epochs < 1:
             raise ValueError("Param 'number_of_epochs' must be a positive integer greater than 0")
         _patience_counter = 0
+        verbose = (
+            logger.getEffectiveLevel() == logging.INFO or
+            logger.getEffectiveLevel() == logging.DEBUG
+        )
         for epoch in range(1, self.params.number_of_epochs + 1):
             # patience before terminating due to no dev score improvements
             if _patience_counter >= self.params.patience:
@@ -237,12 +205,21 @@ class ClassificationBase(nn_module):
             self.train()
             optimizer.zero_grad()
             train_loss, train_batches = 0.0, 0.0
-            t = tqdm(range(0, len(train_examples), self.params.batch_size),
-                     disable=not self.verbose)
+            t = tqdm(
+                range(0, len(train_examples), self.params.batch_size), disable=not verbose
+            )
             for start_idx in t:
                 this_examples = train_examples[start_idx:start_idx + self.params.batch_size]
                 this_labels = train_labels[start_idx:start_idx + self.params.batch_size]
-                batch_data_dict = self.encoder.batch_encode(this_examples, this_labels)
+                batch_data_dict = self.encoder.batch_encode(
+                    examples=this_examples,
+                    padding_length=self.params.padding_length,
+                    add_terminals=self.params.add_terminals
+                )
+                batch_data_dict.update({
+                    "labels": self._batch_encode_labels(
+                        this_labels, batch_data_dict["split_lengths"])
+                })
                 batch_data_dict = self.forward(batch_data_dict)
                 loss = batch_data_dict["loss"]
                 train_loss += loss.cpu().detach().numpy()
@@ -330,7 +307,7 @@ class ClassificationBase(nn_module):
                     _patience_counter = 0
                 best_dev_score, best_dev_epoch = dev_score, epoch
 
-        # load the best model, delete the temp folder and return
+        # load back the best model dumped in temporary path and delete the temp folder
         msg = f"Setting the model weights to checkpoint whose dev score " \
               f"('{self.params.validation_metric}') was {best_dev_score:.4f}"
         logger.info(msg)
@@ -340,12 +317,6 @@ class ClassificationBase(nn_module):
 
         self.ready = True
         self.dirty = True
-
-    def get_default_params(self) -> Dict:
-        return {
-            **ClassificationBase.DEFAULT_PARAMS,
-            **self._get_subclasses_default_params(),
-        }
 
     def _create_optimizer_and_scheduler(self, num_training_steps):
         del num_training_steps
@@ -358,29 +329,180 @@ class ClassificationBase(nn_module):
         scheduler = getattr(torch.optim.lr_scheduler, "LambdaLR")(optimizer, lambda _: 1)
         return optimizer, scheduler
 
-    # abstract methods definitions, to be implemented by sub-classes
+    @abstractmethod
+    def _get_default_params(self) -> Dict:
+        raise NotImplementedError
+
+    def _prepare_input_encoder(self, examples, **params):
+
+        # validation for use_character_embeddings param
+        use_character_embeddings = params.pop("use_character_embeddings", False)
+        if use_character_embeddings:
+            tokenizer_type = params.get("tokenizer_type", "char-tokenizer")
+            # Ensure that the params do not contain both `use_character_embeddings` as well as
+            # `tokenizer_type` params and that they are contradicting
+            if tokenizer_type != "char-tokenizer":
+                msg = "To use character embeddings, 'tokenizer_type' must be 'char-tokenizer'. " \
+                      "Other values passed thorugh params are not allowed."
+                raise ValueError(msg)
+            params.update({"tokenizer_type": tokenizer_type})
+
+        # update params without which can become ambiguous when loading a model
+        params.update({
+            "add_terminals": params.get("add_terminals"),
+            "padding_length": params.get("padding_length"),
+            "tokenizer_type": params.get("tokenizer_type", "whitespace-tokenizer"),
+            "label_padding_idx": LABEL_PAD_TOKEN_IDX,
+        })
+
+        # create and fit encoder
+        self.encoder = InputEncoderFactory.get_encoder_class_from_name(
+            tokenizer_type=params.get("tokenizer_type"))(**params)
+        self.encoder.fit(examples=examples)
+        params.update({
+            "num_tokens": len(self.encoder.get_vocab()),
+            "padding_idx": self.encoder.get_pad_token_idx(),
+        })
+        return params
+
+    def _prepare_embedder(self, **params) -> Dict:
+
+        # validation for tokenizer_type due to embedder_type param
+        tokenizer_type = params.get("tokenizer_type")
+        embedder_type = params.get("embedder_type")
+        allowed_types = BaseClassification.EMBEDDER_TYPE_TO_ALLOWED_TOKENIZER_TYPES
+        if embedder_type in allowed_types:
+            if tokenizer_type not in allowed_types[embedder_type]:
+                msg = f"For the selected choice of embedder ({embedder_type}), only the " \
+                      f"following tokenizer_type are allowed: {allowed_types[embedder_type]}."
+                raise ValueError(msg)
+
+        if self.encoder is None:
+            raise ValueError("An encoder must be first fitted before calling _prepare_embedder()")
+
+        embedder_type = params.get("embedder_type")
+        if embedder_type == "glove":
+            # load glove embs
+            glove_container = GloVeEmbeddingsContainer()
+            token2emb = glove_container.get_pretrained_word_to_embeddings_dict()
+            glove_emb_dim = glove_container.token_dimension
+            # validate emb_dim
+            emb_dim = params.get("emb_dim", glove_emb_dim)
+            if emb_dim != glove_emb_dim:
+                msg = f"Provided 'emb_dim':{emb_dim} cannot be used with the provided " \
+                      f"'embedder_type':{embedder_type}. Consider not specifying any 'emb_dim' " \
+                      f"with this embedder."
+                raise ValueError(msg)
+            params.update({
+                "embedder_type": embedder_type,
+                "emb_dim": emb_dim,
+                "embedding_weights": {
+                    i: token2emb[t] for t, i in self.encoder.get_vocab().items() if t in token2emb
+                },
+            })
+        elif embedder_type == "bert":
+            # the bert model is directly loaded in _init_core() itself
+            params.update({
+                "embedder_type": embedder_type,
+                "emb_dim": self.encoder.config.hidden_size,
+                "pretrained_model_name_or_path": params.get("pretrained_model_name_or_path"),
+            })
+
+        if not params.get("emb_dim"):
+            msg = "Need a valid 'emb_dim' to initialize embedding layers. To specify a " \
+                  "particular dimension, either pass-in the 'emb_dim' param or provide a " \
+                  "valid 'embedder_type' param."
+            raise ValueError(msg)
+
+        return params
 
     @abstractmethod
-    def _init_encoder(self, examples, **kwargs) -> Dict:
-        # return updated kwargs dict
+    def _batch_encode_labels(
+        self, labels: Union[List[int], List[List[int]]], split_lengths: "Tensor2d[int]"
+    ):
         raise NotImplementedError
 
     @abstractmethod
-    def _get_subclasses_default_params(self) -> Dict:
+    def _init_graph(self) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def _init_forward_graph(self) -> None:
+    def forward(self, batch_data_dict: Dict) -> Dict:
         raise NotImplementedError
 
     @abstractmethod
-    def forward(self, batch_data_dict) -> Dict:
+    def predict(self, examples: List[str]) -> Union[List[int], List[List[int]]]:
         raise NotImplementedError
 
     @abstractmethod
-    def predict(self, examples) -> Union[List[int], List[List[int]]]:
+    def predict_proba(self, examples: List[str]) -> Union[List[List[int]], List[List[List[int]]]]:
         raise NotImplementedError
 
-    @abstractmethod
-    def predict_proba(self, examples) -> Union[List[List[int]], List[List[List[int]]]]:
-        raise NotImplementedError
+    def dump(self, path: str):
+        """
+        The following states are dumped into different files:
+            - Pytorch model weights
+            - Encoder state
+            - Params (including params such as tokenizer_type and emb_dim that are used during
+                loading to create encoder and forward graph)
+        """
+        # resolve path and create associated folder if required
+        path = os.path.abspath(os.path.splitext(path)[0]) + ".pytorch_model"
+        os.makedirs(path, exist_ok=True)
+
+        # save weights
+        torch.save(self.state_dict(), os.path.join(path, "model.bin"))
+
+        # save encoder's state
+        self.encoder.dump(path)
+
+        # save all params
+        with open(os.path.join(path, "params.json"), "w") as fp:
+            json.dump(dict(self.params), fp, indent=4)
+            fp.close()
+        msg = f"{self.name} model weights are dumped successfully"
+        logger.info(msg)
+
+        self.dirty = False
+
+    @classmethod
+    def load(cls, path: str):
+        # resolve path
+        path = os.path.abspath(os.path.splitext(path)[0]) + ".pytorch_model"
+
+        # load all params
+        with open(os.path.join(path, "params.json"), "r") as fp:
+            all_params = json.load(fp)
+            fp.close()
+
+        # create new instance
+        module = cls()
+        if module.name != all_params["name"]:
+            msg = f"The name of the loaded model ({all_params['name']}) from the path '{path}' " \
+                  f"is different from the name of the module instantiated ({module.name})"
+            raise AssertionError(msg)
+
+        # load encoder's state
+        module.params.update(dict(all_params))
+        module.encoder = InputEncoderFactory.get_encoder_class_from_name(
+            tokenizer_type=all_params["tokenizer_type"])(**all_params)
+        module.encoder.load(path)
+
+        # load weights
+        module._init_graph()
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        if device != module.params.device:
+            msg = f"Model was dumped when on the device:{module.params.device} " \
+                  f"but is not being loaded on device:{device}"
+            logger.warning(msg)
+            module.params.device = device
+        module.load_state_dict(  # load model weights from checkpoint
+            torch.load(os.path.join(path, "model.bin"), map_location=torch.device(device))
+        )
+        module.to(device)
+        msg = f"{module.name} model weights are loaded successfully on device:{device}"
+        logger.info(msg)
+
+        module.ready = True
+        module.dirty = False
+        return module

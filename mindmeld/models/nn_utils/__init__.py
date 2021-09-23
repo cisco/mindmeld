@@ -11,13 +11,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .sequence_classification_modules import (
+from .sequence_classification import (
     EmbedderForSequenceClassification,
     CnnForSequenceClassification,
     LstmForSequenceClassification,
     BertForSequenceClassification
 )
-from .token_classification_modules import (
+from .token_classification import (
     EmbedderForTokenClassification,
     LstmForTokenClassification,
     CharCnnWithWordLstmForTokenClassification,

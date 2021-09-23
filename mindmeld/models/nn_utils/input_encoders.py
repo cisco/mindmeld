@@ -14,924 +14,825 @@
 """
 This module consists of encoders that serve as input to pytorch modules
 """
-import json
 import logging
 import os
-from abc import abstractmethod
-from typing import Dict, List, Union, Any, Iterable
+from abc import abstractmethod, ABC
+from typing import Dict, List, Union, Any, Tuple
 
-from .._util import _get_module_or_attr
-from ..containers import GloVeEmbeddingsContainer, HuggingfaceTransformersContainer
+from ..containers import HuggingfaceTransformersContainer
+from ...text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
 
 try:
     import torch
-    from torch.nn.utils.rnn import pad_sequence
-
-    nn_module = _get_module_or_attr("torch.nn", "Module")
 except ImportError:
-    nn_module = object
+    pass
+
+try:
+    from tokenizers import Tokenizer
+    from tokenizers import normalizers
+    from tokenizers.trainers import Trainer
+    from tokenizers.normalizers import Lowercase, NFD, StripAccents
+    from tokenizers.pre_tokenizers import Whitespace
+    from tokenizers.models import BPE, WordPiece
+    from tokenizers.trainers import BpeTrainer, WordPieceTrainer
+    from tokenizers.processors import TemplateProcessing
+
+    NO_TOKENIZERS_MODULE = False
+except ImportError:
+    NO_TOKENIZERS_MODULE = True
     pass
 
 logger = logging.getLogger(__name__)
 
-LABEL_PAD_TOKEN_IDX = -1  # value set based on default label padding idx in pytorch
 
+class AbstractEncoder(ABC):
+    """
+    Defines a state-ful tokenizer. Unlike the tokenizer in the text_preperation_pipeline, tokenizers
+    developed on top this abstract class tend to have a state such a vocabulary or a model that is
+    used for encoding a given piece of text into sequence of ids or a sequence of embeddings. These
+    outputs are used by the initial layers of neural nets.
+    """
 
-# abstract encoder; derives from torch nn.Module
+    def __init__(self, **_kwargs):
+        ununsed_kwargs = ','.join([f'{k}:{v}' for k, v in _kwargs.items()])
+        msg = f"The following keyword arguments are not used while initializing " \
+              f"{self.__class__.__name__}: {ununsed_kwargs}"
+        logger.debug(msg)
 
-
-class AbstractEncoder(nn_module):
-
-    def __init__(self):
-        super().__init__()
-        self.name = self.__class__.__name__
-        self.emb_dim = None
-        self.params_keys = set(["name", "emb_dim"])
-
-    def forward(self, *args, **kwargs):
-        return self.batch_encode(*args, **kwargs)
-
-    @abstractmethod
-    def fit(self, **kwargs):
-        msg = f"Subclass {self.name} need to implement this method"
-        raise NotImplementedError(msg)
+    def __call__(self, text):
+        return self.tokenize(text)
 
     @abstractmethod
-    def dump(self, **kwargs):
-        msg = f"Subclass {self.name} need to implement this method"
-        raise NotImplementedError(msg)
+    def fit(self, examples: List[str]):
+        """
+        Method that fits the tokenizer and creates a state that can be dumped or used for encoding
 
-    @classmethod
+        Args:
+            examples: List of text strings that will be used for creating the state of the tokenizer
+        """
+        raise NotImplementedError("Subclasses must implement this method")
+
     @abstractmethod
-    def load(cls, **kwargs):
-        msg = f"Subclass {cls.__name__} need to implement this method"
-        raise NotImplementedError(msg)
+    def dump(self, path: str):
+        """
+        Method that dumps the state (if any) of the tokenizer
+
+        Args:
+            path: The folder where the state has to be dumped
+        """
+        raise NotImplementedError("Subclasses must implement this method")
 
     @abstractmethod
-    def batch_encode(self, examples, labels=None, **kwargs) -> Dict[str, Any]:
-        msg = f"Subclass {self.name} need to implement this method"
-        raise NotImplementedError(msg)
+    def load(self, path: str):
+        """
+        Method that dumps the state (if any) of the tokenizer
 
-    # common `get` methods
+        Args:
+            path: The folder where the dumped state can be found. Not all tokenizers dump with same
+                file names, hence we use a folder name rather than filename.
+        """
+        raise NotImplementedError("Subclasses must implement this method")
 
-    def get_num_tokens(self):
-        if not hasattr(self, "token2idx"):
-            return None
-        return len(self.token2idx)
+    @abstractmethod
+    def tokenize(self, text: str) -> List[str]:
+        """
+        Method that converts a peice of text into a sequence of strings
 
-    def get_emb_dim(self):
-        return self.emb_dim
+        Args:
+            text (str): Input text.
 
-    def get_pad_token_idx(self):
+        Returns:
+            tokens (List[str]): List of tokens.
+        """
+        raise NotImplementedError("Subclasses must implement this method")
+
+    @abstractmethod
+    def batch_encode(
+        self, examples: List[str], padding_length: int = None, add_terminals: bool = False,
+        **kwargs
+    ) -> Dict[str, Any]:
+        """
+        Method that encodes a list of texts into a list of sequence of ids
+
+        Args:
+            examples: List of text strings that will be batch encoded
+            padding_length: The maximum length of each encoded input. Sequences less than this
+                length are padded to padding_length, longer sequences are trimmed. If not specified,
+                the max length of examples upon tokenization is used as padding_length.
+            add_terminals: A boolean flag that determines if terminal special tokens are to be added
+                to the tokenized examples or not.
+
+        Returns:
+            Dict[str, Any]: A dictionary consisting of tensor encodings, lengths of inputs and
+                special tokens used while encoding, etc. (useful for batching labels in case of
+                token classification). Typically, it includes the following (description follows):
+                - seq_ids: The encoded ids useful for embedding lookup, including terminal special
+                    tokens if asked for, and with padding.
+                - seq_lengths: Number of tokens in each example before adding padding tokens. It
+                    also includes terminal tokens as well, if they are added. If using an encoder
+                    that splits words in subwords, then seq_lengths implies number of words instead
+                    of number of subwords, along with any added terminal tokens. This number is
+                    useful in case of token classifiers which require token-level (aka.
+                    word-level) outputs as well as in sequence classifiers models such as LSTM.
+                - split_lengths: The length of each subgroup (i.e. group of subwords) in each
+                    example. Due to its definition, it obviously does not include any terminal
+                    tokens in its counts. This can be seen as a fine-grained information to
+                    seq_lengths values for the encoders with subword tokenization. This is again
+                    useful in cases of token classifiers to flexibly choose between representations
+                    of first sub-word or mean/max pool of sub-words' representations in order to
+                    obtain the word-level representations.
+                - attention_masks (only in case of huggingface trainable encoders): Boolean flags
+                    corresponding to each id in seq_ids, set to 0 if padding token else 1.
+                - hgf_encodings (only in huggingface pretrained encoders): A dict of outputs from a
+                    Pretrained Language Model encoder from Huggingface (shortly dubbed as hgf).
+                - char_seq_ids (only in dual tokenizers): Similar to seq_ids but from a char
+                    tokenizer in case of dual tokenization
+                - char_seq_lengths (only in dual tokenizers): Similar to seq_lengths but from a char
+                    tokenizer in case of dual tokenization. Like seq_lengths, this also includes
+                    terminal special tokens from char vocab in the length count whenever added.
+
+        Special note on `add_terminals` when using for sequence classification:
+            This flag can be True or False in general. Setting it to False will lead to errors in
+            case of Huggingface tokenizers as they are generally built to include terminals along
+            with pad tokens. Hence, the default value for `add_terminals` is False in case of
+            encoders built on top of AbstractVocabLookupEncoder and True for Hugginface ones. This
+            value can be True or False for encoders based on AbstractVocabLookupEncoder for sequence
+            classification.
+        Special note on `add_terminals` when using for token classification:
+            When using a CRF layer, `add_terminals` must be set to False and hence Huggingface
+            encoders cannot be used in such scenarios. If not using a CRF layer, one can use any
+            encoders by setting it to True but care must be taken to modify labels accordingly.
+            Hence, it is advisable to use `split_lengths` for padding labels in case of token
+            classsification instead of `seq_lengths`
+        """
+        raise NotImplementedError("Subclasses must implement this method")
+
+    @abstractmethod
+    def get_vocab(self) -> Dict:
+        """Returns a dictionary of vocab tokens as keys and their ids as values"""
+        raise NotImplementedError("Subclasses must implement this method")
+
+    def get_pad_token_idx(self) -> Union[None, int]:
+        """
+        If there exists a padding token's index in the vocab, it is returned; useful while
+        initializing an embedding layer. Else returns a None.
+        """
         if not hasattr(self, "pad_token_idx"):
             return None
-        return self.pad_token_idx
-
-    def get_embedding_weights(self):
-        if not hasattr(self, "token2emb") or not self.token2emb:
-            msg = f"Encoder instance ({self.name}) does not contain any token-to-embeddings mapping"
-            logger.info(msg)
-            return None
-        embedding_weights = {}
-        for token, idx in self.token2idx.items():
-            if token in self.token2emb:
-                embedding_weights[idx] = self.token2emb[token]
-        return embedding_weights
-
-    @staticmethod
-    def get_pad_label_idx():
-        return LABEL_PAD_TOKEN_IDX
-
-    def _reformat_and_validate(self, examples, labels=None):
-
-        # reformatting
-        if isinstance(examples, str):
-            examples = [examples]
-            if labels:
-                labels = [labels]
-
-        # validation for labels size
-        if labels:
-            if len(examples) != len(labels):
-                msg = f"Number of 'labels' ({len(labels)}) must be same as number of 'examples' " \
-                      f"({len(examples)}) when passing labels to {self.name}.batch_encode()"
-                raise AssertionError(msg)
-
-        return examples, labels
+        return getattr(self, "pad_token_idx")
 
 
-# base encoders
-
-
-class WordEmbeddingsBasedEncoder(AbstractEncoder):
+class AbstractVocabLookupEncoder(AbstractEncoder):
     """
-    A base class for joint tokenization-encoding with the vocab derived from the training data and
-    using word-level embedders if required.
-
-    TOKENIZATION SUPPORT:
-    This class supports three kinds of tokenizations: (1) tokenization at white space,
-    (2) character tokenizations
-
-    ENCODING SUPPORT
-    This class supports encoding text into 0-based ids for an embedding lookup. When using the
-    padding_length, at times, the labels might have to be trimmed as well, which is to be supported
-    in the .batch_encode() method of the derived class.
+    Abstract class wrapped around AbstractEncoder that has a vocabulary lookup as the state.
     """
 
-    ALLOWED_TOKENIZERS = [None, "whitespace-tokenizer", "char-tokenizer"]
-    ALLOWED_EMBEDDER_TYPES = [None, "glove"]
-    BASIC_SPECIAL_VOCAB_DICT = {
-        "pad_token": "<PAD>",
-        "unk_token": "<UNK>",
-        "start_token": "<START>",
-        "end_token": "<END>",
-    }
-    DEFAULT_PARAMS = {
-        "emb_dim": 300,
-    }
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.token2id = {}
 
-    def fit(
-        self,
-        # input data stream
-        examples: List[str] = None,
-        tokens: List[str] = None,
-        # params
-        embedder_type=None,
-        special_vocab_dict=None,
-        padding_length=None,
-        add_terminals=False,
-        emb_dim=None,
-        # non-params
-        _disable_loading_embedder=False,
-        # other params
-        **params
-    ):
-        self.embedder_type = embedder_type
-        self.special_vocab_dict = special_vocab_dict
-        self.padding_length = padding_length
-        self.add_terminals = add_terminals
-        self.params_keys.update([
-            "embedder_type", "special_vocab_dict", "padding_length", "add_terminals"
-        ])
+    @property
+    def id2token(self):
+        return {i: t for t, i in self.token2id.items()}
 
-        self.emb_dim = emb_dim
-        self.token2idx = {}
-        self.token2emb = {}
+    def fit(self, examples: List[str]):
+        examples = [ex.strip() for ex in examples]
+        all_tokens = dict.fromkeys(sum([self.tokenize(text) for text in examples], []))
+        self.token2id = {t: i for i, t in enumerate(all_tokens)}
 
-        # load tokenizer and embedder
-        if self.embedder_type not in self.__class__.ALLOWED_EMBEDDER_TYPES:
-            msg = f"Unsupported name '{self.embedder_type}' for 'embedder_type' " \
-                  f"found. Supported names are only " \
-                  f"{self.__class__.ALLOWED_EMBEDDER_TYPES}."
-            raise ValueError(msg)
-        elif self.embedder_type is None:
-            self.tokenizer_type = params.get("tokenizer_type")
-            self._tokenizer = self._get_tokenizer(self.tokenizer_type)
-            self.params_keys.update(["tokenizer_type"])
-        elif self.embedder_type == "glove":
-            self.tokenizer_type = params.get("tokenizer_type")
-            if self.tokenizer_type not in [None, "whitespace-tokenizer"]:
-                msg = f"Provided 'tokenizer_type':'{params.get('tokenizer_type')}' cannot be " \
-                      f"used with the provided 'embedder_type':'{self.embedder_type}'. " \
-                      f"Discarding 'tokenizer_type' information"
-                logger.warning(msg)
-                self.tokenizer_type = "whitespace-tokenizer"
-            self._tokenizer = self._get_tokenizer(self.tokenizer_type)
-            self.params_keys.update(["tokenizer_type"])
-            if not _disable_loading_embedder:
-                glove_container = GloVeEmbeddingsContainer()
-                self.token2emb = glove_container.get_pretrained_word_to_embeddings_dict()
-                glove_emb_dim = glove_container.token_dimension
-                if self.emb_dim and self.emb_dim != glove_emb_dim:
-                    msg = f"Provided 'emb_dim':'{self.emb_dim}' cannot be used with the provided " \
-                          f"'embedder_type':'{self.embedder_type}'. " \
-                          f"Discarding 'emb_dim' information."
-                    logger.warning(msg)
-                self.emb_dim = glove_emb_dim
+        basic_special_tokens = {
+            "pad_token": "<PAD>",
+            "unk_token": "<UNK>",
+            "start_token": "<START>",
+            "end_token": "<END>",
+        }
+        for name, token in basic_special_tokens.items():
+            self.token2id.update({token: len(self.token2id)})
+            setattr(self, f"{name}", token)
+            setattr(self, f"{name}_idx", self.token2id[token])
 
-        # validate if emb_dim is valid
-        if not self.emb_dim:
-            emb_dim = self.__class__.DEFAULT_PARAMS["emb_dim"]
-            msg = f"Need a valid 'emb_dim' to initialize encoder resource. To specify a " \
-                  f"particular dimension, either pass-in the 'emb_dim' param or provide a " \
-                  f"valid 'embedder_type' param. Continuing by setting 'emb_dim':{emb_dim}"
+    def dump(self, path: str):
+        filename = self._get_filename(path)
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        with open(filename, "w") as opfile:
+            for token in self.token2id:
+                opfile.write(f"{token}\n")
+            opfile.close()
+        msg = f"The state of {self.__class__.__name__} is successfully dumped at '{filename}'"
+        logger.info(msg)
+
+    def load(self, path: str):
+        filename = self._get_filename(path)
+        with open(filename, "r") as opfile:
+            tokens = [line.strip() for line in opfile]
+            opfile.close()
+        self.token2id = {t: i for i, t in enumerate(tokens)}
+        msg = f"The state of {self.__class__.__name__} is successfully loaded from '{filename}'"
+        logger.info(msg)
+
+    def _get_filename(self, path: str):
+        if not os.path.isdir(path):
+            msg = f"The dump method of {self.__class__.__name__} only accepts diretory as the " \
+                  f"path argument."
             logger.error(msg)
-            self.emb_dim = emb_dim
-
-        # Add special vocab before actual vocab
-        special_vocab_dict_ = self.__class__.BASIC_SPECIAL_VOCAB_DICT
-        if self.special_vocab_dict:
-            special_vocab_dict_.update(self.special_vocab_dict)
-        self.special_vocab_dict = dict(special_vocab_dict_)
-        self._add_special_vocab(self.special_vocab_dict)
-
-        # add vocab from tokens inputted directly (useful when loading the encoder from a dump)
-        if tokens:
-            self._add_vocab(tokens)
-
-        # add vocab from examples upon tokenizing each text item
-        if examples:
-            all_tokens = set(sum([self._tokenizer(text) for text in examples], []))
-            self._add_vocab(all_tokens)
-
-        if tokens is None and examples is None:
-            msg = "At least one of 'examples' and 'tokens' must be inputted to create a vocab"
             raise ValueError(msg)
-        else:
-            msg = f"Vocab size: Number of unique tokens collected from training data: " \
-                  f"{len(self.token2idx)}"
-            logger.info(msg)
-
-    def dump(self, dump_folder):
-        if os.path.isfile(dump_folder):
-            msg = f"Path input to 'dump' method must be a folder, " \
-                  f"not a file ({dump_folder})"
-            raise ValueError(msg)
-        os.makedirs(dump_folder, exist_ok=True)
-
-        with open(os.path.join(dump_folder, "text_encoder_vocab.txt"), "w") as fp:
-            for token in self.token2idx:
-                fp.write(token + "\n")
-            fp.close()
-        with open(os.path.join(dump_folder, "text_encoder_config.json"), "w") as fp:
-            params = {k: getattr(self, k) for k in self.params_keys}
-            json.dump(params, fp, indent=4)
-            fp.close()
-
-    @classmethod
-    def load(cls, load_folder):
-        if os.path.isfile(load_folder):
-            msg = f"Path input to 'load' method must be a folder, " \
-                  f"not a file ({load_folder})"
-            raise ValueError(msg)
-
-        encoder = cls()
-        with open(os.path.join(load_folder, "text_encoder_config.json"), "r") as fp:
-            params = json.load(fp)
-            setattr(encoder, "params_keys", set(params.keys()))
-            fp.close()
-        with open(os.path.join(load_folder, "text_encoder_vocab.txt"), "r") as fp:
-            all_tokens = [line.strip() for line in fp]
-            fp.close()
-        encoder.fit(**params, tokens=all_tokens, _disable_loading_embedder=True)
-
-        return encoder
+        filename = os.path.join(path, "vocab.txt")
+        return filename
 
     @abstractmethod
-    def batch_encode(self, examples, labels=None, **kwargs) -> Dict[str, Any]:
-        msg = f"Subclass {self.name} need to implement this method"
-        raise NotImplementedError(msg)
+    def tokenize(self, text: str) -> List[str]:
+        raise NotImplementedError("Subclasses must implement this method")
 
-    def encode(self, list_of_tokens, padding_length, add_terminals):
-        trimmed_list_of_tokens = (
+    def batch_encode(self, examples: List[str], padding_length: int = None,
+                     add_terminals: bool = False, _return_tokenized_examples: bool = False,
+                     **kwargs) -> Dict[str, Any]:
+
+        # convert to tokens and obtain sequence lengths
+        tokenized_examples = [self.tokenize(text) for text in examples]
+        sequence_lengths = [len(seq) for seq in tokenized_examples]
+
+        # obtain padding length
+        # if padding_length is None, it is computed as max(length of all seqs from inputted text)
+        # account for start and end tokens respectively if add_terminals is True
+        curr_max = max(sequence_lengths) + 2 if add_terminals else max(sequence_lengths)
+        padding_length = min(padding_length, curr_max) if padding_length else curr_max
+
+        # batchify by truncating or padding for each example
+        seq_ids, sequence_lengths, list_of_list_of_tokens = zip(*[
+            self._encode_text(example, padding_length, add_terminals)
+            for example in tokenized_examples
+        ])
+
+        return_dict = {
+            "seq_ids": torch.as_tensor(seq_ids, dtype=torch.long),
+            "seq_lengths": torch.as_tensor(sequence_lengths, dtype=torch.long),
+            **({"_seq_tokens": [" ".join(list_of_t) for list_of_t in list_of_list_of_tokens]}
+               if _return_tokenized_examples else {}),
+            "split_lengths": [[1] * len(list_of_t) for list_of_t in list_of_list_of_tokens]
+        }
+        return return_dict
+
+    def _encode_text(self, list_of_tokens: List[str], padding_length: int, add_terminals: bool):
+        """
+        Encodes a list of tokens in to a list of ids based on vocab and special token ids.
+
+        Args:
+            list_of_tokens (List[str]): List of words or sub-words that are to be encoded
+            padding_length (int): Maximum length of the encoded sequence; sequences shorter than
+                this length are padded with a pad index while longer sequences are trimmed
+            add_terminals (bool): Whether terminal start and end tokens are to be added or not to
+                the encoded sequence
+
+        Returns:
+            list_of_ids (List[int]): Sequence of ids corresponding to the input tokens
+            seq_length (int): The length of sequence upon encoding (and before any padding)
+            list_of_tokens (List[str]): Similar to inputted list_of_tokens but without adding
+                special tokens
+        """
+        list_of_tokens = (
             list_of_tokens[:padding_length - 2] if add_terminals else
             list_of_tokens[:padding_length]
         )
-        bounded_list_of_tokens = (
-            [getattr(self, "start_token")] + trimmed_list_of_tokens + [getattr(self, "end_token")]
-        ) if add_terminals else trimmed_list_of_tokens
-        seq_length = len(bounded_list_of_tokens)
-        new_list_of_tokens = (
-            bounded_list_of_tokens + [getattr(self, "pad_token")] * (padding_length - seq_length)
+        list_of_tokens_with_terminals = (
+            [getattr(self, "start_token")] +
+            list_of_tokens +
+            [getattr(self, "end_token")]
+        ) if add_terminals else list_of_tokens
+        list_of_tokens_with_terminals_and_padding = (
+            list_of_tokens_with_terminals +
+            [getattr(self, "pad_token")] * (padding_length - len(list_of_tokens_with_terminals))
         )
         list_of_ids = [
-            self.token2idx.get(token, getattr(self, "unk_token_idx"))
-            for token in new_list_of_tokens
+            self.token2id.get(token, getattr(self, "unk_token_idx"))
+            for token in list_of_tokens_with_terminals_and_padding
         ]
-        return list_of_ids, seq_length
+        return list_of_ids, len(list_of_tokens_with_terminals), list_of_tokens
 
-    def _get_tokenizer(self, tokenizer_type):
+    def get_vocab(self) -> Dict:
+        return self.token2id
 
-        def whitespace_tokenizer(text: str) -> List[str]:
-            return text.split(" ")
 
-        def char_tokenizer(text: str) -> List[str]:
-            return list(text)
+class WhitespaceEncoder(AbstractVocabLookupEncoder):
+    """
+    Encoder that tokenizes at whitespace. Not useful for languages such as Chinese.
+    """
 
-        if tokenizer_type not in self.__class__.ALLOWED_TOKENIZERS:
-            msg = f"Unknown tokenizer type specified ('{tokenizer_type}'). Expected to be " \
-                  f"among {self.__class__.ALLOWED_TOKENIZERS}. "
+    def tokenize(self, text: str) -> List[str]:
+        return text.strip("\n").split(" ")
+
+
+class CharEncoder(AbstractVocabLookupEncoder):
+    """
+    A simple tokenizer that tokenizes at character level
+    """
+
+    def tokenize(self, text: str) -> List[str]:
+        return list(text.strip("\n"))
+
+
+class MindmeldEncoder(AbstractVocabLookupEncoder):
+    """
+    A tokenizer based on Mindmeld app's config and text_preperation_pipeline
+    """
+
+    def __init__(self, app_path=None, language=None, **kwargs):
+        super().__init__(**kwargs)
+
+        self.pipeline = None
+        if app_path is not None:
+            self.pipeline = TextPreparationPipelineFactory.create_from_app_path(app_path=app_path)
+        elif language is not None:
+            self.pipeline = \
+                TextPreparationPipelineFactory.create_text_preparation_pipeline(language=language)
+        else:
+            msg = f"Insufficient params to create a {self.__class__.__name__}."
             raise ValueError(msg)
-        elif tokenizer_type is None:
-            return whitespace_tokenizer
-        elif tokenizer_type == "whitespace-tokenizer":
-            return whitespace_tokenizer
-        elif tokenizer_type == "char-tokenizer":
-            return char_tokenizer
 
-    def _add_special_vocab(self, special_tokens: Dict[str, str]):
-        # Validate special tokens
-        DUPLICATE_RECORD_WARNING = "Ignoring duplicate token {} from special vocab set with name {}"
-        for name, token in special_tokens.items():
-            if name in self.special_vocab_dict and self.special_vocab_dict[name] != token:
-                logger.warning(DUPLICATE_RECORD_WARNING, token, name)
-                continue
-            self.special_vocab_dict.update({name: token})
+    def tokenize(self, text: str) -> List[str]:
+        raise NotImplementedError("TODO: .tokenize() method to implement in MindmeldEncoder")
 
-        # Add special tokens to vocab as well as their names to self
-        for name, token in self.special_vocab_dict.items():
-            self._add_vocab([token])
+
+class WhitespaceAndCharDualEncoder(WhitespaceEncoder):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.char_token2id = {}
+
+    @property
+    def char_id2token(self):
+        return {i: t for t, i in self.char_token2id.items()}
+
+    @staticmethod
+    def char_tokenize(text: str) -> List[str]:
+        return list(text.strip("\n"))
+
+    def fit(self, examples: List[str]):
+        super().fit(examples)
+
+        examples = [ex.strip() for ex in examples]
+        all_tokens = dict.fromkeys(sum([self.char_tokenize(text) for text in examples], []))
+        self.char_token2id = {t: i for i, t in enumerate(all_tokens)}
+
+        basic_special_tokens = {
+            "char_pad_token": "<PAD>",
+            "char_unk_token": "<UNK>",
+            "char_start_token": "<START>",
+            "char_end_token": "<END>",
+        }
+        for name, token in basic_special_tokens.items():
+            self.char_token2id.update({token: len(self.char_token2id)})
             setattr(self, f"{name}", token)
-            setattr(self, f"{name}_idx", self.token2idx[token])
-
-    def _add_vocab(self, vocab: Iterable[str], target_dict=None):
-        if target_dict is None:
-            target_dict = self.token2idx
-        for token in vocab:
-            if token not in target_dict:
-                target_dict.update({token: len(target_dict)})
-
-
-class PretrainedLangModelBasedEncoder(AbstractEncoder):
-    """
-    A base class for joint tokenization-encoding with vocab of a Pretrained Language Model
-    (aka. PLM embedders), i.e sentence embedders like BERT, Elmo, etc..
-    """
-
-    ALLOWED_EMBEDDER_TYPES = ["bert"]
-
-    def fit(
-        self,
-        # input data stream
-        examples: List[str] = None,
-        # params
-        embedder_type=None,
-        padding_length=None,
-        emb_dim=None,
-        update_embeddings=True,
-        # non-params
-        _disable_loading_embedder=False,
-        # other params
-        **params
-    ):
-        del examples
-
-        self.embedder_type = embedder_type
-        self.padding_length = padding_length
-        self.update_embeddings = update_embeddings
-        self.params_keys.update(["embedder_type", "padding_length", "update_embeddings"])
-
-        self.device = params.get("device", "cuda" if torch.cuda.is_available() else "cpu")
-        self.params_keys.update(["device"])
-
-        self.emb_dim = emb_dim
-
-        # load tokenizer and embedder
-        if self.embedder_type == "bert":
-            if params.get("tokenizer_type"):
-                msg = f"Provided 'tokenizer_type':'{params.get('tokenizer_type')}' cannot be " \
-                      f"used with the provided 'embedder_type':'{self.embedder_type}'. " \
-                      f"Discarding 'tokenizer_type' information"
-                logger.warning(msg)
-            self.pretrained_model_name_or_path = params.get("pretrained_model_name_or_path")
-            if not self.pretrained_model_name_or_path:
-                msg = "Must include a valid 'pretrained_model_name_or_path' param when using " \
-                      "embedder_type: 'bert'"
-                raise ValueError(msg)
-            self.params_keys.update(["pretrained_model_name_or_path"])
-            if not _disable_loading_embedder:
-                self._load_bert_embedder_from_checkpoint(self.pretrained_model_name_or_path)
-                bert_emb_dim = self._bert_config.hidden_size
-                if self.emb_dim and self.emb_dim != bert_emb_dim:
-                    msg = f"Provided 'emb_dim':'{self.emb_dim}' cannot be used with the provided " \
-                          f"'embedder_type':'{self.embedder_type}'. " \
-                          f"Discarding 'emb_dim' information."
-                    logger.warning(msg)
-                self.emb_dim = bert_emb_dim
-        else:
-            msg = f"Unsupported name '{embedder_type}' for 'embedder_type' " \
-                  f"found. Supported names are only " \
-                  f"{self.__class__.ALLOWED_EMBEDDER_TYPES}."
-            raise ValueError(msg)
-
-        # some validations
-        if not self.emb_dim:
-            msg = "Need a valid 'emb_dim' to initialize encoder resource. To specify a " \
-                  "particular dimension, either pass-in the 'emb_dim' param or provide a " \
-                  "valid 'embedder_type' param."
-            raise ValueError(msg)
-
-    def dump(self, dump_folder):
-        if os.path.isfile(dump_folder):
-            msg = f"Path input to 'dump' method must be a folder, " \
-                  f"not a file ({dump_folder})"
-            raise ValueError(msg)
-        os.makedirs(dump_folder, exist_ok=True)
-
-        if self.embedder_type == "bert":
-            self.pretrained_model_name_or_path = os.path.join(
-                os.path.abspath(dump_folder), f"{self.embedder_type}_resources",
-                os.path.split(self.pretrained_model_name_or_path)[-1]
-            )
-            self._dump_bert_embedder_to_checkpoint(self.pretrained_model_name_or_path)
-        with open(os.path.join(dump_folder, "text_encoder_config.json"), "w") as fp:
-            params = {k: getattr(self, k) for k in self.params_keys}
-            json.dump(params, fp, indent=4)
-            fp.close()
-
-    @classmethod
-    def load(cls, load_folder):
-        if os.path.isfile(load_folder):
-            msg = f"Path input to 'load' method must be a folder, " \
-                  f"not a file ({load_folder})"
-            raise ValueError(msg)
-
-        encoder = cls()
-        with open(os.path.join(load_folder, "text_encoder_config.json"), "r") as fp:
-            params = json.load(fp)
-            setattr(encoder, "params_keys", set(params.keys()))
-            fp.close()
-        encoder.fit(**params, _disable_loading_embedder=True)
-        if encoder.embedder_type == "bert":
-            encoder._load_bert_embedder_from_checkpoint(encoder.pretrained_model_name_or_path)
-
-        return encoder
-
-    @abstractmethod
-    def batch_encode(self, examples, labels=None, **kwargs) -> Dict[str, Any]:
-        msg = f"Subclass {self.name} need to implement this method"
-        raise NotImplementedError(msg)
-
-    def _load_bert_embedder_from_checkpoint(self, pretrained_model_name_or_path):
-        model_bunch = HuggingfaceTransformersContainer(
-            pretrained_model_name_or_path, reload=True).get_model_bunch()
-        self._bert_config = model_bunch.config
-        self._bert_tokenizer = model_bunch.tokenizer
-        self._bert_model = model_bunch.model.to(self.device)
-        if not self.update_embeddings:
-            for param in self._bert_model:
-                param.requires_grad = False
-
-    def _dump_bert_embedder_to_checkpoint(self, ckpt_folder):
-        os.makedirs(ckpt_folder, exist_ok=True)
-        self._bert_config.save_pretrained(ckpt_folder)
-        self._bert_tokenizer.save_pretrained(ckpt_folder)
-        self._bert_model.save_pretrained(ckpt_folder)
-
-
-# sub-classes that define a custom `batch_encode` on top of base encoders
-
-
-class SeqClsEncoderForEmbLayer(WordEmbeddingsBasedEncoder):
-    """This class produces encoding for the given textual input as a sequence of ids.
-    The inputs can be singular or batched.
-    """
-
-    def batch_encode(
-        self,
-        examples: Union[str, List[str]],
-        labels: Union[int, List[int]] = None,
-        padding_length: int = None,
-        add_terminals: bool = False
-    ):
-        """
-        Returns batched encodings that can be used as an input to a featurizer
-        """
-
-        examples, labels = self._reformat_and_validate(examples, labels)
-
-        # convert to tokens and obtain sequence lengths
-        examples = [self._tokenizer(text) for text in examples]
-        sequence_lengths = [len(seq) for seq in examples]
-
-        # if padding_length is None, it is computed as max(length of all seqs from inputted text)
-        padding_length = padding_length or self.padding_length
-        # add 2 for start and end tokens respectively if add_terminals is True
-        add_terminals = add_terminals or self.add_terminals
-        curr_max = max(sequence_lengths) + 2 if add_terminals else max(sequence_lengths)
-        padding_length = min(padding_length, curr_max) if padding_length else curr_max
-
-        # batchify by truncating or padding for each example
-        seq_ids, sequence_lengths = zip(*[
-            self.encode(example, padding_length, add_terminals) for example in examples
-        ])
-
-        # create output dict
-        return_dict = {
-            "seq_ids": torch.as_tensor(seq_ids, dtype=torch.long),
-            "seq_lengths": torch.as_tensor(sequence_lengths, dtype=torch.long)
-        }
-
-        if labels:
-            return_dict.update({
-                "labels": torch.as_tensor(labels, dtype=torch.long)
-            })
-
-        return return_dict
-
-
-class TokenClsEncoderForEmbLayer(WordEmbeddingsBasedEncoder):
-
-    def _reformat_and_validate(self, examples, labels=None):
-        super()._reformat_and_validate(examples, labels)
-
-        # validation for labels' lengths too
-        if labels:
-            for ex, label_tokens in zip(examples, labels):
-                ex_tokens = ex.split(" ")
-                if len(ex_tokens) != len(label_tokens):
-                    msg = f"Number of tokens in a sentence ({len(ex_tokens)}) must be same as the" \
-                          f"number of tokens in the corresponding token labels " \
-                          f"({len(label_tokens)}) for sentence '{ex}' with labels '{labels}'"
-                    raise AssertionError(msg)
-
-        return examples, labels
-
-    @staticmethod
-    def encode_labels(list_of_label_ids, padding_length, add_terminals):
-        trimmed_list_of_label_ids = (
-            list_of_label_ids[:padding_length - 2] if add_terminals else
-            list_of_label_ids[:padding_length]
-        )
-        bounded_list_of_label_ids = (
-            [LABEL_PAD_TOKEN_IDX] + trimmed_list_of_label_ids + [LABEL_PAD_TOKEN_IDX]
-        ) if add_terminals else trimmed_list_of_label_ids
-        new_list_of_label_ids = (
-            bounded_list_of_label_ids +
-            [LABEL_PAD_TOKEN_IDX] * (padding_length - len(bounded_list_of_label_ids))
-        )
-        return new_list_of_label_ids
-
-    def batch_encode(
-        self,
-        examples: Union[str, List[str]],
-        labels: Union[List[int], List[List[int]]] = None,
-        padding_length: int = None,
-        add_terminals: bool = False,
-        _return_tokenized_examples: bool = False
-    ):
-        """
-        Returns batched encodings that can be used as an input to a featurizer
-        """
-
-        examples, labels = self._reformat_and_validate(examples, labels)
-
-        # convert to tokens and obtain sequence lengths
-        examples = [self._tokenizer(text) for text in examples]
-        sequence_lengths = [len(seq) for seq in examples]
-
-        # if padding_length is None, it is computed as max(length of all seqs from inputted text)
-        padding_length = padding_length or self.padding_length
-        # add 2 for start and end tokens respectively if add_terminals is True
-        add_terminals = add_terminals or self.add_terminals
-        curr_max = max(sequence_lengths) + 2 if add_terminals else max(sequence_lengths)
-        padding_length = min(padding_length, curr_max) if padding_length else curr_max
-
-        # batchify by truncating or padding for each example
-        seq_ids, sequence_lengths = zip(*[
-            self.encode(example, padding_length, add_terminals) for example in examples
-        ])
-
-        return_dict = {
-            "seq_ids": torch.as_tensor(seq_ids, dtype=torch.long),
-            "seq_lengths": torch.as_tensor(sequence_lengths, dtype=torch.long)
-        }
-
-        if _return_tokenized_examples:
-            return_dict.update({
-                "seq_tokens": examples
-            })
-
-        if labels:
-            new_labels = [self.encode_labels(label, padding_length, add_terminals) for label in
-                          labels]
-            return_dict.update({
-                "labels": torch.as_tensor(new_labels, dtype=torch.long)
-            })
-
-        return return_dict
-
-
-class SeqClsEncoderWithPlmLayer(PretrainedLangModelBasedEncoder):
-
-    def batch_encode(
-        self,
-        examples: Union[str, List[str]],
-        labels: Union[int, List[int]] = None,
-        padding_length: int = None,
-    ):
-        """
-        Returns batched encodings that can be used as an input to a featurizer
-        """
-
-        examples, labels = self._reformat_and_validate(examples, labels)
-
-        return_dict = {}
-        padding_length = padding_length or self.padding_length
-
-        if self.embedder_type == "bert":
-            # If padding_length is None, padding is done to the max length of the input batch
-            _inputs = self._bert_tokenizer(
-                examples, padding=True, truncation=True, max_length=padding_length,
-                return_tensors="pt"
-            ).to(self.device)
-            _outputs = self._bert_model(**_inputs, return_dict=True)
-
-            # last_hidden_state, pooler_output, seq_lengths are the keys being updated
-            return_dict.update({
-                **_outputs,
-                "seq_lengths": _inputs["attention_mask"].sum(dim=-1)
-            })
-
-        if labels:
-            return_dict.update({"labels": torch.as_tensor(labels, dtype=torch.long)})
-
-        return return_dict
-
-
-class TokenClsEncoderWithPlmLayer(PretrainedLangModelBasedEncoder):
-
-    def _reformat_and_validate(self, examples, labels=None):
-        super()._reformat_and_validate(examples, labels)
-
-        # validation for labels' lengths too
-        if labels:
-            for ex, label_tokens in zip(examples, labels):
-                ex_tokens = ex.split(" ")
-                if len(ex_tokens) != len(label_tokens):
-                    msg = f"Number of tokens in a sentence ({len(ex_tokens)}) must be same as the" \
-                          f"number of tokens in the corresponding token labels " \
-                          f"({len(label_tokens)}) for sentence '{ex}' with labels '{labels}'"
-                    raise AssertionError(msg)
-
-        return examples, labels
-
-    @staticmethod
-    def _trim_combined(x: List[List[Any]], trim_len: int, y: List[Any] = None):
-        curr_len = 0
-        if y:
-            new_x, new_y = [], []
-            for _x, _y in zip(x, y):
-                if curr_len >= trim_len:
-                    return new_x, new_y
-                if curr_len + len(_x) > trim_len:
-                    new_x.append(_x[trim_len - curr_len])
-                    new_y.append(_y)
-                elif curr_len + len(_x) <= trim_len:
-                    new_x.append(_x)
-                    new_y.append(_y)
-            return new_x, new_y
-        else:
-            new_x = []
-            for _x in x:
-                if curr_len >= trim_len:
-                    return new_x
-                if curr_len + len(_x) > trim_len:
-                    new_x.append(_x[trim_len - curr_len])
-                elif curr_len + len(_x) <= trim_len:
-                    new_x.append(_x)
-            return new_x
-
-    def batch_encode(
-        self,
-        examples: Union[str, List[str]],
-        labels: Union[int, List[int]] = None,
-        padding_length: int = None,
-    ):
-        examples, labels = self._reformat_and_validate(examples, labels)
-
-        return_dict = {}
-        padding_length = padding_length or self.padding_length
-
-        if self.embedder_type == "bert":
-            # tokenize each word of each input seperately
-            tokenized_examples = [
-                [self._bert_tokenizer.tokenize(word) for word in example.split(" ")]
-                for example in examples
-            ]
-            # get maximum length of each example
-            max_curr_len = max([len(sum(t_ex, [])) for t_ex in tokenized_examples]) + 2  # cls, sep
-            # If padding_length is None, padding has to be done to the max length of the input batch
-            padding_length = min(max_curr_len, padding_length) if padding_length else max_curr_len
-
-            _trim_length = padding_length - 2  # -2 to sum upto padding_length after adding cls, sep
-            if labels:
-                trimmed_tokenized_examples, trimmed_labels = zip(*[
-                    self._trim_combined(t_ex, _trim_length, _labels)
-                    for t_ex, _labels in zip(tokenized_examples, labels)
-                ])
-            else:
-                trimmed_tokenized_examples = [
-                    self._trim_combined(t_ex, _trim_length) for t_ex in tokenized_examples
-                ]
-            split_lengths = [[len(x) for x in ex] for ex in trimmed_tokenized_examples]
-            trimmed_tokenized_examples = [" ".join(sum(ex, [])) for ex in
-                                          trimmed_tokenized_examples]
-            _inputs = self._bert_tokenizer(
-                trimmed_tokenized_examples, padding=True, truncation=True, max_length=None,
-                return_tensors="pt"
-            ).to(self.device)
-            # last_hidden_state, pooler_output, seq_lengths are the keys outputted
-            _outputs = self._bert_model(**_inputs, return_dict=True)
-
-            # discard [CLS] token, [SEP] token is anyway discarded as the sum of each split length
-            # item does not go as far as the SEP token
-            last_hidden_state = _outputs["last_hidden_state"][:, 1:]
-
-            return_dict.update({
-                "last_hidden_state": last_hidden_state,  # [BS, SEQ_LEN, EMD_DIM]
-                "split_lengths": split_lengths,  # List[List[Int]]
-                "seq_lengths": torch.as_tensor(
-                    [len(_split_lengths) for _split_lengths in split_lengths], dtype=torch.long
-                )
-            })
-
-            if labels:
-                trimmed_labels = pad_sequence(
-                    [torch.as_tensor(label) for label in trimmed_labels], batch_first=True,
-                    padding_value=LABEL_PAD_TOKEN_IDX
-                ).long()
-                return_dict.update({"labels": trimmed_labels})
-
-        return return_dict
-
-
-# sub-classes that define more complex custom `batch_encode` on top of derived encoders
-
-
-class TokenClsDualEncoderForEmbLayers(TokenClsEncoderForEmbLayer):
-    """Dual encoder that encodes both word level as well as character level tokens
-    """
-
-    ALLOWED_TOKENIZERS = [None, "whitespace-tokenizer"]
-    BASIC_SPECIAL_CHAR_VOCAB_DICT = {
-        "char_pad_token": "<CHAR_PAD>",
-        "char_unk_token": "<CHAR_UNK>",
-        "char_start_token": "<CHAR_START>",
-        "char_end_token": "<CHAR_END>",
-    }
-    DEFAULT_PARAMS = {
-        "emb_dim": 300,
-        "char_emb_dim": 50
-    }
-
-    def fit(
-        self,
-        # input data stream
-        all_char_tokens: List[str] = None,
-        # this class specific params
-        char_emb_dim=None,
-        char_special_vocab_dict=None,
-        char_padding_length=None,
-        char_add_terminals=False,
-        # all other params
-        **params,
-    ):
-        self.char_emb_dim = char_emb_dim or 50
-        self.char_special_vocab_dict = char_special_vocab_dict
-        self.char_padding_length = char_padding_length
-        self.char_add_terminals = char_add_terminals
-        self.params_keys.update([
-            "char_emb_dim", "char_special_vocab_dict", "char_padding_length", "char_add_terminals"
-        ])
-
-        self.char_token2idx = {}
-
-        # validate if char_emb_dim is valid
-        if not self.char_emb_dim:
-            char_emb_dim = self.__class__.DEFAULT_PARAMS["char_emb_dim"]
-            msg = f"Need a valid 'char_emb_dim' to initialize encoder resource. To specify a " \
-                  f"particular dimension, either pass-in the 'char_emb_dim' param with a " \
-                  f"positive integer value. Continuing by setting 'char_emb_dim':{char_emb_dim}"
+            setattr(self, f"{name}_idx", self.char_token2id[token])
+
+    def dump(self, path: str):
+        super().dump(path)
+
+        filename = self._get_char_filename(path)
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        with open(filename, "w") as opfile:
+            for token in self.char_token2id:
+                opfile.write(f"{token}\n")
+            opfile.close()
+        msg = f"The state of {self.__class__.__name__} is successfully dumped at '{filename}'"
+        logger.info(msg)
+
+    def load(self, path: str):
+        super().load(path)
+
+        filename = self._get_char_filename(path)
+        with open(filename, "r") as opfile:
+            tokens = [line.strip() for line in opfile]
+            opfile.close()
+        self.char_token2id = {t: i for i, t in enumerate(tokens)}
+        msg = f"The state of {self.__class__.__name__} is successfully loaded from '{filename}'"
+        logger.info(msg)
+
+    def _get_char_filename(self, path: str):
+        if not os.path.isdir(path):
+            msg = f"The dump method of {self.__class__.__name__} only accepts diretory as the " \
+                  f"path argument."
             logger.error(msg)
-            self.char_emb_dim = char_emb_dim
-
-        # Add special vocab before actual vocab
-        special_vocab_dict_ = self.__class__.BASIC_SPECIAL_CHAR_VOCAB_DICT
-        if self.char_special_vocab_dict:
-            special_vocab_dict_.update(self.char_special_vocab_dict)
-        self.char_special_vocab_dict = dict(special_vocab_dict_)
-        for name, token in self.char_special_vocab_dict.items():
-            self._add_vocab([token], target_dict=self.char_token2idx)
-            setattr(self, f"{name}", token)
-            setattr(self, f"{name}_idx", self.char_token2idx[token])
-
-        # populate token lookup dictionary
-        super().fit(**params)
-
-        # populate char lookup dictionary
-        if not all_char_tokens:
-            all_char_tokens = set(c for token in self.token2idx for c in list(token))
-        self._add_vocab(all_char_tokens, target_dict=self.char_token2idx)
-
-    def dump(self, dump_folder):
-        super().dump(dump_folder)
-        with open(os.path.join(dump_folder, "char_text_encoder_vocab.txt"), "w") as fp:
-            for token in self.char_token2idx:
-                fp.write(token + "\n")
-            fp.close()
-
-    @classmethod
-    def load(cls, load_folder):
-        if os.path.isfile(load_folder):
-            msg = f"Path input to 'load' method must be a folder, " \
-                  f"not a file ({load_folder})"
             raise ValueError(msg)
+        filename = os.path.join(path, "char_vocab.txt")
+        return filename
 
-        encoder = cls()
-        with open(os.path.join(load_folder, "text_encoder_config.json"), "r") as fp:
-            params = json.load(fp)
-            setattr(encoder, "params_keys", set(params.keys()))
-            fp.close()
-        with open(os.path.join(load_folder, "text_encoder_vocab.txt"), "r") as fp:
-            all_tokens = [line.strip() for line in fp]
-            fp.close()
-        with open(os.path.join(load_folder, "char_text_encoder_vocab.txt"), "r") as fp:
-            all_char_tokens = [line.strip() for line in fp]
-            fp.close()
-        encoder.fit(
-            **params, tokens=all_tokens, all_char_tokens=all_char_tokens,
-            _disable_loading_embedder=True
-        )
+    def batch_encode(self, examples: List[str], char_padding_length: int = None,
+                     char_add_terminals=True, add_terminals=False,
+                     _return_tokenized_examples: bool = False,
+                     **kwargs) -> Dict[str, Any]:
 
-        return encoder
-
-    def batch_encode(
-        self,
-        examples: Union[str, List[str]],
-        labels: Union[List[int], List[List[int]]] = None,
-        padding_length: int = None,
-        add_terminals: bool = False,
-        char_padding_length: int = None,
-        char_add_terminals: bool = False
-    ):
-        """
-        Returns batched encodings that can be used as an input to a featurizer
-        """
-
-        # validation
-        add_terminals = add_terminals or self.add_terminals
         if add_terminals:
-            msg = "Setting param 'add_terminals' to True is not supported with dual token encoder"
-            raise NotImplementedError(msg)
+            msg = f"The argument 'add_terminals' must be False to encode a batch using" \
+                  f"{self.__class__.__name__}."
+            logger.error(msg)
+            raise ValueError(msg)
 
         return_dict = super().batch_encode(
-            examples, labels=labels, padding_length=padding_length, add_terminals=False,
-            _return_tokenized_examples=True
+            examples=examples, add_terminals=False, _return_tokenized_examples=True, **kwargs
         )
 
-        # use tokenize examples to obtain tokens for char tokenization
-        examples = return_dict.pop("seq_tokens")
-
+        # use tokenized examples to obtain tokens for char tokenization
+        seq_tokens = return_dict.pop("_seq_tokens")
         char_seq_ids, char_sequence_lengths = [], []
-        for example in examples:
+        for _seq_tokens in seq_tokens:
             # compute padding length for character sequences
-            _char_padding_length = char_padding_length or self.char_padding_length
-            _char_add_terminals = char_add_terminals or self.char_add_terminals
-            _curr_max = max([len(word) for word in example])
-            _curr_max = _curr_max + 2 if _char_add_terminals else _curr_max
-            _char_padding_length = (
-                min(_char_padding_length, _curr_max) if _char_padding_length else _curr_max
+            _curr_max = max([len(word) for word in _seq_tokens])
+            _curr_max = _curr_max + 2 if char_add_terminals else _curr_max
+            char_padding_length = (
+                min(char_padding_length, _curr_max) if char_padding_length else _curr_max
             )
-            # encode
             _char_seq_ids, _char_sequence_lengths = zip(*[
-                self.encode_char(list(word), _char_padding_length, _char_add_terminals)
-                for word in example
+                self._encode_chars(list(word), char_padding_length, char_add_terminals)
+                for word in _seq_tokens
             ])
             char_seq_ids.append(_char_seq_ids)
             char_sequence_lengths.append(_char_sequence_lengths)
 
         return_dict.update({
-            "char_seq_ids": [torch.as_tensor(_ids, dtype=torch.long) for _ids in char_seq_ids],
+            "char_seq_ids": [
+                torch.as_tensor(_ids, dtype=torch.long) for _ids in char_seq_ids
+            ],
             "char_seq_lengths": [
                 torch.as_tensor(_lens, dtype=torch.long) for _lens in char_sequence_lengths
             ]
         })
-
         return return_dict
 
-    def encode_char(self, list_of_tokens, padding_length, add_terminals):
-        trimmed_list_of_tokens = (
+    def _encode_chars(self, list_of_tokens: List[str], padding_length: int, add_terminals: bool):
+        """
+        Encodes a list of tokens in to a list of character ids based on the encoder's char vocab
+
+        Args:
+            list_of_tokens (List[str]): List of chars that are to be encoded
+            padding_length (int): Maximum length of the encoded sequence; sequences shorter than
+                this length are padded with a pad index while longer sequences are trimmed
+            add_terminals (bool): Whether terminal start and end tokens are to be added or not to
+                the encoded sequence
+
+        Returns:
+            list_of_ids (List[int]): Sequence of ids corresponding to the input chars
+            seq_length (int): The length of sequence upon encoding (before padding)
+        """
+        list_of_chars = (
             list_of_tokens[:padding_length - 2] if add_terminals else
             list_of_tokens[:padding_length]
         )
-        bounded_list_of_tokens = (
+        list_of_chars_with_terminals = (
             [getattr(self, "char_start_token")] +
-            trimmed_list_of_tokens +
+            list_of_chars +
             [getattr(self, "char_end_token")]
-        ) if add_terminals else trimmed_list_of_tokens
-        seq_length = len(bounded_list_of_tokens)
-        new_list_of_tokens = (
-            bounded_list_of_tokens +
-            [getattr(self, "char_pad_token")] * (padding_length - seq_length)
+        ) if add_terminals else list_of_chars
+        list_of_chars_with_terminals_and_padding = (
+            list_of_chars_with_terminals +
+            [getattr(self, "char_pad_token")] * (
+                padding_length - len(list_of_chars_with_terminals))
         )
         list_of_ids = [
-            self.char_token2idx.get(token, getattr(self, "char_unk_token_idx"))
-            for token in new_list_of_tokens
+            self.char_token2id.get(token, getattr(self, "char_unk_token_idx"))
+            for token in list_of_chars_with_terminals_and_padding
         ]
-        return list_of_ids, seq_length
+        return list_of_ids, len(list_of_chars_with_terminals)
 
-    # some `get` methods for char modeling
+    def get_char_vocab(self) -> Dict:
+        return self.char_token2id
 
-    def get_char_num_tokens(self):
-        if not hasattr(self, "char_token2idx"):
-            return None
-        return len(self.char_token2idx)
-
-    def get_char_emb_dim(self):
-        return self.char_emb_dim
-
-    def get_char_pad_token_idx(self):
+    def get_char_pad_token_idx(self) -> Union[None, int]:
+        """
+        If there exists a char padding token's index in the vocab, it is returned; useful while
+        initializing an embedding layer. Else returns a None.
+        """
         if not hasattr(self, "char_pad_token_idx"):
             return None
-        return self.char_pad_token_idx
+        return getattr(self, "char_pad_token_idx")
+
+
+def _trim_list_of_subtokens_groups(
+    x: List[List[Any]],
+    max_len: int,
+    y: List[Any] = None
+) -> Union[Tuple[List[Any], List], List[Any]]:
+    """
+    Given a sequence of sub-tokens groups upon tokenization step, this method identifies the
+    first N sub-groups to be used so that the max_len of the sequence is not violated. If a
+    sequence of labels are passed-in through the argument y, their list is also trimmed
+    corresponding to the list of sub-token groups.
+
+    Args:
+        x: List of groups of sub-words, obtained upon whitespace pre-tokenization and word-level
+            tokenization
+        max_len: The maximum length of ravelled output expected. If given a value greater than the
+            number of all sub-words inputted, it is clipped to number of all sub-words.
+        y: Labels accompanying each group in x
+    """
+    max_len = min(max_len, sum([len(_x) for _x in x]))
+    curr_len = 0
+    if y:
+        new_x, new_y = [], []
+        for _x, _y in zip(x, y):
+            if curr_len >= max_len:
+                return new_x, new_y
+            if curr_len + len(_x) > max_len:
+                new_x.append(_x[:max_len - curr_len])
+                new_y.append(_y)
+                curr_len = max_len
+            elif curr_len + len(_x) <= max_len:
+                new_x.append(_x)
+                new_y.append(_y)
+                curr_len += len(_x)
+        return new_x, new_y
+    else:
+        new_x = []
+        for _x in x:
+            if curr_len >= max_len:
+                return new_x
+            if curr_len + len(_x) > max_len:
+                new_x.append(_x[:max_len - curr_len])
+                curr_len = max_len
+            elif curr_len + len(_x) <= max_len:
+                new_x.append(_x)
+                curr_len += len(_x)
+        return new_x
+
+
+class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
+    """
+    Abstract class wrapped around AbstractEncoder that is based on Huggingface's tokenizers library
+    for creating state model.
+
+    reference:
+    https://huggingface.co/docs/tokenizers/python/latest/pipeline.html
+    """
+
+    SPECIAL_TOKENS = ["[UNK]", "[CLS]", "[SEP]", "[PAD]", "[MASK]"]
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.tokenizer = None
+        self.trainer = Trainer
+
+        if NO_TOKENIZERS_MODULE:
+            raise ImportError("pip install tokenizers")
+
+    def fit(self, examples: List[str]):
+        """
+        references:
+        - Huggingface: tutorials/python/training_from_memory.html @ https://tinyurl.com/6hxrtspa
+        - https://huggingface.co/docs/tokenizers/python/latest/index.html
+        """
+
+        self._prepare_pipeline()
+        trainer = self.trainer(
+            # vocab_size=30000,
+            special_tokens=AbstractHuggingfaceTrainableEncoder.SPECIAL_TOKENS
+        )
+        self.tokenizer.train_from_iterator(examples, trainer=trainer, length=len(examples))
+
+    def _prepare_pipeline(self):
+        self.tokenizer.normalizer = normalizers.Sequence([NFD(), Lowercase(), StripAccents()])
+        self.tokenizer.pre_tokenizer = Whitespace()
+        self.tokenizer.post_processor = TemplateProcessing(
+            single="[CLS] $A [SEP]",
+            pair="[CLS] $A [SEP] $B:1 [SEP]:1",
+            special_tokens=[
+                ("[CLS]", 1),
+                ("[SEP]", 2),
+            ],
+        )
+        self.tokenizer.enable_padding(
+            pad_id=AbstractHuggingfaceTrainableEncoder.SPECIAL_TOKENS.index("[PAD]"),
+            pad_token="[PAD]"
+        )
+
+    def dump(self, path: str):
+        filename = self._get_filename(path)
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        self.tokenizer.save(filename)
+        msg = f"The state of {self.__class__.__name__} is successfully dumped at '{filename}'"
+        logger.info(msg)
+
+    def load(self, path: str):
+        filename = self._get_filename(path)
+        self.tokenizer = Tokenizer.from_file(filename)
+        self._prepare_pipeline()
+        msg = f"The state of {self.__class__.__name__} is successfully loaded from '{filename}'"
+        logger.info(msg)
+
+    def _get_filename(self, path: str):
+        if not os.path.isdir(path):
+            msg = f"The dump method of {self.__class__.__name__} only accepts diretory as the " \
+                  f"path argument."
+            logger.error(msg)
+            raise ValueError(msg)
+        filename = os.path.join(path, "tokenizer.json")
+        return filename
+
+    def tokenize(self, text: str) -> List[str]:
+        """
+        Example:
+        --------
+        output = tokenizer.encode("Hello, y'all! How are you 😁 ?")
+        print(output.tokens)
+        # ["Hello", ",", "y", "'", "all", "!", "How", "are", "you", "[UNK]", "?"]
+        """
+        output = self.tokenizer.encode(text, add_special_tokens=False)
+        # By disabling add_special_tokens, one can expect tokenized outputs without any terminal
+        # [CLS] and [SEP] tokens
+        return output.tokens
+
+    def batch_encode(self, examples: List[str], padding_length: int = None,
+                     add_terminals=True, **kwargs) -> Dict[str, Any]:
+        """
+        Example:
+        --------
+        output = tokenizer.encode_batch(["Hello, y'all!", "How are you 😁 ?"])
+        print(output[1].tokens)
+        # ["[CLS]", "How", "are", "you", "[UNK]", "?", "[SEP]", "[PAD]"]
+
+        NOTE:
+        -----
+        Passing the argument `padding_length` to set the max length for batch encoding is not
+        available yet for Huggingface tokenizers
+        """
+
+        if not add_terminals:
+            msg = f"The argument 'add_terminals' must be True to encode a batch using" \
+                  f"{self.__class__.__name__}."
+            logger.error(msg)
+            raise ValueError(msg)
+
+        # tokenize each word of each input seperately
+        # get maximum length of each example, accounting for terminal tokens- cls, sep
+        # If padding_length is None, padding has to be done to the max length of the input batch
+        tokenized_examples = [
+            [self.tokenize(word) for word in example.split(" ")] for example in examples
+        ]
+        max_curr_len = max([len(sum(t_ex, [])) for t_ex in tokenized_examples]) + 2
+        padding_length = min(max_curr_len, padding_length) if padding_length else max_curr_len
+        padding_length = padding_length - 2  # -2 to sum to padding_length after adding cls, sep
+
+        subgrouped_examples = [
+            _trim_list_of_subtokens_groups(t_ex, padding_length) for t_ex in
+            tokenized_examples
+        ]  # List[List[List[str]]], innermost List[str] is a list of subwords for a given word
+        tokenized_examples = [" ".join(sum(ex, [])) for ex in subgrouped_examples]
+        split_lengths = [[len(x) for x in ex] for ex in subgrouped_examples]  # len of each subgroup
+
+        output = self.tokenizer.encode_batch(
+            tokenized_examples, add_special_tokens=True
+        )
+        seq_ids = [o.ids for o in output]
+        attention_masks = [o.attention_mask for o in output]
+
+        return_dict = {
+            "seq_ids": torch.as_tensor(seq_ids, dtype=torch.long),  # List[List[int]]
+            "attention_masks": torch.as_tensor(attention_masks, dtype=torch.long),  # List[Lst[int]]
+            "seq_lengths": torch.as_tensor(  # List[int], number of groups per example
+                [len(_split_lengths) + 2 for _split_lengths in split_lengths], dtype=torch.long
+            ),
+            "split_lengths": split_lengths,  # List[List[int]], len of each subgroup
+            # For each example, sum of its split_lengths will be equal to the sum of attention mask
+            # minus terminals.
+        }
+        return return_dict
+
+    def get_vocab(self) -> Dict:
+        return self.tokenizer.get_vocab()
+
+    def get_pad_token_idx(self) -> int:
+        return self.tokenizer.token_to_id("[PAD]")
+
+
+class BytePairEncodingEncoder(AbstractHuggingfaceTrainableEncoder):
+    """
+    Encoder that fits a BPE model based on the input examples
+    """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.tokenizer = Tokenizer(BPE())
+        self.trainer = BpeTrainer
+
+
+class WordPieceEncoder(AbstractHuggingfaceTrainableEncoder):
+    """
+    Encoder that fits a WordPiece model based on the input examples
+    """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.tokenizer = Tokenizer(WordPiece())
+        self.trainer = WordPieceTrainer
+
+
+class HuggingfacePretrainedEncoder(AbstractEncoder):
+
+    def __init__(self, pretrained_model_name_or_path=None, **kwargs):
+        super().__init__(**kwargs)
+        self.pretrained_model_name_or_path = pretrained_model_name_or_path
+        self.config, self.tokenizer = None, None
+
+    def fit(self, examples: List[str]):
+        del examples
+
+        if self.pretrained_model_name_or_path is None:
+            msg = f"Need a valid 'pretrained_model_name_or_path' path to fit" \
+                  f"{self.__class__.__name__} but found value: {self.pretrained_model_name_or_path}"
+            raise ValueError(msg)
+
+        hf_trans = HuggingfaceTransformersContainer(self.pretrained_model_name_or_path)
+        self.config = hf_trans.get_transformer_model_config()
+        self.tokenizer = hf_trans.get_transformer_model_tokenizer()
+
+    def dump(self, path: str):
+        if not os.path.isdir(path):
+            msg = f"The dump method of {self.__class__.__name__} only accepts diretory as the " \
+                  f"path argument."
+            logger.error(msg)
+            raise ValueError(msg)
+        os.makedirs(path, exist_ok=True)
+        self.config.save_pretrained(path)
+        self.tokenizer.save_pretrained(path)
+
+    def load(self, path: str):
+        if not os.path.isdir(path):
+            msg = f"The dump method of {self.__class__.__name__} only accepts diretory as the " \
+                  f"path argument."
+            logger.error(msg)
+            raise ValueError(msg)
+        hf_trans = HuggingfaceTransformersContainer(path)
+        self.config = hf_trans.get_transformer_model_config()
+        self.tokenizer = hf_trans.get_transformer_model_tokenizer()
+
+    def tokenize(self, text: str) -> List[str]:
+        return self.tokenizer.tokenize(text)
+
+    def batch_encode(self, examples: List[str], padding_length: int = None,
+                     add_terminals=True, **kwargs) -> Dict[str, Any]:
+
+        if not add_terminals:
+            msg = f"The argument 'add_terminals' must be True to encode a batch using" \
+                  f"{self.__class__.__name__}."
+            logger.error(msg)
+            raise ValueError(msg)
+
+        # tokenize each word of each input seperately
+        # get maximum length of each example, accounting for terminal tokens- cls, sep
+        # If padding_length is None, padding has to be done to the max length of the input batch
+        tokenized_examples = [
+            [self.tokenize(word) for word in example.split(" ")]
+            for example in examples
+        ]
+        max_curr_len = max([len(sum(t_ex, [])) for t_ex in tokenized_examples]) + 2
+        padding_length = min(max_curr_len, padding_length) if padding_length else max_curr_len
+        padding_length = padding_length - 2  # -2 to sum to padding_length after adding cls, sep
+
+        subgrouped_examples = [
+            _trim_list_of_subtokens_groups(t_ex, padding_length) for t_ex in
+            tokenized_examples
+        ]
+        tokenized_examples = [" ".join(sum(ex, [])) for ex in subgrouped_examples]
+        split_lengths = [[len(x) for x in ex] for ex in subgrouped_examples]  # len of each subgroup
+
+        hgf_encodings = self.tokenizer(
+            tokenized_examples, padding=True, truncation=True, max_length=None,
+            return_tensors="pt"
+        )  # Huggingface returns this as BatchEncodings and needs to be converted to a dictionary
+
+        return_dict = {
+            "hgf_encodings": {**hgf_encodings},
+            "seq_lengths": torch.as_tensor(  # List[int], number of groups per example
+                [len(_split_lengths) + 2 for _split_lengths in split_lengths], dtype=torch.long
+            ),
+            "split_lengths": split_lengths,  # List[List[int]], len of each subgroup
+            # For each example, sum of its split_lengths will be equal to the sum of attention mask
+            # minus terminals.
+        }
+        return return_dict
+
+    def get_vocab(self) -> Dict:
+        return self.tokenizer.get_vocab()
+
+    def get_pad_token_idx(self) -> int:
+        return self.tokenizer.pad_token_id
+
+
+class InputEncoderFactory:
+    TOKENIZER_NAME_TO_CLASS = {
+        "whitespace-tokenizer": WhitespaceEncoder,
+        "char-tokenizer": CharEncoder,
+        "whitespace_and_char-tokenizer": WhitespaceAndCharDualEncoder,
+        "mindmeld-tokenizer": MindmeldEncoder,
+        "bpe-tokenizer": BytePairEncodingEncoder,
+        "wordpiece-tokenizer": WordPieceEncoder,
+        "huggingface_pretrained-tokenizer": HuggingfacePretrainedEncoder,
+    }
+
+    @classmethod
+    def get_encoder_class_from_name(cls, tokenizer_type):
+        if tokenizer_type not in InputEncoderFactory.TOKENIZER_NAME_TO_CLASS:
+            msg = f"Expected tokenizer_type to among " \
+                  f"{[*InputEncoderFactory.TOKENIZER_NAME_TO_CLASS]} " \
+                  f"but found '{tokenizer_type}' in {cls.__class__.__name__}. " \
+                  f"Cannot create an input encoder."
+            logger.error(msg)
+            raise ValueError(msg)
+        return InputEncoderFactory.TOKENIZER_NAME_TO_CLASS[tokenizer_type]

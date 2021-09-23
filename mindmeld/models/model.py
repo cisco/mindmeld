@@ -52,7 +52,6 @@ from .._version import get_mm_version
 from ..text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
 
 # for backwards compatability for sklearn models serialized and dumped in previous version
-from .labels import LabelEncoder, EntityLabelEncoder  # pylint: disable=unused-import
 
 logger = logging.getLogger(__name__)
 
@@ -756,3 +755,10 @@ class PytorchModel(AbstractModel):
         self._resources[
             "text_preparation_pipeline"
         ] = resource_loader.get_text_preparation_pipeline()
+
+    @staticmethod
+    def _validate_training_data(examples, labels):
+        if len(examples) != len(labels):
+            msg = f"Number of 'labels' ({len(labels)}) must be same as number of 'examples' " \
+                  f"({len(examples)})"
+            raise AssertionError(msg)

@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import logging
-import os
 
 from .._util import _get_module_or_attr
 
@@ -32,40 +31,16 @@ SEED = 7246
 logger = logging.getLogger(__name__)
 
 
-# utils
-
-def get_disk_space_of_model(pytorch_module):
-    filename = "temp.bin"
-    torch.save(pytorch_module.state_dict(), filename)
-    size = os.path.getsize(filename) / 1e6
-    os.remove(filename)
-    return size
-
-
-def get_num_weights_of_model(pytorch_module):
-    n_total = 0
-    n_requires_grad = 0
-    for param in list(pytorch_module.parameters()):
-        t = 1
-        for sz in list(param.size()):
-            t *= sz
-        n_total += t
-        if param.requires_grad:
-            n_requires_grad += t
-    return n_requires_grad, n_total
-
-
-# Various nn layers
-
-
 class EmbeddingLayer(nn_module):
     """A pytorch wrapper layer for embeddings that takes input as a batched sequence of ids
     and outputs embeddings correponding to those ids
     """
 
-    def __init__(self, num_tokens, emb_dim, padding_idx=None,
-                 embedding_weights=None, update_embeddings=True,
-                 embeddings_dropout=0.5, coefficients=None, update_coefficients=True):
+    def __init__(
+        self, num_tokens, emb_dim, padding_idx=None,
+        embedding_weights=None, update_embeddings=True,
+        embeddings_dropout=0.5, coefficients=None, update_coefficients=True
+    ):
         super().__init__()
 
         self.embeddings = nn.Embedding(num_tokens, emb_dim, padding_idx=padding_idx)
@@ -175,6 +150,7 @@ class LstmLayer(nn_module):
         # returns:          dim: [BS, SEQ_LEN, EMB_DIM]
 
         # [BS, SEQ_LEN, EMD_DIM] -> [BS, SEQ_LEN, EMD_DIM*(2 if bidirectional else 1)]
+        lengths = lengths.to(torch.device("cpu"))
         packed = pack_padded_sequence(padded_token_embs, lengths,
                                       batch_first=True, enforce_sorted=False)
         lstm_outputs, _ = self.lstm(packed)
@@ -231,6 +207,10 @@ class PoolingLayer(nn_module):
 
 
 class SplittingAndPoolingLayer(nn_module):
+    """
+    Pooling class that first splits a sequence of representations into subgroups of representations
+    based on lengths of subgroups inputted, and pools each subgroup separately.
+    """
 
     def __init__(self, pooling_type):
         super().__init__()
@@ -242,27 +222,37 @@ class SplittingAndPoolingLayer(nn_module):
 
         self.pooling_type = pooling_type
 
-    def _split_and_pool(self, tensor_2d, list_of_chunk_lengths):
+    def _split_and_pool(self, tensor_2d, list_of_subgroup_length, discard_terminals):
         # tensor_2d:         dim: [SEQ_LEN, EMD_DIM]
+        # discard_terminals  bool
         # returns:           dim: [BS', EMD_DIM]
 
-        splits = torch.split(tensor_2d[:sum(list_of_chunk_lengths)], list_of_chunk_lengths, dim=0)
+        if discard_terminals:
+            n_representations = sum(list_of_subgroup_length) + 2
+            tensor_2d = tensor_2d[:n_representations]
+            tensor_2d = tensor_2d[1:-1]  # discard terminal representations
+        else:
+            n_representations = sum(list_of_subgroup_length)
+            tensor_2d = tensor_2d[:n_representations]
+
+        splits = torch.split(tensor_2d, list_of_subgroup_length, dim=0)
         padded_token_embs = pad_sequence(splits, batch_first=True)  # [BS', SEQ_LEN', EMD_DIM]
 
         if self.pooling_type == "first":
             outputs = padded_token_embs[:, 0, :]
         else:
-            raise NotImplementedError
+            raise NotImplementedError("Pooling types other than 'first' are not yet implemeneted.")
 
         return outputs
 
-    def forward(self, padded_token_embs, span_lengths):
+    def forward(self, padded_token_embs, span_lengths, discard_terminals=None):
         # padded_token_embs: dim: [BS, SEQ_LEN, EMD_DIM]
         # span_lengths:      dim: List[List of Int summing up to SEQ_LEN' <= SEQ_LEN]
+        # discard_terminals: bool
         # returns:           dim: [BS, SEQ_LEN', EMD_DIM]
 
         outputs = pad_sequence([
-            self._split_and_pool(_padded_token_embs, _span_lengths)
+            self._split_and_pool(_padded_token_embs, _span_lengths, discard_terminals)
             for _padded_token_embs, _span_lengths in zip(padded_token_embs, span_lengths)
         ], batch_first=True)
 
