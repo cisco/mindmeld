@@ -92,7 +92,6 @@ class AugmentorFactory:
             retain_entities = self.config.get("retain_entities", False)
             register_all_augmentors()
             return AUGMENTATION_MAP[self.config["augmentor_class"]](
-                app_path=app_path,
                 batch_size=batch_size,
                 language=self.language,
                 retain_entities=retain_entities,
