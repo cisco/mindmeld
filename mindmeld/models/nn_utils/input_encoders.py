@@ -20,6 +20,7 @@ from abc import abstractmethod, ABC
 from typing import Dict, List, Union, Any, Tuple
 
 from .helpers import BatchData
+from .._util import _get_module_or_attr
 from ..containers import HuggingfaceTransformersContainer
 
 try:
@@ -28,7 +29,6 @@ except ImportError:
     pass
 
 try:
-    from tokenizers import Tokenizer
     from tokenizers import normalizers
     from tokenizers.trainers import Trainer
     from tokenizers.normalizers import Lowercase, NFD, StripAccents
@@ -587,7 +587,7 @@ class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
 
     def load(self, path: str):
         filename = self._get_filename(path)
-        self.tokenizer = Tokenizer.from_file(filename)
+        self.tokenizer = _get_module_or_attr("tokenizers", "Tokenizer").from_file(filename)
         self._prepare_pipeline()
         msg = f"The state of {self.__class__.__name__} is successfully loaded from '{filename}'"
         logger.info(msg)
@@ -684,7 +684,7 @@ class BytePairEncodingEncoder(AbstractHuggingfaceTrainableEncoder):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.tokenizer = Tokenizer(BPE())
+        self.tokenizer = _get_module_or_attr("tokenizers", "Tokenizer")(BPE())
         self.trainer = BpeTrainer
 
 
@@ -695,7 +695,7 @@ class WordPieceEncoder(AbstractHuggingfaceTrainableEncoder):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.tokenizer = Tokenizer(WordPiece())
+        self.tokenizer = _get_module_or_attr("tokenizers", "Tokenizer")(WordPiece())
         self.trainer = WordPieceTrainer
 
 
