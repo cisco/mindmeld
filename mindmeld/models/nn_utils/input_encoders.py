@@ -19,8 +19,8 @@ import os
 from abc import abstractmethod, ABC
 from typing import Dict, List, Union, Any, Tuple
 
+from .helpers import BatchData
 from ..containers import HuggingfaceTransformersContainer
-from ...text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
 
 try:
     import torch
@@ -59,9 +59,6 @@ class AbstractEncoder(ABC):
               f"{self.__class__.__name__}: {ununsed_kwargs}"
         logger.debug(msg)
 
-    def __call__(self, text):
-        return self.tokenize(text)
-
     @abstractmethod
     def fit(self, examples: List[str]):
         """
@@ -94,7 +91,7 @@ class AbstractEncoder(ABC):
         raise NotImplementedError("Subclasses must implement this method")
 
     @abstractmethod
-    def tokenize(self, text: str) -> List[str]:
+    def _tokenize(self, text: str) -> List[str]:
         """
         Method that converts a peice of text into a sequence of strings
 
@@ -108,14 +105,13 @@ class AbstractEncoder(ABC):
 
     @abstractmethod
     def batch_encode(
-        self, examples: List[str], padding_length: int = None, add_terminals: bool = False,
-        **kwargs
-    ) -> Dict[str, Any]:
+        self, examples: List[str], padding_length: int = None, add_terminals: bool = False, **kwargs
+    ) -> BatchData:
         """
         Method that encodes a list of texts into a list of sequence of ids
 
         Args:
-            examples: List of text strings that will be batch encoded
+            examples: List of text strings that will be encoded as a batch
             padding_length: The maximum length of each encoded input. Sequences less than this
                 length are padded to padding_length, longer sequences are trimmed. If not specified,
                 the max length of examples upon tokenization is used as padding_length.
@@ -123,11 +119,10 @@ class AbstractEncoder(ABC):
                 to the tokenized examples or not.
 
         Returns:
-            Dict[str, Any]: A dictionary consisting of tensor encodings, lengths of inputs and
+            BatchData: A dictionary consisting of tensor encodings, lengths of inputs and
                 special tokens used while encoding, etc. (useful for batching labels in case of
-                token classification). Typically, it includes the following (description follows):
-                - seq_ids: The encoded ids useful for embedding lookup, including terminal special
-                    tokens if asked for, and with padding.
+                token classification). Typically, it includes the following keys
+                (description follows):
                 - seq_lengths: Number of tokens in each example before adding padding tokens. It
                     also includes terminal tokens as well, if they are added. If using an encoder
                     that splits words in subwords, then seq_lengths implies number of words instead
@@ -140,7 +135,12 @@ class AbstractEncoder(ABC):
                     seq_lengths values for the encoders with subword tokenization. This is again
                     useful in cases of token classifiers to flexibly choose between representations
                     of first sub-word or mean/max pool of sub-words' representations in order to
-                    obtain the word-level representations.
+                    obtain the word-level representations. For lookup table based encoders where
+                    words are not broken into sub-words, `split_lengths` is simply a sequence of
+                    ones whose sum indicates the number of words w/o terminal & padding tokens.
+                - seq_ids (in case non-pretrained models that require training an embedding layer):
+                    The encoded ids useful for embedding lookup, including terminal special tokens
+                    if asked for, and with padding.
                 - attention_masks (only in case of huggingface trainable encoders): Boolean flags
                     corresponding to each id in seq_ids, set to 0 if padding token else 1.
                 - hgf_encodings (only in huggingface pretrained encoders): A dict of outputs from a
@@ -197,7 +197,7 @@ class AbstractVocabLookupEncoder(AbstractEncoder):
 
     def fit(self, examples: List[str]):
         examples = [ex.strip() for ex in examples]
-        all_tokens = dict.fromkeys(sum([self.tokenize(text) for text in examples], []))
+        all_tokens = dict.fromkeys(sum([self._tokenize(text) for text in examples], []))
         self.token2id = {t: i for i, t in enumerate(all_tokens)}
 
         basic_special_tokens = {
@@ -240,15 +240,16 @@ class AbstractVocabLookupEncoder(AbstractEncoder):
         return filename
 
     @abstractmethod
-    def tokenize(self, text: str) -> List[str]:
+    def _tokenize(self, text: str) -> List[str]:
         raise NotImplementedError("Subclasses must implement this method")
 
-    def batch_encode(self, examples: List[str], padding_length: int = None,
-                     add_terminals: bool = False, _return_tokenized_examples: bool = False,
-                     **kwargs) -> Dict[str, Any]:
+    def batch_encode(
+        self, examples: List[str], padding_length: int = None,
+        add_terminals: bool = False, _return_tokenized_examples: bool = False, **kwargs
+    ) -> BatchData:
 
         # convert to tokens and obtain sequence lengths
-        tokenized_examples = [self.tokenize(text) for text in examples]
+        tokenized_examples = [self._tokenize(text) for text in examples]
         sequence_lengths = [len(seq) for seq in tokenized_examples]
 
         # obtain padding length
@@ -263,14 +264,15 @@ class AbstractVocabLookupEncoder(AbstractEncoder):
             for example in tokenized_examples
         ])
 
-        return_dict = {
-            "seq_ids": torch.as_tensor(seq_ids, dtype=torch.long),
+        return BatchData(**{
             "seq_lengths": torch.as_tensor(sequence_lengths, dtype=torch.long),
-            **({"_seq_tokens": [" ".join(list_of_t) for list_of_t in list_of_list_of_tokens]}
-               if _return_tokenized_examples else {}),
-            "split_lengths": [[1] * len(list_of_t) for list_of_t in list_of_list_of_tokens]
-        }
-        return return_dict
+            "split_lengths": [[1] * len(list_of_t) for list_of_t in list_of_list_of_tokens],
+            "seq_ids": torch.as_tensor(seq_ids, dtype=torch.long),
+            **(
+                {"_seq_tokens": [" ".join(list_of_t) for list_of_t in list_of_list_of_tokens]}
+                if _return_tokenized_examples else {}
+            ),
+        })
 
     def _encode_text(self, list_of_tokens: List[str], padding_length: int, add_terminals: bool):
         """
@@ -317,7 +319,7 @@ class WhitespaceEncoder(AbstractVocabLookupEncoder):
     Encoder that tokenizes at whitespace. Not useful for languages such as Chinese.
     """
 
-    def tokenize(self, text: str) -> List[str]:
+    def _tokenize(self, text: str) -> List[str]:
         return text.strip("\n").split(" ")
 
 
@@ -326,30 +328,8 @@ class CharEncoder(AbstractVocabLookupEncoder):
     A simple tokenizer that tokenizes at character level
     """
 
-    def tokenize(self, text: str) -> List[str]:
+    def _tokenize(self, text: str) -> List[str]:
         return list(text.strip("\n"))
-
-
-class MindmeldEncoder(AbstractVocabLookupEncoder):
-    """
-    A tokenizer based on Mindmeld app's config and text_preperation_pipeline
-    """
-
-    def __init__(self, app_path=None, language=None, **kwargs):
-        super().__init__(**kwargs)
-
-        self.pipeline = None
-        if app_path is not None:
-            self.pipeline = TextPreparationPipelineFactory.create_from_app_path(app_path=app_path)
-        elif language is not None:
-            self.pipeline = \
-                TextPreparationPipelineFactory.create_text_preparation_pipeline(language=language)
-        else:
-            msg = f"Insufficient params to create a {self.__class__.__name__}."
-            raise ValueError(msg)
-
-    def tokenize(self, text: str) -> List[str]:
-        raise NotImplementedError("TODO: .tokenize() method to implement in MindmeldEncoder")
 
 
 class WhitespaceAndCharDualEncoder(WhitespaceEncoder):
@@ -415,10 +395,10 @@ class WhitespaceAndCharDualEncoder(WhitespaceEncoder):
         filename = os.path.join(path, "char_vocab.txt")
         return filename
 
-    def batch_encode(self, examples: List[str], char_padding_length: int = None,
-                     char_add_terminals=True, add_terminals=False,
-                     _return_tokenized_examples: bool = False,
-                     **kwargs) -> Dict[str, Any]:
+    def batch_encode(
+        self, examples: List[str], char_padding_length: int = None, char_add_terminals=True,
+        add_terminals=False, _return_tokenized_examples: bool = False, **kwargs
+    ) -> BatchData:
 
         if add_terminals:
             msg = f"The argument 'add_terminals' must be False to encode a batch using" \
@@ -426,13 +406,13 @@ class WhitespaceAndCharDualEncoder(WhitespaceEncoder):
             logger.error(msg)
             raise ValueError(msg)
 
-        return_dict = super().batch_encode(
+        batch_data = super().batch_encode(
             examples=examples, add_terminals=False, _return_tokenized_examples=True, **kwargs
         )
 
         # use tokenized examples to obtain tokens for char tokenization
-        seq_tokens = return_dict.pop("_seq_tokens")
-        char_seq_ids, char_sequence_lengths = [], []
+        seq_tokens = batch_data.pop("_seq_tokens")
+        char_seq_ids, char_seq_lengths = [], []
         for _seq_tokens in seq_tokens:
             # compute padding length for character sequences
             _curr_max = max([len(word) for word in _seq_tokens])
@@ -440,22 +420,18 @@ class WhitespaceAndCharDualEncoder(WhitespaceEncoder):
             char_padding_length = (
                 min(char_padding_length, _curr_max) if char_padding_length else _curr_max
             )
-            _char_seq_ids, _char_sequence_lengths = zip(*[
+            _char_seq_ids, _char_seq_lengths = zip(*[
                 self._encode_chars(list(word), char_padding_length, char_add_terminals)
                 for word in _seq_tokens
             ])
             char_seq_ids.append(_char_seq_ids)
-            char_sequence_lengths.append(_char_sequence_lengths)
+            char_seq_lengths.append(_char_seq_lengths)
 
-        return_dict.update({
-            "char_seq_ids": [
-                torch.as_tensor(_ids, dtype=torch.long) for _ids in char_seq_ids
-            ],
-            "char_seq_lengths": [
-                torch.as_tensor(_lens, dtype=torch.long) for _lens in char_sequence_lengths
-            ]
+        batch_data.update({
+            "char_seq_ids": [torch.as_tensor(_ids, dtype=torch.long) for _ids in char_seq_ids],
+            "char_seq_lengths": [torch.as_tensor(_ls, dtype=torch.long) for _ls in char_seq_lengths]
         })
-        return return_dict
+        return batch_data
 
     def _encode_chars(self, list_of_tokens: List[str], padding_length: int, add_terminals: bool):
         """
@@ -625,7 +601,7 @@ class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
         filename = os.path.join(path, "tokenizer.json")
         return filename
 
-    def tokenize(self, text: str) -> List[str]:
+    def _tokenize(self, text: str) -> List[str]:
         """
         Example:
         --------
@@ -638,8 +614,9 @@ class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
         # [CLS] and [SEP] tokens
         return output.tokens
 
-    def batch_encode(self, examples: List[str], padding_length: int = None,
-                     add_terminals=True, **kwargs) -> Dict[str, Any]:
+    def batch_encode(
+        self, examples: List[str], padding_length: int = None, add_terminals=True, **kwargs
+    ) -> BatchData:
         """
         Example:
         --------
@@ -663,7 +640,7 @@ class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
         # get maximum length of each example, accounting for terminal tokens- cls, sep
         # If padding_length is None, padding has to be done to the max length of the input batch
         tokenized_examples = [
-            [self.tokenize(word) for word in example.split(" ")] for example in examples
+            [self._tokenize(word) for word in example.split(" ")] for example in examples
         ]
         max_curr_len = max([len(sum(t_ex, [])) for t_ex in tokenized_examples]) + 2
         padding_length = min(max_curr_len, padding_length) if padding_length else max_curr_len
@@ -682,17 +659,16 @@ class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
         seq_ids = [o.ids for o in output]
         attention_masks = [o.attention_mask for o in output]
 
-        return_dict = {
-            "seq_ids": torch.as_tensor(seq_ids, dtype=torch.long),  # List[List[int]]
-            "attention_masks": torch.as_tensor(attention_masks, dtype=torch.long),  # List[Lst[int]]
+        return BatchData(**{
             "seq_lengths": torch.as_tensor(  # List[int], number of groups per example
                 [len(_split_lengths) + 2 for _split_lengths in split_lengths], dtype=torch.long
             ),
-            "split_lengths": split_lengths,  # List[List[int]], len of each subgroup
-            # For each example, sum of its split_lengths will be equal to the sum of attention mask
+            "split_lengths": split_lengths,  # List[List[int]], len of each subgroup; For each
+            # example, sum of its split_lengths will be equal to the sum of attention mask
             # minus terminals.
-        }
-        return return_dict
+            "seq_ids": torch.as_tensor(seq_ids, dtype=torch.long),  # List[List[int]]
+            "attention_masks": torch.as_tensor(attention_masks, dtype=torch.long),  # List[Lst[int]]
+        })
 
     def get_vocab(self) -> Dict:
         return self.tokenizer.get_vocab()
@@ -762,11 +738,12 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
         self.config = hf_trans.get_transformer_model_config()
         self.tokenizer = hf_trans.get_transformer_model_tokenizer()
 
-    def tokenize(self, text: str) -> List[str]:
+    def _tokenize(self, text: str) -> List[str]:
         return self.tokenizer.tokenize(text)
 
-    def batch_encode(self, examples: List[str], padding_length: int = None,
-                     add_terminals=True, **kwargs) -> Dict[str, Any]:
+    def batch_encode(
+        self, examples: List[str], padding_length: int = None, add_terminals=True, **kwargs
+    ) -> BatchData:
 
         if not add_terminals:
             msg = f"The argument 'add_terminals' must be True to encode a batch using" \
@@ -778,7 +755,7 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
         # get maximum length of each example, accounting for terminal tokens- cls, sep
         # If padding_length is None, padding has to be done to the max length of the input batch
         tokenized_examples = [
-            [self.tokenize(word) for word in example.split(" ")]
+            [self._tokenize(word) for word in example.split(" ")]
             for example in examples
         ]
         max_curr_len = max([len(sum(t_ex, [])) for t_ex in tokenized_examples]) + 2
@@ -797,16 +774,15 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
             return_tensors="pt"
         )  # Huggingface returns this as BatchEncodings and needs to be converted to a dictionary
 
-        return_dict = {
-            "hgf_encodings": {**hgf_encodings},
+        return BatchData(**{
             "seq_lengths": torch.as_tensor(  # List[int], number of groups per example
                 [len(_split_lengths) + 2 for _split_lengths in split_lengths], dtype=torch.long
             ),
-            "split_lengths": split_lengths,  # List[List[int]], len of each subgroup
-            # For each example, sum of its split_lengths will be equal to the sum of attention mask
+            "split_lengths": split_lengths,  # List[List[int]], len of each subgroup; For each
+            # example, sum of its split_lengths will be equal to the sum of attention mask
             # minus terminals.
-        }
-        return return_dict
+            "hgf_encodings": {**hgf_encodings},
+        })
 
     def get_vocab(self) -> Dict:
         return self.tokenizer.get_vocab()
@@ -820,7 +796,6 @@ class InputEncoderFactory:
         "whitespace-tokenizer": WhitespaceEncoder,
         "char-tokenizer": CharEncoder,
         "whitespace_and_char-tokenizer": WhitespaceAndCharDualEncoder,
-        "mindmeld-tokenizer": MindmeldEncoder,
         "bpe-tokenizer": BytePairEncodingEncoder,
         "wordpiece-tokenizer": WordPieceEncoder,
         "huggingface_pretrained-tokenizer": HuggingfacePretrainedEncoder,

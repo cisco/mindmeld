@@ -39,7 +39,7 @@ from .helpers import (
     WORD_NGRAM_FREQ_RSC,
 )
 from .model import ModelConfig, Model, PytorchModel
-from .nn_utils import sequence_classification as nn_modules
+from .nn_utils import sequence_classification as nn_modules, ALLOWED_EMBEDDER_TYPES
 
 logger = logging.getLogger(__name__)
 
@@ -500,11 +500,10 @@ class PytorchTextModel(PytorchModel):
 
         # dismabiguation between glove and bert embedder
         def _resolve_and_return_embedder_class():
-            allowed_embedder_types = [None, "glove", "bert"]
             embedder_type = self.config.params.get("embedder_type")
-            if embedder_type not in allowed_embedder_types:
+            if embedder_type not in ALLOWED_EMBEDDER_TYPES:
                 msg = f"Need a valid 'embedder_type' param in params field of config to load a " \
-                      f"embedder type model. Allowed values are {allowed_embedder_types}"
+                      f"embedder type model. Allowed values are {ALLOWED_EMBEDDER_TYPES}"
                 raise ValueError(msg)
             return {
                 None: nn_modules.EmbedderForSequenceClassification,
@@ -556,7 +555,8 @@ class PytorchTextModel(PytorchModel):
         y = list(encoded_y)
 
         params = params or self.config.params
-        examples = [ex.normalized_text for ex in examples]
+        self._get_query_text_type(params)
+        examples = self._query2examples(examples)
         self._validate_training_data(examples, y)
 
         self._clf = self._get_model_constructor()()  # gets the class name and then initializes
@@ -567,14 +567,13 @@ class PytorchTextModel(PytorchModel):
     def predict(self, examples, dynamic_resource=None):
         del dynamic_resource
 
-        examples = [ex.normalized_text for ex in examples]
-
+        examples = self._query2examples(examples)
         y = self._clf.predict(examples)
         predictions = self._class_encoder.inverse_transform(y)
         return self._label_encoder.decode(predictions)
 
     def predict_proba(self, examples):
-        examples = [ex.normalized_text for ex in examples]
+        examples = self._query2examples(examples)
 
         # snippet re-used from ./text_model.py/TextModel._predict_proba()
         predictions = []
@@ -599,6 +598,7 @@ class PytorchTextModel(PytorchModel):
         metadata = {
             "label_encoder": self._label_encoder,
             "class_encoder": self._class_encoder,
+            "query_text_type": self._query_text_type,
             "model_config": self.config
         }
         os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -614,6 +614,7 @@ class PytorchTextModel(PytorchModel):
 
         model._label_encoder = metadata["label_encoder"]
         model._class_encoder = metadata["class_encoder"]
+        model._query_text_type = metadata["query_text_type"]
 
         # underneath tagger load
         model._clf = model._get_model_constructor().load(path)  # .load() is a classmethod

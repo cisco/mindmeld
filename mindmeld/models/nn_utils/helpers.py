@@ -14,6 +14,8 @@
 import logging
 import os
 
+from ...core import Bunch
+
 try:
     import torch
 except ImportError:
@@ -62,3 +64,7 @@ def get_num_weights_of_model(pytorch_module):
         if param.requires_grad:
             n_requires_grad += t
     return n_requires_grad, n_total
+
+
+class BatchData(Bunch):
+    pass

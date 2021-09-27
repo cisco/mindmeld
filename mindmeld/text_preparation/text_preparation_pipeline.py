@@ -16,6 +16,8 @@ import logging
 from typing import List, Dict, Tuple, Union
 import re
 import unicodedata
+import json
+from hashlib import sha256
 
 from .normalizers import (
     Normalizer,
@@ -34,8 +36,10 @@ from ..components._config import (
     get_language_config,
     ENGLISH_LANGUAGE_CODE,
 )
-from ..constants import UNICODE_SPACE_CATEGORY
-
+from ..constants import UNICODE_SPACE_CATEGORY, DUCKLING_VERSION
+from ..exceptions import MindMeldImportError
+from ..path import get_app
+from .._version import get_mm_version
 logger = logging.getLogger(__name__)
 
 
@@ -59,14 +63,96 @@ class TextPreparationPipeline:
         language: str = ENGLISH_LANGUAGE_CODE,
     ):
         """Creates a Pipeline instance."""
-        self.language = language
-        self.preprocessors = preprocessors or [NoOpPreprocessor()]
-        self.normalizers = normalizers or [NoOpNormalizer()]
-        self.tokenizer = tokenizer
-        self.stemmer = stemmer or NoOpStemmer()
+        self._language = language
+        self._preprocessors = preprocessors or [NoOpPreprocessor()]
+        self._normalizers = normalizers or [NoOpNormalizer()]
+        self._tokenizer = tokenizer
+        self._stemmer = stemmer or NoOpStemmer()
 
         if self.tokenizer is None:
             raise TextPreparationPipelineError("Tokenizer cannot be None.")
+
+    # Getters
+    @property
+    def language(self):
+        return self._language
+
+    @property
+    def tokenizer(self):
+        return self._tokenizer
+
+    @property
+    def preprocessors(self):
+        return self._preprocessors
+
+    @property
+    def normalizers(self):
+        return self._normalizers
+
+    @property
+    def stemmer(self):
+        return self._stemmer
+
+    # Setters
+    @tokenizer.setter
+    def tokenizer(self, tokenizer: Tokenizer):
+        """Set the tokenizer for the Text Preparation Pipeline
+        Args:
+            tokenizer (Tokenizer): Tokenizer to use.
+        """
+        if not isinstance(tokenizer, Tokenizer):
+            raise TypeError(f"{tokenizer} must be a Tokenizer object.")
+        self._tokenizer = tokenizer
+
+    @preprocessors.setter
+    def preprocessors(self, preprocessors: List[Preprocessor]):
+        """Set the preprocessors for the Text Preparation Pipeline
+        Args:
+            preprocessors (List[Preprocessor]): Preprocessors to use.
+        """
+        for preprocessor in preprocessors:
+            if not isinstance(preprocessor, Preprocessor):
+                raise TypeError(f"{preprocessor} must be a Preprocessor object.")
+        self._preprocessors = preprocessors
+
+    def append_preprocessor(self, preprocessor: Preprocessor):
+        """Add a preprocessor to the Text Preparation Pipeline
+        Args:
+            preprocessor (List[Preprocessor]): Preprocessor to append to current Preprocessors.
+        """
+        if not isinstance(preprocessor, Preprocessor):
+            raise TypeError(f"{preprocessor} must be a Preprocessor object.")
+        self._preprocessors.append(preprocessor)
+
+    @normalizers.setter
+    def normalizers(self, normalizers: List[Normalizer]):
+        """Set the normalizers for the Text Preparation Pipeline
+        Args:
+            normalizers (List[Normalizer]): Normalizers to use.
+        """
+        for normalizer in normalizers:
+            if not isinstance(normalizer, Normalizer):
+                raise TypeError(f"{normalizer} must be a Normalizer object.")
+        self._normalizers = normalizers
+
+    def append_normalizer(self, normalizer: Normalizer):
+        """Add a normalizer to the Text Preparation Pipeline
+        Args:
+            normalizer (List[Normalizer]): Normalizer to append to current Normalizers.
+        """
+        if not isinstance(normalizer, Normalizer):
+            raise TypeError(f"{normalizer} must be a Normalizer object.")
+        self._normalizers.append(normalizer)
+
+    @stemmer.setter
+    def stemmer(self, stemmer: Stemmer):
+        """Set the stemmer for the Text Preparation Pipeline
+        Args:
+            stemmer (Stemmer): Stemmer to use.
+        """
+        if not isinstance(stemmer, Stemmer):
+            raise TypeError(f"{stemmer} must be a Stemmer object.")
+        self._stemmer = stemmer
 
     def preprocess(self, text):
         """
@@ -192,6 +278,39 @@ class TextPreparationPipeline:
         """
         return self.stemmer.stem_word(word)
 
+    def tojson(self):
+        """
+        Method defined to obtain recursive JSON representation of a TextPreparationPipeline.
+
+        Args:
+            None.
+
+        Returns:
+            JSON representation of TextPreparationPipeline (dict) .
+        """
+        return {
+            "duckling_version": DUCKLING_VERSION,
+            "mm_version": get_mm_version(),
+            "language": self.language,
+            "preprocessors": self.preprocessors,
+            "normalizers": self.normalizers,
+            "tokenizer": self.tokenizer,
+            "stemmer": self.stemmer
+        }
+
+    def get_hashid(self):
+        """
+        Method defined to obtain Hash value of TextPreparationPipeline.
+
+        Args:
+            None.
+
+        Returns:
+            256 character hash representation of current TextPreparationPipeline config (str) .
+        """
+        string = json.dumps(self, cls=TextPreparationPipelineJSONEncoder, sort_keys=True)
+        return sha256(string.encode()).hexdigest()
+
     @staticmethod
     def find_mindmeld_annotation_re_matches(text):
         """
@@ -246,7 +365,7 @@ class TextPreparationPipeline:
 
         if prev_entity_end < len(text):
             # Adds the remainder of the text after the last end brace } "function(post_entity_text)"
-            modified_text.append(function(text[prev_entity_end : len(text)]))
+            modified_text.append(function(text[prev_entity_end: len(text)]))
 
         return "".join(modified_text)
 
@@ -294,7 +413,7 @@ class TextPreparationPipeline:
         if prev_entity_end < len(text):
             # Add tokens from the text after the last MindMeld entity
             tokens_after_last_entity = self.tokenizer.tokenize(
-                text[prev_entity_end : len(text)]
+                text[prev_entity_end: len(text)]
             )
             TextPreparationPipeline.offset_token_start_values(
                 tokens=tokens_after_last_entity, offset=prev_entity_end
@@ -437,6 +556,35 @@ class TextPreparationPipelineFactory:
     @staticmethod
     def create_from_app_path(app_path):
         """Static method to create a TextPreparationPipeline instance from an app_path.
+        If a custom text_preparation_pipeline is passed into the Application object in the
+        app_path/__init__.py file then it will be used. Otherwise, a text_preparation_pipeline
+        will be created based on the specifications in the config.
+
+        Args:
+            app_path (str): The application path.
+
+        Returns:
+            TextPreparationPipeline: A TextPreparationPipeline class.
+        """
+        if app_path:
+            try:
+                app = get_app(app_path)
+                if hasattr(app, 'text_preparation_pipeline') and app.text_preparation_pipeline:
+                    logger.info(
+                        "Using custom text_preparation_pipeline from %s/__init__.py.", app_path
+                    )
+                    return app.text_preparation_pipeline
+            except MindMeldImportError:
+                logger.warning(
+                    "Error importing application from %s. Using default TextPreparationPipeline.",
+                    app_path
+                )
+        return TextPreparationPipelineFactory.create_from_app_config(app_path)
+
+    @staticmethod
+    def create_from_app_config(app_path):
+        """ Static method to create a TextPreparation pipeline based on the specifications in
+        the config.
 
         Args:
             app_path (str): The application path.
@@ -464,7 +612,7 @@ class TextPreparationPipelineFactory:
         stemmer = (
             "NoOpStemmer"
             if "stemmer" in text_preparation_config
-            and not text_preparation_config["stemmer"]
+               and not text_preparation_config["stemmer"]
             else text_preparation_config.get("stemmer")
         )
         return TextPreparationPipelineFactory.create_text_preparation_pipeline(
@@ -627,3 +775,23 @@ class TextPreparationPipelineFactory:
             raise TypeError(
                 f"{component} must be of type String or {expected_component_class.__name__}."
             )
+
+
+class TextPreparationPipelineJSONEncoder(json.JSONEncoder):
+    """
+    Custom Encoder class defined to obtain recursive JSON representation of a TextPreparationPipeline.
+
+    Args:
+        None.
+
+    Returns:
+        Custom JSON Encoder class (json.JSONEncoder) .
+    """
+
+    def default(self, o):
+        tojson = getattr(o, 'tojson', None)
+        if callable(tojson):
+            return tojson()
+        else:
+            raise TextPreparationPipelineError(
+                f"Missing tojson() for {o.__class__.__name__} to create query cache hash.")

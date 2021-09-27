@@ -12,12 +12,12 @@
 # limitations under the License.
 
 """
-Custom modules built on top of nn layers that can do sequence classification
+Custom modules built on top of nn layers that can do token classification
 """
 
 import logging
 from abc import abstractmethod
-from typing import Dict, List
+from typing import List
 
 from .classification import BaseClassification
 from .layers import (
@@ -33,8 +33,15 @@ try:
     import torch
     import torch.nn as nn
     from torch.nn.utils.rnn import pad_sequence
-    from torchcrf import CRF
 except ImportError:
+    pass
+
+try:
+    from torchcrf import CRF
+
+    TORCHCRF_AVAILABLE = True
+except ImportError:
+    TORCHCRF_AVAILABLE = False
     pass
 
 logger = logging.getLogger(__name__)
@@ -46,21 +53,7 @@ class BaseTokenClassification(BaseClassification):
      this base can be trained for sequence tagging aka. token classification.
     """
 
-    DEFAULT_PARAMS = {
-        "output_keep_prob": 0.7,
-        "use_crf_layer": True,
-        "patience": 10,  # observed in benchmarking that more patience is better when using crf
-        "token_spans_pooling_type":
-            "first",  # if words split in subgroups, tells which subword representation to consider
-    }
-
-    def _get_default_params(self):
-        return {
-            **BaseTokenClassification.DEFAULT_PARAMS,
-            **self.__class__.DEFAULT_PARAMS
-        }
-
-    def _batch_encode_labels(self, labels: List[int], split_lengths: int):
+    def _prepare_labels(self, labels: List[int], split_lengths: int):
         # for token classification, the length of an example matters (i.e number of words in it)
         # as the labels are one-to-one mapped each example. Hence, we need to do padding.
 
@@ -71,9 +64,9 @@ class BaseTokenClassification(BaseClassification):
                 return labels + [self.params.label_padding_idx] * (
                     required_seq_length - len(label_sequence))
 
-        required_seq_length = max([sum(label_seq) for label_seq in labels])
+        _required_seq_length = max([len(_split_lengths) for _split_lengths in split_lengths])
         return torch.as_tensor(
-            [_trim_or_pad(label_seq, required_seq_length) for label_seq in labels],
+            [_trim_or_pad(_label_sequence, _required_seq_length) for _label_sequence in labels],
             dtype=torch.long
         )
 
@@ -106,6 +99,8 @@ class BaseTokenClassification(BaseClassification):
         )
         if self.params.use_crf_layer:
             self.classifier_head = nn.Linear(self.out_dim, self.params.num_labels)
+            if not TORCHCRF_AVAILABLE:
+                raise ImportError("pip install torchcrf")
             self.crf_layer = CRF(self.params.num_labels, batch_first=True)
         else:
             if self.params.num_labels >= 2:
@@ -120,26 +115,26 @@ class BaseTokenClassification(BaseClassification):
 
         print(f"{self.name} is initialized")
 
-    def forward(self, batch_data_dict):
+    def forward(self, batch_data):
 
-        batch_data_dict = self._to_device(batch_data_dict)
-        batch_data_dict = self._forward_core(batch_data_dict)
+        batch_data = self._to_device(batch_data)
+        batch_data = self._forward_core(batch_data)
 
-        token_embs = batch_data_dict["token_embs"]
+        token_embs = batch_data["token_embs"]
 
         # strip the terminals if required; note they are not acccounted in the label padding process
         if self.params.add_terminals:
             token_embs = self.span_pooling_layer(
                 token_embs,
-                batch_data_dict["split_lengths"],  # List[List[Int]],
+                batch_data["split_lengths"],  # List[List[Int]],
                 discard_terminals=self.params.add_terminals
             )  # [BS, SEQ_LEN`, EMD_DIM], and the SEQ_LEN` matches the width of labels upon padding
 
         token_embs = self.dense_layer_dropout(token_embs)
         logits = self.classifier_head(token_embs)
-        batch_data_dict.update({"logits": logits})
+        batch_data.update({"logits": logits})
 
-        targets = batch_data_dict.get("labels")
+        targets = batch_data.get("labels")
         if targets is not None:
             if self.params.use_crf_layer:
                 # create a mask to ignore token positions that are padded
@@ -148,9 +143,9 @@ class BaseTokenClassification(BaseClassification):
                 loss = - self.crf_layer(logits, targets, mask=mask)  # negative log likelihood
             else:
                 loss = self.criterion(logits.view(-1, logits.shape[-1]), targets.view(-1))
-            batch_data_dict.update({"loss": loss})
+            batch_data.update({"loss": loss})
 
-        return batch_data_dict
+        return batch_data
 
     def predict(self, examples):
         preds = []
@@ -159,14 +154,14 @@ class BaseTokenClassification(BaseClassification):
         with torch.no_grad():
             for start_idx in range(0, len(examples), self.params.batch_size):
                 this_examples = examples[start_idx:start_idx + self.params.batch_size]
-                batch_data_dict = self.encoder.batch_encode(this_examples)
-                this_logits = self.forward(batch_data_dict)["logits"]
+                batch_data = self.encoder.batch_encode(this_examples)
+                this_logits = self.forward(batch_data)["logits"]
                 # find predictions
                 if self.params.use_crf_layer:
                     # create a mask to ignore token positions that are padded
                     mask = torch.as_tensor(pad_sequence([
                         torch.as_tensor([1] * length_)
-                        for length_ in batch_data_dict["seq_lengths"]],
+                        for length_ in batch_data["seq_lengths"]],
                         batch_first=True
                     ), dtype=torch.uint8).to(self.params.device)  # [BS] -> [BS, SEQ_LEN]
                     this_preds = self.crf_layer.decode(this_logits, mask=mask)  # -> List[List[int]]
@@ -175,7 +170,7 @@ class BaseTokenClassification(BaseClassification):
                 # trim predictions as per sequence length
                 this_preds = [
                     pred_list[:list_len] for pred_list, list_len in
-                    zip(this_preds, batch_data_dict["seq_lengths"])
+                    zip(this_preds, batch_data["seq_lengths"])
                 ]
                 preds.extend(this_preds)
         if was_training:
@@ -189,14 +184,14 @@ class BaseTokenClassification(BaseClassification):
         with torch.no_grad():
             for start_idx in range(0, len(examples), self.params.batch_size):
                 this_examples = examples[start_idx:start_idx + self.params.batch_size]
-                batch_data_dict = self.encoder.batch_encode(this_examples)
-                this_logits = self.forward(batch_data_dict)["logits"]
+                batch_data = self.encoder.batch_encode(this_examples)
+                this_logits = self.forward(batch_data)["logits"]
                 # find predictions
                 if self.params.use_crf_layer:
                     # create a mask to ignore token positions that are padded
                     mask = torch.as_tensor(
                         pad_sequence([torch.as_tensor([1] * length_) for length_ in
-                                      batch_data_dict["seq_lengths"]], batch_first=True),
+                                      batch_data["seq_lengths"]], batch_first=True),
                         dtype=torch.uint8
                     ).to(self.params.device)
                     this_preds = self.crf_layer.decode(this_logits, mask=mask)  # -> List[List[int]]
@@ -205,7 +200,7 @@ class BaseTokenClassification(BaseClassification):
                 # trim predictions as per sequence length
                 this_preds = [
                     pred_list[:list_len] for pred_list, list_len in
-                    zip(this_preds, batch_data_dict["seq_lengths"])
+                    zip(this_preds, batch_data["seq_lengths"])
                 ]
                 preds.extend(this_preds)
         if was_training:
@@ -217,17 +212,11 @@ class BaseTokenClassification(BaseClassification):
         raise NotImplementedError
 
     @abstractmethod
-    def _forward_core(self, batch_data_dict: Dict) -> Dict:
+    def _forward_core(self, batch_data):
         raise NotImplementedError
 
 
 class EmbedderForTokenClassification(BaseTokenClassification):
-    DEFAULT_PARAMS = {
-        "padding_idx": None,
-        "update_embeddings": True,
-        "embedder_output_keep_prob": 0.7,
-        "output_keep_prob": 1.0,  # set to 1.0 due to the shallowness of the architecture
-    }
 
     def _init_core(self):
         self.emb_layer = EmbeddingLayer(
@@ -240,13 +229,13 @@ class EmbedderForTokenClassification(BaseTokenClassification):
         )
         self.out_dim = self.params.emb_dim
 
-    def _forward_core(self, batch_data_dict):
-        seq_ids = batch_data_dict["seq_ids"]  # [BS, SEQ_LEN]
+    def _forward_core(self, batch_data):
+        seq_ids = batch_data["seq_ids"]  # [BS, SEQ_LEN]
 
         token_embs = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, self.out_dim]
 
-        batch_data_dict.update({"token_embs": token_embs})
-        return batch_data_dict
+        batch_data.update({"token_embs": token_embs})
+        return batch_data
 
 
 class LstmForTokenClassification(BaseTokenClassification):
@@ -258,16 +247,6 @@ class LstmForTokenClassification(BaseTokenClassification):
     through pooling operations. Finally, this module outputs a 2D representation for each
     instance in the batch (i.e. [BS, SEQ_LEN', EMB_DIM]).
     """
-
-    DEFAULT_PARAMS = {
-        "padding_idx": None,
-        "update_embeddings": True,
-        "embedder_output_keep_prob": 0.7,
-        "lstm_hidden_dim": 128,
-        "lstm_num_layers": 2,
-        "lstm_keep_prob": 0.7,
-        "lstm_bidirectional": True,
-    }
 
     def _init_core(self):
         self.emb_layer = EmbeddingLayer(
@@ -290,35 +269,19 @@ class LstmForTokenClassification(BaseTokenClassification):
             else self.params.lstm_hidden_dim
         )
 
-    def _forward_core(self, batch_data_dict):
-        seq_ids = batch_data_dict["seq_ids"]  # [BS, SEQ_LEN]
-        seq_lengths = batch_data_dict["seq_lengths"]  # [BS]
+    def _forward_core(self, batch_data):
+        seq_ids = batch_data["seq_ids"]  # [BS, SEQ_LEN]
+        seq_lengths = batch_data["seq_lengths"]  # [BS]
 
         token_embs = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, EMD_DIM]
         token_embs = self.lstm_layer(token_embs, seq_lengths)  # [BS, SEQ_LEN, self.out_dim]
 
-        batch_data_dict.update({"token_embs": token_embs})
+        batch_data.update({"token_embs": token_embs})
 
-        return batch_data_dict
+        return batch_data
 
 
 class CharLstmWithWordLstmForTokenClassification(BaseTokenClassification):
-    DEFAULT_PARAMS = {
-        "tokenizer_type": "whitespace_and_char-tokenizer",
-        "padding_idx": None,
-        "update_embeddings": True,
-        "embedder_output_keep_prob": 0.7,
-        "lstm_hidden_dim": 128,
-        "lstm_num_layers": 2,
-        "lstm_keep_prob": 0.7,
-        "lstm_bidirectional": True,
-        "char_lstm_hidden_dim": 128,
-        "char_lstm_num_layers": 2,
-        "char_lstm_keep_prob": 0.7,
-        "char_lstm_bidirectional": True,
-        "char_lstm_output_pooling_type": "last",
-        "word_level_character_embedding_size": None
-    }
 
     def _prepare_input_encoder(self, examples, **params):
         params = super()._prepare_input_encoder(examples, **params)
@@ -388,9 +351,9 @@ class CharLstmWithWordLstmForTokenClassification(BaseTokenClassification):
             else self.params.lstm_hidden_dim
         )
 
-    def _forward_core(self, batch_data_dict):
-        char_seq_ids = batch_data_dict["char_seq_ids"]  # List of [BS, SEQ_LEN]
-        char_seq_lengths = batch_data_dict["char_seq_lengths"]  # List of [BS]
+    def _forward_core(self, batch_data):
+        char_seq_ids = batch_data["char_seq_ids"]  # List of [BS, SEQ_LEN]
+        char_seq_lengths = batch_data["char_seq_lengths"]  # List of [BS]
 
         encs = [self.char_emb_layer(_seq_ids) for _seq_ids in char_seq_ids]
         encs = [self.char_lstm_layer(enc, seq_len) for enc, seq_len in zip(encs, char_seq_lengths)]
@@ -401,34 +364,20 @@ class CharLstmWithWordLstmForTokenClassification(BaseTokenClassification):
         char_encs = self.char_lstm_output_transform(
             encs)  # [BS, SEQ_LEN, self.word_level_character_embedding_size]
 
-        seq_ids = batch_data_dict["seq_ids"]  # [BS, SEQ_LEN]
-        seq_lengths = batch_data_dict["seq_lengths"]  # [BS]
+        seq_ids = batch_data["seq_ids"]  # [BS, SEQ_LEN]
+        seq_lengths = batch_data["seq_lengths"]  # [BS]
 
         word_encs = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, self.emb_dim]
         char_plus_word_encs = torch.cat((char_encs, word_encs), dim=-1)  # [BS, SEQ_LEN, sum(both)]
         token_embs = self.lstm_layer(char_plus_word_encs,
                                      seq_lengths)  # [BS, SEQ_LEN, self.out_dim]
 
-        batch_data_dict.update({"token_embs": token_embs})
+        batch_data.update({"token_embs": token_embs})
 
-        return batch_data_dict
+        return batch_data
 
 
 class CharCnnWithWordLstmForTokenClassification(BaseTokenClassification):
-    DEFAULT_PARAMS = {
-        "tokenizer_type": "whitespace_and_char-tokenizer",
-        "padding_idx": None,
-        "update_embeddings": True,
-        "embedder_output_keep_prob": 0.7,
-        "lstm_hidden_dim": 128,
-        "lstm_num_layers": 2,
-        "lstm_keep_prob": 0.7,
-        "lstm_bidirectional": True,
-        "char_window_sizes": [3, 4, 5],
-        "char_number_of_windows": [100, 100, 100],
-        "char_cnn_output_keep_prob": 0.7,
-        "word_level_character_embedding_size": None
-    }
 
     def _prepare_input_encoder(self, examples, **params):
         params = super()._prepare_input_encoder(examples, **params)
@@ -490,9 +439,9 @@ class CharCnnWithWordLstmForTokenClassification(BaseTokenClassification):
             else self.params.lstm_hidden_dim
         )
 
-    def _forward_core(self, batch_data_dict):
-        char_seq_ids = batch_data_dict["char_seq_ids"]  # List of [BS, SEQ_LEN]
-        # char_seq_lengths = batch_data_dict["char_seq_lengths"]  # List of [BS]
+    def _forward_core(self, batch_data):
+        char_seq_ids = batch_data["char_seq_ids"]  # List of [BS, SEQ_LEN]
+        # char_seq_lengths = batch_data["char_seq_lengths"]  # List of [BS]
 
         encs = [self.char_emb_layer(_seq_ids) for _seq_ids in char_seq_ids]
         encs = [self.char_conv_layer(enc) for enc in encs]
@@ -501,26 +450,20 @@ class CharCnnWithWordLstmForTokenClassification(BaseTokenClassification):
         char_encs = self.char_cnn_output_transform(
             encs)  # [BS, SEQ_LEN, self.word_level_character_embedding_size]
 
-        seq_ids = batch_data_dict["seq_ids"]  # [BS, SEQ_LEN]
-        seq_lengths = batch_data_dict["seq_lengths"]  # [BS]
+        seq_ids = batch_data["seq_ids"]  # [BS, SEQ_LEN]
+        seq_lengths = batch_data["seq_lengths"]  # [BS]
 
         word_encs = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, self.emb_dim]
         char_plus_word_encs = torch.cat((char_encs, word_encs), dim=-1)  # [BS, SEQ_LEN, sum(both)]
         token_embs = self.lstm_layer(char_plus_word_encs,
                                      seq_lengths)  # [BS, SEQ_LEN, self.out_dim]
 
-        batch_data_dict.update({"token_embs": token_embs})
+        batch_data.update({"token_embs": token_embs})
 
-        return batch_data_dict
+        return batch_data
 
 
 class BertForTokenClassification(BaseTokenClassification):
-    DEFAULT_PARAMS = {
-        "tokenizer_type": "huggingface_pretrained-tokenizer",
-        "embedder_output_keep_prob": 0.7,
-        "output_keep_prob": 1.0,  # unnecessary upon using `embedder_output_keep_prob`
-        "use_crf_layer": False,  # Following BERT paper's best results
-    }
 
     def fit(self, examples, labels, **params):
         # overriding base class' method to set params, and then calling base class' .fit()
@@ -605,8 +548,8 @@ class BertForTokenClassification(BaseTokenClassification):
         )
         self.out_dim = self.params.emb_dim
 
-    def _forward_core(self, batch_data_dict):
-        bert_outputs = self.bert_model(**batch_data_dict["hgf_encodings"], return_dict=True)
+    def _forward_core(self, batch_data):
+        bert_outputs = self.bert_model(**batch_data["hgf_encodings"], return_dict=True)
         last_hidden_state = bert_outputs.get("last_hidden_state")  # [BS, SEQ_LEN, EMD_DIM]
         if last_hidden_state is None:
             msg = f"The choice of pretrained bert model " \
@@ -615,5 +558,5 @@ class BertForTokenClassification(BaseTokenClassification):
             raise ValueError(msg)
 
         last_hidden_state = self.dropout(last_hidden_state)
-        batch_data_dict.update({"token_embs": last_hidden_state})
-        return batch_data_dict
+        batch_data.update({"token_embs": last_hidden_state})
+        return batch_data

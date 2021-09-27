@@ -748,13 +748,14 @@ class PytorchModel(AbstractModel):
         super().__init__(config)
         self._label_encoder = get_label_encoder(self.config)
         self._class_encoder = SKLabelEncoder()
+        self._query_text_type = None
         self._clf = None
 
     def initialize_resources(self, resource_loader, examples=None, labels=None):
-        del examples, labels
-        self._resources[
-            "text_preparation_pipeline"
-        ] = resource_loader.get_text_preparation_pipeline()
+        del resource_loader, examples, labels
+        # self._resources[
+        #     "text_preparation_pipeline"
+        # ] = resource_loader.get_text_preparation_pipeline()
 
     @staticmethod
     def _validate_training_data(examples, labels):
@@ -762,3 +763,56 @@ class PytorchModel(AbstractModel):
             msg = f"Number of 'labels' ({len(labels)}) must be same as number of 'examples' " \
                   f"({len(examples)})"
             raise AssertionError(msg)
+
+    def _get_query_text_type(self, params=None):
+        """
+        Returns the query text type to use for obtaining training examples from Query objects.
+
+        Args:
+            params (Dict, optional): The config params passed in to train the model
+
+        Returns:
+            query_text_type (str): The choice of text type to use.
+        """
+
+        if params is None and self._query_text_type:
+            return self._query_text_type
+
+        # While the key '_query_text_type' in config params allows for end users to configure the
+        # choice of text type to be used, it also needs the user have knowledge about the different
+        # text types in a Query object. Hence, it is kept for developer/benchmarking puposes mainly.
+        # choices: "text", "processed_text", "normalized_text"
+        allowed_text_types = ["text", "processed_text", "normalized_text"]
+
+        if params is None:
+            query_text_type = "processed_text"
+        elif params.get("_query_text_type") is None:
+            if params.get("embedder_type") == "bert":
+                query_text_type = "text"
+            else:
+                query_text_type = "processed_text"
+        else:
+            query_text_type = params.get("_query_text_type")
+
+        if query_text_type not in allowed_text_types:
+            msg = f"The params 'query_text_type' can only be among " \
+                  f"{allowed_text_types} but found value {query_text_type}."
+            logger.error(msg)
+            raise ValueError(msg)
+
+        self._query_text_type = query_text_type
+        return self._query_text_type
+
+    def _query2examples(self, queries):
+        """
+        Method that decides which text type- processed_text or raw_text -that needs to be used for
+        neural model training/inference.
+
+        Args:
+            queries (List[Query]): A list of query objects.
+
+        Returns:
+            examples (List[str]): A list of strings obtained from the query objects based on the
+                input configs
+        """
+        return [getattr(query, self._get_query_text_type()) for query in queries]

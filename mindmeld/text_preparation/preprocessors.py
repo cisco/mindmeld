@@ -33,6 +33,18 @@ class Preprocessor(ABC):
         """
         pass
 
+    def tojson(self):
+        """
+        Method defined to obtain recursive JSON representation of a TextPreparationPipeline.
+
+        Args:
+            None.
+
+        Returns:
+            JSON representation of Preprocessor (dict) .
+        """
+        return {self.__class__.__name__: None}
+
 
 class NoOpPreprocessor(Preprocessor):
     """

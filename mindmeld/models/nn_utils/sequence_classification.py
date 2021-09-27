@@ -17,7 +17,6 @@ Custom modules built on top of nn layers that can do sequence classification
 
 import logging
 from abc import abstractmethod
-from typing import Dict
 
 from .classification import BaseClassification
 from .layers import (
@@ -44,17 +43,7 @@ class BaseSequenceClassification(BaseClassification):
      this base can be trained for sequence classification.
     """
 
-    DEFAULT_PARAMS = {
-        "output_keep_prob": 0.7
-    }
-
-    def _get_default_params(self):
-        return {
-            **BaseSequenceClassification.DEFAULT_PARAMS,
-            **self.__class__.DEFAULT_PARAMS
-        }
-
-    def _batch_encode_labels(self, labels, split_lengths):
+    def _prepare_labels(self, labels, split_lengths):
         # for sequence classification, the length of an example doesn't matter as we have only one
         # label for each example. hence, no need to do any padding or validation checks.
         del split_lengths
@@ -99,25 +88,25 @@ class BaseSequenceClassification(BaseClassification):
 
         print(f"{self.name} is initialized")
 
-    def forward(self, batch_data_dict):
+    def forward(self, batch_data):
 
-        batch_data_dict = self._to_device(batch_data_dict)
-        batch_data_dict = self._forward_core(batch_data_dict)
+        batch_data = self._to_device(batch_data)
+        batch_data = self._forward_core(batch_data)
 
-        seq_embs = batch_data_dict["seq_embs"]
+        seq_embs = batch_data["seq_embs"]
         seq_embs = self.dense_layer_dropout(seq_embs)
         logits = self.classifier_head(seq_embs)
-        batch_data_dict.update({"logits": logits})
+        batch_data.update({"logits": logits})
 
-        targets = batch_data_dict.get("labels")
+        targets = batch_data.get("labels")
         if targets is not None:
             if self.params.num_labels == 2:
                 loss = self.criterion(logits.view(-1), targets.float())
             elif self.params.num_labels > 2:
                 loss = self.criterion(logits, targets)
-            batch_data_dict.update({"loss": loss})
+            batch_data.update({"loss": loss})
 
-        return batch_data_dict
+        return batch_data
 
     def predict(self, examples):
         logits = self._forward_with_batching_and_no_grad(examples)
@@ -144,8 +133,8 @@ class BaseSequenceClassification(BaseClassification):
         with torch.no_grad():
             for start_idx in range(0, len(examples), self.params.batch_size):
                 this_examples = examples[start_idx:start_idx + self.params.batch_size]
-                batch_data_dict = self.encoder.batch_encode(this_examples)
-                this_logits = self.forward(batch_data_dict)["logits"]
+                batch_data = self.encoder.batch_encode(this_examples)
+                this_logits = self.forward(batch_data)["logits"]
                 logits = torch.cat((logits, this_logits)) if logits is not None else this_logits
         if was_training:
             self.train()
@@ -156,7 +145,7 @@ class BaseSequenceClassification(BaseClassification):
         raise NotImplementedError
 
     @abstractmethod
-    def _forward_core(self, batch_data_dict: Dict) -> Dict:
+    def _forward_core(self, batch_data):
         raise NotImplementedError
 
 
@@ -172,14 +161,6 @@ class EmbedderForSequenceClassification(BaseSequenceClassification):
     matrix (e.g. tf-idf weights).
     """
 
-    DEFAULT_PARAMS = {
-        "padding_idx": None,
-        "update_embeddings": True,
-        "embedder_output_keep_prob": 0.7,
-        "embedder_output_pooling_type": "mean",
-        "output_keep_prob": 1.0,  # set to 1.0 due to the shallowness of the architecture
-    }
-
     def _init_core(self):
         self.emb_layer = EmbeddingLayer(
             self.params.num_tokens,
@@ -194,16 +175,16 @@ class EmbedderForSequenceClassification(BaseSequenceClassification):
         )
         self.out_dim = self.params.emb_dim
 
-    def _forward_core(self, batch_data_dict):
-        seq_ids = batch_data_dict["seq_ids"]  # [BS, SEQ_LEN]
-        seq_lengths = batch_data_dict["seq_lengths"]  # [BS]
+    def _forward_core(self, batch_data):
+        seq_ids = batch_data["seq_ids"]  # [BS, SEQ_LEN]
+        seq_lengths = batch_data["seq_lengths"]  # [BS]
 
         encodings = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, EMD_DIM]
         encodings = self.emb_layer_pooling(encodings, seq_lengths)  # [BS, self.out_dim]
 
-        batch_data_dict.update({"seq_embs": encodings})
+        batch_data.update({"seq_embs": encodings})
 
-        return batch_data_dict
+        return batch_data
 
 
 class CnnForSequenceClassification(BaseSequenceClassification):
@@ -213,14 +194,6 @@ class CnnForSequenceClassification(BaseSequenceClassification):
 
     The `forward` method of this module expects only padded token ids as input.
     """
-
-    DEFAULT_PARAMS = {
-        "padding_idx": None,
-        "update_embeddings": True,
-        "embedder_output_keep_prob": 0.7,
-        "window_sizes": [3, 4, 5],
-        "number_of_windows": [100, 100, 100],
-    }
 
     def _init_core(self):
         self.emb_layer = EmbeddingLayer(
@@ -238,15 +211,15 @@ class CnnForSequenceClassification(BaseSequenceClassification):
         )
         self.out_dim = sum(self.params.number_of_windows)
 
-    def _forward_core(self, batch_data_dict):
-        seq_ids = batch_data_dict["seq_ids"]  # [BS, SEQ_LEN]
+    def _forward_core(self, batch_data):
+        seq_ids = batch_data["seq_ids"]  # [BS, SEQ_LEN]
 
         encodings = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, EMD_DIM]
         encodings = self.conv_layer(encodings)  # [BS, self.out_dim]
 
-        batch_data_dict.update({"seq_embs": encodings})
+        batch_data.update({"seq_embs": encodings})
 
-        return batch_data_dict
+        return batch_data
 
 
 class LstmForSequenceClassification(BaseSequenceClassification):
@@ -257,17 +230,6 @@ class LstmForSequenceClassification(BaseSequenceClassification):
     The `forward` method of this module expects padded token ids along with numer of tokens
     per instance in the batch.
     """
-
-    DEFAULT_PARAMS = {
-        "padding_idx": None,
-        "update_embeddings": True,
-        "embedder_output_keep_prob": 0.7,
-        "lstm_hidden_dim": 128,
-        "lstm_num_layers": 2,
-        "lstm_keep_prob": 0.7,
-        "lstm_bidirectional": True,
-        "lstm_output_pooling_type": "last",
-    }
 
     def _init_core(self):
         self.emb_layer = EmbeddingLayer(
@@ -293,26 +255,20 @@ class LstmForSequenceClassification(BaseSequenceClassification):
             else self.params.lstm_hidden_dim
         )
 
-    def _forward_core(self, batch_data_dict):
-        seq_ids = batch_data_dict["seq_ids"]  # [BS, SEQ_LEN]
-        seq_lengths = batch_data_dict["seq_lengths"]  # [BS]
+    def _forward_core(self, batch_data):
+        seq_ids = batch_data["seq_ids"]  # [BS, SEQ_LEN]
+        seq_lengths = batch_data["seq_lengths"]  # [BS]
 
         encodings = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, EMD_DIM]
         encodings = self.lstm_layer(encodings, seq_lengths)  # [BS, SEQ_LEN, self.out_dim]
         encodings = self.lstm_layer_pooling(encodings, seq_lengths)  # [BS, self.out_dim]
 
-        batch_data_dict.update({"seq_embs": encodings})
+        batch_data.update({"seq_embs": encodings})
 
-        return batch_data_dict
+        return batch_data
 
 
 class BertForSequenceClassification(BaseSequenceClassification):
-    DEFAULT_PARAMS = {
-        "tokenizer_type": "huggingface_pretrained-tokenizer",
-        "embedder_output_keep_prob": 0.7,
-        "embedder_output_pooling_type": "first",
-        "output_keep_prob": 1.0,  # unnecessary upon using `embedder_output_keep_prob`
-    }
 
     def fit(self, examples, labels, **params):
         # overriding base class' method to set params, and then calling base class' .fit()
@@ -401,9 +357,9 @@ class BertForSequenceClassification(BaseSequenceClassification):
             )
         self.out_dim = self.params.emb_dim
 
-    def _forward_core(self, batch_data_dict):
+    def _forward_core(self, batch_data):
 
-        bert_outputs = self.bert_model(**batch_data_dict["hgf_encodings"], return_dict=True)
+        bert_outputs = self.bert_model(**batch_data["hgf_encodings"], return_dict=True)
 
         if self.params.embedder_output_pooling_type != "first":
             last_hidden_state = bert_outputs.get("last_hidden_state")  # [BS, SEQ_LEN, EMD_DIM]
@@ -413,7 +369,7 @@ class BertForSequenceClassification(BaseSequenceClassification):
                       f"has no key 'last_hidden_state' in its output dictionary"
                 raise ValueError(msg)
             last_hidden_state = self.dropout(last_hidden_state)
-            seq_lengths = batch_data_dict["seq_lengths"]  # [BS]
+            seq_lengths = batch_data["seq_lengths"]  # [BS]
             encodings = self.emb_layer_pooling(last_hidden_state, seq_lengths)  # [BS, self.out_dim]
         else:
             pooler_output = bert_outputs.get("pooler_output")  # [BS, self.out_dim]
@@ -433,6 +389,6 @@ class BertForSequenceClassification(BaseSequenceClassification):
                 pooler_output = last_hidden_state[:, 0, :]  # [BS, self.out_dim]
             encodings = self.dropout(pooler_output)
 
-        batch_data_dict.update({"seq_embs": encodings})
+        batch_data.update({"seq_embs": encodings})
 
-        return batch_data_dict
+        return batch_data

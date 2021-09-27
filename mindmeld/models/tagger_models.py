@@ -26,7 +26,7 @@ from .helpers import (
     ingest_dynamic_gazetteer,
 )
 from .model import ModelConfig, Model, PytorchModel
-from .nn_utils import token_classification as nn_modules
+from .nn_utils import token_classification as nn_modules, ALLOWED_EMBEDDER_TYPES
 from .taggers.crf import ConditionalRandomFields
 from .taggers.memm import MemmModel
 from ..exceptions import MindMeldError
@@ -441,11 +441,10 @@ class PytorchTaggerModel(PytorchModel):
 
         # dismabiguation between glove and bert embedder
         def _resolve_and_return_embedder_class():
-            allowed_embedder_types = [None, "glove", "bert"]
             embedder_type = self.config.params.get("embedder_type")
-            if embedder_type not in allowed_embedder_types:
+            if embedder_type not in ALLOWED_EMBEDDER_TYPES:
                 msg = f"Need a valid 'embedder_type' param in params field of config to load a " \
-                      f"embedder type model. Allowed values are {allowed_embedder_types}"
+                      f"embedder type model. Allowed values are {ALLOWED_EMBEDDER_TYPES}"
                 raise ValueError(msg)
             return {
                 None: nn_modules.EmbedderForTokenClassification,
@@ -519,7 +518,8 @@ class PytorchTaggerModel(PytorchModel):
         y = list(encoded_y)
 
         params = params or self.config.params
-        examples = [ex.normalized_text for ex in examples]
+        self._get_query_text_type(params)
+        examples = self._query2examples(examples)
         self._validate_training_data(examples, y)
 
         self._clf = self._get_model_constructor()()  # gets the class name only
@@ -533,7 +533,8 @@ class PytorchTaggerModel(PytorchModel):
         if self._no_entities:
             return [()]
 
-        y = self._clf.predict([ex.normalized_text for ex in examples])
+        examples = self._query2examples(examples)
+        y = self._clf.predict(examples)
         flat_y = sum(y, [])
         decoded_flat_y = self._class_encoder.inverse_transform(flat_y).tolist()
         decoded_y = []
@@ -564,8 +565,9 @@ class PytorchTaggerModel(PytorchModel):
         metadata = {
             "label_encoder": self._label_encoder,
             "class_encoder": self._class_encoder,
+            "query_text_type": self._query_text_type,
+            "model_config": self.config,
             "no_entities": self._no_entities,
-            "model_config": self.config
         }
         os.makedirs(os.path.dirname(path), exist_ok=True)
         joblib.dump(metadata, path)
@@ -580,6 +582,7 @@ class PytorchTaggerModel(PytorchModel):
 
         model._label_encoder = metadata["label_encoder"]
         model._class_encoder = metadata["class_encoder"]
+        model._query_text_type = metadata["query_text_type"]
         model._no_entities = metadata["no_entities"]
 
         # underneath tagger load

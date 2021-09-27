@@ -27,11 +27,13 @@ import numpy as np
 from sklearn.metrics import accuracy_score, f1_score
 from tqdm import tqdm
 
+from .helpers import BatchData
 from .helpers import (
     get_disk_space_of_model,
     get_num_weights_of_model
 )
 from .input_encoders import InputEncoderFactory
+from .params import get_default_params
 from .._util import _get_module_or_attr
 from ..containers import GloVeEmbeddingsContainer
 from ...core import Bunch
@@ -42,10 +44,8 @@ try:
     import torch.nn as nn
 
     nn_module = _get_module_or_attr("torch.nn", "Module")
-    is_cuda_available = _get_module_or_attr("torch.cuda", "is_available")()
 except ImportError:
     nn_module = object
-    is_cuda_available = False
     pass
 
 SEED = 6174
@@ -53,28 +53,17 @@ LABEL_PAD_TOKEN_IDX = -1  # value set based on default label padding idx in pyto
 
 logger = logging.getLogger(__name__)
 
+EMBEDDER_TYPE_TO_ALLOWED_TOKENIZER_TYPES = {
+    "glove": ["whitespace-tokenizer", ],
+    "bert": ["huggingface_pretrained-tokenizer", ]
+}
+
 
 class BaseClassification(nn_module):
     """
     A base class for sequence and token classifiation using deep neural nets. The trainable examples
     inputted to the methods of this class are generally in the form of strings or list of strings.
     """
-    DEFAULT_PARAMS = {
-        "device": "cuda" if is_cuda_available else "cpu",
-        "number_of_epochs": 100,
-        "patience": 7,
-        "batch_size": 32,
-        "gradient_accumulation_steps": 1,
-        "max_grad_norm": None,
-        "optimizer": "Adam",
-        "learning_rate": 0.001,
-        "validation_metric": "accuracy",  # or 'f1'
-        "dev_split_ratio": 0.2
-    }
-    EMBEDDER_TYPE_TO_ALLOWED_TOKENIZER_TYPES = {
-        "glove": ["whitespace-tokenizer", ],
-        "bert": ["huggingface_pretrained-tokenizer", ]
-    }
 
     def __init__(self):
         super().__init__()
@@ -91,10 +80,7 @@ class BaseClassification(nn_module):
         return f"<{self.name}> ready:{self.ready} dirty:{self.dirty}"
 
     def get_default_params(self) -> Dict:
-        return {
-            **BaseClassification.DEFAULT_PARAMS,
-            **self._get_default_params(),
-        }
+        return get_default_params(self.__class__.__name__)
 
     def who_am_i(self) -> str:
         msg = f"{self.name} " \
@@ -104,18 +90,19 @@ class BaseClassification(nn_module):
         logger.info(msg)
         return msg
 
-    def batch_data_to_device(self, batch_data_dict: Dict) -> Dict:
+    def _to_device(self, batch_data: BatchData) -> BatchData:
         """method for gpu usage and data loading"""
-        for k, v in batch_data_dict.items():
+        for k, v in batch_data.items():
             if v is not None and isinstance(v, torch.Tensor):
-                batch_data_dict[k] = v.to(self.params.device)
+                batch_data[k] = v.to(self.params.device)
             elif isinstance(v, list):
-                batch_data_dict[k] = [
-                    vv.to(self.params.device) if isinstance(vv, torch.Tensor) else vv for vv in v
+                batch_data[k] = [
+                    vv.to(self.params.device) if isinstance(vv, torch.Tensor) else vv
+                    for vv in v
                 ]
             elif isinstance(v, dict):
-                batch_data_dict[k] = self.batch_data_to_device(batch_data_dict[k])
-        return batch_data_dict
+                batch_data[k] = self._to_device(batch_data[k])
+        return batch_data
 
     def fit(self, examples, labels, **params):  # pylint: disable=too-many-locals
         """
@@ -211,17 +198,16 @@ class BaseClassification(nn_module):
             for start_idx in t:
                 this_examples = train_examples[start_idx:start_idx + self.params.batch_size]
                 this_labels = train_labels[start_idx:start_idx + self.params.batch_size]
-                batch_data_dict = self.encoder.batch_encode(
+                batch_data = self.encoder.batch_encode(
                     examples=this_examples,
                     padding_length=self.params.padding_length,
                     add_terminals=self.params.add_terminals
                 )
-                batch_data_dict.update({
-                    "labels": self._batch_encode_labels(
-                        this_labels, batch_data_dict["split_lengths"])
+                batch_data.update({
+                    "labels": self._prepare_labels(this_labels, batch_data["split_lengths"])
                 })
-                batch_data_dict = self.forward(batch_data_dict)
-                loss = batch_data_dict["loss"]
+                batch_data = self.forward(batch_data)
+                loss = batch_data["loss"]
                 train_loss += loss.cpu().detach().numpy()
                 train_batches += 1
                 # find gradients
@@ -329,11 +315,7 @@ class BaseClassification(nn_module):
         scheduler = getattr(torch.optim.lr_scheduler, "LambdaLR")(optimizer, lambda _: 1)
         return optimizer, scheduler
 
-    @abstractmethod
-    def _get_default_params(self) -> Dict:
-        raise NotImplementedError
-
-    def _prepare_input_encoder(self, examples, **params):
+    def _prepare_input_encoder(self, examples, **params) -> Dict:
 
         # validation for use_character_embeddings param
         use_character_embeddings = params.pop("use_character_embeddings", False)
@@ -370,11 +352,11 @@ class BaseClassification(nn_module):
         # validation for tokenizer_type due to embedder_type param
         tokenizer_type = params.get("tokenizer_type")
         embedder_type = params.get("embedder_type")
-        allowed_types = BaseClassification.EMBEDDER_TYPE_TO_ALLOWED_TOKENIZER_TYPES
-        if embedder_type in allowed_types:
-            if tokenizer_type not in allowed_types[embedder_type]:
+        if embedder_type in EMBEDDER_TYPE_TO_ALLOWED_TOKENIZER_TYPES:
+            if tokenizer_type not in EMBEDDER_TYPE_TO_ALLOWED_TOKENIZER_TYPES[embedder_type]:
                 msg = f"For the selected choice of embedder ({embedder_type}), only the " \
-                      f"following tokenizer_type are allowed: {allowed_types[embedder_type]}."
+                      f"following tokenizer_type are allowed: " \
+                      f"{EMBEDDER_TYPE_TO_ALLOWED_TOKENIZER_TYPES[embedder_type]}."
                 raise ValueError(msg)
 
         if self.encoder is None:
@@ -417,7 +399,7 @@ class BaseClassification(nn_module):
         return params
 
     @abstractmethod
-    def _batch_encode_labels(
+    def _prepare_labels(
         self, labels: Union[List[int], List[List[int]]], split_lengths: "Tensor2d[int]"
     ):
         raise NotImplementedError
@@ -427,7 +409,7 @@ class BaseClassification(nn_module):
         raise NotImplementedError
 
     @abstractmethod
-    def forward(self, batch_data_dict: Dict) -> Dict:
+    def forward(self, batch_data: BatchData) -> BatchData:
         raise NotImplementedError
 
     @abstractmethod
