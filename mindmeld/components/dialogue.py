@@ -1003,7 +1003,7 @@ class AutoEntityFilling:
 
         if request.text.lower() in self._form.exit_keys:
             responder.reply(self._form.exit_msg)
-            responder.speak(self._form_exit_msg)
+            responder.speak(self._form.exit_msg)
             self._exit_flow(responder)
             return
 
