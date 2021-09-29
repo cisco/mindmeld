@@ -342,6 +342,7 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
             # models abstract layer
             head, ext = os.path.splitext(path)
             resolver_config_path = head + ".config" + ext
+            os.makedirs(os.path.dirname(resolver_config_path), exist_ok=True)
             with open(resolver_config_path, "wb") as fp:
                 pickle.dump(self.resolver_configurations, fp)
                 fp.close()
@@ -349,7 +350,7 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
             # save data hash
             # this hash is useful for avoiding re-fitting the resolver on unchanged data
             hash_path = path + ".hash"
-            os.makedirs(os.path.dirname(path), exist_ok=True)
+            os.makedirs(os.path.dirname(hash_path), exist_ok=True)
             with open(hash_path, "w") as hash_file:
                 hash_file.write(self.hash)
 
@@ -1358,6 +1359,7 @@ class TfIdfSparseCosSimEntityResolver(BaseEntityResolver):
             "syn_tfidf_matrix": self._syn_tfidf_matrix,  # caching sparse vectors of synonyms
             "vectorizer": self._vectorizer,  # caching vectorizer
         }
+        os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "wb") as fp:
             pickle.dump(resolver_state, fp)
             fp.close()
