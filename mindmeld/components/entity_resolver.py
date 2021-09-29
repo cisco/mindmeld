@@ -183,7 +183,7 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
         self._no_trainable_canonical_entity_map = False
         self.dirty = False  # bool, True if exists any unsaved data/model that can be saved
         self.ready = False  # bool, True if the model is already fitted or loaded
-        self.hash = None
+        self.hash = ""
 
     def __repr__(self):
         msg = "<{} ready: {!r}, dirty: {!r}, app_path: {!r}, entity_type: {!r}>"
@@ -196,6 +196,8 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
     @resolver_configurations.setter
     @abstractmethod
     def resolver_configurations(self, model_settings):
+        """Sets the configurations for the resolver that are used while creating a dump of configs
+        """
         raise NotImplementedError
 
     def fit(self, clean=False, entity_map=None):
@@ -230,17 +232,15 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
         if self._is_system_entity:
             self._no_trainable_canonical_entity_map = True
             self.ready = True
-            self.dirty = False
+            self.dirty = True  # configs need to be saved even for sys entities
             return
 
-        # load the KB consisting of canonical entities and their synonyms (aka. whitelist)
         entity_map = entity_map or self._get_entity_map()
-
-        # create a hash for the observed entities data
         entities_data = entity_map.get("entities", [])
         if not entities_data:
             self._no_trainable_canonical_entity_map = True
             self.ready = True
+            self.dirty = True
             return
 
         # obtain hash
@@ -312,41 +312,49 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
 
         return self._trim_and_sort_results(results, top_n)
 
-    def dump(self, path):
+    def dump(self, model_path, incremental_model_path=None):
         """
-        Dumps the state of the entity resolver. The state for embedder model is the cached
-        embeddings whereas for text features based resolvers, (if required,) it will generally be a
-        serialized pickle of the underlying model/algorithm and the data associated.
+        Persists the trained classification model to disk. The state for an embedder based model is
+        the cached embeddings whereas for text features based resolvers, (if required,) it will
+        generally be a serialized pickle of the underlying model/algorithm and the data associated.
 
         In general, this method leads to creation of the following files:
-            - .pkl: pickle of the underlying model/algo state (not required for Elasticsearch)
-            - .embedder_cache.pkl: pickle of the underlying embeddings (only for embedder resolver)
             - .configs.pkl: pickle of the resolver's configuarble parameters
             - .pkl.hash: a hash string obtained from a combination of KB data and the config params
+            - .pkl (optional, for non-ES models): pickle of the underlying model/algo state
+            - .embedder_cache.pkl (optional, for embedder models): pickle of underlying embeddings
 
         Args:
-            path (str): A .pkl file path where the resolver will be dumped. The model hash will be
-                dumped at {path}.hash file path
+            model_path (str): A .pkl file path where the resolver will be dumped. The model hash
+                will be dumped at {path}.hash file path
+            incremental_model_path (str, optional): The timestamp folder where the cached
+                models are stored.
         """
+        for path in [model_path, incremental_model_path]:
+            if not path:
+                continue
 
-        os.makedirs(os.path.dirname(path), exist_ok=True)
+            # underlying resolver model/algorithm/embeddings specific dump
+            self._dump(path)
 
-        # dump underlying resolver model/algorithm/embeddings
-        self._dump(path)
+            # save resolver configs
+            # in case of classifiers (domain, intent, etc.), dumping configs is handled by the
+            # models abstract layer
+            head, ext = os.path.splitext(path)
+            resolver_config_path = head + ".config" + ext
+            with open(resolver_config_path, "wb") as fp:
+                pickle.dump(self.resolver_configurations, fp)
+                fp.close()
 
-        # save resolver configs
-        head, ext = os.path.splitext(path)
-        resolver_config_path = head + ".config" + ext
-        with open(resolver_config_path, "wb") as fp:
-            pickle.dump(self.resolver_configurations, fp)
-            fp.close()
+            # save data hash
+            # this hash is useful for avoiding re-fitting the resolver on unchanged data
+            hash_path = path + ".hash"
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(hash_path, "w") as hash_file:
+                hash_file.write(self.hash)
 
-        # save data hash; useful for avoiding re-fitting the resolver on unchanged data
-        hash_path = path + ".hash"
-        with open(hash_path, "w") as hash_file:
-            hash_file.write(self.hash)
-
-        self.dirty = False
+            if path == model_path:
+                self.dirty = False
 
     def load(self, path, entity_map=None):
         """
@@ -360,8 +368,28 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
             entity_map (Dict[str, Union[str, List]]): Entity map if passed in directly instead of
                 loading from a file path
         """
+        msg = f"Loading {self.__class__.__name__} entity resolver for entity_type {self.type}"
+        logger.info(msg)
+
+        if self.ready:
+            return
+
+        if self._is_system_entity:
+            self._no_trainable_canonical_entity_map = True
+            self.ready = True
+            self.dirty = False
+            return
+
         entity_map = entity_map or self._get_entity_map()
         entities_data = entity_map.get("entities", [])
+        if not entities_data:
+            self._no_trainable_canonical_entity_map = True
+            self.ready = True
+            self.dirty = False
+            return
+
+        # obtain hash
+        # hash based on the KB data before any processing
         new_hash = self._get_model_hash(entities_data)
 
         hash_path = path + ".hash"
@@ -369,9 +397,10 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
             self.hash = hash_file.read()
             hash_file.close()
         if new_hash != self.hash:
-            msg = f"Found the KB data to have changed when trying to load " \
-                  f"{self.__class__.__name__} resolver. Please fit using 'clean=True' " \
-                  f"before loading a resolver fopr this KB."
+            msg = f"Found KB data to have changed when loading {self.__class__.__name__} " \
+                  f"resolver ({str(self)}). Please fit using 'clean=True' " \
+                  f"before loading a resolver fopr this KB. Found new data hash to be " \
+                  f"'{new_hash}' whereas the hash during dumping was '{self.hash}'"
             logger.error(msg)
             raise ValueError(msg)
 
@@ -397,6 +426,15 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
 
         self.ready = True
         self.dirty = False
+
+    def unload(self):
+        """
+        Unloads the model from memory. This helps reduce memory requirements while
+        training other models.
+        """
+        self._unload()
+        self.resolver_configurations = {}
+        self.ready = False
 
     @abstractmethod
     def _fit(self, clean, entity_map):
@@ -603,6 +641,9 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
     def _load(self, path, entity_map):
         pass
 
+    def _unload(self):
+        pass
+
 
 class ExactMatchEntityResolver(BaseEntityResolver):
     """
@@ -703,6 +744,9 @@ class ExactMatchEntityResolver(BaseEntityResolver):
 
     def _load(self, path, entity_map):
         self.processed_entity_map = self.get_processed_entity_map(entity_map)
+
+    def _unload(self):
+        self.processed_entity_map = None
 
 
 class ElasticsearchEntityResolver(BaseEntityResolver):
@@ -1167,11 +1211,11 @@ class TfIdfSparseCosSimEntityResolver(BaseEntityResolver):
 
         self.resolver_configurations = kwargs.get("config", {}).get("model_settings", {})
         self.processed_entity_map = None
+        self._analyzer = self._char_ngrams_plus_words_analyzer
 
-        self._analyzer = kwargs.get("analyzer") or self._char_ngrams_plus_words_analyzer
-        self._vectorizer = None
-        self._syn_tfidf_matrix = None
         self._unique_synonyms = []
+        self._syn_tfidf_matrix = None
+        self._vectorizer = None
 
     @BaseEntityResolver.resolver_configurations.setter
     def resolver_configurations(self, model_settings):
@@ -1326,6 +1370,12 @@ class TfIdfSparseCosSimEntityResolver(BaseEntityResolver):
         self._unique_synonyms = resolver_state["unique_synonyms"]
         self._syn_tfidf_matrix = resolver_state["syn_tfidf_matrix"]
         self._vectorizer = resolver_state["vectorizer"]
+
+    def _unload(self):
+        self.processed_entity_map = None
+        self._unique_synonyms = []
+        self._syn_tfidf_matrix = None
+        self._vectorizer = None
 
     def _char_ngrams_plus_words_analyzer(self, string):
         """
@@ -1547,13 +1597,15 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
                 pooled_encoding = np.mean(self._embedder_model.get_encodings(syns), axis=0)
                 self._embedder_model.add_to_cache({pooled_cname: pooled_encoding})
 
-        # backwards compatability
-        #  even if the .dump() method of resolver isn't called explicitly, the embeddings need to be
-        #  cached for fast inference of resolver
-        self._embedder_model.dump_cache()
-
         # useful for validation while loading
         self._model_settings["embedder_model_id"] = self._embedder_model.model_id
+
+        # snippet for backwards compatability
+        #  even if the .dump() method of resolver isn't called explicitly, the embeddings need to be
+        #  cached for fast inference of resolver; however, with the introduction of dump() and
+        #  load() methods, this temporary persisting is not necessary and must be removed in future
+        #  versions
+        self._embedder_model.dump_cache()
 
     def _predict(self, nbest_entities, allowed_cnames=None):
         """Predicts the resolved value(s) for the given entity using cosine similarity.
@@ -1598,7 +1650,9 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
         return values
 
     def _dump(self, path):
-        self._embedder_model.clear_cache()  # delete the temp cache as .dump() method is now called
+        # kept due to backwards compatability in _fit(), must be removed in future versions
+        self._embedder_model.clear_cache()  # delete the temp cache as .dump() method is now used
+
         head, ext = os.path.splitext(path)
         embedder_cache_path = head + ".embedder_cache" + ext
         self._embedder_model.dump_cache(cache_path=embedder_cache_path)
@@ -1610,6 +1664,7 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
             app_path=self.app_path, config=self.resolver_configurations
         )
 
+        # validate model id and load cache
         if self.resolver_configurations["embedder_model_id"] != self._embedder_model.model_id:
             msg = f"Unable to resolve the embedder model configurations. Found mismatched " \
                   f"configuartions between configs in the loaded pickle file and the configs " \
@@ -1620,6 +1675,10 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
         self._embedder_model.load_cache(
             cache_path=self.resolver_configurations["embedder_cache_path"]
         )
+
+    def _unload(self):
+        self.processed_entity_map = None
+        self._embedder_model = None
 
     def _predict_batch(self, nbest_entities_list, batch_size):
 

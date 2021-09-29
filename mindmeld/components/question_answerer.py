@@ -1344,7 +1344,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                     #               .pkl
                     #               .pkl.hash
                     #               .config.pkl
-                    self._text_resolver.dump(path=resolver_cache_path)
+                    self._text_resolver.dump(resolver_cache_path)
                 elif not self._text_resolver:
                     msg = f"Loading a text resolver for field '{self.field_name}' in " \
                           f"index '{self.index_name}'."
@@ -1408,7 +1408,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                     #               .pkl.hash
                     #               .config.pkl
                     #               .embedder_cache.pkl
-                    self._embedding_resolver.dump(path=resolver_cache_path)
+                    self._embedding_resolver.dump(resolver_cache_path)
                 elif not self._embedding_resolver:
                     msg = f"Loading an embedder resolver for field '{self.field_name}' in " \
                           f"index '{self.index_name}'."

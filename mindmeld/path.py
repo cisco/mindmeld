@@ -47,6 +47,9 @@ GEN_INTENT_CHECKPOINT_FOLDER = os.path.join(GEN_DOMAIN_CHECKPOINT_FOLDER, "{inte
 ENTITY_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, "entity.pkl")
 ENTITY_MODEL_CHECKPOINT_PATH = os.path.join(GEN_INTENT_CHECKPOINT_FOLDER, "entity.pkl")
 RESOLVER_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, "{entity}-resolver.pkl")
+RESOLVER_MODEL_CHECKPOINT_PATH = os.path.join(
+    GEN_INTENT_CHECKPOINT_FOLDER, "{entity}-resolver.pkl"
+)
 ROLE_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, "{entity}-role.pkl")
 ROLE_MODEL_CHECKPOINT_PATH = os.path.join(
     GEN_INTENT_CHECKPOINT_FOLDER, "{entity}-role.pkl"
@@ -442,18 +445,21 @@ def get_role_model_paths(
 
 @safe_path
 def get_resolver_model_path(
-    app_path, domain, intent, entity
+    app_path, domain, intent, entity, model_name=None, timestamp=None
 ):
-    """Gets the path to the entity resolver model
+    """Gets the path to the resolver model as well as the path to a
+    timestamp-cached resolver model.
 
     Args:
         app_path (str): The path to the app data.
         domain (str): A domain under the application.
         intent (str): A intent under the domain.
         entity (str): An entity under the intent
+        model_name (str): The name of the model. Allows multiple models to be stored.
+        timestamp (str): The timestamp string to store cached models in
 
     Returns:
-        (str) The main model path
+        (tuple) A tuple with the main model path and the cached model path
 
     """
     main_path = RESOLVER_MODEL_PATH.format(
@@ -461,7 +467,18 @@ def get_resolver_model_path(
     )
     main_path = _resolve_model_name(main_path)
 
-    return main_path
+    ts_path = None
+    if timestamp:
+        ts_path = RESOLVER_MODEL_CHECKPOINT_PATH.format(
+            app_path=app_path,
+            domain=domain,
+            intent=intent,
+            entity=entity,
+            timestamp=timestamp,
+        )
+        ts_path = _resolve_model_name(ts_path, model_name)
+
+    return main_path, ts_path
 
 
 @safe_path
