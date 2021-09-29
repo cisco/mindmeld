@@ -59,11 +59,8 @@ class Embedder(ABC):
             Args:
                 cache_path: A .pkl cache path to dump the embeddings cache
             """
-            self.reset()
-            self.cache_path = cache_path
-            if self.cache_path:
-                self.cache_path = os.path.abspath(self.cache_path)
-                self.load()
+            if cache_path:
+                self.load(self._get_cache_path(cache_path=cache_path))
 
         def reset(self):
             self.data = OrderedDict()
@@ -76,6 +73,7 @@ class Embedder(ABC):
             if os.path.exists(cache_path) and os.path.getsize(cache_path) > 0:
                 with open(cache_path, "rb") as fp:
                     data = pickle.load(fp)
+                    fp.close()
 
                 if (
                     "_texts" in data and
@@ -97,6 +95,9 @@ class Embedder(ABC):
                               "Ignoring loading ..."
                         logger.error(msg)
                     self.data = data
+
+            else:
+                self.reset()
 
         def clear(self, cache_path=None):
             """Deletes the cache file."""
@@ -130,15 +131,14 @@ class Embedder(ABC):
                 msg = "No embedding data exists to dump. Ignoring dumping."
                 logger.warning(msg)
 
+        def get(self, text, default=None):
+            return self.__getitem__(text, default)
+
         def _get_cache_path(self, cache_path):
-            cache_path = cache_path or self.cache_path
             if not cache_path:
                 msg = f"Invalid cache path '({cache_path})' provided for {self.__class__.__name__}."
                 raise ValueError(msg)
             return os.path.abspath(cache_path)
-
-        def get(self, text, default=None):
-            return self.__getitem__(text, default)
 
         def __contains__(self, text):
             if text in self.data:
@@ -166,47 +166,77 @@ class Embedder(ABC):
         def __len__(self):
             len(self.data)
 
-    def __init__(self, app_path=None, cache_path=None, **kwargs):
+    def __init__(self, cache_path=None, app_path=None, **kwargs):
         """
-        Initializes an embedder.
+        Initializes an embedder. The instantiated embedder model maintains a cache object that has
+        embeddings of inputs observed so far through the .get_encodings() method. This cache can be
+        useful especially if obtaining embeddings for the same text input is costlier in time versus
+        a lookup.
 
         Args:
-            app_path: Path of the app used to create cache folder to dump encodings
-            cache_path: A .pkl path where the embeddings are to be saved.
-                        If provided, discards app_path information.
+            cache_path (str): A .pkl path where the embeddings are to be cached. If provided,
+                discards the app_path information.
+            app_path (str): Path of the app used to create cache folder to dump encodings
         """
-        self.app_path = app_path
+
+        # model if can can be modified in _load() method based on the inputted embedder model
+        # configs to avoid overwriting a default cache path
+        self._model_id = "default"
+        self.model = self._load()
+
+        if cache_path is None:
+
+            if app_path:
+                deprecated_cache_path = path.get_embedder_cache_file_path(
+                    app_path,
+                    kwargs.get("embedder_type", "default"),
+                    kwargs.get("model_name", "default")
+                )
+                if (
+                    os.path.exists(deprecated_cache_path) and
+                    os.path.getsize(deprecated_cache_path) > 0
+                ):
+                    # deprecated usage:
+                    #   Determine path from `embedder_type` and `model_name`
+                    #   Inside a Mindmeld app, this path is generally something like:
+                    #       '.generated/indexes/{embedder_type}_{model_name}_cache.pkl'
+                    cache_path = deprecated_cache_path
+                else:
+                    # new usage:
+                    #   Determine cache path for the model using `model_id`
+                    #   Implies a previously used path name has no data and hence, is safe to change
+                    #   default cache path for this model (backwards compatability required only for
+                    #   loading previously dumped embeddings data).
+                    #   Cannot use previous path template because `model_name` alone is not
+                    #   sufficient to uniquely identify a bert model (as it can be configured now).
+                    #   Inside a Mindmeld app, this path is generally something like:
+                    #       '.generated/indexes/{model_id}_cache.pkl'
+                    cache_path = path.get_embedder_cache_file_path(
+                        app_path,
+                        self.model_id
+                    )
+
+            else:
+                msg = f"{self.__class__.__name__} embedder instantiated without a valid cache " \
+                      f"path. This will lead to an error if you try to dump the encodings cache. " \
+                      f"To have a valid cache dump location, pass-in 'app_path' or 'cache_path' " \
+                      f"argument. Alternatively, the `cache_path` can also be passed to the dump " \
+                      f"and load methods directly."
+                logger.info(msg)
+
+        # load a caching object
         self.cache_path = cache_path
-
-        self._model_id = None  # to be set in _load() method
-        self.model = self._load(**kwargs)  # load model before obtaining the cache path
-
-        # determine cache_path and load a caching object
-        if self.cache_path is None and self.app_path is None:
-            msg = f"{self.__class__.__name__} embedder instantiated without a valid cache path. " \
-                  f"This will lead to an error if you try to dump the encodings cache. To have a " \
-                  f"valid cache dump location, pass-in 'app_path' or 'cache_path' argument."
-            logger.error(msg)
-        if self.app_path and not self.cache_path:
-            # deprecated usage: determine path from `embedder_type` and `model_name` (eg. QA module)
-            deprecated_cache_path = path.get_embedder_cache_file_path(
-                self.app_path, kwargs.get("embedder_type", "default"),
-                kwargs.get("model_name", "default")
-            )
-            if os.path.exists(deprecated_cache_path) and os.path.getsize(deprecated_cache_path) > 0:
-                self.cache_path = deprecated_cache_path
-        if self.app_path and not self.cache_path:
-            # new usage: determine cache path for the model using model_id (eg. ER module)
-            #   implies a previously used path name has no data and hence, is safe to change
-            #   default cache path for this model (backwards compatability required only for
-            #   loading previously dumped embeddings data)
-            # Inside an app folder, this path is generally something like:
-            #   '.generated/indexes/{model_id}_cache.pkl'
-            self.cache_path = path.get_embedder_cache_file_path(self.app_path, self.model_id)
         self.cache = Embedder.EmbeddingsCache(self.cache_path)
 
-    def __repr__(self):
-        return f"{self.__class__.__name__} cache_path: {self.cache.cache_path}"
+    @property
+    def model_id(self):
+        """Returns a unique hash representation of the embedder model based on its name and configs
+        """
+        if not self._model_id:
+            msg = "Embedder models need to have model ids to uniquely identify each model with a " \
+                  "specific configuration. It can be set through the instance attribute '_model_id'"
+            raise ValueError(msg)
+        return self._model_id
 
     def get_encodings(self, text_list, add_to_cache=True):
         """Fetches the encoded values from the cache, or generates them.
@@ -253,24 +283,49 @@ class Embedder(ABC):
             self.cache[key] = value
 
     def dump_cache(self, cache_path=None):
-        self.cache.dump(cache_path=cache_path)
-
-    # deprecated method, same functionality as 'dump_cache' method
-    def dump(self, cache_path=None):
-        msg = f"DeprecationWarning: Use {self.__class__.__name__}.dump_cache() instead of " \
-              f"{self.__class__.__name__}.dump()"
-        warnings.warn(msg, DeprecationWarning)
-        self.dump_cache(cache_path=cache_path)
+        self.cache.dump(cache_path=cache_path or self.cache_path)
 
     def load_cache(self, cache_path=None):
-        self.cache.load(cache_path=cache_path)
+        self.cache.load(cache_path=cache_path or self.cache_path)
 
     def clear_cache(self, cache_path=None):
-        self.cache.clear(cache_path=cache_path)
+        self.cache.clear(cache_path=cache_path or self.cache_path)
 
     def reset_cache(self, cache_path=None):
-        self.cache.clear(cache_path=cache_path)
+        self.cache.clear(cache_path=cache_path or self.cache_path)
         self.cache.reset()
+
+    @abstractmethod
+    def _load(self, **kwargs):
+        """Loads the embedder model
+
+        Returns:
+            The model object.
+        """
+
+        # backwards compatability
+        if getattr(self, "load", None):
+            # implies `load()` is implemented as an abstract class instead of the new way `_load()`
+            getattr(self, "load")(**kwargs)
+
+        raise NotImplementedError
+
+    @abstractmethod
+    def _encode(self, text_list):
+        """
+        Args:
+            text_list (list): A list of text strings for which to generate the embeddings.
+
+        Returns:
+            (list): A list of numpy arrays of the embeddings.
+        """
+
+        # backwards compatability
+        if getattr(self, "encode", None):
+            # implies `encode()` is implemented as an abstract class instead of new way `_encode()`
+            getattr(self, "encode")(text_list)
+
+        raise NotImplementedError
 
     def find_similarity(
         self, src_texts, tgt_texts=None, top_n=20, scores_normalizer=None,
@@ -401,45 +456,12 @@ class Embedder(ABC):
         string = json.dumps(kwargs, sort_keys=True)
         return Hasher(algorithm="sha256").hash(string=string)
 
-    @property
-    def model_id(self):
-        if not self._model_id:
-            msg = "Embedder models need to have model ids to uniquely identify each model with a " \
-                  "specific configuration. It can be set through the instance attribute '_model_id'"
-            raise ValueError(msg)
-        return self._model_id
-
-    @abstractmethod
-    def _load(self, **kwargs):
-        """Loads the embedder model
-
-        Returns:
-            The model object.
-        """
-
-        # backwards compatability
-        if getattr(self, "load", None):
-            # implies `load()` is implemented as an abstract class instead of the new way `_load()`
-            getattr(self, "load")(**kwargs)
-
-        raise NotImplementedError
-
-    @abstractmethod
-    def _encode(self, text_list):
-        """
-        Args:
-            text_list (list): A list of text strings for which to generate the embeddings.
-
-        Returns:
-            (list): A list of numpy arrays of the embeddings.
-        """
-
-        # backwards compatability
-        if getattr(self, "encode", None):
-            # implies `encode()` is implemented as an abstract class instead of new way `_encode()`
-            getattr(self, "encode")(text_list)
-
-        raise NotImplementedError
+    # deprecated method, same functionality as 'dump_cache' method
+    def dump(self, cache_path=None):
+        msg = f"DeprecationWarning: Use {self.__class__.__name__}.dump_cache() instead of " \
+              f"{self.__class__.__name__}.dump()"
+        warnings.warn(msg, DeprecationWarning)
+        self.dump_cache(cache_path=cache_path)
 
 
 class BertEmbedder(Embedder):  # pylint: disable=too-many-instance-attributes
@@ -454,25 +476,33 @@ class BertEmbedder(Embedder):  # pylint: disable=too-many-instance-attributes
     #   when creating mutliple BERT based Entity Resolvers
     CACHE_MODELS = {}
 
-    def __init__(self, app_path, **kwargs):
+    def __init__(self, cache_path=None, app_path=None, **kwargs):
         """
+        Initializes a BERT based embedder from Huggingface
+
         Args:
-            model_name (str, deprecated): name of the BERT model from huggingface models
-            pretrained_name_or_abspath (str): argumnet to be used instead of model_name in future
-            bert_output_type (str): the output of BERT model to use, choices- 'mean', 'cls'
-            quantize_model (str): if True, the BERT model is quantized
-            batch_size (int): the batch size used for the computation
-            show_progress_bar (bool): Output a progress bar when encode sentences
-            output_value (str): Default sentence_embedding, to get sentence embeddings.
-                Can be set to token_embeddings to get wordpiece token embeddings.
-                Choices are `sentence_embedding` and `token_embedding`
-            convert_to_numpy (bool): If true, the output is a list of numpy vectors. Else, it is a
-                list of pytorch tensors.
-            convert_to_tensor (bool): If true, you get one large tensor as return. Overwrites any
-                setting from convert_to_numpy
-            device: Which torch.device to use for the computation
-            concat_last_n_layers (int): number of hidden outputs to concat starting from last layer
-            normalize_token_embs (bool): if the (sub-)token embs are to be individually normalized
+            cache_path (str): A .pkl path where the embeddings are to be cached. If provided,
+                discards the app_path information.
+            app_path (str): Path of the app used to create cache folder to dump encodings
+
+            Keyword args that uniquely identify the embeddings of the model:
+                model_name (str, deprecated): name of the BERT model from huggingface models
+                pretrained_name_or_abspath (str): arg to be used instead of model_name in future
+                bert_output_type (str): the output of BERT model to use, choices- 'mean', 'cls'
+                quantize_model (str): if True, the BERT model is quantized
+                concat_last_n_layers (int): num of hidden outputs to concat starting from last layer
+                normalize_token_embs (bool): if the (sub-token) embs are to be normalized
+
+            Keyword args that are required for run-time:
+                batch_size (int): the batch size used for the computation
+                output_value (str): Default sentence_embedding, to get sentence embeddings.
+                    Can be set to token_embeddings to get wordpiece token embeddings.
+                    Choices are `sentence_embedding` and `token_embedding`
+                convert_to_numpy (bool): If true, the output is a list of numpy vectors. Else, it
+                    is a list of pytorch tensors.
+                convert_to_tensor (bool): If true, you get one large tensor as return. Overwrites
+                    any setting from convert_to_numpy
+                device: Which torch.device to use for the computation
         """
 
         # deprecated configs keys, must be removed in future versions
@@ -486,7 +516,7 @@ class BertEmbedder(Embedder):  # pylint: disable=too-many-instance-attributes
                       f"instantiating a {self.__class__.__name__} class."
                 raise ValueError(msg)
 
-        # configs that uniquely identify the model
+        # configs that uniquely identify the model, used in model_id
         self.pretrained_name_or_abspath = self.model_name or kwargs.get(
             "pretrained_name_or_abspath", BertEmbedder.DEFAULT_BERT
         )
@@ -497,13 +527,132 @@ class BertEmbedder(Embedder):  # pylint: disable=too-many-instance-attributes
 
         # runtime configs for the model
         self._batch_size = kwargs.get("batch_size", 8)
-        self._show_progress_bar = kwargs.get("show_progress_bar", False)
         self._output_value = kwargs.get("output_value", 'sentence_embedding')
         self._convert_to_numpy = kwargs.get("convert_to_numpy", True)
         self._convert_to_tensor = kwargs.get("convert_to_tensor", False)
         self.device = kwargs.get("device", "cuda" if _torch("is_available", sub="cuda") else "cpu")
+        self._show_progress_bar = (
+            logger.getEffectiveLevel() == logging.INFO or
+            logger.getEffectiveLevel() == logging.DEBUG
+        )
 
-        super().__init__(app_path, **kwargs)
+        super().__init__(cache_path=cache_path, app_path=app_path, **kwargs)
+
+    def _load(self):
+
+        if not _is_module_available("sentence_transformers"):
+            raise ImportError(
+                "Must install the extra [bert] by running `pip install mindmeld[bert]` "
+                "to use the built in bert embedder.")
+
+        self._model_id = str(self.get_hashid(
+            pretrained_name_or_abspath=self.pretrained_name_or_abspath,
+            bert_output_type=self.bert_output_type,
+            quantize_model=self.quantize_model,
+            concat_last_n_layers=self._concat_last_n_layers,
+            normalize_token_embs=self._normalize_token_embs
+        ))
+        model = BertEmbedder.CACHE_MODELS.get(self._model_id, None)
+
+        if not model:
+
+            info_msg = ""
+            for name in [
+                self.pretrained_name_or_abspath,
+                f"sentence-transformers/{self.pretrained_name_or_abspath}"
+            ]:
+                try:
+                    model = (
+                        self._get_sentence_transformers_encoder(name,
+                                                                output_type=self.bert_output_type,
+                                                                quantize=self.quantize_model,
+                                                                return_components=True)
+                    )
+                    info_msg += f"Successfully initialized name/path `{name}` directly through " \
+                                f"huggingface-transformers. "
+                except OSError:
+                    info_msg += f"Could not initialize name/path `{name}` directly through " \
+                                f"huggingface-transformers. "
+
+                if model:
+                    break
+
+            logger.info(info_msg)
+
+            if not model:
+                msg = f"Could not resolve the name/path `{self.pretrained_name_or_abspath}`. " \
+                      f"Please check the model name and retry."
+                raise Exception(msg)
+
+            BertEmbedder.CACHE_MODELS.update({self._model_id: model})
+
+        return model
+
+    def _encode(self, phrases):
+        """Encodes input text(s) into embeddings, one vector for each phrase
+
+        Args:
+            phrases (str, list[str]): textual inputs that are to be encoded using sentence \
+                                        transformers' model
+
+
+        Returns:
+            (Union[List[Tensor], ndarray, Tensor]): By default, a numpy array is returned.
+                If convert_to_tensor, a stacked tensor is returned. If convert_to_numpy, a numpy
+                matrix is returned.
+        """
+
+        if not phrases:
+            return []
+
+        if not isinstance(phrases, (str, list)):
+            raise TypeError(f"argument phrases must be of type str or list, not {type(phrases)}")
+
+        show_progress_bar = (
+            self._show_progress_bar and
+            (len(phrases) if isinstance(phrases, list) else 1) > 1
+        )
+
+        # `False` for first call but might not for the subsequent calls
+        _use_sbert_model = getattr(self, "_use_sbert_model", False)
+
+        if not _use_sbert_model:
+            try:
+                # this snippet is to reduce dependency on sentence-transformers library
+                #   note that currently, the dependency is not fully eliminated due to backwards
+                #   compatability issues in huggingface-transformers between older (python 3.6)
+                #   and newer (python >=3.7) versions which needs more conditions to be implemented
+                #   in `_encode_local` and hence will be addressed in future work
+                # TODO: eliminate depedency on sentence-transformers library
+                results = self._encode_local(phrases,
+                                             batch_size=self._batch_size,
+                                             show_progress_bar=show_progress_bar,
+                                             output_value=self._output_value,
+                                             convert_to_numpy=self._convert_to_numpy,
+                                             convert_to_tensor=self._convert_to_tensor,
+                                             device=self.device,
+                                             concat_last_n_layers=self._concat_last_n_layers,
+                                             normalize_token_embs=self._normalize_token_embs)
+                setattr(self, "_use_sbert_model", False)
+            except TypeError as e:
+                logger.error(e)
+                if self._concat_last_n_layers != 1 or self._normalize_token_embs:
+                    msg = f"{'concat_last_n_layers,' if self._concat_last_n_layers != 1 else ''} " \
+                          f"{'normalize_token_embs' if self._normalize_token_embs else ''} " \
+                          f"ignored as resorting to using encode methods from sentence-transformers"
+                    logger.warning(msg)
+                setattr(self, "_use_sbert_model", True)
+
+        if getattr(self, "_use_sbert_model"):
+            results = self.model.sbert_model.encode(phrases,
+                                                    batch_size=self._batch_size,
+                                                    show_progress_bar=show_progress_bar,
+                                                    output_value=self._output_value,
+                                                    convert_to_numpy=self._convert_to_numpy,
+                                                    convert_to_tensor=self._convert_to_tensor,
+                                                    device=self.device)
+
+        return results
 
     @staticmethod
     def _batch_to_device(batch, target_device):
@@ -690,122 +839,6 @@ class BertEmbedder(Embedder):  # pylint: disable=too-many-instance-attributes
 
         return all_embeddings
 
-    def _load(self, **kwargs):
-
-        if not _is_module_available("sentence_transformers"):
-            raise ImportError(
-                "Must install the extra [bert] by running `pip install mindmeld[bert]` "
-                "to use the built in bert embedder.")
-
-        self._model_id = str(self.get_hashid(
-            pretrained_name_or_abspath=self.pretrained_name_or_abspath,
-            bert_output_type=self.bert_output_type,
-            quantize_model=self.quantize_model,
-            concat_last_n_layers=self._concat_last_n_layers,
-            normalize_token_embs=self._normalize_token_embs
-        ))
-        model = BertEmbedder.CACHE_MODELS.get(self._model_id, None)
-
-        if not model:
-
-            info_msg = ""
-            for name in [
-                self.pretrained_name_or_abspath,
-                f"sentence-transformers/{self.pretrained_name_or_abspath}"
-            ]:
-                try:
-                    model = (
-                        self._get_sentence_transformers_encoder(name,
-                                                                output_type=self.bert_output_type,
-                                                                quantize=self.quantize_model,
-                                                                return_components=True)
-                    )
-                    info_msg += f"Successfully initialized name/path `{name}` directly through " \
-                                f"huggingface-transformers. "
-                except OSError:
-                    info_msg += f"Could not initialize name/path `{name}` directly through " \
-                                f"huggingface-transformers. "
-
-                if model:
-                    break
-
-            logger.info(info_msg)
-
-            if not model:
-                msg = f"Could not resolve the name/path `{self.pretrained_name_or_abspath}`. " \
-                      f"Please check the model name and retry."
-                raise Exception(msg)
-
-            BertEmbedder.CACHE_MODELS.update({self._model_id: model})
-
-        return model
-
-    def _encode(self, phrases):
-        """Encodes input text(s) into embeddings, one vector for each phrase
-
-        Args:
-            phrases (str, list[str]): textual inputs that are to be encoded using sentence \
-                                        transformers' model
-
-
-        Returns:
-            (Union[List[Tensor], ndarray, Tensor]): By default, a numpy array is returned.
-                If convert_to_tensor, a stacked tensor is returned. If convert_to_numpy, a numpy
-                matrix is returned.
-        """
-
-        if not phrases:
-            return []
-
-        if not isinstance(phrases, (str, list)):
-            raise TypeError(f"argument phrases must be of type str or list, not {type(phrases)}")
-
-        show_progress_bar = (
-            self._show_progress_bar and
-            (len(phrases) if isinstance(phrases, list) else 1) > 1
-        )
-
-        # `False` for first call but might not for the subsequent calls
-        _use_sbert_model = getattr(self, "_use_sbert_model", False)
-
-        if not _use_sbert_model:
-            try:
-                # this snippet is to reduce dependency on sentence-transformers library
-                #   note that currently, the dependency is not fully eliminated due to backwards
-                #   compatability issues in huggingface-transformers between older (python 3.6)
-                #   and newer (python >=3.7) versions which needs more conditions to be implemented
-                #   in `_encode_local` and hence will be addressed in future work
-                # TODO: eliminate depedency on sentence-transformers library
-                results = self._encode_local(phrases,
-                                             batch_size=self._batch_size,
-                                             show_progress_bar=show_progress_bar,
-                                             output_value=self._output_value,
-                                             convert_to_numpy=self._convert_to_numpy,
-                                             convert_to_tensor=self._convert_to_tensor,
-                                             device=self.device,
-                                             concat_last_n_layers=self._concat_last_n_layers,
-                                             normalize_token_embs=self._normalize_token_embs)
-                setattr(self, "_use_sbert_model", False)
-            except TypeError as e:
-                logger.error(e)
-                if self._concat_last_n_layers != 1 or self._normalize_token_embs:
-                    msg = f"{'concat_last_n_layers,' if self._concat_last_n_layers != 1 else ''} " \
-                          f"{'normalize_token_embs' if self._normalize_token_embs else ''} " \
-                          f"ignored as resorting to using encode methods from sentence-transformers"
-                    logger.warning(msg)
-                setattr(self, "_use_sbert_model", True)
-
-        if getattr(self, "_use_sbert_model"):
-            results = self.model.sbert_model.encode(phrases,
-                                                    batch_size=self._batch_size,
-                                                    show_progress_bar=show_progress_bar,
-                                                    output_value=self._output_value,
-                                                    convert_to_numpy=self._convert_to_numpy,
-                                                    convert_to_tensor=self._convert_to_tensor,
-                                                    device=self.device)
-
-        return results
-
 
 class GloveEmbedder(Embedder):
     """
@@ -814,39 +847,51 @@ class GloveEmbedder(Embedder):
 
     DEFAULT_EMBEDDING_DIM = 300
 
-    def __init__(self, app_path, **kwargs):
-        super().__init__(app_path, **kwargs)
+    def __init__(self, cache_path=None, app_path=None, **kwargs):
+        """
+        Initializes a GloVe embedder.
+
+        Args:
+            cache_path (str): A .pkl path where the embeddings are to be cached. If provided,
+                discards the app_path information.
+            app_path (str): Path of the app used to create cache folder to dump encodings
+
+            Keyword args that uniquely identify the embeddings of the model:
+                token_embedding_dimension: The token dimension of GloVe embedder to load
+                token_pretrained_embedding_filepath: The path where GloVe embeddings are
+                    available. If its None, an appropriate file will be downloaded to
+                    mindmeld/data/ folder and used.
+        """
+
+        self.token_embedding_dimension = kwargs.get(
+            "token_embedding_dimension", self.DEFAULT_EMBEDDING_DIM
+        )
+        self.token_pretrained_embedding_filepath = kwargs.get(
+            "token_pretrained_embedding_filepath"
+        )
         self.text_preparation_pipeline = (
             TextPreparationPipelineFactory.create_default_text_preparation_pipeline()
         )
 
-    def tokenize(self, text):
-        return [
-            t["entity"] for t in
-            self.text_preparation_pipeline.tokenize_and_normalize(text)
-        ]
+        super().__init__(cache_path=cache_path, app_path=app_path, **kwargs)
 
-    def _load(self, **kwargs):
-        token_embedding_dimension = kwargs.get(
-            "token_embedding_dimension", self.DEFAULT_EMBEDDING_DIM
-        )
-        token_pretrained_embedding_filepath = kwargs.get(
-            "token_pretrained_embedding_filepath"
-        )
+    def _load(self):
+
         self._model_id = str(self.get_hashid(
-            token_embedding_dimension=token_embedding_dimension,
+            token_embedding_dimension=self.token_embedding_dimension,
             token_pretrained_embedding_filepath=os.path.abspath(
-                token_pretrained_embedding_filepath),
+                self.token_pretrained_embedding_filepath),
         ))
+
         return WordSequenceEmbedding(
             0,
-            token_embedding_dimension,
-            token_pretrained_embedding_filepath,
+            self.token_embedding_dimension,
+            self.token_pretrained_embedding_filepath,
             use_padding=False,
         )
 
     def _encode(self, text_list):
-        token_list = [self.tokenize(text) for text in text_list]
+        token_list = [self._tokenize(text) for text in text_list]
         vector_list = [self.model.encode_sequence_of_tokens(tl) for tl in token_list]
         encoded_vecs = []
         for vl in vector_list:
@@ -855,6 +900,12 @@ class GloveEmbedder(Embedder):
             else:
                 encoded_vecs.append(np.average(vl, axis=0))
         return encoded_vecs
+
+    def _tokenize(self, text):
+        return [
+            t["entity"] for t in
+            self.text_preparation_pipeline.tokenize_and_normalize(text)
+        ]
 
     def dump(self):
         """Dumps the cache to disk."""

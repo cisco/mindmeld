@@ -12,7 +12,7 @@ import os
 # pylint: disable=locally-disabled,redefined-outer-name
 import pytest
 from mindmeld.components._elasticsearch_helpers import create_es_client
-from mindmeld.components.question_answerer import QuestionAnswerer
+from mindmeld.components.question_answerer import QuestionAnswerer, NativeQuestionAnswerer
 
 ENTITY_TYPE = "store_name"
 STORE_DATA_FILE_PATH = os.path.dirname(__file__) + "/../kwik_e_mart/data/stores.json"
@@ -325,7 +325,7 @@ def test_embedder_search_glove(food_ordering_with_glove):
 
 
 @pytest.fixture
-def answerer_without_elasticsearch(kwik_e_mart_app_path):
+def answerer_native(kwik_e_mart_app_path):
     QA_CONFIG = {
         "model_type": "native",
         "model_settings": {
@@ -344,7 +344,7 @@ def answerer_without_elasticsearch(kwik_e_mart_app_path):
 
 
 @pytest.fixture
-def relative_answerer_without_elasticsearch(kwik_e_mart_app_path):
+def relative_answerer_native(kwik_e_mart_app_path):
     QA_CONFIG = {
         "model_type": "native",
         "model_settings": {
@@ -365,7 +365,7 @@ def relative_answerer_without_elasticsearch(kwik_e_mart_app_path):
 
 
 @pytest.fixture
-def food_ordering_answerer_without_elasticsearch(food_ordering_app_path):
+def food_ordering_answerer_native(food_ordering_app_path):
     QA_CONFIG = {
         "model_type": "native",
         "model_settings": {
@@ -385,7 +385,7 @@ def food_ordering_answerer_without_elasticsearch(food_ordering_app_path):
 
 @pytest.mark.extras
 @pytest.fixture
-def food_ordering_with_bert_without_elasticsearch(food_ordering_app_path):
+def food_ordering_with_bert_native(food_ordering_app_path):
     bert_qa_config = {
         "model_type": "native",
         "model_settings": {
@@ -407,7 +407,7 @@ def food_ordering_with_bert_without_elasticsearch(food_ordering_app_path):
 
 @pytest.mark.extras
 @pytest.fixture
-def food_ordering_with_glove_without_elasticsearch(food_ordering_app_path):
+def food_ordering_with_glove_native(food_ordering_app_path):
     glove_qa_config = {
         "model_type": "native",
         "model_settings": {
@@ -427,50 +427,79 @@ def food_ordering_with_glove_without_elasticsearch(food_ordering_app_path):
     return qa
 
 
-def test_basic_relative_search_without_elasticsearch(relative_answerer_without_elasticsearch):
+@pytest.fixture
+def answerer_native_unloaded(kwik_e_mart_app_path):
+    NativeQuestionAnswerer._unload_all_indices()
+    QA_CONFIG = {
+        "model_type": "native",
+        "model_settings": {
+            "query_type": "keyword"
+        }
+    }
+    qa = QuestionAnswerer(kwik_e_mart_app_path, config=QA_CONFIG)
+    return qa
+
+
+@pytest.mark.extras
+@pytest.fixture
+def food_ordering_with_bert_native_unloaded(food_ordering_app_path):
+    NativeQuestionAnswerer._unload_all_indices()
+    bert_qa_config = {
+        "model_type": "native",
+        "model_settings": {
+            "query_type": "embedder",
+            "embedder_type": "bert",
+            "embedding_fields": {"menu_items_bert": ["name"]},
+        }
+    }
+    qa = QuestionAnswerer(food_ordering_app_path, config=bert_qa_config)
+    return qa
+
+
+def test_basic_relative_search_native(relative_answerer_native):
     """Test basic search."""
 
     # retrieve object using ID
-    res = relative_answerer_without_elasticsearch.get(index="store_name", id="20")
+    res = relative_answerer_native.get(index="store_name", id="20")
     assert len(res) > 0
 
     # simple text query
-    res = relative_answerer_without_elasticsearch.get(index="store_name", store_name="peanut")
+    res = relative_answerer_native.get(index="store_name", store_name="peanut")
     assert len(res) > 0
 
     # simple text query
-    res = relative_answerer_without_elasticsearch.get(index="store_name",
-                                                      store_name="Springfield Heights")
+    res = relative_answerer_native.get(index="store_name",
+                                       store_name="Springfield Heights")
     assert len(res) > 0
 
     # multiple text queries
-    res = relative_answerer_without_elasticsearch.get(
+    res = relative_answerer_native.get(
         index="store_name", store_name="peanut", address="peanut st"
     )
     assert len(res) > 0
 
 
-def test_advanced_search_without_elasticsearch(answerer_without_elasticsearch):
+def test_advanced_search_native(answerer_native):
     """Test advanced search."""
 
-    s = answerer_without_elasticsearch.build_search(index="store_name")
+    s = answerer_native.build_search(index="store_name")
     res = s.query(store_name="peanut").execute()
     assert len(res) > 0
 
 
-def test_partial_match_without_elasticsearch(answerer_without_elasticsearch):
+def test_partial_match_native(answerer_native):
     """Test partial match."""
 
     # test partial match
-    res = answerer_without_elasticsearch.get(index="store_name", store_name="Garden")
+    res = answerer_native.get(index="store_name", store_name="Garden")
     assert len(res) > 0
 
 
-def test_sort_by_distance_without_elasticsearch(answerer_without_elasticsearch):
+def test_sort_by_distance_native(answerer_native):
     """Test sort by distance."""
 
     # retrieve object using ID
-    res = answerer_without_elasticsearch.get(
+    res = answerer_native.get(
         index="store_name",
         _sort="location",
         _sort_type="distance",
@@ -480,51 +509,49 @@ def test_sort_by_distance_without_elasticsearch(answerer_without_elasticsearch):
     assert res[0].get("id") == "19"
 
 
-def test_basic_search_validation_without_elasticsearch(
-    food_ordering_answerer_without_elasticsearch
-):
+def test_basic_search_validation_native(food_ordering_answerer_native):
     """Test validation."""
 
     # index not exist
     with pytest.raises(ValueError):
-        food_ordering_answerer_without_elasticsearch.get(index="nosuchindex", nosuchfield="novalue")
+        food_ordering_answerer_native.get(index="nosuchindex", nosuchfield="novalue")
 
     # field not exist
     with pytest.raises(ValueError):
-        food_ordering_answerer_without_elasticsearch.get(index="menu_items", nosuchfield="novalue")
+        food_ordering_answerer_native.get(index="menu_items", nosuchfield="novalue")
 
     # invalid field type
     with pytest.raises(ValueError):
-        food_ordering_answerer_without_elasticsearch.get(index="menu_items", price="novalue")
+        food_ordering_answerer_native.get(index="menu_items", price="novalue")
 
     # invalid sort type
     with pytest.raises(ValueError):
-        food_ordering_answerer_without_elasticsearch.get(
+        food_ordering_answerer_native.get(
             index="menu_items", _sort="price", _sort_type="distance"
         )
 
     # invalid sort type
     with pytest.raises(ValueError):
-        food_ordering_answerer_without_elasticsearch.get(
+        food_ordering_answerer_native.get(
             index="menu_items", _sort="location", _sort_type="asc"
         )
 
     # missing origin
     with pytest.raises(ValueError):
-        food_ordering_answerer_without_elasticsearch.get(
+        food_ordering_answerer_native.get(
             index="menu_items", _sort="location", _sort_type="distance"
         )
 
 
-def test_unstructured_search_without_elasticsearch(food_ordering_answerer_without_elasticsearch):
-    res = food_ordering_answerer_without_elasticsearch.get(
+def test_unstructured_search_native(food_ordering_answerer_native):
+    res = food_ordering_answerer_native.get(
         index="menu_items",
         query_type="text",
         description="something with crab meat and scallops",
     )
     assert len(res) > 0
 
-    s = food_ordering_answerer_without_elasticsearch.build_search(index="menu_items")
+    s = food_ordering_answerer_native.build_search(index="menu_items")
     res = s.query(
         query_type="text", description="maybe a roll with some salmon"
     ).execute()
@@ -537,57 +564,57 @@ def test_unstructured_search_without_elasticsearch(food_ordering_answerer_withou
     assert len(res) > 0
 
 
-def test_advanced_search_validation_without_elasticsearch(answerer_without_elasticsearch):
+def test_advanced_search_validation_native(answerer_native):
     """Tests validation in advanced search."""
 
     # index not exist
     with pytest.raises(ValueError):
-        s = answerer_without_elasticsearch.build_search(index="nosuchindex")
+        s = answerer_native.build_search(index="nosuchindex")
         s.query(fieldnotexist="test")
 
     # field not exist
     with pytest.raises(ValueError):
-        s = answerer_without_elasticsearch.build_search(index="store_name")
+        s = answerer_native.build_search(index="store_name")
         s.query(fieldnotexist="test")
 
     # invalid field type
     with pytest.raises(ValueError):
-        s = answerer_without_elasticsearch.build_search(index="store_name")
+        s = answerer_native.build_search(index="store_name")
         s.query(location="testlocation")
 
     # range filter can only be specified with number or date fields.
     with pytest.raises(ValueError):
-        s = answerer_without_elasticsearch.build_search(index="store_name")
+        s = answerer_native.build_search(index="store_name")
         s.filter(field="phone_number", gt=10)
 
     # sort field to be number or date type.
     with pytest.raises(ValueError):
-        s = answerer_without_elasticsearch.build_search(index="store_name")
+        s = answerer_native.build_search(index="store_name")
         s.sort(field="store_name", sort_type="asc")
 
     # missing origin
     with pytest.raises(ValueError):
-        s = answerer_without_elasticsearch.build_search(index="store_name")
+        s = answerer_native.build_search(index="store_name")
         s.sort(field="location", sort_type="distance")
 
 
 @pytest.mark.extras
 @pytest.mark.bert
 @pytest.mark.es7
-def test_embedder_search_bert_without_elasticsearch(food_ordering_with_bert_without_elasticsearch):
-    res = food_ordering_with_bert_without_elasticsearch.get(
+def test_embedder_search_bert_native(food_ordering_with_bert_native):
+    res = food_ordering_with_bert_native.get(
         index="menu_items_bert", query_type="embedder", name="pasta with tomato sauce"
     )
     assert len(res) > 0
 
-    res = food_ordering_with_bert_without_elasticsearch.get(
+    res = food_ordering_with_bert_native.get(
         index="menu_items_bert",
         query_type="embedder_keyword",
         name="pasta with tomato sauce",
     )
     assert len(res) > 0
 
-    res = food_ordering_with_bert_without_elasticsearch.get(
+    res = food_ordering_with_bert_native.get(
         index="menu_items_bert",
         query_type="embedder_text",
         name="pasta with tomato sauce",
@@ -598,22 +625,20 @@ def test_embedder_search_bert_without_elasticsearch(food_ordering_with_bert_with
 @pytest.mark.extras
 @pytest.mark.es7
 @pytest.mark.xfail(strict=False)
-def test_embedder_search_glove_without_elasticsearch(
-    food_ordering_with_glove_without_elasticsearch
-):
-    res = food_ordering_with_glove_without_elasticsearch.get(
+def test_embedder_search_glove_native(food_ordering_with_glove_native):
+    res = food_ordering_with_glove_native.get(
         index="menu_items_glove", query_type="embedder", name="pasta with tomato sauce"
     )
     assert len(res) > 0
 
-    res = food_ordering_with_glove_without_elasticsearch.get(
+    res = food_ordering_with_glove_native.get(
         index="menu_items_glove",
         query_type="embedder_keyword",
         name="pasta with tomato sauce",
     )
     assert len(res) > 0
 
-    res = food_ordering_with_glove_without_elasticsearch.get(
+    res = food_ordering_with_glove_native.get(
         index="menu_items_glove",
         query_type="embedder_text",
         name="pasta with tomato sauce",
@@ -621,25 +646,88 @@ def test_embedder_search_glove_without_elasticsearch(
     assert len(res) > 0
 
 
-def test_basic_search_without_elasticsearch(answerer_without_elasticsearch):
+def test_basic_search_native(answerer_native):
     """Test basic search."""
 
     # retrieve object using ID
-    res = answerer_without_elasticsearch.get(index="store_name", id="20")
+    res = answerer_native.get(index="store_name", id="20")
     assert len(res) > 0
 
     # simple text query
-    res = answerer_without_elasticsearch.get(index="store_name", store_name="peanut")
+    res = answerer_native.get(index="store_name", store_name="peanut")
     assert len(res) > 0
 
     # simple text query
-    res = answerer_without_elasticsearch.get(index="store_name", store_name="Springfield Heights")
+    res = answerer_native.get(index="store_name", store_name="Springfield Heights")
     assert len(res) > 0
 
     # multiple text queries
-    res = answerer_without_elasticsearch.get(index="store_name", store_name="peanut",
-                                             address="peanut st")
+    res = answerer_native.get(index="store_name", store_name="peanut",
+                              address="peanut st")
     assert len(res) > 0
 
     # check that score is included in response
     assert res[0].get('_score') is not None
+
+
+def test_sort_by_distance_native_unloaded(answerer_native_unloaded):
+    """Test sort by distance."""
+
+    # retrieve object using ID
+    res = answerer_native_unloaded.get(
+        index="store_name",
+        _sort="location",
+        _sort_type="distance",
+        _sort_location="44.24,-123.12",
+    )
+    assert len(res) > 0
+    assert res[0].get("id") == "19"
+
+
+def test_basic_search_native_unloaded(answerer_native_unloaded):
+    """Test basic search."""
+
+    # retrieve object using ID
+    res = answerer_native_unloaded.get(index="store_name", id="20")
+    assert len(res) > 0
+
+    # simple text query
+    res = answerer_native_unloaded.get(index="store_name", store_name="peanut")
+    assert len(res) > 0
+
+    # simple text query
+    res = answerer_native_unloaded.get(index="store_name",
+                                       store_name="Springfield Heights")
+    assert len(res) > 0
+
+    # multiple text queries
+    res = answerer_native_unloaded.get(index="store_name", store_name="peanut",
+                                       address="peanut st")
+    assert len(res) > 0
+
+    # check that score is included in response
+    assert res[0].get('_score') is not None
+
+
+@pytest.mark.extras
+@pytest.mark.bert
+@pytest.mark.es7
+def test_embedder_search_bert_native_unloaded(food_ordering_with_bert_native_unloaded):
+    res = food_ordering_with_bert_native_unloaded.get(
+        index="menu_items_bert", query_type="embedder", name="pasta with tomato sauce"
+    )
+    assert len(res) > 0
+
+    res = food_ordering_with_bert_native_unloaded.get(
+        index="menu_items_bert",
+        query_type="embedder_keyword",
+        name="pasta with tomato sauce",
+    )
+    assert len(res) > 0
+
+    res = food_ordering_with_bert_native_unloaded.get(
+        index="menu_items_bert",
+        query_type="embedder_text",
+        name="pasta with tomato sauce",
+    )
+    assert len(res) > 0

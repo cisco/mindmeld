@@ -159,34 +159,6 @@ class EntityResolverFactory:
             **kwargs)
 
 
-class EntityResolver:
-    """
-    Class for backwards compatability
-
-    deprecated usage
-        >>> entity_resolver = EntityResolver(
-                app_path, resource_loader, entity_type
-            )
-
-    new usage
-        >>> entity_resolver = EntityResolverFactory.create_resolver(
-                app_path, entity_type
-            )
-        # or ...
-        >>> entity_resolver = EntityResolverFactory.create_resolver(
-                app_path, entity_type, resource_loader=resource_loader
-            )
-    """
-
-    def __new__(cls, app_path, resource_loader, entity_type, **kwargs):
-        msg = "Entity Resolver should now be loaded using EntityResolverFactory. " \
-              "See https://www.mindmeld.com/docs/userguide/entity_resolver.html for more details."
-        warnings.warn(msg, DeprecationWarning)
-        return EntityResolverFactory.create_resolver(
-            app_path, entity_type, resource_loader=resource_loader, **kwargs
-        )
-
-
 class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
     """
     Base class for Entity Resolvers
@@ -198,8 +170,7 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
         Args:
             app_path (str): The application path.
             entity_type (str): The entity type associated with this entity resolver.
-            resource_loader (ResourceLoader, Optional): An object which can load resources for the
-                resolver.
+            resource_loader (ResourceLoader, Optional): A resource loader object for the resolver.
         """
         self.app_path = app_path
         self.type = entity_type
@@ -207,221 +178,25 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
             resource_loader or ResourceLoader.create_resource_loader(app_path=self.app_path)
         )
 
+        self._model_settings = {}
         self._is_system_entity = Entity.is_system_entity(self.type)
         self._no_trainable_canonical_entity_map = False
         self.dirty = False  # bool, True if exists any unsaved data/model that can be saved
         self.ready = False  # bool, True if the model is already fitted or loaded
         self.hash = None
 
-        # resources for creating and maintaining processed entity map
-        self._aug_lower_case = None
-        self._aug_title_case = None
-        self._aug_normalized = None
-        self._normalize_aliases = None
-        self.processed_entity_map = None
-
     def __repr__(self):
         msg = "<{} ready: {!r}, dirty: {!r}, app_path: {!r}, entity_type: {!r}>"
         return msg.format(self.__class__.__name__, self.ready, self.dirty, self.app_path, self.type)
 
-    def _get_entity_map(self, force_reload=False):
-        try:
-            return self._resource_loader.get_entity_map(self.type, force_reload=force_reload)
-        except Exception as e:
-            msg = f"Unable to load entity mapping data for " \
-                  f"entity type: {self.type} in app_path: {self.app_path}"
-            raise Exception(msg) from e
+    @property
+    def resolver_configurations(self):
+        return self._model_settings
 
-    @staticmethod
-    def _format_entity_map(entities_data):
-        """
-        Args:
-            entities_data (List[dict]): A list of dictionary objects each consisting of a 'cname'
-                (canonical name string), 'whitelist' (a list of zero or more synonyms) and 'id' (a
-                unique idenfier for the set of cname and whitelist)
-
-        Returns:
-            entities_data (List[dict]): A reformatted entities_data list
-
-        Raise:
-            valueError: if any object has missing cname as well as whitelist
-        """
-        all_ids = set()
-        for i, ent_object in enumerate(entities_data):
-            _id = ent_object.get("id")
-            cname = ent_object.get("cname")
-            whitelist = list(dict.fromkeys(ent_object.get("whitelist", [])))
-            if cname is None and len(whitelist) == 0:
-                msg = f"Found no canonical name field 'cname' while processing KB objects. " \
-                      f"The observed KB entity object is: {ent_object}"
-                raise ValueError(msg)
-            elif cname is None and len(whitelist):
-                cname = whitelist[0]
-                whitelist = whitelist[1:]
-            if _id in all_ids:
-                msg = f"Found a duplicate id {_id} while formatting data for entity resolution. "
-                _id = uuid.uuid4()
-                msg += f"Replacing it with a new id: {_id}"
-                logger.warning(msg)
-            if not _id:
-                _id = uuid.uuid4()
-                msg = f"Found an entry in entity_map without a corresponding id. " \
-                      f"Creating a random new id ({_id}) for this object."
-                logger.warning(msg)
-            _id = str(_id)
-            all_ids.update([_id])
-            entities_data[i] = {"id": _id, "cname": cname, "whitelist": whitelist}
-        return entities_data
-
-    def _trim_and_sort_results(self, results, top_n):
-        """
-        Trims down the results generated by any ER class, finally populating at max top_n documents
-
-        Args:
-            results (list[dict]): Each element in this list is a result dictions with keys such as
-                `id` (optional), `cname`, `score` and any others
-            top_n (int): Number of top documents required to be populated
-
-        Returns:
-            list[dict]: if trimmed, a list similar to `results` but with fewer elements,
-                        else, the `results` list as-is is returned
-        """
-
-        if not results:
-            return None
-
-        if not isinstance(top_n, int) or top_n <= 0:
-            msg = f"The value of 'top_n' set to '{top_n}' during predictions in " \
-                  f"{self.__class__.__name__}. This will result in an unsorted list of documents. "
-            logger.info(msg)
-            return results
-
-        # Obtain top scored result for each doc id (only if scores field exist in results)
-        best_results = {}
-        for result in results:
-            if "score" not in result:
-                return results
-            # use cname as id if no `id` field exist in results
-            _id = result["id"] if "id" in result else result["cname"]
-            if _id not in best_results or result["score"] > best_results[_id]["score"]:
-                best_results[_id] = result
-        results = [*best_results.values()]
-
-        # Obtain upto top_n docs and sort them as final result
-        n_scores = len(results)
-        if n_scores < top_n and top_n != DEFAULT_TOP_N:
-            # log only if a value other than default value is specified
-            msg = f"Retrieved only {len(results)} entity resolutions instead of asked " \
-                  f"number {top_n} for entity type {self.type}"
-            logger.info(msg)
-        elif n_scores > top_n:
-            # select the top_n by using argpartition as it is faster than sorting
-            _sim_scores = np.asarray([val["score"] for val in results])
-            _top_inds = _sim_scores.argpartition(n_scores - top_n)[-top_n:]
-            results = [results[ind] for ind in _top_inds]  # trimmed list of top_n docs
-
-        return sorted(results, key=lambda x: x["score"], reverse=True)
-
-    def _get_model_hash(self, entities_data):
-        """Returns a hash representing the inputs into the model
-
-        Args:
-            model_config (dict): The settings for the underlying model
-            entities_data (List[dict]): The entity objects in the KB used to fit this model
-
-        Returns:
-            str: The hash
-        """
-        config_string = json.dumps(self._resolver_configs, sort_keys=True)
-        strings = sorted([json.dumps(ent_obj, sort_keys=True) for ent_obj in entities_data])
-        return Hasher(algorithm="sha256").hash_list(strings=[*strings, config_string])
-
-    def _process_entities(self,
-                          entities,
-                          normalizer=None,
-                          augment_lower_case=False,
-                          augment_title_case=False,
-                          augment_normalized=False,
-                          normalize_aliases=False):
-        """
-        Loads in the mapping.json file and stores the synonym mappings in a item_map
-            and a synonym_map
-
-        Args:
-            entities (list[dict]): List of dictionaries with keys `id`, `cname` and `whitelist`
-            normalizer (callable): The normalizer to use, if provided, used to normalize synonyms
-            augment_lower_case (bool): If to extend the synonyms list with their lower-cased values
-            augment_title_case (bool): If to extend the synonyms list with their title-cased values
-            augment_normalized (bool): If to extend the synonyms list with their normalized values,
-                                        uses the provided normalizer
-        """
-
-        do_mutate_strings = any([augment_lower_case, augment_title_case, augment_normalized])
-        if do_mutate_strings:
-            msg = "Adding additional form of the whitelist and cnames to list of possible synonyms"
-            logger.info(msg)
-
-        item_map = {}
-        syn_map = {}
-        seen_ids = []
-        for item in entities:
-            item_id = item.get("id")
-            cname = item["cname"]
-            if cname in item_map:
-                msg = "Canonical name %s specified in %s entity map multiple times"
-                logger.debug(msg, cname, self.type)
-            if item_id and item_id in seen_ids:
-                msg = "Id %s specified in %s entity map multiple times"
-                raise ValueError(msg.format(item_id, self.type))
-            seen_ids.append(item_id)
-
-            aliases = [cname] + item.pop("whitelist", [])
-            if do_mutate_strings:
-                new_aliases = []
-                if augment_lower_case:
-                    new_aliases.extend([string.lower() for string in aliases])
-                if augment_title_case:
-                    new_aliases.extend([string.title() for string in aliases])
-                if augment_normalized and normalizer:
-                    new_aliases.extend([normalizer(string) for string in aliases])
-                aliases = set([*aliases, *new_aliases])
-            if normalize_aliases and normalizer:
-                aliases = [normalizer(alias) for alias in aliases]
-
-            items_for_cname = item_map.get(cname, [])
-            items_for_cname.append(item)
-            item_map[cname] = items_for_cname
-            for alias in aliases:
-                if alias in syn_map:
-                    msg = "Synonym %s specified in %s entity map multiple times"
-                    logger.debug(msg, cname, self.type)
-                cnames_for_syn = syn_map.get(alias, [])
-                cnames_for_syn.append(cname)
-                syn_map[alias] = list(set(cnames_for_syn))
-
-        return {"items": item_map, "synonyms": syn_map}
-
-    def get_processed_entity_map(self, entity_map):
-        """
-        Processes the entity map into a format suitable for indexing and similarity searching
-
-        Args:
-            entity_map (Dict[str, Union[str, List]]): Entity map if passed in directly instead of
-                loading from a file path
-
-        Returns:
-            processed_entity_map (Dict): A processed entity map better suited for indexing and
-                querying
-        """
-
-        return self._process_entities(
-            entity_map.get("entities", []),
-            normalizer=self._resource_loader.query_factory.normalize,
-            augment_lower_case=self._aug_lower_case,
-            augment_title_case=self._aug_title_case,
-            augment_normalized=self._aug_normalized,
-            normalize_aliases=self._normalize_aliases
-        )
+    @resolver_configurations.setter
+    @abstractmethod
+    def resolver_configurations(self, model_settings):
+        raise NotImplementedError
 
     def fit(self, clean=False, entity_map=None):
         """Fits the resolver model, if required
@@ -485,6 +260,145 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
         self.dirty = True
         return
 
+    @abstractmethod
+    def _fit(self, clean, entity_map):
+        """Fits the entity resolver model
+
+        Args:
+            clean (bool): If ``True``, deletes and recreates the index from scratch instead of
+                            updating the existing index with synonyms in the mapping.json.
+            entity_map (json): json data loaded from `mapping.json` file for the entity type
+        """
+        raise NotImplementedError
+
+    def _get_model_hash(self, entities_data):
+        """Returns a hash representing the inputs into the model
+
+        Args:
+            model_config (dict): The settings for the underlying model
+            entities_data (List[dict]): The entity objects in the KB used to fit this model
+
+        Returns:
+            str: The hash
+        """
+        config_string = json.dumps(self.resolver_configurations, sort_keys=True)
+        strings = sorted([json.dumps(ent_obj, sort_keys=True) for ent_obj in entities_data])
+        return Hasher(algorithm="sha256").hash_list(strings=[*strings, config_string])
+
+    def _get_entity_map(self, force_reload=False):
+        try:
+            return self._resource_loader.get_entity_map(self.type, force_reload=force_reload)
+        except Exception as e:
+            msg = f"Unable to load entity mapping data for " \
+                  f"entity type: {self.type} in app_path: {self.app_path}"
+            raise Exception(msg) from e
+
+    @staticmethod
+    def _format_entity_map(entities_data):
+        """
+        Args:
+            entities_data (List[dict]): A list of dictionary objects each consisting of a 'cname'
+                (canonical name string), 'whitelist' (a list of zero or more synonyms) and 'id' (a
+                unique idenfier for the set of cname and whitelist)
+
+        Returns:
+            entities_data (List[dict]): A reformatted entities_data list
+
+        Raise:
+            valueError: if any object has missing cname as well as whitelist
+        """
+        all_ids = set()
+        for i, ent_object in enumerate(entities_data):
+            _id = ent_object.get("id")
+            cname = ent_object.get("cname")
+            whitelist = list(dict.fromkeys(ent_object.get("whitelist", [])))
+            if cname is None and len(whitelist) == 0:
+                msg = f"Found no canonical name field 'cname' while processing KB objects. " \
+                      f"The observed KB entity object is: {ent_object}"
+                raise ValueError(msg)
+            elif cname is None and len(whitelist):
+                cname = whitelist[0]
+                whitelist = whitelist[1:]
+            if _id in all_ids:
+                msg = f"Found a duplicate id {_id} while formatting data for entity resolution. "
+                _id = uuid.uuid4()
+                msg += f"Replacing it with a new id: {_id}"
+                logger.warning(msg)
+            if not _id:
+                _id = uuid.uuid4()
+                msg = f"Found an entry in entity_map without a corresponding id. " \
+                      f"Creating a random new id ({_id}) for this object."
+                logger.warning(msg)
+            _id = str(_id)
+            all_ids.update([_id])
+            entities_data[i] = {"id": _id, "cname": cname, "whitelist": whitelist}
+        return entities_data
+
+    def _process_entities(self,
+                          entities,
+                          normalizer=None,
+                          augment_lower_case=False,
+                          augment_title_case=False,
+                          augment_normalized=False,
+                          normalize_aliases=False):
+        """
+        Loads in the mapping.json file and stores the synonym mappings in a item_map
+            and a synonym_map
+
+        Args:
+            entities (list[dict]): List of dictionaries with keys `id`, `cname` and `whitelist`
+            normalizer (callable): The normalizer to use, if provided, used to normalize synonyms
+            augment_lower_case (bool): If to extend the synonyms list with their lower-cased values
+            augment_title_case (bool): If to extend the synonyms list with their title-cased values
+            augment_normalized (bool): If to extend the synonyms list with their normalized values,
+                uses the provided normalizer
+        """
+
+        do_mutate_strings = any([augment_lower_case, augment_title_case, augment_normalized])
+        if do_mutate_strings:
+            msg = "Adding additional form of the whitelist and cnames to list of possible synonyms"
+            logger.info(msg)
+
+        item_map = {}
+        syn_map = {}
+        seen_ids = []
+        for item in entities:
+            item_id = item.get("id")
+            cname = item["cname"]
+            if cname in item_map:
+                msg = "Canonical name %s specified in %s entity map multiple times"
+                logger.debug(msg, cname, self.type)
+            if item_id and item_id in seen_ids:
+                msg = "Id %s specified in %s entity map multiple times"
+                raise ValueError(msg.format(item_id, self.type))
+            seen_ids.append(item_id)
+
+            aliases = [cname] + item.pop("whitelist", [])
+            if do_mutate_strings:
+                new_aliases = []
+                if augment_lower_case:
+                    new_aliases.extend([string.lower() for string in aliases])
+                if augment_title_case:
+                    new_aliases.extend([string.title() for string in aliases])
+                if augment_normalized and normalizer:
+                    new_aliases.extend([normalizer(string) for string in aliases])
+                aliases = set([*aliases, *new_aliases])
+            if normalize_aliases and normalizer:
+                aliases = [normalizer(alias) for alias in aliases]
+
+            items_for_cname = item_map.get(cname, [])
+            items_for_cname.append(item)
+            item_map[cname] = items_for_cname
+            for alias in aliases:
+                if alias in syn_map:
+                    msg = "Synonym %s specified in %s entity map multiple times"
+                    logger.debug(msg, cname, self.type)
+                cnames_for_syn = syn_map.get(alias, [])
+                cnames_for_syn.append(cname)
+                syn_map[alias] = list(set(cnames_for_syn))
+
+        return {"items": item_map, "synonyms": syn_map}
+
     def predict(self, entity_or_list_of_entities, top_n=DEFAULT_TOP_N, allowed_cnames=None):
         """Predicts the resolved value(s) for the given entity using the loaded entity map or the
         trained entity resolution model.
@@ -533,17 +447,6 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
         return self._trim_and_sort_results(results, top_n)
 
     @abstractmethod
-    def _fit(self, clean, entity_map):
-        """Fits the entity resolver model
-
-        Args:
-            clean (bool): If ``True``, deletes and recreates the index from scratch instead of
-                            updating the existing index with synonyms in the mapping.json.
-            entity_map (json): json data loaded from `mapping.json` file for the entity type
-        """
-        raise NotImplementedError
-
-    @abstractmethod
     def _predict(self, nbest_entities, allowed_cnames=None):
         """Predicts the resolved value(s) for the given entity using cosine similarity.
 
@@ -557,6 +460,55 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
             (list): The resolved values for the provided entity.
         """
         raise NotImplementedError
+
+    def _trim_and_sort_results(self, results, top_n):
+        """
+        Trims down the results generated by any ER class, finally populating at max top_n documents
+
+        Args:
+            results (list[dict]): Each element in this list is a result dictions with keys such as
+                `id` (optional), `cname`, `score` and any others
+            top_n (int): Number of top documents required to be populated
+
+        Returns:
+            list[dict]: if trimmed, a list similar to `results` but with fewer elements,
+                        else, the `results` list as-is is returned
+        """
+
+        if not results:
+            return None
+
+        if not isinstance(top_n, int) or top_n <= 0:
+            msg = f"The value of 'top_n' set to '{top_n}' during predictions in " \
+                  f"{self.__class__.__name__}. This will result in an unsorted list of documents. "
+            logger.info(msg)
+            return results
+
+        # Obtain top scored result for each doc id (only if scores field exist in results)
+        best_results = {}
+        for result in results:
+            if "score" not in result:
+                return results
+            # use cname as id if no `id` field exist in results
+            _id = result["id"] if "id" in result else result["cname"]
+            if _id not in best_results or result["score"] > best_results[_id]["score"]:
+                best_results[_id] = result
+        results = [*best_results.values()]
+
+        # Obtain upto top_n docs and sort them as final result
+        n_scores = len(results)
+        if n_scores < top_n and top_n != DEFAULT_TOP_N:
+            # log only if a value other than default value is specified
+            msg = f"Retrieved only {len(results)} entity resolutions instead of asked " \
+                  f"number {top_n} for entity type {self.type}"
+            logger.info(msg)
+        elif n_scores > top_n:
+            # select the top_n by using argpartition as it is faster than sorting
+            _sim_scores = np.asarray([val["score"] for val in results])
+            _top_inds = _sim_scores.argpartition(n_scores - top_n)[-top_n:]
+            results = [results[ind] for ind in _top_inds]  # trimmed list of top_n docs
+
+        return sorted(results, key=lambda x: x["score"], reverse=True)
 
     def dump(self, path, cache_kb=True):
         """
@@ -578,14 +530,23 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
                 upon loading (useful in cases like NativeQuestionAnswerer!)
         """
 
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+
         # dump underlying resolver model/algorithm/embeddings
         self._dump(path)
 
-        # save data hash; useful for avoiding re-fitting the resolver on unchanged data
+        # save data hash
+        # useful for avoiding re-fitting the resolver on unchanged data
         hash_path = path + ".hash"
-        os.makedirs(os.path.dirname(hash_path), exist_ok=True)
         with open(hash_path, "w") as hash_file:
             hash_file.write(self.hash)
+
+        # save resolver configs
+        head, ext = os.path.splitext(path)
+        resolver_config_path = head + ".config" + ext
+        with open(resolver_config_path, "wb") as fp:
+            pickle.dump(self.resolver_configurations, fp)
+            fp.close()
 
         # dump processed entity map that will be used to retrieve results during prediction
         if cache_kb:
@@ -598,7 +559,7 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
         self.dirty = False
 
     def _dump(self, path):
-        raise NotImplementedError
+        pass
 
     def load(self, path):
         """
@@ -617,6 +578,26 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
             with open(ent_map_path, "rb") as fp:
                 self.processed_entity_map = pickle.load(fp)
                 fp.close()
+        else:
+            msg = f"Cannot find a cached KB while loading the resolver:{self.__class__.__name__}." \
+                  f" This could have happened if you passed the argument 'cache_kb=False' during" \
+                  f" dumping of the resolver model."
+            logger.debug(msg)
+            self.processed_entity_map = None
+
+        # load resolver configs if it exists
+        head, ext = os.path.splitext(path)
+        resolver_config_path = head + ".config" + ext
+        if os.path.exists(resolver_config_path):
+            with open(resolver_config_path, "rb") as fp:
+                self.resolver_configurations = pickle.load(fp)
+                fp.close()
+        else:
+            msg = f"Cannot find a configs path for the resolver while loading the " \
+                  f"resolver:{self.__class__.__name__}. This could have happened if you missed " \
+                  f"to call the .dump() method of resolver before calling the .load() method."
+            logger.debug(msg)
+            self.resolver_configurations = {}
 
         # load underlying resolver model/algorithm/embeddings
         self._load(path)
@@ -625,12 +606,7 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
         self.dirty = False
 
     def _load(self, path):
-        raise NotImplementedError
-
-    @property
-    @abstractmethod
-    def _resolver_configs(self):
-        raise NotImplementedError
+        pass
 
 
 class ExactMatchEntityResolver(BaseEntityResolver):
@@ -639,22 +615,35 @@ class ExactMatchEntityResolver(BaseEntityResolver):
     """
 
     def __init__(self, app_path, entity_type, **kwargs):
+        """
+        Args:
+            app_path (str): The application path.
+            entity_type (str): The entity type associated with this entity resolver.
+            resource_loader (ResourceLoader, Optional): A resource loader object for the resolver.
+            config (dict): Configurations can be passed in through `model_settings` field
+                `model_settings` (dict): Following keys are configurable:
+                    augment_lower_case (bool): to augment lowercased synonyms as whitelist
+                    augment_title_case (bool): to augment titlecased synonyms as whitelist
+                    augment_normalized (bool): to augment text normalized synonyms as whitelist
+        """
         super().__init__(app_path, entity_type, **kwargs)
 
-        settings = kwargs.pop("config", {}).get("model_settings", {})
-        self._aug_lower_case = settings.get("augment_lower_case", False)
-        self._aug_title_case = settings.get("augment_title_case", False)
-        self._aug_normalized = settings.get("augment_normalized", False)
-        self._normalize_aliases = True
+        self.resolver_configurations = kwargs.get("config", {}).get("model_settings", {})
+        self.processed_entity_map = None
 
-    @property
-    def _resolver_configs(self):
-        return {
+    @BaseEntityResolver.resolver_configurations.setter
+    def resolver_configurations(self, model_settings):
+        self._model_settings = model_settings or {}
+        self._aug_lower_case = self._model_settings.get("augment_lower_case", False)
+        self._aug_title_case = self._model_settings.get("augment_title_case", False)
+        self._aug_normalized = self._model_settings.get("augment_normalized", False)
+        self._normalize_aliases = True
+        self._model_settings.update({
             "augment_lower_case": self._aug_lower_case,
             "augment_title_case": self._aug_title_case,
             "augment_normalized": self._aug_normalized,
             "normalize_aliases": self._normalize_aliases,
-        }
+        })
 
     def _fit(self, clean, entity_map):
 
@@ -697,23 +686,26 @@ class ExactMatchEntityResolver(BaseEntityResolver):
 
         return values
 
-    def _dump(self, path):
-        head, ext = os.path.splitext(path)
-        resolver_config_path = head + ".config" + ext
-        with open(resolver_config_path, "wb") as fp:
-            pickle.dump(self._resolver_configs, fp)
-            fp.close()
+    def get_processed_entity_map(self, entity_map):
+        """
+        Processes the entity map into a format suitable for indexing and similarity searching
 
-    def _load(self, path):
-        head, ext = os.path.splitext(path)
-        resolver_config_path = head + ".config" + ext
-        with open(resolver_config_path, "rb") as fp:
-            _resolver_configs = pickle.load(fp)
-            fp.close()
-        self._aug_lower_case = _resolver_configs["augment_lower_case"]
-        self._aug_title_case = _resolver_configs["augment_title_case"]
-        self._aug_normalized = _resolver_configs["augment_normalized"]
-        self._normalize_aliases = _resolver_configs["normalize_aliases"]
+        Args:
+            entity_map (Dict[str, Union[str, List]]): Entity map if passed in directly instead of
+                loading from a file path
+
+        Returns:
+            processed_entity_map (Dict): A processed entity map better suited for indexing and
+                querying
+        """
+        return self._process_entities(
+            entity_map.get("entities", []),
+            normalizer=self._resource_loader.query_factory.normalize,
+            augment_lower_case=self._aug_lower_case,
+            augment_title_case=self._aug_title_case,
+            augment_normalized=self._aug_normalized,
+            normalize_aliases=self._normalize_aliases
+        )
 
 
 class ElasticsearchEntityResolver(BaseEntityResolver):
@@ -726,15 +718,33 @@ class ElasticsearchEntityResolver(BaseEntityResolver):
     """The prefix of the ES index."""
 
     def __init__(self, app_path, entity_type, **kwargs):
+        """
+        Args:
+            app_path (str): The application path.
+            entity_type (str): The entity type associated with this entity resolver.
+            resource_loader (ResourceLoader, Optional): A resource loader object for the resolver.
+            es_host (str): The Elasticsearch host server
+            es_client (Elasticsearch): an elastic search client
+            config (dict): Configurations can be passed in through `model_settings` field
+                `model_settings` (dict): Following keys are configurable:
+                    phonetic_match_types (List): a list of phonetic match types that are passed to
+                        Elasticsearch. Currently supports only using "double_metaphone" string in
+                        the list.
+        """
         super().__init__(app_path, entity_type, **kwargs)
+
+        self.resolver_configurations = kwargs.get("config", {}).get("model_settings", {})
 
         self._es_host = kwargs.get("es_host")
         self._es_config = {"client": kwargs.get("es_client"), "pid": os.getpid()}
-        self._use_double_metaphone = "double_metaphone" in (
-            kwargs.pop("config", {}).get("model_settings", {}).get("phonetic_match_types", [])
-        )
-
         self._app_namespace = get_app_namespace(self.app_path)
+
+    @BaseEntityResolver.resolver_configurations.setter
+    def resolver_configurations(self, model_settings):
+        self._model_settings = model_settings or {}
+        self._use_double_metaphone = "double_metaphone" in (
+            self._model_settings.get("phonetic_match_types", [])
+        )
 
     @property
     def _es_index_name(self):
@@ -833,12 +843,6 @@ class ElasticsearchEntityResolver(BaseEntityResolver):
             es_host,
             es_client,
         )
-
-    @property
-    def _resolver_configs(self):
-        return {
-            "use_double_metaphone": self._use_double_metaphone,
-        }
 
     def _fit(self, clean, entity_map):
         """Loads an entity mapping file to Elasticsearch for text relevance based entity resolution.
@@ -1114,52 +1118,12 @@ class ElasticsearchEntityResolver(BaseEntityResolver):
 
             return results
 
-    def dump(self, path, **_kwargs):
-        """
-        Args:
-            path (str): A .pkl file path where the resolver will be dumped. The model hash will be
-                dumped at {path}.hash file path.
-        """
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        head, ext = os.path.splitext(path)
-        resolver_config_path = head + ".config" + ext
-        with open(resolver_config_path, "wb") as fp:
-            pickle.dump(self._resolver_configs, fp)
-            fp.close()
+    def dump(self, path, cache_kb=True):
+        super().dump(path, cache_kb=False)
 
-        hash_path = path + ".hash"
-        os.makedirs(os.path.dirname(hash_path), exist_ok=True)
-        with open(hash_path, "w") as hash_file:
-            hash_file.write(self.hash)
+    def _load(self, path):
+        del path
 
-        self.dirty = False
-
-    def load(self, path=None):
-        """
-        Args:
-            path (str): A .pkl file path where the resolver has been dumped, if dumped by
-                calling .dump()
-        """
-        # Before adding the dump+load functionality, other entity resolvers' `load` method simply
-        # was redirecting to the `fit` method whereas for ES resolver, it is doing something
-        # different- hence the load method is overwritten for the ES resolver
-
-        # backwards compatability:
-        # previous versions of the code might try to access the `load` method upon creating indices
-        # w/o dumping the config or w/o passing the `path` argument
-        try:
-            head, ext = os.path.splitext(path)
-            resolver_config_path = head + ".config" + ext
-            with open(resolver_config_path, "rb") as fp:
-                _resolver_configs = pickle.load(fp)
-                fp.close()
-            self._use_double_metaphone = _resolver_configs["use_double_metaphone"]
-        except (TypeError, FileNotFoundError):
-            msg = f"Unable to load previously used configs for the {self.__class__.__name__} " \
-                  f"resolver while loading."
-            logger.warning(msg)
-
-        # elasticsearch loading
         try:
             scoped_index_name = get_scoped_index_name(
                 self._app_namespace, self._es_index_name
@@ -1183,42 +1147,55 @@ class ElasticsearchEntityResolver(BaseEntityResolver):
         except _getattr("elasticsearch", "ElasticsearchException") as e:
             raise EntityResolverError from e
 
-        self.ready = True
-        self.dirty = False
-
 
 class TfIdfSparseCosSimEntityResolver(BaseEntityResolver):
+    # pylint: disable=too-many-instance-attributes
     """
     a tf-idf based entity resolver using sparse matrices. ref:
     scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html
     """
 
     def __init__(self, app_path, entity_type, **kwargs):
+        """
+        Args:
+            app_path (str): The application path.
+            entity_type (str): The entity type associated with this entity resolver.
+            resource_loader (ResourceLoader, Optional): A resource loader object for the resolver.
+            config (dict): Configurations can be passed in through `model_settings` field
+                `model_settings`:
+                    augment_lower_case: to augment lowercased synonyms as whitelist
+                    augment_title_case: to augment titlecased synonyms as whitelist
+                    augment_normalized: to augment text normalized synonyms as whitelist
+                    augment_max_synonyms_embeddings: to augment pooled synonyms whose embedding
+                        is max-pool of all whitelist's (including above alterations) encodings
+        """
         super().__init__(app_path, entity_type, **kwargs)
 
-        settings = kwargs.pop("config", {}).get("model_settings", {})
-        self._aug_lower_case = settings.get("augment_lower_case", True)
-        self._aug_title_case = settings.get("augment_title_case", False)
-        self._aug_normalized = settings.get("augment_normalized", False)
-        self._aug_max_syn_embs = settings.get("augment_max_synonyms_embeddings", True)
-        self._normalize_aliases = False
+        self.resolver_configurations = kwargs.get("config", {}).get("model_settings", {})
+        self.processed_entity_map = None
 
-        self.ngram_length = 5  # max number of character ngrams to consider; 3 for elasticsearch
         self._analyzer = kwargs.get("analyzer") or self._char_ngrams_plus_words_analyzer
         self._vectorizer = None
         self._syn_tfidf_matrix = None
         self._unique_synonyms = []
 
-    @property
-    def _resolver_configs(self):
-        return {
+    @BaseEntityResolver.resolver_configurations.setter
+    def resolver_configurations(self, model_settings):
+        self._model_settings = model_settings or {}
+        self._aug_lower_case = self._model_settings.get("augment_lower_case", True)
+        self._aug_title_case = self._model_settings.get("augment_title_case", False)
+        self._aug_normalized = self._model_settings.get("augment_normalized", False)
+        self._aug_max_syn_embs = self._model_settings.get("augment_max_synonyms_embeddings", True)
+        self._normalize_aliases = False
+        self.ngram_length = 5  # max number of character ngrams to consider; 3 for elasticsearch
+        self._model_settings.update({
             "augment_lower_case": self._aug_lower_case,
             "augment_title_case": self._aug_title_case,
             "augment_normalized": self._aug_normalized,
-            "normalize_aliases": self._normalize_aliases,
             "augment_max_synonyms_embeddings": self._aug_max_syn_embs,
+            "normalize_aliases": self._normalize_aliases,
             "ngram_length": self.ngram_length,
-        }
+        })
 
     def _fit(self, clean, entity_map):
 
@@ -1305,7 +1282,7 @@ class TfIdfSparseCosSimEntityResolver(BaseEntityResolver):
         except KeyError:
             logger.warning(
                 "Failed to resolve entity %r for type %r; "
-                "set 'clean=True' for computing embeddings of newly added items in mappings.json",
+                "set 'clean=True' for computing TFIDF scores of newly added items in mappings.json",
                 top_entity.text, top_entity.type
             )
             return None
@@ -1318,8 +1295,6 @@ class TfIdfSparseCosSimEntityResolver(BaseEntityResolver):
         return values
 
     def _dump(self, path):
-
-        os.makedirs(os.path.dirname(path), exist_ok=True)
         resolver_state = {
             "unique_synonyms": self._unique_synonyms,  # caching unique syns for finding similarity
             "syn_tfidf_matrix": self._syn_tfidf_matrix,  # caching sparse vectors of synonyms
@@ -1329,25 +1304,7 @@ class TfIdfSparseCosSimEntityResolver(BaseEntityResolver):
             pickle.dump(resolver_state, fp)
             fp.close()
 
-        head, ext = os.path.splitext(path)
-        resolver_config_path = head + ".config" + ext
-        with open(resolver_config_path, "wb") as fp:
-            pickle.dump(self._resolver_configs, fp)
-            fp.close()
-
     def _load(self, path):
-        head, ext = os.path.splitext(path)
-        resolver_config_path = head + ".config" + ext
-        with open(resolver_config_path, "rb") as fp:
-            _resolver_configs = pickle.load(fp)
-            fp.close()
-        self._aug_lower_case = _resolver_configs["augment_lower_case"]
-        self._aug_title_case = _resolver_configs["augment_title_case"]
-        self._aug_normalized = _resolver_configs["augment_normalized"]
-        self._normalize_aliases = _resolver_configs["normalize_aliases"]
-        self._aug_max_syn_embs = _resolver_configs["augment_max_synonyms_embeddings"]
-        self.ngram_length = _resolver_configs["ngram_length"]
-
         with open(path, "rb") as fp:
             resolver_state = pickle.load(fp)
             fp.close()
@@ -1469,6 +1426,28 @@ class TfIdfSparseCosSimEntityResolver(BaseEntityResolver):
 
         return results
 
+    def get_processed_entity_map(self, entity_map):
+        """
+        Processes the entity map into a format suitable for indexing and similarity searching
+
+        Args:
+            entity_map (Dict[str, Union[str, List]]): Entity map if passed in directly instead of
+                loading from a file path
+
+        Returns:
+            processed_entity_map (Dict): A processed entity map better suited for indexing and
+                querying
+        """
+
+        return self._process_entities(
+            entity_map.get("entities", []),
+            normalizer=self._resource_loader.query_factory.normalize,
+            augment_lower_case=self._aug_lower_case,
+            augment_title_case=self._aug_title_case,
+            augment_normalized=self._aug_normalized,
+            normalize_aliases=self._normalize_aliases
+        )
+
 
 class EmbedderCosSimEntityResolver(BaseEntityResolver):
     """
@@ -1478,8 +1457,10 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
     def __init__(self, app_path, entity_type, **kwargs):
         """
         Args:
-            app_path (str): App's path to cache embeddings
-            er_config (dict): Configurations can be passed in through `model_settings` field
+            app_path (str): The application path.
+            entity_type (str): The entity type associated with this entity resolver.
+            resource_loader (ResourceLoader, Optional): A resource loader object for the resolver.
+            config (dict): Configurations can be passed in through `model_settings` field
                 `model_settings`:
                     embedder_type: the type of embedder picked from embedder_models.py class
                         (eg. 'bert', 'glove', etc. )
@@ -1487,42 +1468,33 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
                     augment_title_case: to augment titlecased synonyms as whitelist
                     augment_normalized: to augment text normalized synonyms as whitelist
                     augment_average_synonyms_embeddings: to augment pooled synonyms whose embedding
-                        is average of all whitelist's (including above alterations) encodings.
-                    scores_normalizer: a normalizer that normalizes computed similarity scores
-                        allowed choices are "min_max_scaler", "standard_scaler"
-                    batch_size: can be set based on machine capabilities and RAM
+                        is average of all whitelist's (including above alterations) encodings
+                    embedder_cache_path (str): A path where the embedder cache can be stored. If it
+                        is not specified, an embedder will be instantiated using the app_path
+                        information. If specified, it will be used to dump the embeddings cache.
         """
         super().__init__(app_path, entity_type, **kwargs)
 
-        er_config = kwargs.pop("config", {})
-        settings = er_config.get("model_settings", {})
-        self._aug_lower_case = settings.get("augment_lower_case", False)
-        self._aug_title_case = settings.get("augment_title_case", False)
-        self._aug_normalized = settings.get("augment_normalized", False)
-        self._aug_avg_syn_embs = settings.get("augment_average_synonyms_embeddings", True)
+        self.resolver_configurations = kwargs.get("config", {}).get("model_settings", {})
+        self.processed_entity_map = None
+        self._embedder_model = None
+
+    @BaseEntityResolver.resolver_configurations.setter
+    def resolver_configurations(self, model_settings):
+        self._model_settings = model_settings or {}
+        self._aug_lower_case = self._model_settings.get("augment_lower_case", False)
+        self._aug_title_case = self._model_settings.get("augment_title_case", False)
+        self._aug_normalized = self._model_settings.get("augment_normalized", False)
+        self._aug_avg_syn_embs = self._model_settings.get(
+            "augment_average_synonyms_embeddings", True)
         self._normalize_aliases = False
-
-        self._embedder_cache_path = kwargs.get("embedder_cache_path")
-
-        # No `app_path` specified because we now have dump and load methods that take a caching path
-        # as argument. Previously, we just dumped and loaded from a default cache_path ascertained
-        # by that embedder model itself (through model_id and app_poth) i.e. one path for all usages
-        # of that particular embedder model. However, with the introduction of dump and load method
-        # to resolvers, one-path-for-all is no longer an optimal solution and is deprecated.
-        # Note that we do not specify any `cache_path` key field as well in the er_config here!
-        self._embedder_model = create_embedder_model(app_path=None, config=er_config)
-
-    @property
-    def _resolver_configs(self):
-        return {
-            "embedder_model_id": self._embedder_model.model_id,
+        self._model_settings.update({
             "augment_lower_case": self._aug_lower_case,
             "augment_title_case": self._aug_title_case,
             "augment_normalized": self._aug_normalized,
             "normalize_aliases": self._normalize_aliases,
             "augment_max_synonyms_embeddings": self._aug_avg_syn_embs,
-            "embedder_cache_path": self._embedder_cache_path,
-        }
+        })
 
     def _fit(self, clean, entity_map):
 
@@ -1530,6 +1502,12 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
             msg = f"clean=True ignored while fitting {self.__class__.__name__}"
             logger.info(msg)
 
+        # Initialize an embedder model
+        self._embedder_model = create_embedder_model(
+            app_path=self.app_path, config=self.resolver_configurations
+        )
+
+        # obtain synonyms data
         self.processed_entity_map = self.get_processed_entity_map(entity_map)
 
         # load embeddings from cache if exists, encode any other synonyms if required
@@ -1558,16 +1536,13 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
                 pooled_encoding = np.mean(self._embedder_model.get_encodings(syns), axis=0)
                 self._embedder_model.add_to_cache({pooled_cname: pooled_encoding})
 
-        # Dump the embedder cache if a valid embedder_cache_path is passed-in. Because we didn't
-        # provide an `app_path` during embedder model initialization previously, the embedder
-        # doesn't have a default cache path and relies on the path provided to dump_cache() method
-        # as below. Note that this cache will be cleared in case the .dump() method is called upon
-        # fitting. Nevertheless, we still dump it because resolvers can be used in both NLP pipeline
-        # (w/o invoking the dump functionality but specifying an embedder_cache_path) as well as
-        # in places like native Question Answerer pipeline (w/ invoking the dump functionality
-        # explicitly).
-        if self._embedder_cache_path:
-            self._embedder_model.dump_cache(cache_path=self._embedder_cache_path)
+        # backwards compatability
+        #  even if the .dump() method of resolver isn't called explicitly, the embeddings need to be
+        #  cached for fast inference of resolver
+        self._embedder_model.dump_cache()
+
+        # useful for validation while loading
+        self._model_settings["embedder_model_id"] = self._embedder_model.model_id
 
     def _predict(self, nbest_entities, allowed_cnames=None):
         """Predicts the resolved value(s) for the given entity using cosine similarity.
@@ -1598,59 +1573,38 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
                         item_value.update({"top_synonym": synonym})
                         values.append(item_value)
         except KeyError:
-            logger.warning(
-                "Failed to resolve entity %r for type %r; "
-                "set 'clean=True' for computing embeddings of newly added items in mappings.json",
-                top_entity.text, top_entity.type
-            )
+            msg = f"Failed to resolve entity {top_entity.text} for type {top_entity.type}; set " \
+                  f"'clean=True' for computing embeddings of newly added items in mappings.json"
+            logger.warning(msg)
             return None
         except TypeError:
-            logger.warning(
-                "Failed to resolve entity %r for type %r", top_entity.text, top_entity.type
-            )
+            msg = f"Failed to resolve entity {top_entity.text} for type {top_entity.type}"
+            logger.warning(msg)
             return None
 
         return values
 
     def _dump(self, path):
-
-        # dump embeddings cache
-        if self._embedder_cache_path:
-            # delete the temporary cache as the dump method is explicitly called
-            self._embedder_model.clear_cache(cache_path=self._embedder_cache_path)
+        self._embedder_model.clear_cache()  # delete the temp cache as .dump() method is now called
         head, ext = os.path.splitext(path)
         embedder_cache_path = head + ".embedder_cache" + ext
         self._embedder_model.dump_cache(cache_path=embedder_cache_path)
-        self._embedder_cache_path = embedder_cache_path
-
-        head, ext = os.path.splitext(path)
-        resolver_config_path = head + ".config" + ext
-        with open(resolver_config_path, "wb") as fp:
-            pickle.dump(self._resolver_configs, fp)
-            fp.close()
+        self._model_settings["embedder_cache_path"] = embedder_cache_path
 
     def _load(self, path):
-        head, ext = os.path.splitext(path)
-        resolver_config_path = head + ".config" + ext
-        with open(resolver_config_path, "rb") as fp:
-            _resolver_configs = pickle.load(fp)
-            fp.close()
-        embedder_model_id = _resolver_configs["embedder_model_id"]
-        if embedder_model_id != self._embedder_model.model_id:
+        self._embedder_model = create_embedder_model(
+            app_path=self.app_path, config=self.resolver_configurations
+        )
+        if self.resolver_configurations["embedder_model_id"] != self._embedder_model.model_id:
             msg = f"Unable to resolve the embedder model configurations. Found mismatched " \
                   f"configuartions between configs in the loaded pickle file and the configs " \
                   f"specified while instantiating {self.__class__.__name__}. Delete the related " \
                   f"model files and re-fit the resolver. Note that embedder models are not " \
                   f"pickled due to their large disk sizes and are only loaded from input configs."
             raise ValueError(msg)
-        self._aug_lower_case = _resolver_configs["augment_lower_case"]
-        self._aug_title_case = _resolver_configs["augment_title_case"]
-        self._aug_normalized = _resolver_configs["augment_normalized"]
-        self._normalize_aliases = _resolver_configs["normalize_aliases"]
-        self._aug_avg_syn_embs = _resolver_configs["augment_max_synonyms_embeddings"]
-        self._embedder_cache_path = _resolver_configs["embedder_cache_path"]
-
-        self._embedder_model.load_cache(cache_path=self._embedder_cache_path)
+        self._embedder_model.load_cache(
+            cache_path=self.resolver_configurations["embedder_cache_path"]
+        )
 
     def _predict_batch(self, nbest_entities_list, batch_size):
 
@@ -1715,6 +1669,28 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
 
         return [self._trim_and_sort_results(results, top_n) for results in results_list]
 
+    def get_processed_entity_map(self, entity_map):
+        """
+        Processes the entity map into a format suitable for indexing and similarity searching
+
+        Args:
+            entity_map (Dict[str, Union[str, List]]): Entity map if passed in directly instead of
+                loading from a file path
+
+        Returns:
+            processed_entity_map (Dict): A processed entity map better suited for indexing and
+                querying
+        """
+
+        return self._process_entities(
+            entity_map.get("entities", []),
+            normalizer=self._resource_loader.query_factory.normalize,
+            augment_lower_case=self._aug_lower_case,
+            augment_title_case=self._aug_title_case,
+            augment_normalized=self._aug_normalized,
+            normalize_aliases=self._normalize_aliases
+        )
+
 
 class SentenceBertCosSimEntityResolver(EmbedderCosSimEntityResolver):
     """
@@ -1766,7 +1742,36 @@ class SentenceBertCosSimEntityResolver(EmbedderCosSimEntityResolver):
                 },
             }
         })
+
         super().__init__(app_path, entity_type, **kwargs)
+
+
+class EntityResolver:
+    """
+    Class for backwards compatability
+
+    deprecated usage
+        >>> entity_resolver = EntityResolver(
+                app_path, resource_loader, entity_type
+            )
+
+    new usage
+        >>> entity_resolver = EntityResolverFactory.create_resolver(
+                app_path, entity_type
+            )
+        # or ...
+        >>> entity_resolver = EntityResolverFactory.create_resolver(
+                app_path, entity_type, resource_loader=resource_loader
+            )
+    """
+
+    def __new__(cls, app_path, resource_loader, entity_type, **kwargs):
+        msg = "Entity Resolver should now be loaded using EntityResolverFactory. " \
+              "See https://www.mindmeld.com/docs/userguide/entity_resolver.html for more details."
+        warnings.warn(msg, DeprecationWarning)
+        return EntityResolverFactory.create_resolver(
+            app_path, entity_type, resource_loader=resource_loader, **kwargs
+        )
 
 
 ENTITY_RESOLVER_MODEL_MAPPINGS = {

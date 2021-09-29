@@ -140,7 +140,6 @@ class QuestionAnswererFactory:
                     }
                 }
         """
-
         if not config.get("model_settings", {}).get("query_type"):
             model_type = config.get("model_type")
             if not model_type:
@@ -158,7 +157,6 @@ class QuestionAnswererFactory:
                 model_settings.update({"query_type": model_type})
                 config["model_settings"] = model_settings
                 config["model_type"] = "elasticsearch"
-
         return config
 
     @staticmethod
@@ -659,7 +657,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                 id2value,
                 has_text_resolver=("text" in query_type or "keyword" in query_type),
                 has_embedding_resolver=match_regex(key, embedding_fields),
-                resolver_settings=model_settings,
+                resolver_model_settings=model_settings,
                 clean=clean,
                 processor_type="text" if "text" in query_type else "keyword",
                 resource_loader=_resource_loader
@@ -858,7 +856,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                         id2value={},
                         has_text_resolver=field_resource.has_text_resolver,
                         has_embedding_resolver=field_resource.has_embedding_resolver,
-                        resolver_settings={},
+                        resolver_model_settings={},
                         processor_type=field_resource.processor_type,
                         resource_loader=_resource_loader
                     )
@@ -1224,7 +1222,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                    f"has_embedding_resolver: {self.has_embedding_resolver}"
 
         def update_resource(
-            self, id2value, has_text_resolver, has_embedding_resolver, resolver_settings,
+            self, id2value, has_text_resolver, has_embedding_resolver, resolver_model_settings,
             clean=False, app_path=DEFAULT_APP_PATH, processor_type="keyword", resource_loader=None
         ):
             """
@@ -1240,8 +1238,9 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                 id2value (dict): a mapping between documnet ids & values of the chosen KB field
                 has_text_resolver (bool): If a tfidf resolver is to be created
                 has_embedding_resolver (bool): If a embedder resolver is to be created
-                resolver_settings (dict): a ER- or QA- config with 'model_settings' keyword;
-                    same setting used in both kinds of resolvers
+                resolver_model_settings (dict): A dictionary cocnsisting of model settings for the
+                    resolver models. Currently, the same setting is passed to all kinds of resolver
+                    models.
                 clean (bool, optional): if True, resolvers are fit with clean=True
                 app_path (str, optional): a path to create cache for embedder resolver
                 processor_type (str, optional, "text" or "keyword"): processor for tfidf resolver
@@ -1316,7 +1315,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                         app_path=app_path,
                         entity_type=get_scoped_index_name(self.index_name, self.field_name),
                         config={"model_settings": {
-                            **resolver_settings,
+                            **resolver_model_settings,
                             "augment_max_synonyms_embeddings": False}
                         },
                         resource_loader=resource_loader,
@@ -1328,51 +1327,37 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                     entity_map = self._get_resolvers_entity_map(processed_id2value)
                     self._text_resolver.fit(entity_map=entity_map, clean=clean)
                     # dump
-                    resolver_cache_path = get_question_answerer_index_cache_file_path(
-                        app_path, get_scoped_index_name(
-                            get_scoped_index_name(self.index_name, self.field_name),
-                            "text_resolver"
-                        ))
                     # ex: ~/.cache/mindmeld/question_answerers/
                     #           {food_ordering}${restaurants}${field_name}
                     #               .pkl
                     #               .pkl.hash
                     #               .config.pkl
-                    self._text_resolver.dump(path=resolver_cache_path, cache_kb=False)
-                    # kb data is not cached here to eliminate duplicate data dump, dumped to the
+                    resolver_cache_path = get_question_answerer_index_cache_file_path(
+                        app_path, get_scoped_index_name(
+                            get_scoped_index_name(self.index_name, self.field_name),
+                            "text_resolver"
+                        ))
+                    self._text_resolver.dump(path=resolver_cache_path,
+                                             cache_kb=False)  # kb data is
+                    # not cached here to eliminate duplicate data dump, dumped to the
                     # disk both by NativeQA as well as by each of the entity resolver.
-                    # dump configs
-                    head, ext = os.path.splitext(resolver_cache_path)
-                    resolver_settings_path = head + ".settings" + ext
-                    with open(resolver_settings_path, "wb") as fp:
-                        pickle.dump(resolver_settings if resolver_settings else {}, fp)
-                        fp.close()
                 elif not self._text_resolver:
                     msg = f"Loading a text resolver for field '{self.field_name}' in " \
                           f"index '{self.index_name}'."
                     logger.info(msg)
                     try:
-                        # load configs
+                        # create a new instance of resolver and load it
+                        self._text_resolver = TfIdfSparseCosSimEntityResolver(
+                            app_path=app_path,
+                            entity_type=get_scoped_index_name(self.index_name, self.field_name),
+                            config={},  # resolver loads its own configs previously dumped
+                            resource_loader=resource_loader,
+                        )
                         resolver_cache_path = get_question_answerer_index_cache_file_path(
                             app_path, get_scoped_index_name(
                                 get_scoped_index_name(self.index_name, self.field_name),
                                 "text_resolver"
                             ))
-                        head, ext = os.path.splitext(resolver_cache_path)
-                        resolver_settings_path = head + ".settings" + ext
-                        with open(resolver_settings_path, "rb") as fp:
-                            _resolver_settings = pickle.load(fp)
-                            fp.close()
-                        # create a new instance of resolver and load it
-                        self._text_resolver = TfIdfSparseCosSimEntityResolver(
-                            app_path=app_path,
-                            entity_type=get_scoped_index_name(self.index_name, self.field_name),
-                            config={"model_settings": {
-                                **_resolver_settings,
-                                "augment_max_synonyms_embeddings": False}
-                            },
-                            resource_loader=resource_loader,
-                        )
                         self._text_resolver.load(path=resolver_cache_path)
                         # get id2value & process it, get entity map & process it, assign to resolver
                         processed_id2value = dict(zip(
@@ -1401,60 +1386,45 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                     self._embedding_resolver = EmbedderCosSimEntityResolver(
                         app_path=app_path,
                         entity_type=get_scoped_index_name(self.index_name, self.field_name),
-                        config={"model_settings": {**resolver_settings}},
+                        config={"model_settings": {**resolver_model_settings}},
                         resource_loader=resource_loader
                     )
                     entity_map = self._get_resolvers_entity_map(
                         self.id2value)  # use same data as text resolver but without any processing!
                     self._embedding_resolver.fit(
                         entity_map=entity_map,
-                        clean=clean)  # since we do not pass-in `embedder_cache_path` argument
-                    # during initialization, the fit() method does not dump the embeddings cache in
-                    # any temporary path and dumps it when the dump() method is called explicitly
-                    # dump
+                        clean=clean)
                     resolver_cache_path = get_question_answerer_index_cache_file_path(
                         app_path, get_scoped_index_name(
                             get_scoped_index_name(self.index_name, self.field_name),
                             "embedder_resolver"
                         ))
+                    # dump
                     # ex: ~/.cache/mindmeld/question_answerers/
                     #           {food_ordering}${restaurants}${field_name}
                     #               .pkl.hash
                     #               .config.pkl
                     #               .embedder_cache.pkl
-                    self._embedding_resolver.dump(path=resolver_cache_path, cache_kb=False)
-                    # kb data is not cached here to eliminate duplicate data dump, dumped to the
+                    self._embedding_resolver.dump(path=resolver_cache_path, cache_kb=False)  # kb
+                    # data is not cached here to eliminate duplicate data dump, dumped to the
                     # disk both by NativeQA as well as by each of the entity resolver.
-                    # dump configs
-                    # dump configs
-                    head, ext = os.path.splitext(resolver_cache_path)
-                    resolver_settings_path = head + ".settings" + ext
-                    with open(resolver_settings_path, "wb") as fp:
-                        pickle.dump(resolver_settings if resolver_settings else {}, fp)
-                        fp.close()
                 elif not self._embedding_resolver:
                     msg = f"Loading an embedder resolver for field '{self.field_name}' in " \
                           f"index '{self.index_name}'."
                     logger.info(msg)
                     try:
-                        # load configs
+                        # create a new instance of resolver and load it
+                        self._embedding_resolver = EmbedderCosSimEntityResolver(
+                            app_path=app_path,
+                            entity_type=get_scoped_index_name(self.index_name, self.field_name),
+                            config={},  # resolver loads its own configs previously dumped
+                            resource_loader=resource_loader,
+                        )
                         resolver_cache_path = get_question_answerer_index_cache_file_path(
                             app_path, get_scoped_index_name(
                                 get_scoped_index_name(self.index_name, self.field_name),
                                 "embedder_resolver"
                             ))
-                        head, ext = os.path.splitext(resolver_cache_path)
-                        resolver_settings_path = head + ".settings" + ext
-                        with open(resolver_settings_path, "rb") as fp:
-                            _resolver_settings = pickle.load(fp)
-                            fp.close()
-                        # create a new instance of resolver and load it
-                        self._embedding_resolver = EmbedderCosSimEntityResolver(
-                            app_path=app_path,
-                            entity_type=get_scoped_index_name(self.index_name, self.field_name),
-                            config={"model_settings": {**_resolver_settings}},
-                            resource_loader=resource_loader,
-                        )
                         self._embedding_resolver.load(path=resolver_cache_path)
                         # get id2value, get entity map & process it, assign to resolver
                         entity_map = self._get_resolvers_entity_map(
@@ -1998,6 +1968,12 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
 
             return curated_docs
 
+    @classmethod
+    def _unload_all_indices(cls):
+        NativeQuestionAnswerer.ALL_INDICES = NativeQuestionAnswerer.Indices(
+            app_path=DEFAULT_APP_PATH
+        )
+
     ALL_INDICES = Indices(app_path=DEFAULT_APP_PATH)
 
 
@@ -2026,9 +2002,10 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         # bug-fix: previously, '_embedder_model' is created only when 'model_type' is 'embedder'
         self._embedder_model = None
         if "embedder" in self.query_type:
-            _app_path = self.app_path or DEFAULT_APP_PATH
             # An app path is necessary for creating a cache path for dumping embeddings cache
-            self._embedder_model = create_embedder_model(_app_path, self.model_settings)
+            self._embedder_model = create_embedder_model(
+                app_path=self.app_path or DEFAULT_APP_PATH, config=self.model_settings
+            )
 
     @property
     def _es_client(self):
