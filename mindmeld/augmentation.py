@@ -478,7 +478,7 @@ class MultiLingualParaphraser(Augmentor):
     (currently supports: French, Italian, Portuguese, Romanian and Spanish).
     """
 
-    def __init__(self, batch_size, language, paths, path_suffix, resource_loader):
+    def __init__(self, batch_size, language, retain_entities, paths, path_suffix, resource_loader):
         """Initializes a multi-lingual paraphraser.
 
         Args:
@@ -498,6 +498,7 @@ class MultiLingualParaphraser(Augmentor):
         self.torch_device = (
             "cuda" if _get_module_or_attr("torch.cuda", "is_available")() else "cpu"
         )
+        self.retain_entities = retain_entities
 
         MarianTokenizer = _get_module_or_attr("transformers", "MarianTokenizer")
         MarianMTModel = _get_module_or_attr("transformers", "MarianMTModel")
