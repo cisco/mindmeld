@@ -112,7 +112,7 @@ def english_paraphraser_retain_entities(kwik_e_mart_app_path):
         ),
     ],
 )
-def test_num_paraphrases(english_paraphraser_retain_entities, query, entity_types):
+def test_paraphrases_with_entities(english_paraphraser_retain_entities, query, entity_types):
     paraphrases = english_paraphraser_retain_entities.augment_queries([query])
     for p in paraphrases:
         for entity in entity_types:
