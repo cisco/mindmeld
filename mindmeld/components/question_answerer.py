@@ -1281,7 +1281,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                 # discard input arguments as resolvers are not applicable to these data types
                 if has_text_resolver or has_embedding_resolver:
                     msg = f"Unable to create any resolver for the field {self.field_name} due to " \
-                          f"its marked data type {self.data_type}. "
+                          f"its marked data type '{self.data_type}'. "
                     logger.info(msg)
                 self.has_text_resolver = False
                 self.has_embedding_resolver = False
@@ -1290,9 +1290,11 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                 self.has_text_resolver = has_text_resolver
                 self.has_embedding_resolver = has_embedding_resolver
                 if not self.has_text_resolver and not self.has_embedding_resolver:
-                    msg = f"Atleast one of text or embedder resolver needs to be applied " \
-                          f"for string(s) type data field ({self.field_name}). "
-                    logger.error(msg)
+                    msg = f"Atleast one of text or embedder resolver can be applied " \
+                          f"for string type data field ({self.field_name}) but continuing " \
+                          f"without fitting any resolvers due to your input configurations. " \
+                          f"This might limit your search space during inference!"
+                    logger.warning(msg)
                     return
                 new_hash = Hasher(algorithm="sha256").hash(
                     string=json.dumps(self.id2value, sort_keys=True)
@@ -1310,6 +1312,12 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                               f"'keyword'] but found to be of value '{processor_type}'"
                         raise ValueError(msg)
                     self.processor_type = processor_type
+                    # obtain a cache path
+                    resolver_cache_path = get_question_answerer_index_cache_file_path(
+                        app_path, get_scoped_index_name(
+                            get_scoped_index_name(self.index_name, self.field_name),
+                            "text_resolver"
+                        ))
                     # create a new resolver and fit
                     self._text_resolver = TfIdfSparseCosSimEntityResolver(
                         app_path=app_path,
@@ -1320,11 +1328,15 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                         },
                         resource_loader=resource_loader,
                     )
-                    processed_id2value = dict(zip(
-                        self.id2value.keys(),
-                        self._auto_string_processor([*self.id2value.values()], self.processor_type)
-                    ))
-                    entity_map = self._get_resolvers_entity_map(processed_id2value)
+                    entity_map = self._get_resolvers_entity_map(
+                        dict(zip(
+                            self.id2value.keys(),
+                            self._auto_string_processor(
+                                [*self.id2value.values()],
+                                self.processor_type
+                            )
+                        ))
+                    )
                     self._text_resolver.fit(entity_map=entity_map, clean=clean)
                     # dump
                     # ex: ~/.cache/mindmeld/question_answerers/
@@ -1332,20 +1344,18 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                     #               .pkl
                     #               .pkl.hash
                     #               .config.pkl
-                    resolver_cache_path = get_question_answerer_index_cache_file_path(
-                        app_path, get_scoped_index_name(
-                            get_scoped_index_name(self.index_name, self.field_name),
-                            "text_resolver"
-                        ))
-                    self._text_resolver.dump(path=resolver_cache_path,
-                                             cache_kb=False)  # kb data is
-                    # not cached here to eliminate duplicate data dump, dumped to the
-                    # disk both by NativeQA as well as by each of the entity resolver.
+                    self._text_resolver.dump(path=resolver_cache_path)
                 elif not self._text_resolver:
                     msg = f"Loading a text resolver for field '{self.field_name}' in " \
                           f"index '{self.index_name}'."
                     logger.info(msg)
                     try:
+                        # obtain a cache path
+                        resolver_cache_path = get_question_answerer_index_cache_file_path(
+                            app_path, get_scoped_index_name(
+                                get_scoped_index_name(self.index_name, self.field_name),
+                                "text_resolver"
+                            ))
                         # create a new instance of resolver and load it
                         self._text_resolver = TfIdfSparseCosSimEntityResolver(
                             app_path=app_path,
@@ -1353,23 +1363,16 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                             config={},  # resolver loads its own configs previously dumped
                             resource_loader=resource_loader,
                         )
-                        resolver_cache_path = get_question_answerer_index_cache_file_path(
-                            app_path, get_scoped_index_name(
-                                get_scoped_index_name(self.index_name, self.field_name),
-                                "text_resolver"
+                        entity_map = self._get_resolvers_entity_map(
+                            dict(zip(
+                                self.id2value.keys(),
+                                self._auto_string_processor(
+                                    [*self.id2value.values()],
+                                    self.processor_type
+                                )
                             ))
-                        self._text_resolver.load(path=resolver_cache_path)
-                        # get id2value & process it, get entity map & process it, assign to resolver
-                        processed_id2value = dict(zip(
-                            self.id2value.keys(),
-                            self._auto_string_processor(
-                                [*self.id2value.values()],
-                                self.processor_type)
-                        ))
-                        entity_map = self._get_resolvers_entity_map(processed_id2value)
-                        processed_entity_map = self._text_resolver.get_processed_entity_map(
-                            entity_map)
-                        self._text_resolver.processed_entity_map = processed_entity_map
+                        )
+                        self._text_resolver.load(path=resolver_cache_path, entity_map=entity_map)
                     except Exception as e:
                         msg = "Couldn't load a text resolver from cache path. Consider " \
                               "calling the 'load_kb()' method with argument 'clean=True'."
@@ -1382,6 +1385,12 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                     msg = f"Creating an embedder resolver for field '{self.field_name}' in " \
                           f"index '{self.index_name}'."
                     logger.info(msg)
+                    # obtain a cache path
+                    resolver_cache_path = get_question_answerer_index_cache_file_path(
+                        app_path, get_scoped_index_name(
+                            get_scoped_index_name(self.index_name, self.field_name),
+                            "embedder_resolver"
+                        ))
                     # create a new resolver and fit
                     self._embedding_resolver = EmbedderCosSimEntityResolver(
                         app_path=app_path,
@@ -1390,29 +1399,27 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                         resource_loader=resource_loader
                     )
                     entity_map = self._get_resolvers_entity_map(
-                        self.id2value)  # use same data as text resolver but without any processing!
-                    self._embedding_resolver.fit(
-                        entity_map=entity_map,
-                        clean=clean)
-                    resolver_cache_path = get_question_answerer_index_cache_file_path(
-                        app_path, get_scoped_index_name(
-                            get_scoped_index_name(self.index_name, self.field_name),
-                            "embedder_resolver"
-                        ))
+                        self.id2value
+                    )  # use same data as text resolver but without any processing!
+                    self._embedding_resolver.fit(entity_map=entity_map, clean=clean)
                     # dump
                     # ex: ~/.cache/mindmeld/question_answerers/
                     #           {food_ordering}${restaurants}${field_name}
                     #               .pkl.hash
                     #               .config.pkl
                     #               .embedder_cache.pkl
-                    self._embedding_resolver.dump(path=resolver_cache_path, cache_kb=False)  # kb
-                    # data is not cached here to eliminate duplicate data dump, dumped to the
-                    # disk both by NativeQA as well as by each of the entity resolver.
+                    self._embedding_resolver.dump(path=resolver_cache_path)
                 elif not self._embedding_resolver:
                     msg = f"Loading an embedder resolver for field '{self.field_name}' in " \
                           f"index '{self.index_name}'."
                     logger.info(msg)
                     try:
+                        # obtain a cache path
+                        resolver_cache_path = get_question_answerer_index_cache_file_path(
+                            app_path, get_scoped_index_name(
+                                get_scoped_index_name(self.index_name, self.field_name),
+                                "embedder_resolver"
+                            ))
                         # create a new instance of resolver and load it
                         self._embedding_resolver = EmbedderCosSimEntityResolver(
                             app_path=app_path,
@@ -1420,18 +1427,12 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                             config={},  # resolver loads its own configs previously dumped
                             resource_loader=resource_loader,
                         )
-                        resolver_cache_path = get_question_answerer_index_cache_file_path(
-                            app_path, get_scoped_index_name(
-                                get_scoped_index_name(self.index_name, self.field_name),
-                                "embedder_resolver"
-                            ))
-                        self._embedding_resolver.load(path=resolver_cache_path)
-                        # get id2value, get entity map & process it, assign to resolver
                         entity_map = self._get_resolvers_entity_map(
-                            self.id2value)
-                        processed_entity_map = self._embedding_resolver.get_processed_entity_map(
-                            entity_map)
-                        self._embedding_resolver.processed_entity_map = processed_entity_map
+                            self.id2value
+                        )  # use same data as text resolver but without any processing!
+                        self._embedding_resolver.load(
+                            path=resolver_cache_path, entity_map=entity_map
+                        )
                     except Exception as e:
                         msg = "Couldn't load embedder resolver from cache path. Consider " \
                               "calling the 'load_kb()' method with argument 'clean=True'."
