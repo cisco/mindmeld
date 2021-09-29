@@ -92,7 +92,7 @@ setup(
         ],
         "bert": [
             'torch~=1.7.0; python_version>="3.6"',
-            'transformers~=4.10.0; python_version>="3.6"',
+            'transformers~=3.5.1; python_version>="3.6"',
             'sentence-transformers~=0.3; python_version>="3.6"',
             # elasticsearch-py 7.14 breaks backwards compatibility with servers prior to 7.11
             'elasticsearch>=7.0,<7.14',
