@@ -92,8 +92,8 @@ In the config for this paraphraser class, the ``'augmentor_class'`` should be se
 Retaining Entity Annotations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The default English model ignores entity annotations and paraphrases the full query (along with entities). If you wish to retain the entity values and annotations in your query as is in the paraphrases, you can set the ``'retain_entities'`` key to ``True`` in the config.
-In addition, if a gazetteer is provided for the entity type, the system will automatically replace the entity values with randomly sampled entities from the gazetteer. This is recommended to improve the n-gram diversity in your queries.
+The default English model ignores entity annotations and paraphrases the full query (along with entities). If you wish to retain the original query's entity values and annotations in the paraphrases, you can set the ``'retain_entities'`` key to ``True`` in the config.
+In addition, if a gazetteer is provided for an entity type, the system will automatically replace entity values with randomly sampled entities from the gazetteer. This is recommended to improve the n-gram diversity in your queries.
 
 .. note::
 

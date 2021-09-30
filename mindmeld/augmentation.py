@@ -236,6 +236,12 @@ class EnglishParaphraser(Augmentor):
             path_suffix (str): Suffix to be added to new augmented files.
             resource_loader (object): Resource Loader object for the application.
         """
+
+        if language != 'en':
+            raise UnsupportedLanguageError(
+                f"'{self.language_code}' is not supported by the English Augmentor class"
+            )
+
         super().__init__(
             language=language,
             paths=paths,
@@ -488,6 +494,11 @@ class MultiLingualParaphraser(Augmentor):
             path_suffix (str): Suffix to be added to new augmented files.
             resource_loader (object): Resource Loader object for the application.
         """
+        if language not in ["es", "fr", "it", "pt", "ro"]:
+            raise UnsupportedLanguageError(
+                f"'{self.language_code}' is not supported by the MultiLingual Augmentor class"
+            )
+
         super().__init__(
             language=language,
             paths=paths,
