@@ -239,7 +239,7 @@ class EnglishParaphraser(Augmentor):
 
         if language != 'en':
             raise UnsupportedLanguageError(
-                f"'{self.language_code}' is not supported by the English Augmentor class"
+                f"'{language}' is not supported by the English Augmentor class"
             )
 
         super().__init__(
@@ -496,7 +496,7 @@ class MultiLingualParaphraser(Augmentor):
         """
         if language not in ["es", "fr", "it", "pt", "ro"]:
             raise UnsupportedLanguageError(
-                f"'{self.language_code}' is not supported by the MultiLingual Augmentor class"
+                f"'{language}' is not supported by the MultiLingual Augmentor class"
             )
 
         super().__init__(
