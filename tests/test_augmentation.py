@@ -13,6 +13,7 @@ import pytest
 from mindmeld.augmentation import AugmentorFactory, UnsupportedLanguageError
 from mindmeld.components._config import get_augmentation_config
 from mindmeld.resource_loader import ResourceLoader
+from mindmeld.query_factory import QueryFactory
 
 NUM_PARAPHRASES = 10
 
@@ -88,7 +89,9 @@ def english_paraphraser_retain_entities(kwik_e_mart_app_path):
     config = get_augmentation_config(app_path=kwik_e_mart_app_path)
     language = "en"
     config['retain_entities'] = True
-    resource_loader = ResourceLoader.create_resource_loader(kwik_e_mart_app_path)
+    query_factory = QueryFactory.create_query_factory(app_path=kwik_e_mart_app_path, duckling=True)
+    resource_loader = ResourceLoader.create_resource_loader(app_path=kwik_e_mart_app_path,
+                                                            query_factory=query_factory)
     augmentor = AugmentorFactory(
         config=config,
         language=language,
