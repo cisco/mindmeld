@@ -82,6 +82,19 @@ class TextPreparationPipeline:
             preprocessed_text = preprocessor.process(preprocessed_text)
         return preprocessed_text
 
+    def custom_preprocessors_exist(self):
+        """ Checks if the current TextPreparationPipeline has preprocessors that is not
+        simply the NoOpPreprocessor or None.
+
+        Returns:
+            has_custom_preprocessors (bool): Whether atleast one custom preprocessor exists.
+        """
+        return (
+            self.preprocessors is not None
+            and len(self.preprocessors) >= 1
+            and not isinstance(self.preprocessors[0], NoOpPreprocessor)
+        )
+
     def normalize(self, text, keep_special_chars=None):
         """Normalize Text.
         Args:
