@@ -58,6 +58,7 @@ def test_unsupported_language(kwik_e_mart_app_path):
         ).create_augmentor()
 
 
+@pytest.mark.skip
 @pytest.mark.extras
 @pytest.mark.parametrize(
     "query",
