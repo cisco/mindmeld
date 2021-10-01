@@ -301,6 +301,7 @@ class EnglishParaphraser(Augmentor):
         try:
             with zipfile.ZipFile(PARAPHRASER_FILE_PATH, 'r') as zip_ref:
                 zip_ref.extractall(EMBEDDINGS_FOLDER_PATH)
+            os.remove(PARAPHRASER_FILE_PATH)
         except zipfile.BadZipfile:
             logger.error("Unable to extract zip file. Try downloading the model again.")
 
