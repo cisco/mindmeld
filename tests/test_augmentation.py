@@ -14,6 +14,7 @@ from mindmeld.augmentation import AugmentorFactory, UnsupportedLanguageError
 from mindmeld.components._config import get_augmentation_config
 from mindmeld.resource_loader import ResourceLoader
 from mindmeld.query_factory import QueryFactory
+from mindmeld.markup import load_query
 
 NUM_PARAPHRASES = 10
 
@@ -27,6 +28,7 @@ def english_paraphraser_retain_entities(kwik_e_mart_app_path, request):
     query_factory = QueryFactory.create_query_factory(app_path=kwik_e_mart_app_path, duckling=True)
     resource_loader = ResourceLoader.create_resource_loader(app_path=kwik_e_mart_app_path,
                                                             query_factory=query_factory)
+    request.cls.query_factory = query_factory
     request.cls.augmentor = AugmentorFactory(
         config=config,
         language=language,
@@ -34,8 +36,10 @@ def english_paraphraser_retain_entities(kwik_e_mart_app_path, request):
     ).create_augmentor()
     yield None
     request.cls.augmentor = None
+    request.cls.query_factor = None
 
 
+@pytest.mark.skip
 @pytest.mark.extras
 @pytest.mark.usefixtures("english_paraphraser_retain_entities")
 class TestEnglishParaphraserWithEntities:
@@ -54,7 +58,8 @@ class TestEnglishParaphraserWithEntities:
         ],
     )
     def test_paraphrases_with_entities(self, query, entity_types):
-        paraphrases = self.augmentor.augment_queries([query])
+        processed_query = load_query(query, query_factory=self.query_factory)
+        paraphrases = self.augmentor.augment_queries([processed_query])
         for p in paraphrases:
             for entity in entity_types:
                 assert entity in p
@@ -87,7 +92,8 @@ class TestDefaultEnglishParaphraser:
         ],
     )
     def test_num_paraphrases(self, query, value):
-        paraphrases = self.augmentor.augment_queries([query])
+        processed_query = load_query(query)
+        paraphrases = self.augmentor.augment_queries([processed_query])
         assert len(paraphrases) == value
 
 
@@ -122,6 +128,6 @@ def test_spanish_paraphrases(kwik_e_mart_app_path, query):
         resource_loader=resource_loader,
     ).create_augmentor()
 
-    paraphrases = multilingual_paraphraser.augment_queries([query])
+    paraphrases = multilingual_paraphraser.augment_queries([load_query(query)])
     multilingual_paraphraser=None
     assert "aumentar el volumen" in paraphrases

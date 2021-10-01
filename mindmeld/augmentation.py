@@ -26,6 +26,7 @@ from tqdm import tqdm
 
 from ._util import get_pattern, read_path_queries, write_to_file
 from .components._util import _is_module_available, _get_module_or_attr
+from .components._config import ENGLISH_LANGUAGE_CODE
 from .models.helpers import register_augmentor, AUGMENTATION_MAP
 from .markup import load_query, dump_query
 from .core import Entity, Span, QueryEntity, ProcessedQuery, _get_overlap
@@ -153,7 +154,7 @@ class Augmentor(ABC):
         filtered_paths = self._get_files(path_rules=self.files_to_augment)
 
         for path in tqdm(filtered_paths):
-            queries = read_path_queries(path)
+            queries = self._get_processed_queries_to_paraphrase(path)
             # To-Do: Use generator to write files incrementally.
             augmented_queries = self.augment_queries(queries, **kwargs)
             write_to_file(path, augmented_queries, suffix=self.path_suffix)
@@ -191,6 +192,23 @@ class Augmentor(ABC):
         """
         pattern = re.compile("^.*[a-zA-Z0-9].*$")
         return pattern.search(query) and True
+
+    def _get_processed_queries_to_paraphrase(self, path):
+        """Returns a list of processed queries for a given file path
+
+        Args:
+            path (str): Path to text file with queries
+
+        Return:
+            Processed queries (list(ProcessedQuery))
+        """
+        queries = read_path_queries(path)
+        processed_queries = []
+        for query in queries:
+            processed_query = load_query(query,
+                                         query_factory=self._resource_loader.query_factory)
+            processed_queries.append(processed_query)
+        return processed_queries
 
     def _get_files(self, path_rules=None):
         """Fetches relevant files given the path rules specified in the config.
@@ -237,7 +255,7 @@ class EnglishParaphraser(Augmentor):
             resource_loader (object): Resource Loader object for the application.
         """
 
-        if language != 'en':
+        if language != ENGLISH_LANGUAGE_CODE:
             raise UnsupportedLanguageError(
                 f"'{language}' is not supported by the English Augmentor class"
             )
@@ -266,6 +284,7 @@ class EnglishParaphraser(Augmentor):
         self.tokenizer = PegasusTokenizer.from_pretrained(model_name)
         self.model = PegasusForConditionalGeneration.from_pretrained(
             model_name).to(self.torch_device)
+        self.model.eval()
 
         # Update default params with user model config
         self.batch_size = batch_size
@@ -305,14 +324,14 @@ class EnglishParaphraser(Augmentor):
         except zipfile.BadZipfile:
             logger.error("Unable to extract zip file. Try downloading the model again.")
 
-    def _prepare_inputs(self, queries):
+    def _prepare_inputs(self, processed_queries):
         """Processes input as expected by the two different English models
         Example:
             The default model requires just <unannotated text>
             The retain_entities model requires <unannotated text> <EOS> <entity values>
 
         Args:
-            queries (list(str)): List of application queries.
+            processed queries (list(ProcessedQuery)): List of ProcessedQuery objects from the app
 
         Return:
             model_inputs (list(str)): List of queries to be paraphrased in the
@@ -321,20 +340,16 @@ class EnglishParaphraser(Augmentor):
                                                        with entity annotations
         """
         model_inputs = []
-        processed_queries = []
-        for query in queries:
-            processed_query = load_query(query,
-                                         query_factory=self._resource_loader.query_factory)
+        for processed_query in processed_queries:
             processed_query_text = processed_query.query.text.strip()
             if self.retain_entities:
                 text = [processed_query_text.lower(), EOS_TOKEN]
                 for entity in processed_query.entities:
                     text.append(entity.text.lower())
-                processed_queries.append(processed_query)
                 model_inputs.append(' '.join(text))
             else:
                 model_inputs.append(processed_query_text)
-        return model_inputs, processed_queries
+        return model_inputs
 
     def _replace_with_random_gaz_entity(self, paraphrase_text, entity_matches):
         """Replaces values of annotated entities with randomly sampled ones from gazetteers
@@ -440,7 +455,7 @@ class EnglishParaphraser(Augmentor):
         queries = [' '.join(s.split()) for s in without_puncts if s]
         return queries
 
-    def _generate_paraphrases(self, queries):
+    def _generate_paraphrases(self, processed_queries):
         """Generates paraphrase responses for given query.
 
         Args:
@@ -451,17 +466,18 @@ class EnglishParaphraser(Augmentor):
         """
         all_generated_queries = []
 
-        for pos in range(0, len(queries), self.batch_size):
-            tokenizer_input, processed_input_queries = self._prepare_inputs(
-                                                           queries[pos:pos + self.batch_size])
+        for pos in range(0, len(processed_queries), self.batch_size):
+            processed_input_queries = processed_queries[pos:pos + self.batch_size]
+            tokenizer_input = self._prepare_inputs(processed_input_queries)
             batch = self.tokenizer.prepare_seq2seq_batch(
                 tokenizer_input,
                 **self.default_tokenizer_params,
             ).to(self.torch_device)
-            generated = self.model.generate(
-                **batch,
-                **self.default_paraphraser_model_params,
-            )
+            with _get_module_or_attr("torch", "no_grad")():
+                generated = self.model.generate(
+                    **batch,
+                    **self.default_paraphraser_model_params,
+                )
             decoded_queries = self.tokenizer.batch_decode(generated, skip_special_tokens=True)
             if self.retain_entities:
                 decoded_queries = self._normalize_paraphrases(decoded_queries)
@@ -519,12 +535,14 @@ class MultiLingualParaphraser(Augmentor):
         self.en_tokenizer = MarianTokenizer.from_pretrained(en_model_name)
         self.en_model = MarianMTModel.from_pretrained(en_model_name)
         self.en_model.to(self.torch_device)
+        self.en_model.eval()
 
         target_model_name = "Helsinki-NLP/opus-mt-en-ROMANCE"
         self.target_tokenizer = MarianTokenizer.from_pretrained(target_model_name)
         self.target_model = MarianMTModel.from_pretrained(target_model_name).to(
             self.torch_device
         )
+        self.target_model.eval()
 
         # Update default params with user model config
         self.batch_size = batch_size
@@ -561,15 +579,15 @@ class MultiLingualParaphraser(Augmentor):
             ).to(self.torch_device)
             for key in encoded:
                 encoded[key] = encoded[key].to(self.torch_device)
-
-            translated = model.generate(**encoded, **kwargs)
+            with _get_module_or_attr("torch", "no_grad")():
+                translated = model.generate(**encoded, **kwargs)
             translated_queries = tokenizer.batch_decode(
                 translated, skip_special_tokens=True
             )
             all_translated_queries.extend(translated_queries)
         return all_translated_queries
 
-    def _prepare_inputs(self, queries):
+    def _prepare_inputs(self, processed_queries):
         """Removes any markdown formatting in the query
 
             Args:
@@ -579,12 +597,13 @@ class MultiLingualParaphraser(Augmentor):
                 unannotated queries (list(str))
 
         """
-        unannotated_queries = [load_query(query).query.text.strip() for query in queries]
+        unannotated_queries = [processed_query.query.text.strip()
+                               for processed_query in processed_queries]
         return unannotated_queries
 
-    def augment_queries(self, queries):
+    def augment_queries(self, processed_queries):
         translated_queries = self._translate(
-            queries=self._prepare_inputs(queries),
+            queries=self._prepare_inputs(processed_queries),
             model=self.en_model,
             tokenizer=self.en_tokenizer,
             **self.default_forward_params,
