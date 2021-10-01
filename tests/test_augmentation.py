@@ -9,11 +9,13 @@ Tests the ``augmentation`` module.
 """
 
 import pytest
+import shutil
 
 from mindmeld.augmentation import AugmentorFactory, UnsupportedLanguageError
 from mindmeld.components._config import get_augmentation_config
 from mindmeld.resource_loader import ResourceLoader
 from mindmeld.query_factory import QueryFactory
+from mindmeld.path import PARAPHRASER_MODEL_PATH
 
 NUM_PARAPHRASES = 10
 
@@ -32,6 +34,8 @@ def english_paraphraser_retain_entities(kwik_e_mart_app_path, request):
         language=language,
         resource_loader=resource_loader,
     ).create_augmentor()
+    yield None
+    shutil.rmtree(PARAPHRASER_MODEL_PATH)
 
 
 @pytest.mark.extras
