@@ -71,7 +71,7 @@ def english_paraphraser(kwik_e_mart_app_path, request):
     ).create_augmentor()
 
 
-@pytest.skip
+@pytest.mark.skip
 @pytest.mark.extras
 @pytest.mark.usefixtures("english_paraphraser")
 class TestDefaultEnglishParaphraser:
@@ -88,7 +88,7 @@ class TestDefaultEnglishParaphraser:
         assert len(paraphrases) == value
 
 
-@pytest.skip
+@pytest.mark.skip
 @pytest.mark.extras
 def test_unsupported_language(kwik_e_mart_app_path):
     config = get_augmentation_config(app_path=kwik_e_mart_app_path)
@@ -102,7 +102,7 @@ def test_unsupported_language(kwik_e_mart_app_path):
         ).create_augmentor()
 
 
-@pytest.skip
+@pytest.mark.skip
 @pytest.mark.extras
 @pytest.mark.parametrize(
     "query",
