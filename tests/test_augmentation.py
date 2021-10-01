@@ -9,13 +9,11 @@ Tests the ``augmentation`` module.
 """
 
 import pytest
-import shutil
 
 from mindmeld.augmentation import AugmentorFactory, UnsupportedLanguageError
 from mindmeld.components._config import get_augmentation_config
 from mindmeld.resource_loader import ResourceLoader
 from mindmeld.query_factory import QueryFactory
-from mindmeld.path import PARAPHRASER_MODEL_PATH
 
 NUM_PARAPHRASES = 10
 
@@ -35,7 +33,7 @@ def english_paraphraser_retain_entities(kwik_e_mart_app_path, request):
         resource_loader=resource_loader,
     ).create_augmentor()
     yield None
-    shutil.rmtree(PARAPHRASER_MODEL_PATH)
+    request.cls.augmentor = None
 
 
 @pytest.mark.extras
@@ -73,9 +71,10 @@ def english_paraphraser(kwik_e_mart_app_path, request):
         language=language,
         resource_loader=resource_loader,
     ).create_augmentor()
+    yield None
+    request.cls.augmentor = None
 
 
-@pytest.mark.skip
 @pytest.mark.extras
 @pytest.mark.usefixtures("english_paraphraser")
 class TestDefaultEnglishParaphraser:
@@ -92,7 +91,6 @@ class TestDefaultEnglishParaphraser:
         assert len(paraphrases) == value
 
 
-@pytest.mark.skip
 @pytest.mark.extras
 def test_unsupported_language(kwik_e_mart_app_path):
     config = get_augmentation_config(app_path=kwik_e_mart_app_path)
@@ -106,7 +104,6 @@ def test_unsupported_language(kwik_e_mart_app_path):
         ).create_augmentor()
 
 
-@pytest.mark.skip
 @pytest.mark.extras
 @pytest.mark.parametrize(
     "query",
@@ -126,4 +123,5 @@ def test_spanish_paraphrases(kwik_e_mart_app_path, query):
     ).create_augmentor()
 
     paraphrases = multilingual_paraphraser.augment_queries([query])
+    multilingual_paraphraser=None
     assert "aumentar el volumen" in paraphrases
