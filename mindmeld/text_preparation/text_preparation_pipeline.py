@@ -92,7 +92,7 @@ class TextPreparationPipeline:
         return (
             self.preprocessors is not None
             and len(self.preprocessors) >= 1
-            and not isinstance(self.preprocessors[0], NoOpPreprocessor)
+            and not any([isinstance(elem, NoOpPreprocessor) for elem in self.preprocessors])
         )
 
     def normalize(self, text, keep_special_chars=None):
