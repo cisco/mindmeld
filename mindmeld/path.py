@@ -134,6 +134,11 @@ PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH = os.path.join(
 PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH = os.path.join(
     EMBEDDINGS_FOLDER_PATH, "previously_used_word_embeddings.pkl"
 )
+# Use embedding path to store paraphraser model
+PARAPHRASER_FILE_PATH = os.path.join(EMBEDDINGS_FOLDER_PATH, "paraphrase_retain_entities.zip")
+PARAPHRASER_MODEL_PATH = os.path.join(EMBEDDINGS_FOLDER_PATH, "paraphrase_retain_entities")
+# Download default model from huggingface model hub. We may want to upload this to a S3 bucket too.
+HUGGINGFACE_PARAPHRASER_MODEL_PATH = 'tuner007/pegasus_paraphrase'
 
 # User specific directories
 USER_CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".mindmeld")
