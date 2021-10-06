@@ -55,6 +55,7 @@ class SystemEntityError(Exception):
 
 class DucklingDimension(Enum):
     AMOUNT_OF_MONEY = "amount-of-money"
+    CREDIT_CARD_NUMBER = "credit-card-number"
     DISTANCE = "distance"
     DURATION = "duration"
     NUMERAL = "numeral"
@@ -578,7 +579,13 @@ class DucklingRecognizer(SystemEntityRecognizer):
         return []
 
     def get_candidates_for_text(
-        self, text, entity_types=None, language=None, locale=None
+        self,
+        text,
+        entity_types=None,
+        locale=None,
+        language=None,
+        time_zone=None,
+        timestamp=None,
     ):
         """Identifies candidate system entities in the given text.
 
@@ -587,13 +594,23 @@ class DucklingRecognizer(SystemEntityRecognizer):
             entity_types (list of str): The entity types to consider
             language (str): Language code
             locale (str): Locale code
+            time_zone (str, optional): An IANA time zone id such as 'America/Los_Angeles'.
+                If not specified, the system time zone is used.
+            timestamp (long, optional): A unix timestamp used as the reference time.
+                If not specified, the current system time is used. If `time_zone`
+                is not also specified, this parameter is ignored.
 
         Returns:
             list of dict: The system entities found in the text
         """
         dims = dimensions_from_entity_types(entity_types)
         response, response_code = self.parse(
-            text, dimensions=dims, language=language, locale=locale
+            text,
+            dimensions=dims,
+            language=language,
+            locale=locale,
+            time_zone=time_zone,
+            timestamp=timestamp,
         )
         if response_code == SUCCESSFUL_HTTP_CODE:
             items = []
@@ -636,6 +653,7 @@ def duckling_item_to_entity(item):
     if dimension in map(
         lambda x: x.value,
         [
+            DucklingDimension.CREDIT_CARD_NUMBER,
             DucklingDimension.EMAIL,
             DucklingDimension.PHONE_NUMBER,
             DucklingDimension.URL,
