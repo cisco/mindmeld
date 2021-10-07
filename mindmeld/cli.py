@@ -647,9 +647,10 @@ def _find_duckling_os_executable():
 
 
 @shared_cli.command("num-parse", context_settings=CONTEXT_SETTINGS)
+@click.pass_context
 @click.option("--start/--stop", default=True, help="Start or stop numerical parser")
 @click.option("-p", "--port", required=False, default="7151")
-def num_parser(start, port):
+def num_parser(ctx, start, port):
     """Starts or stops the local numerical parser service."""
     if start:
         pid = _get_duckling_pid()
@@ -703,6 +704,13 @@ def num_parser(start, port):
                 ):
                     f.write(data)
                     f.flush()
+
+            # Verify the downloaded file
+            hash_digest = hashlib.sha256(open(exec_path, "rb").read()).hexdigest()
+            if hash_digest != path.DUCKLING_PATH_TO_SHA_MAPPINGS[exec_path]:
+                os.remove(exec_path)
+                logger.error("Binary file downloaded from %s does not match expected version", url)
+                ctx.exit(1)
 
         # make the file executable
         st = os.stat(exec_path)
