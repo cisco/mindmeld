@@ -251,7 +251,6 @@ def test_credit_card(query, predicted_texts, predicted_values):
 
     res = requests.post(DUCKLING_URL, data=data)
     responses = res.json()
-    print(responses)
     response_texts = [r["body"] for r in responses]
     response_values = [
         r["value"]["value"] for r in responses if r["value"].get("value")
