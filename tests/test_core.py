@@ -419,6 +419,7 @@ def test_system_entity_time_resolution(home_assistant_nlp):
         ("skk 2.00 am", {(1, 1), (1, 2), (2, 2)}, 'sys_time'),
         ("$20 5", {(1, 1), (0, 0), (0, 1)}, 'sys_amount-of-money'),
         ("ok cool $20 5", {(3, 3), (2, 2), (2, 3)}, 'sys_amount-of-money'),
+        ("1時間のミーティングを30分後から予約", {(0,1), (5,6)}, 'sys_duration'),
     ],
 )
 def test_sys_entities_normalized_token_span(query_factory, raw_query, valid_spans, entity_type):
