@@ -107,8 +107,8 @@ class BaseQuestionAnswerer(ABC):
             kwargs.get("resource_loader") or ResourceLoader.create_resource_loader(self.app_path)
         )
         self._qa_config = (
-            kwargs.get("config") or
-            get_classifier_config("question_answering", app_path=self.app_path)
+            kwargs.get("config")
+            or get_classifier_config("question_answering", app_path=self.app_path)
         )
 
     def __repr__(self):
@@ -218,8 +218,8 @@ class BaseQuestionAnswerer(ABC):
         """
 
         if (
-            ("config" in kwargs and kwargs["config"]) or
-            ("app_path" in kwargs and kwargs["app_path"])
+            ("config" in kwargs and kwargs["config"])
+            or ("app_path" in kwargs and kwargs["app_path"])
         ):
             msg = "Passing 'config' or 'app_path' to '.load_kb()' method is no longer " \
                   "supported. Create a Question Answerer instance with the required " \
@@ -607,8 +607,10 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
             elif isinstance(value, str) and "," in value and len(value.split(",")) == 2:
                 # eg. "37.77,122.41"
                 return value.strip()
-            elif (isinstance(value, list) and len(value) == 2 and
-                  isinstance(value[0], numbers.Number) and isinstance(value[1], numbers.Number)):
+            elif (isinstance(value, list)
+                  and len(value) == 2
+                  and isinstance(value[0], numbers.Number)
+                  and isinstance(value[1], numbers.Number)):
                 # eg. [37.77, 122.41]
                 return ",".join([str(_value) for _value in value])
 
@@ -1059,10 +1061,10 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
 
             # tfidf based text resolver
             if (
-                self.has_text_resolver and
-                (not self._text_resolver or
-                 new_hash != self.hash or
-                 self.processor_type != processor_type)
+                self.has_text_resolver
+                and (not self._text_resolver
+                     or new_hash != self.hash
+                     or self.processor_type != processor_type)
             ):
                 # log info
                 msg = f"Creating a text resolver for field '{self.field_name}' in " \
@@ -1089,8 +1091,8 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
 
             # embedder based resolver
             if (
-                self.has_embedding_resolver and
-                (not self._embedding_resolver or new_hash != self.hash)
+                self.has_embedding_resolver
+                and (not self._embedding_resolver or new_hash != self.hash)
             ):
                 # log info
                 msg = f"Creating an embedder resolver for field '{self.field_name}' in " \

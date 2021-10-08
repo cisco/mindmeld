@@ -70,16 +70,16 @@ class Embedder(ABC):
                     data = pickle.load(fp)
 
                 if (
-                    "_texts" in data and
-                    "_texts_embeddings" in data and
-                    isinstance(data["_texts"], list)
+                    "_texts" in data
+                    and "_texts_embeddings" in data
+                    and isinstance(data["_texts"], list)
                 ):  # new format;
                     self.data = dict(zip(data["_texts"], data["_texts_embeddings"]))
 
                 elif (
-                    "synonyms" in data and
-                    "synonyms_embs" in data and
-                    isinstance(data["synonyms"], dict)
+                    "synonyms" in data
+                    and "synonyms_embs" in data
+                    and isinstance(data["synonyms"], dict)
                 ):  # deprecated format; backwards compatible with ER module code
                     self.data = {key: data["synonyms_embs"][j] for key, j in data["synonyms"]}
 
@@ -564,8 +564,8 @@ class BertEmbedder(Embedder):
         self.transformer_model.eval()
         if show_progress_bar is None:
             show_progress_bar = (
-                logger.getEffectiveLevel() == logging.INFO or
-                logger.getEffectiveLevel() == logging.DEBUG
+                logger.getEffectiveLevel() == logging.INFO
+                or logger.getEffectiveLevel() == logging.DEBUG
             )
 
         if convert_to_tensor:
@@ -637,8 +637,8 @@ class BertEmbedder(Embedder):
                 "to use the built in bert embedder.")
 
         pretrained_name_or_abspath = (
-            kwargs.get("pretrained_name_or_abspath", None) or
-            BertEmbedder.DEFAULT_BERT if self.model_name == "default" else self.model_name
+            kwargs.get("pretrained_name_or_abspath", None)
+            or BertEmbedder.DEFAULT_BERT if self.model_name == "default" else self.model_name
         )
         bert_output_type = kwargs.get("bert_output_type", "mean")
         quantize_model = kwargs.get("quantize_model", False)
@@ -703,8 +703,8 @@ class BertEmbedder(Embedder):
             raise TypeError(f"argument phrases must be of type str or list, not {type(phrases)}")
 
         show_progress_bar = (
-            self._show_progress_bar and
-            (len(phrases) if isinstance(phrases, list) else 1) > 1
+            self._show_progress_bar
+            and (len(phrases) if isinstance(phrases, list) else 1) > 1
         )
 
         # `False` for first call but might not for the subsequent calls
