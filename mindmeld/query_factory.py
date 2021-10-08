@@ -88,7 +88,7 @@ class QueryFactory:
         char_maps = {}
 
         # Step 1: Preprocessing
-        if self.text_preparation_pipeline.preprocessors:
+        if self.text_preparation_pipeline.custom_preprocessors_exist():
             preprocessed_text = self.text_preparation_pipeline.preprocess(raw_text)
             (
                 forward_map,
