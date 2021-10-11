@@ -810,6 +810,7 @@ class AutoEntityFilling:
         Returns:
             (bool): Boolean whether the user input fulfills the slot requirements
         """
+        print(self._app.registry.func_registry)
         text = request.text
         entity_type = slot.entity
 
@@ -878,7 +879,8 @@ class AutoEntityFilling:
             # If false, overall validation fails. If either true or a custom resolved
             # value is returned, then the validation succeeds.
 
-            _validity = slot.custom_eval(request)
+            custom_eval_func = self._app.registry.func_registry[slot.custom_eval]
+            _validity = custom_eval_func(request)
             if _validity is False:
                 # For checking 'false' return cases
                 return False, _resolved_value

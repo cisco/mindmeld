@@ -13,8 +13,7 @@
 
 """This module contains a collection of the core data structures used in MindMeld."""
 import logging
-import pickle
-from typing import Optional, List, Dict, Callable
+from typing import Optional, List, Dict
 import immutables
 
 from .constants import SYSTEM_ENTITY_PREFIX
@@ -1009,7 +1008,7 @@ class FormEntity:
         default_eval(bool, optional): Use system validation (default: True)
         hints(list, optional): Developer defined list of keywords to verify the
         user input against
-        custom_eval(func, optional): custom validation function (should return either bool:
+        custom_eval(str, optional): custom validation function name (should return either bool:
         validated or not) or a custom resolved value for the entity. If custom resolved value
         is returned, the slot response is considered to be valid.
     """
@@ -1023,7 +1022,7 @@ class FormEntity:
         value: Optional[Dict] = None,
         default_eval: Optional[bool] = True,
         hints: Optional[List[str]] = None,
-        custom_eval: Optional[Callable] = None,
+        custom_eval: Optional[str] = None,
     ):
         self.entity = entity
         self.role = role
@@ -1044,14 +1043,8 @@ class FormEntity:
         if not self.entity or not isinstance(self.entity, str):
             raise TypeError("Entity cannot be empty.")
 
-        if self.custom_eval and not callable(custom_eval):
-            try:
-                f = open(custom_eval, "rb")
-                custom_eval = pickle.load(f)
-                f.close()
-                self.custom_eval = custom_eval
-            except:
-                raise TypeError("Invalid custom validation function type.")
+        if self.custom_eval and not isinstance(self.custom_eval, str):
+            raise TypeError("'custom_eval' function should be a string.")
 
     def to_dict(self):
         """Converts the entity into a dictionary"""
@@ -1064,6 +1057,14 @@ class FormEntity:
                 base[field] = val
 
         return base
+
+
+class Registry:
+    def __init__(self):
+        self.func_registry = {}
+
+    def add_to_func_registry(self, func_name, func):
+        self.func_registry[func_name] = func
 
 
 def resolve_entity_conflicts(query_entities):
