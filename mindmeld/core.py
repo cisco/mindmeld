@@ -1060,10 +1060,17 @@ class FormEntity:
 
 
 class Registry:
+    """A registration class to map object names to corresponding objects."""
     def __init__(self):
         self.func_registry = {}
 
     def add_to_func_registry(self, func_name, func):
+        """Populates the function registry map.
+
+        Args:
+            func_name (str): Name to be used as key for the function.
+            func (func): Callable function.
+        """
         self.func_registry[func_name] = func
 
 

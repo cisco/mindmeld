@@ -810,7 +810,6 @@ class AutoEntityFilling:
         Returns:
             (bool): Boolean whether the user input fulfills the slot requirements
         """
-        print(self._app.registry.func_registry)
         text = request.text
         entity_type = slot.entity
 
