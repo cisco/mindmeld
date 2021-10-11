@@ -950,6 +950,7 @@ class AutoEntityFilling:
         response_form.entities = self._local_entity_form
         responder.form = DEFAULT_FORM_SCHEMA.dump(response_form)
         responder.reply(nlr)
+        responder.speak(nlr)
         self._retry_attempts = 0
         self._prompt_turn = False
 
@@ -960,6 +961,7 @@ class AutoEntityFilling:
             response_form.entities = self._local_entity_form
             responder.form = DEFAULT_FORM_SCHEMA.dump(response_form)
             responder.reply(nlr)
+            responder.speak(nlr)
         else:
             # max attempts exceeded, reset counter, exit auto_fill.
             self._retry_attempts = 0
@@ -1027,6 +1029,7 @@ class AutoEntityFilling:
                 # check if user has been prompted for this entity slot
                 if self._prompt_turn:
                     self._prompt_slot(responder, slot.responses)
+                    responder.listen()
                     return
 
                 # If already prompted,
@@ -1036,6 +1039,7 @@ class AutoEntityFilling:
                 if not _is_valid:
                     # retry logic
                     self._retry_logic(request, responder, slot.retry_response)
+                    responder.listen()
                     return
 
                 slot.value = Entity(

@@ -77,12 +77,23 @@ class ConditionalRandomFields(Tagger):
         seq = self._clf.predict(X)
         marginals_dict = self._clf.predict_marginals(X)
         marginal_tuples = []
+        predictions = []
+        tag_maps = []
         for query_index, query_seq in enumerate(seq):
-            query_marginal_tuples = []
-            for i, tag in enumerate(query_seq):
-                query_marginal_tuples.append([tag, marginals_dict[query_index][i][tag]])
-            marginal_tuples.append(query_marginal_tuples)
-        return marginal_tuples
+            tags = []
+            preds = []
+            for i in range(len(query_seq)):
+                tags.extend(list(marginals_dict[query_index][i].keys()))
+                preds.extend(list(marginals_dict[query_index][i].values()))
+            tag_maps.append(tags)
+            predictions.append(preds)
+        return [tag_maps, predictions]
+        # for query_index, query_seq in enumerate(seq):
+        #     query_marginal_tuples = []
+        #     for i, tag in enumerate(query_seq):
+        #         query_marginal_tuples.append([tag, marginals_dict[query_index][i][tag]])
+        #     marginal_tuples.append(query_marginal_tuples)
+        # return marginal_tuples
 
     def extract_features(self,
                          examples,

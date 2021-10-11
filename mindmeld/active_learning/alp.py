@@ -44,6 +44,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         batch_size: int,
         tuning_strategies: list,
         tuning_level: str,
+        entity_tuning: bool,
         selection_strategy: str,
         save_sampled_queries: bool,
         aggregate_statistic: str,
@@ -83,6 +84,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         self.n_epochs = n_epochs
         self.batch_size = batch_size
         self.tuning_level = tuning_level
+        self.entity_tuning = entity_tuning
         self.tuning_strategies = tuning_strategies
         self.selection_strategy = selection_strategy
         self.save_sampled_queries = save_sampled_queries
@@ -109,6 +111,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         return MindMeldALClassifier(
             self.app_path,
             self.tuning_level,
+            self.entity_tuning,
             self.n_classifiers,
             self.aggregate_statistic,
             self.class_level_statistic,
@@ -134,6 +137,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             "n_classifiers": self.n_classifiers,
             "n_epochs": self.n_epochs,
             "batch_size": self.batch_size,
+            "entity_tuning": self.entity_tuning,
             "tuning_level": self.tuning_level,
             "tuning_strategies": self.tuning_strategies,
             "selection_strategy": self.selection_strategy,
@@ -154,6 +158,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         logger.info("Creating strategy tuning data bucket.")
         self.data_bucket = DataBucketFactory.get_data_bucket_for_strategy_tuning(
             self.app_path,
+            self.entity_tuning,
             self.tuning_level,
             self.train_pattern,
             self.test_pattern,
@@ -169,6 +174,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         logger.info("Loading queries for active-learning selection.")
         self.data_bucket = DataBucketFactory.get_data_bucket_for_query_selection(
             self.app_path,
+            self.entity_tuning,
             self.tuning_level,
             self.train_pattern,
             self.test_pattern,
@@ -224,6 +230,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                     eval_stats,
                     confidences_2d,
                     confidences_3d,
+                    entity_confidences,
                     confidence_segments,
                 ) = self.mindmeld_al_classifier.train(self.data_bucket, heuristic)
                 if not select_mode:
@@ -236,10 +243,16 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                     )
 
                 num_unsampled = len(self.data_bucket.unsampled_queries)
+
+                if self.entity_tuning:
+                    confidence_2d_type = entity_confidences
+                else:
+                    confidence_2d_type = confidences_2d
+
                 if num_unsampled > 0:
                     newly_sampled_queries_ids = self.data_bucket.sample_and_update(
                         sampling_size=self._get_sampling_size(num_unsampled),
-                        confidences_2d=confidences_2d,
+                        confidences_2d=confidence_2d_type,
                         confidences_3d=confidences_3d,
                         heuristic=heuristic,
                         confidence_segments=confidence_segments,
@@ -311,6 +324,7 @@ class ActiveLearningPipelineFactory:
             n_epochs=config.get("tuning", {}).get("n_epochs"),
             batch_size=config.get("tuning", {}).get("batch_size"),
             tuning_strategies=config.get("tuning", {}).get("tuning_strategies"),
+            entity_tuning=config.get("tuning", {}).get("entity_tuning", True),
             tuning_level=config.get("tuning", {}).get("tuning_level"),
             selection_strategy=config.get("query_selection", {}).get(
                 "selection_strategy"

@@ -318,17 +318,20 @@ class TaggerModel(Model):
         predicted_tags_probas = self._clf.predict_proba(
             examples, self.config, workspace_resource
         )
-        tags, probas = zip(*predicted_tags_probas[0])
-        entity_confidence = []
-        entities = self._label_encoder.decode([tags], examples=[examples[0]])[0]
-        for entity in entities:
-            entity_proba = \
-                probas[entity.normalized_token_span.start: entity.normalized_token_span.end + 1]
-            # We assume that the score of the least likely tag in the sequence as the confidence
-            # score of the entire entity sequence
-            entity_confidence.append(min(entity_proba))
-        predicted_labels_scores = tuple(zip(entities, entity_confidence))
-        return predicted_labels_scores
+        # tags, probas = zip(*predicted_tags_probas[0])
+        return tuple(zip(*predicted_tags_probas[0]))
+        # tags, probas = predicted_tags_probas
+
+        # entity_confidence = []
+        # entities = self._label_encoder.decode([tags], examples=[examples[0]])[0]
+        # for entity in entities:
+        #     entity_proba = \
+        #         probas[entity.normalized_token_span.start: entity.normalized_token_span.end + 1]
+        #     # We assume that the score of the least likely tag in the sequence as the confidence
+        #     # score of the entire entity sequence
+        #     entity_confidence.append(min(entity_proba))
+        # predicted_labels_scores = tuple(zip(entities, entity_confidence))
+        # return predicted_labels_scores
 
     def evaluate(self, examples, labels):
         """Evaluates a model against the given examples and labels
@@ -350,8 +353,13 @@ class TaggerModel(Model):
 
         predictions = self.predict(examples)
 
+        # probabilities for all tags across all tokens
+        probas = []
+        for example in examples:
+            probas.append(self.predict_proba([example]))
+
         evaluations = [
-            EvaluatedExample(e, labels[i], predictions[i], None, self.config.label_type)
+            EvaluatedExample(e, labels[i], predictions[i], probas[i], self.config.label_type)
             for i, e in enumerate(examples)
         ]
 

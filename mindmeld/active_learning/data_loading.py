@@ -39,11 +39,10 @@ class LabelMap:
             query_tree (dict): Nested Dictionary containing queries.
                 Has the format: {"domain":{"intent":[Query List]}}.
         """
-        domain_to_intents = LabelMap.get_domain_to_intents(query_tree)
-
-        self.domain2id = LabelMap._get_domain_mappings(domain_to_intents)
+        self.domain_to_intents = LabelMap.get_domain_to_intents(query_tree)
+        self.domain2id = LabelMap._get_domain_mappings(self.domain_to_intents)
         self.id2domain = LabelMap._reverse_dict(self.domain2id)
-        self.domain_to_intent2id = LabelMap._get_intent_mappings(domain_to_intents)
+        self.domain_to_intent2id = LabelMap._get_intent_mappings(self.domain_to_intents)
         self.id2intent = LabelMap._reverse_nested_dict(self.domain_to_intent2id)
 
     @staticmethod
@@ -115,6 +114,29 @@ class LabelMap:
         for parent_key, parent_value in dictionary.items():
             reversed_dict[parent_key] = LabelMap._reverse_dict(parent_value)
         return reversed_dict
+
+    @staticmethod
+    def _get_entity_mappings(
+        entity_tuning: bool, query_list: ProcessedQueryList
+    ) -> Dict:
+        entity_labels = set()
+        if entity_tuning:
+            logger.info("Generating Entity Labels...")
+            for d, i, entities in zip(
+                query_list.domains(), query_list.intents(), query_list.entities()
+            ):
+                if len(entities):
+                    for entity in entities:
+                        e = str(entity.entity.type)
+                        entity_labels.add(f"{d}.{i}.B|{e}")
+                        entity_labels.add(f"{d}.{i}.I|{e}")
+                # else:
+                e = "O|"
+                entity_labels.add(f"{d}.{i}.{e}")
+                    # entity_labels.add(f"{e}")
+
+        entity_labels = sorted(list(entity_labels))
+        return dict(zip(entity_labels, range(len(entity_labels))))
 
     @staticmethod
     def get_class_labels(
@@ -316,21 +338,25 @@ class DataBucket:
         return newly_sampled_queries_ids
 
     @staticmethod
-    def filter_queries_by_domain(query_list: ProcessedQueryList, domain: str):
+    def filter_queries_by_nlp_component(
+        query_list: ProcessedQueryList, component_type: str, component_name: str
+    ):
         """Filter queries for training preperation.
 
         Args:
             query_list (list): List of queries to filter
-            domain (str): Domain of desired queries
+            component_type (str): Component type of desired queries
+            component_name (str): Component name of desired queries
 
         Returns:
             filtered_queries_indices (list): List of indices of filtered queries.
             filtered_queries (list): List of filtered queries.
         """
+
         filtered_queries = []
         filtered_queries_indices = []
         for index, query in enumerate(query_list.processed_queries()):
-            if query.domain == domain:
+            if getattr(query, component_type) == component_name:
                 filtered_queries_indices.append(index)
                 filtered_queries.append(query)
         return filtered_queries_indices, filtered_queries
@@ -344,6 +370,7 @@ class DataBucketFactory:
     @staticmethod
     def get_data_bucket_for_strategy_tuning(
         app_path: str,
+        entity_tuning: bool,
         tuning_level: str,
         train_pattern: str,
         test_pattern: str,
@@ -367,6 +394,13 @@ class DataBucketFactory:
         train_query_list = resource_loader.get_flattened_label_set(
             label_set=train_pattern
         )
+
+        if entity_tuning:
+            label_map.entity2id = LabelMap._get_entity_mappings(
+                entity_tuning, train_query_list
+            )
+            label_map.id2entity = LabelMap._reverse_dict(label_map.entity2id)
+
         train_class_labels = LabelMap.get_class_labels(tuning_level, train_query_list)
         ranked_indices = stratified_random_sample(train_class_labels)
         sampling_size = int(train_seed_pct * len(train_query_list))
@@ -393,6 +427,7 @@ class DataBucketFactory:
     @staticmethod
     def get_data_bucket_for_query_selection(
         app_path: str,
+        entity_tuning: bool,
         tuning_level: str,
         train_pattern: str,
         test_pattern: str,
@@ -439,7 +474,9 @@ class DataBucketFactory:
 
         if log_usage_pct < AL_MAX_LOG_USAGE_PCT:
             sampling_size = int(log_usage_pct * len(log_query_list))
-            log_class_labels = LabelMap.get_class_labels(tuning_level, log_query_list)
+            log_class_labels, entity_labels = label_map.get_class_labels(
+                tuning_level, log_query_list
+            )
             ranked_indices = stratified_random_sample(log_class_labels)
             log_query_ids = [
                 log_query_list.elements[i] for i in ranked_indices[:sampling_size]

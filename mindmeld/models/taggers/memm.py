@@ -145,14 +145,20 @@ class MemmModel(Tagger):
 
         prev_tag = START_TAG
         seq_log_probs = []
+        predictions = []
+        tag_maps = []
         for features in features_by_segment:
             features["prev_tag"] = prev_tag
             X, _ = self._preprocess_data([features])
             prediction = self._clf.predict_proba(X)[0]
-            predicted_tag = np.argmax(prediction)
-            prev_tag = self.class_encoder.inverse_transform(predicted_tag)
-            seq_log_probs.append([prev_tag, prediction[predicted_tag]])
-        return seq_log_probs
+            predictions.append(list(prediction))
+            tag_maps.append([self.class_encoder.inverse_transform(i) for i in range(len(prediction))])
+            # print(prediction, [self.class_encoder.inverse_transform(i) for i in range(len(prediction))])
+            # predicted_tag = np.argmax(prediction)
+            # prev_tag = self.class_encoder.inverse_transform(predicted_tag)
+            # seq_log_probs.append([prev_tag, prediction[predicted_tag]])
+        # return seq_log_probs
+        return [tag_maps, predictions]
 
     @staticmethod
     def _get_feature_selector(selector_type):
