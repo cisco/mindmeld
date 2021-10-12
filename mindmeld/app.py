@@ -25,12 +25,13 @@ from .components.custom_action import CustomActionException, CustomActionSequenc
 from .components.dialogue import AutoEntityFilling, DialogueFlow, DialogueResponder
 from .components.request import Request
 from .components.schemas import DEFAULT_FORM_SCHEMA
+from .core import CallableRegistry
 from .server import MindMeldServer
 
 logger = logging.getLogger(__name__)
 
 
-class Application:
+class Application:  # pylint: disable=R0902
     """The conversational application.
 
         Attributes:
@@ -69,6 +70,7 @@ class Application:
         self.text_preparation_pipeline = text_preparation_pipeline
         self.async_mode = async_mode
         self.custom_action_config = get_custom_action_config(self.app_path)
+        self.registry = CallableRegistry()
 
     @property
     def question_answerer(self):
@@ -234,6 +236,17 @@ class Application:
             else:
                 self.add_dialogue_rule(func_name, auto_fill, **kwargs)
             return func
+
+        return _decorator
+
+    def register_func(self, name=None):
+        """Registers custom functions for mindmeld app"""
+
+        def _decorator(func):
+            func_name = name or func.__name__
+            if not callable(func):
+                raise TypeError("Invalid function type %s.", func_name)  # pylint: disable=W0715
+            self.registry.functions_registry[func_name] = func
 
         return _decorator
 

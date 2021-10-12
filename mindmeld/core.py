@@ -1053,7 +1053,7 @@ class FormEntity:
         default_eval(bool, optional): Use system validation (default: True)
         hints(list, optional): Developer defined list of keywords to verify the
         user input against
-        custom_eval(func, optional): custom validation function (should return either bool:
+        custom_eval(str, optional): custom validation function name (should return either bool:
         validated or not) or a custom resolved value for the entity. If custom resolved value
         is returned, the slot response is considered to be valid.
     """
@@ -1071,7 +1071,6 @@ class FormEntity:
     ):
         self.entity = entity
         self.role = role
-
         if isinstance(responses, str):
             responses = [responses]
         self.responses = responses or [
@@ -1088,8 +1087,9 @@ class FormEntity:
 
         if not self.entity or not isinstance(self.entity, str):
             raise TypeError("Entity cannot be empty.")
-        if self.custom_eval and not callable(custom_eval):
-            raise TypeError("Invalid custom validation function type.")
+
+        if self.custom_eval and not isinstance(self.custom_eval, str):
+            raise TypeError("'custom_eval' function should be a string.")
 
     def to_dict(self):
         """Converts the entity into a dictionary"""
@@ -1102,6 +1102,27 @@ class FormEntity:
                 base[field] = val
 
         return base
+
+
+class CallableRegistry:
+    """A registration class to map callable object names to corresponding objects."""
+    def __init__(self):
+        self._callable_functions_registry = {}
+
+    @property
+    def functions_registry(self):
+        """Getter for functions registry"""
+        return self._callable_functions_registry
+
+    @functions_registry.setter
+    def functions_registry(self, func_name, func):
+        """Populates the function registry map.
+
+        Args:
+            func_name (str): Name to be used as key for the function.
+            func (func): Callable function.
+        """
+        self._callable_functions_registry[func_name] = func
 
 
 def resolve_entity_conflicts(query_entities):
