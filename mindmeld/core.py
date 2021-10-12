@@ -1059,19 +1059,25 @@ class FormEntity:
         return base
 
 
-class Registry:
-    """A registration class to map object names to corresponding objects."""
+class CallableRegistry:
+    """A registration class to map callable object names to corresponding objects."""
     def __init__(self):
-        self.func_registry = {}
+        self._callable_functions_registry = {}
 
-    def add_to_func_registry(self, func_name, func):
+    @property
+    def functions_registry(self):
+        """Getter for functions registry"""
+        return self._callable_functions_registry
+
+    @functions_registry.setter
+    def functions_registry(self, func_name, func):
         """Populates the function registry map.
 
         Args:
             func_name (str): Name to be used as key for the function.
             func (func): Callable function.
         """
-        self.func_registry[func_name] = func
+        self._callable_functions_registry[func_name] = func
 
 
 def resolve_entity_conflicts(query_entities):

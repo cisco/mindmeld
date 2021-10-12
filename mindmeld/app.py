@@ -25,7 +25,7 @@ from .components.custom_action import CustomActionException, CustomActionSequenc
 from .components.dialogue import AutoEntityFilling, DialogueFlow, DialogueResponder
 from .components.request import Request
 from .components.schemas import DEFAULT_FORM_SCHEMA
-from .core import Registry
+from .core import CallableRegistry
 from .server import MindMeldServer
 
 logger = logging.getLogger(__name__)
@@ -69,7 +69,7 @@ class Application:  # pylint: disable=R0902
         self.preprocessor = preprocessor
         self.async_mode = async_mode
         self.custom_action_config = get_custom_action_config(self.app_path)
-        self.registry = Registry()
+        self.registry = CallableRegistry()
 
     @property
     def question_answerer(self):
@@ -245,7 +245,7 @@ class Application:  # pylint: disable=R0902
             func_name = name or func.__name__
             if not callable(func):
                 raise TypeError("Invalid function type %s.", func_name)  # pylint: disable=W0715
-            self.registry.add_to_func_registry(func_name, func)
+            self.registry.functions_registry[func_name] = func
 
         return _decorator
 

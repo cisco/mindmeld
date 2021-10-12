@@ -878,7 +878,7 @@ class AutoEntityFilling:
             # If false, overall validation fails. If either true or a custom resolved
             # value is returned, then the validation succeeds.
 
-            custom_eval_func = self._app.registry.func_registry[slot.custom_eval]
+            custom_eval_func = self._app.registry.functions_registry[slot.custom_eval]
             _validity = custom_eval_func(request)
             if _validity is False:
                 # For checking 'false' return cases
