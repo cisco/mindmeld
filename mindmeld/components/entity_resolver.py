@@ -71,7 +71,7 @@ class EntityResolverFactory:
     @staticmethod
     def _correct_deprecated_er_config(er_config):
         """
-        for backwards compatability
+        for backwards compatibility
           if `er_config` is supplied in deprecated format, its format is corrected and returned,
           else it is not modified and returned as-is
 
@@ -209,6 +209,10 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
             entity_map (Dict[str, Union[str, List]]): Entity map if passed in directly instead of
                 loading from a file path
 
+        Raises:
+            EntityResolverError: if the resolver cannot be fit with the loaded/passed-in data
+
+
         Example of a entity_map.json file:
         ---------------------------------
         entity_map = {
@@ -222,6 +226,7 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
                 ...
             ],
         }
+
         """
         msg = f"Fitting {self.__class__.__name__} entity resolver for entity_type {self.type}"
         logger.info(msg)
@@ -259,7 +264,12 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
 
         # reformat (if required) and fit the resolver model
         entity_map["entities"] = self._format_entity_map(entities_data)
-        self._fit(clean, entity_map)
+        try:
+            self._fit(clean, entity_map)
+        except Exception as e:
+            msg = f"Error in {self.__class__.__name__} while fitting the resolver model with " \
+                  f"clean={clean}"
+            raise EntityResolverError(msg) from e
         self.hash = new_hash
 
         self.ready = True
@@ -282,6 +292,9 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
 
         Returns:
             (list): The top n resolved values for the provided entity.
+
+        Raises:
+            EntityResolverError: if unable to obtain predictions for the given input
         """
 
         if not self.ready:
@@ -308,7 +321,12 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
             allowed_cnames = set(allowed_cnames)  # order doesn't matter
 
         # unsorted list in case of tfidf and embedder models; sorted in case of Elasticsearch
-        results = self._predict(nbest_entities, allowed_cnames)
+        try:
+            results = self._predict(nbest_entities, allowed_cnames)
+        except Exception as e:
+            msg = f"Error in {self.__class__.__name__} while resolving entities for the " \
+                  f"input: {entity_or_list_of_entities}"
+            raise EntityResolverError(msg) from e
 
         return self._trim_and_sort_results(results, top_n)
 
@@ -330,6 +348,14 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
             incremental_model_path (str, optional): The timestamp folder where the cached
                 models are stored.
         """
+        msg = f"Dumping {self.__class__.__name__} entity resolver for entity_type {self.type}"
+        logger.info(msg)
+
+        if not self.ready:
+            msg = "Resolver not ready, model must be built (.fit()) before dumping."
+            logger.error(msg)
+            raise EntityResolverError(msg)
+
         for path in [model_path, incremental_model_path]:
             if not path:
                 continue
@@ -368,11 +394,18 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
             path (str): A .pkl file path where the resolver has been dumped
             entity_map (Dict[str, Union[str, List]]): Entity map if passed in directly instead of
                 loading from a file path
+
+        Raises:
+            EntityResolverError: if the resolver cannot be loaded from the specified path
         """
         msg = f"Loading {self.__class__.__name__} entity resolver for entity_type {self.type}"
         logger.info(msg)
 
         if self.ready:
+            msg = f"The {self.__class__.__name__} entity resolver for entity_type {self.type} is " \
+                  f"already loaded. If you wish to do a clean fit, you can call the fit method " \
+                  f"as follows: .fit(clean=True)"
+            logger.info(msg)
             return
 
         if self._is_system_entity:
@@ -423,7 +456,12 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
             self.resolver_configurations = {}
 
         # load underlying resolver model/algorithm/embeddings
-        self._load(path, entity_map=entity_map)
+        try:
+            self._load(path, entity_map=entity_map)
+        except Exception as e:
+            msg = f"Error in {self.__class__.__name__} while loading the resolver from the " \
+                  f"path: {path}"
+            raise EntityResolverError(msg) from e
 
         self.ready = True
         self.dirty = False
@@ -555,7 +593,7 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
                     new_aliases.extend([string.title() for string in aliases])
                 if augment_normalized and normalizer:
                     new_aliases.extend([normalizer(string) for string in aliases])
-                aliases = set([*aliases, *new_aliases])
+                aliases = {*aliases, *new_aliases}
             if normalize_aliases and normalizer:
                 aliases = [normalizer(alias) for alias in aliases]
 
@@ -1602,7 +1640,7 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
         # useful for validation while loading
         self._model_settings["embedder_model_id"] = self._embedder_model.model_id
 
-        # snippet for backwards compatability
+        # snippet for backwards compatibility
         #  even if the .dump() method of resolver isn't called explicitly, the embeddings need to be
         #  cached for fast inference of resolver; however, with the introduction of dump() and
         #  load() methods, this temporary persisting is not necessary and must be removed in future
@@ -1652,7 +1690,7 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
         return values
 
     def _dump(self, path):
-        # kept due to backwards compatability in _fit(), must be removed in future versions
+        # kept due to backwards compatibility in _fit(), must be removed in future versions
         self._embedder_model.clear_cache()  # delete the temp cache as .dump() method is now used
 
         head, ext = os.path.splitext(path)
@@ -1788,11 +1826,11 @@ class SentenceBertCosSimEntityResolver(EmbedderCosSimEntityResolver):
         }
         # update er_configs in the kwargs with the defaults if any of the default keys are missing
         kwargs.update({
-            "er_config": {
-                **kwargs.get("er_config", {}),
+            "config": {
+                **kwargs.get("config", {}),
                 "model_settings": {
                     **defaults,
-                    **kwargs.get("er_config", {}).get("model_settings", {}),
+                    **kwargs.get("config", {}).get("model_settings", {}),
                 },
             }
         })
@@ -1802,7 +1840,7 @@ class SentenceBertCosSimEntityResolver(EmbedderCosSimEntityResolver):
 
 class EntityResolver:
     """
-    Class for backwards compatability
+    Class for backwards compatibility
 
     deprecated usage
         >>> entity_resolver = EntityResolver(

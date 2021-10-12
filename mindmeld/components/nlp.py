@@ -35,7 +35,7 @@ from ._config import (
 from ._util import TreeNlp, MaskState
 from .domain_classifier import DomainClassifier
 from .entity_recognizer import EntityRecognizer
-from .entity_resolver import EntityResolverFactory, ElasticsearchConnectionError
+from .entity_resolver import EntityResolverFactory
 from .intent_classifier import IntentClassifier
 from .parser import Parser
 from .role_classifier import RoleClassifier
@@ -1711,19 +1711,16 @@ class EntityProcessor(Processor):
         self.role_classifier.load(
             incremental_model_path if incremental_timestamp else model_path
         )
-        try:
-            model_path, incremental_model_path = path.get_resolver_model_path(
-                self._app_path,
-                self.domain,
-                self.intent,
-                self.type,
-                timestamp=incremental_timestamp,
-            )
-            self.entity_resolver.load(
-                incremental_model_path if incremental_timestamp else model_path
-            )
-        except ElasticsearchConnectionError:
-            logger.warning("Cannot connect to Elasticsearch, so Entity Resolver is not loaded.")
+        model_path, incremental_model_path = path.get_resolver_model_path(
+            self._app_path,
+            self.domain,
+            self.intent,
+            self.type,
+            timestamp=incremental_timestamp,
+        )
+        self.entity_resolver.load(
+            incremental_model_path if incremental_timestamp else model_path
+        )
 
     def _evaluate(self, print_stats, label_set="test"):
         # evaluation can be done only for role classifier and not for entity resolver

@@ -34,6 +34,15 @@ def test_bert_embedder():
     assert type(encoded_vec) == ndarray
 
 
+@pytest.mark.skip(reason="sentence bert embedding URL is failing to download")
+@pytest.mark.xfail(strict=False)
+@pytest.mark.extras
+@pytest.mark.bert
+def test_bert_embedder_without_model_name():
+    with pytest.raises(ValueError):
+        BertEmbedder(APP_PATH)
+
+
 @pytest.mark.xfail(strict=False)
 def test_glove_embedder():
     embedder = GloveEmbedder(

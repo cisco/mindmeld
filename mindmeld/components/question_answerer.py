@@ -89,7 +89,7 @@ class QuestionAnswererFactory:
     """
 
     @classmethod
-    def create_question_answerer(cls, app_path=None, app_namespace=None, config=None, **kwargs):
+    def create_question_answerer(cls, app_path=None, config=None, app_namespace=None, **kwargs):
         """
         Args:
             app_path (str, optional): The path to the directory containing the app's data. If
@@ -107,7 +107,7 @@ class QuestionAnswererFactory:
         question_answerer_class = cls._get_question_answerer_class(model_type)
 
         return question_answerer_class(
-            app_path=app_path, app_namespace=app_namespace, config=reformatted_config, **kwargs
+            app_path=app_path, config=reformatted_config, app_namespace=app_namespace, **kwargs
         )
 
     @staticmethod
@@ -119,7 +119,7 @@ class QuestionAnswererFactory:
     @staticmethod
     def _correct_deprecated_qa_config(config):
         """
-        for backwards compatability
+        for backwards compatibility
           if the config is supplied in deprecated format, its format is corrected and returned,
           else it is not modified and returned as-is
 
@@ -301,15 +301,16 @@ class QuestionAnswerer:
 
 class BaseQuestionAnswerer(ABC):
 
-    def __init__(self, app_path=None, app_namespace=None, config=None, **_kwargs):
+    def __init__(self, app_path=None, config=None, app_namespace=None, **_kwargs):
         """
         Args:
             app_path (str, optional): The path to the directory containing the app's data. If
                 provided, used to obtain default 'app_namespace' and QA configurations
-            app_namespace (str, optional): The namespace of the app. Used to prevent
-                collisions between the indices of this app and those of other apps.
             config (dict, optional): The QA config if passed directly rather than loaded from the
                 app config
+            app_namespace (str, optional): The namespace of the app. Used to prevent collisions
+                between the indices of this app and those of other apps. If None, it's value is
+                determined from the app_path.
         """
 
         if not app_path and not app_namespace:
@@ -318,9 +319,16 @@ class BaseQuestionAnswerer(ABC):
                   f"distinctly identify the Knowledge Base indices being created."
             logger.error(msg)
             raise ValueError(msg)
+        elif app_path and not app_namespace:
+            self.app_path = os.path.abspath(app_path)
+            self.app_namespace = get_app_namespace(self.app_path)
+        elif app_namespace and not app_path:
+            self.app_path = os.path.abspath(DEFAULT_APP_PATH)
+            self.app_namespace = get_app_namespace(self.app_path)
+        else:
+            self.app_path = os.path.abspath(app_path)
+            self.app_namespace = app_namespace
 
-        self.app_path = os.path.abspath(app_path) if app_path else app_path
-        self.app_namespace = app_namespace or get_app_namespace(self.app_path)
         self._qa_config = (
             config or get_classifier_config("question_answering", app_path=self.app_path)
         )
@@ -450,6 +458,9 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
     This class uses Entity Resolvers in the backend to implement various underlying functionalities
     of question answerer.
 
+    The created resolvers are dumped at DEFAULT_APP_PATH, whose directory serves as a common
+    site to host all app_namespace's indices, similar to how all the indices of Elasticsearch
+    are stored in a common directory on the disk.
     """
 
     @staticmethod
@@ -703,11 +714,14 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
         def __contains__(self, item):
             return item in self._indices
 
-        def get_index_cache_path(self, index_name):
-            # ex: ~/.cache/mindmeld/question_answerers/{food_ordering}${restaurants}.pkl
-            return get_question_answerer_index_cache_file_path(self.app_path, index_name)
+        def _get_index_cache_path(self, index_name, app_path=None):
+            # ex: ~/.cache/mindmeld/question_answerers/{food_ordering}${restaurants}.pkl where
+            # self.app_path=~/.cache/mindmeld/question_answerers and
+            # index_name = {food_ordering}${restaurants}
+            app_path = app_path or self.app_path
+            return get_question_answerer_index_cache_file_path(app_path, index_name)
 
-        # a 'get' method to obtain all the ids observed in a given KB
+        # 'get' methods for accessing indices that are already loaded into memory
 
         def get_all_ids(self, index_name):
             try:
@@ -716,8 +730,6 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                 msg = f"Index {index_name} does not exist in scope of {self.app_path}. " \
                       f"Consider creating one before calling '.get_all_ids()'. "
                 raise KeyError(msg) from e
-
-        # 'get' methods for accessing the KB data
 
         def get(self, index_name):
             """
@@ -731,8 +743,10 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                       f"Consider creating one before calling '.get()'. "
                 raise KeyError(msg) from e
 
+        # 'get' methods that checks in-memory indices as well as disk path for loading indices
+
         def is_available(self, index_name):
-            return index_name in self or os.path.exists(self.get_index_cache_path(index_name))
+            return index_name in self or os.path.exists(self._get_index_cache_path(index_name))
 
         def get_index_metadata(self, index_name):
             """
@@ -755,8 +769,8 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                 index_name (str): A scoped index name for loading metadata
 
             Returns:
-                index_resorces (Dict[str, FieldResource]): the field resources for each field in the
-                    KB data.
+                index_resources (Dict[str, FieldResource]): the field resources for each field in
+                    the KB data.
                 index_all_ids (List[str]): the list of ids observed for this KB
             """
             if index_name in self:
@@ -787,7 +801,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
             return metadata, index_all_ids
 
         def _get_index_metadata_from_disk(self, index_name):
-            cache_path = self.get_index_cache_path(index_name)
+            cache_path = self._get_index_cache_path(index_name)
             with open(cache_path, "rb") as opfile:
                 metadata = pickle.load(opfile)
                 opfile.close()
@@ -802,8 +816,8 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                 del self._indices[index_name]  # free the pointer
 
             # clear index dump cache path, if required
-            # TODO: This might not delete the entity resolver data and need methods for doing same.
-            cache_path = self.get_index_cache_path(index_name)
+            # Note: This might not delete the entity resolver data and need methods for doing same.
+            cache_path = self._get_index_cache_path(index_name)
             if cache_path and os.path.exists(cache_path):
                 os.remove(cache_path)
 
@@ -831,7 +845,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
             self._indices_all_ids.update({index_name: index_all_ids})
 
             # dump to disk
-            cache_path = self.get_index_cache_path(index_name)
+            cache_path = self._get_index_cache_path(index_name)
             os.makedirs(os.path.dirname(cache_path), exist_ok=True)
             metadata, index_all_ids = self._get_index_metadata_from_memory(index_name)
             metadata.update({"__all_ids": index_all_ids})
@@ -846,6 +860,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
             method loads metadata, fits resources and gets them ready.
             """
             if index_name in self:
+                # in-memory indices are always fit indices
                 return
             elif self.is_available(index_name):
                 index_resources, index_all_ids = self.get_index_metadata(index_name)
@@ -856,7 +871,6 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                         id2value={},
                         has_text_resolver=field_resource.has_text_resolver,
                         has_embedding_resolver=field_resource.has_embedding_resolver,
-                        resolver_model_settings={},
                         processor_type=field_resource.processor_type,
                         resource_loader=_resource_loader
                     )
@@ -1222,8 +1236,15 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                    f"has_embedding_resolver: {self.has_embedding_resolver}"
 
         def update_resource(
-            self, id2value, has_text_resolver, has_embedding_resolver, resolver_model_settings,
-            clean=False, app_path=DEFAULT_APP_PATH, processor_type="keyword", resource_loader=None
+            self,
+            id2value,
+            has_text_resolver,
+            has_embedding_resolver,
+            resolver_model_settings=None,
+            clean=False,
+            app_path=DEFAULT_APP_PATH,
+            processor_type="keyword",
+            resource_loader=None
         ):
             """
             Updates a field resource by fitting with latest data (if id2value is passed) or by
@@ -1244,6 +1265,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                 clean (bool, optional): if True, resolvers are fit with clean=True
                 app_path (str, optional): a path to create cache for embedder resolver
                 processor_type (str, optional, "text" or "keyword"): processor for tfidf resolver
+                resource_loader (ResourceLoader, optional): a resource loader object
             """
 
             if not id2value and not self.data_type:  # else, if required, update resolvers
@@ -1319,6 +1341,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                             "text_resolver"
                         ))
                     # create a new resolver and fit
+                    resolver_model_settings = resolver_model_settings or {}
                     self._text_resolver = TfIdfSparseCosSimEntityResolver(
                         app_path=app_path,
                         entity_type=get_scoped_index_name(self.index_name, self.field_name),
@@ -1392,6 +1415,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                             "embedder_resolver"
                         ))
                     # create a new resolver and fit
+                    resolver_model_settings = resolver_model_settings or {}
                     self._embedding_resolver = EmbedderCosSimEntityResolver(
                         app_path=app_path,
                         entity_type=get_scoped_index_name(self.index_name, self.field_name),
@@ -1985,7 +2009,6 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
     This class uses Elasticsearch in the backend to implement various underlying functionalities
     of question answerer.
-
     """
 
     def __init__(self, **kwargs):
@@ -2003,10 +2026,28 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         # bug-fix: previously, '_embedder_model' is created only when 'model_type' is 'embedder'
         self._embedder_model = None
         if "embedder" in self.query_type:
-            # An app path is necessary for creating a cache path for dumping embeddings cache
+            model_settings = self.model_settings
+            # add defaults
+            if model_settings.get("embedder_type") == "bert":
+                pretrained_name_or_abspath = model_settings.get(
+                    "pretrained_name_or_abspath", "sentence-transformers/bert-base-nli-mean-tokens"
+                )
+                model_settings["pretrained_name_or_abspath"] = pretrained_name_or_abspath
+            elif model_settings.get("embedder_type") == "glove":
+                token_embedding_dimension = model_settings.get(
+                    "token_embedding_dimension", 300
+                )
+                model_settings["token_embedding_dimension"] = token_embedding_dimension
+            # set the value
+            self.model_settings = model_settings
+            # init an embedder with those model settings
             self._embedder_model = create_embedder_model(
                 app_path=self.app_path or DEFAULT_APP_PATH, config=self.model_settings
-            )
+            )  # An app path is necessary for creating a cache path for dumping embeddings cache
+
+    @BaseQuestionAnswerer.model_settings.setter
+    def model_settings(self, value):
+        self._qa_config["model_settings"] = value
 
     @property
     def _es_client(self):
@@ -2358,6 +2399,8 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
         # Saves the embedder model cache to disk
         if embedder_model:
+            # as no cache_path is specified here, the cache is dumped at a path that is already
+            # determined at the time of `embedder_model` initialization
             embedder_model.dump_cache()
 
     class Search:

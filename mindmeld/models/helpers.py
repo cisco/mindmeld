@@ -177,6 +177,7 @@ def create_embedder_model(app_path, config):
         )
 
     try:
+        # cache_path for embedder, if required, needs to be included as a key in the embedder_config
         return EMBEDDER_MAP[embedder_type](app_path=app_path, **embedder_config)
     except KeyError as e:
         msg = "Invalid model configuration: Unknown embedder type {!r}"
