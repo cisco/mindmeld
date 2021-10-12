@@ -40,7 +40,6 @@ def test_offset_token_start_values():
 
 
 def test_filter_out_space_text_tokens():
-
     input_tokens = [
         {"text": "How"},
         {"text": "   "},
@@ -60,7 +59,6 @@ def test_filter_out_space_text_tokens():
 
 
 def test_find_mindmeld_annotation_re_matches():
-
     sentence = "Hello {Lucien|sys_person|employee}. Do you have {1|sys_number} cat?"
     matches = TextPreparationPipeline.find_mindmeld_annotation_re_matches(sentence)
     assert len(matches) == 2
@@ -72,7 +70,6 @@ def test_find_mindmeld_annotation_re_matches():
 
 
 def test_normalize_around_annoations():
-
     sentence = "HELLO {LUCIEN|PERSON_NAME}, HOW ARE YOU?"
     normalized_sentence = TextPreparationPipeline.modify_around_annotations(
         text=sentence, function=Lowercase().normalize
@@ -82,7 +79,6 @@ def test_normalize_around_annoations():
 
 
 def test_tokenize_around_annoations():
-
     text_preparation_pipeline = (
         TextPreparationPipelineFactory.create_default_text_preparation_pipeline()
     )
@@ -101,7 +97,6 @@ def test_tokenize_around_annoations():
 
 
 def test_create_text_preparation_pipeline():
-
     text_preparation_pipeline = (
         TextPreparationPipelineFactory.create_text_preparation_pipeline(
             language=ENGLISH_LANGUAGE_CODE,
@@ -122,8 +117,70 @@ def test_create_text_preparation_pipeline():
     assert isinstance(text_preparation_pipeline.stemmer, EnglishNLTKStemmer)
 
 
-def test_construct_pipeline_components_valid_input():
+def test_text_preparation_pipeline_hash():
+    text_preparation_pipeline = (
+        TextPreparationPipelineFactory.create_text_preparation_pipeline(
+            language=ENGLISH_LANGUAGE_CODE,
+            preprocessors=["NoOpPreprocessor"],
+            regex_norm_rules=[{"pattern": ".*", "replacement": "cisco"}],
+            normalizers=["Lowercase", "ASCIIFold"],
+            tokenizer="WhiteSpaceTokenizer",
+            stemmer=None,
+        )
+    )
 
+    original_hash = text_preparation_pipeline.get_hashid()
+
+    # Change order of normalizers
+    text_preparation_pipeline = (
+        TextPreparationPipelineFactory.create_text_preparation_pipeline(
+            language=ENGLISH_LANGUAGE_CODE,
+            preprocessors=["NoOpPreprocessor"],
+            regex_norm_rules=[{"pattern": ".*", "replacement": "cisco"}],
+            normalizers=["ASCIIFold", "Lowercase"],
+            tokenizer="WhiteSpaceTokenizer",
+            stemmer=None,
+        )
+    )
+    order_changed_hash = text_preparation_pipeline.get_hashid()
+
+    # Change RegexNormalizer pattern
+    text_preparation_pipeline = (
+        TextPreparationPipelineFactory.create_text_preparation_pipeline(
+            language=ENGLISH_LANGUAGE_CODE,
+            preprocessors=["NoOpPreprocessor"],
+            regex_norm_rules=[{"pattern": ".*", "replacement": "cisc0"}],
+            normalizers=["ASCIIFold", "Lowercase"],
+            tokenizer="WhiteSpaceTokenizer",
+            stemmer=None,
+        )
+    )
+
+    regex_changed_hash = text_preparation_pipeline.get_hashid()
+
+    # Change Tokenizer type
+    text_preparation_pipeline = (
+        TextPreparationPipelineFactory.create_text_preparation_pipeline(
+            language=ENGLISH_LANGUAGE_CODE,
+            preprocessors=["NoOpPreprocessor"],
+            regex_norm_rules=[{"pattern": ".*", "replacement": "cisco"}],
+            normalizers=["ASCIIFold", "Lowercase"],
+            tokenizer="LetterTokenizer",
+            stemmer=None,
+        )
+    )
+
+    tokenizer_changed_hash = text_preparation_pipeline.get_hashid()
+
+    assert original_hash != order_changed_hash
+    assert original_hash != regex_changed_hash
+    assert original_hash != tokenizer_changed_hash
+    assert tokenizer_changed_hash != regex_changed_hash
+    assert tokenizer_changed_hash != order_changed_hash
+    assert regex_changed_hash != order_changed_hash
+
+
+def test_construct_pipeline_components_valid_input():
     text_preparation_pipeline = (
         TextPreparationPipelineFactory.create_text_preparation_pipeline(
             preprocessors=("NoOpPreprocessor", NoOpPreprocessor()),
@@ -148,7 +205,6 @@ def test_construct_pipeline_components_valid_input():
 
 
 def test_construct_pipeline_components_invalid_input():
-
     with pytest.raises(TypeError):
         TextPreparationPipelineFactory.create_text_preparation_pipeline(
             preprocessors=None,

@@ -440,8 +440,8 @@ class BaseQuestionAnswerer(ABC):
         """
 
         if (
-            ("config" in kwargs and kwargs["config"]) or
-            ("app_path" in kwargs and kwargs["app_path"])
+            ("config" in kwargs and kwargs["config"])
+            or ("app_path" in kwargs and kwargs["app_path"])
         ):
             msg = "Passing 'config' or 'app_path' to '.load_kb()' method is no longer " \
                   "supported. Create a Question Answerer instance with the required " \
@@ -938,8 +938,10 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
             elif isinstance(value, str) and "," in value and len(value.split(",")) == 2:
                 # eg. "37.77,122.41"
                 return value.strip()
-            elif (isinstance(value, list) and len(value) == 2 and
-                  isinstance(value[0], numbers.Number) and isinstance(value[1], numbers.Number)):
+            elif (isinstance(value, list)
+                  and len(value) == 2
+                  and isinstance(value[0], numbers.Number)
+                  and isinstance(value[1], numbers.Number)):
                 # eg. [37.77, 122.41]
                 return ",".join([str(_value) for _value in value])
 
@@ -1216,7 +1218,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
 
             # vars that contain data of the field
             self.data_type = None
-            self.id2value = {}  # TODO: duplicate data also exist in resolver object if created
+            self.id2value = {}  # Resolvers don't dump data; so no data duplication on the disk
             self.hash = None  # to identify any data changes before build resolver
 
             # details to create any required resolvers
