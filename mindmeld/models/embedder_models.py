@@ -48,9 +48,12 @@ class Embedder(ABC):
             Args:
                 cache_path: A .pkl cache path to dump the embeddings cache
             """
-            self.data = OrderedDict()
+            self.reset()
             if cache_path:
                 self.load(self._get_cache_path(cache_path=cache_path))
+
+        def reset(self):
+            self.data = OrderedDict()
 
         def load(self, cache_path=None):
             """Loads the cache file."""
@@ -85,8 +88,6 @@ class Embedder(ABC):
 
         def clear(self, cache_path=None):
             """Deletes the cache file."""
-
-            self.data = OrderedDict()
 
             cache_path = self._get_cache_path(cache_path)
 

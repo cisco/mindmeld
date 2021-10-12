@@ -319,15 +319,9 @@ class BaseQuestionAnswerer(ABC):
                   f"distinctly identify the Knowledge Base indices being created."
             logger.error(msg)
             raise ValueError(msg)
-        elif app_path and not app_namespace:
-            self.app_path = os.path.abspath(app_path)
-            self.app_namespace = get_app_namespace(self.app_path)
-        elif app_namespace and not app_path:
-            self.app_path = os.path.abspath(DEFAULT_APP_PATH)
-            self.app_namespace = get_app_namespace(self.app_path)
-        else:
-            self.app_path = os.path.abspath(app_path)
-            self.app_namespace = app_namespace
+
+        self.app_path = os.path.abspath(app_path) if app_path else app_path
+        self.app_namespace = app_namespace or get_app_namespace(self.app_path)
 
         self._qa_config = (
             config or get_classifier_config("question_answering", app_path=self.app_path)
@@ -351,7 +345,19 @@ class BaseQuestionAnswerer(ABC):
 
     @property
     def model_settings(self) -> dict:
-        return self._qa_config.get("model_settings", {})
+        model_settings = self._qa_config.get("model_settings", {})
+
+        # add defaults
+        if model_settings.get("embedder_type") == "bert":
+            model_settings["pretrained_name_or_abspath"] = model_settings.get(
+                "pretrained_name_or_abspath", "sentence-transformers/bert-base-nli-mean-tokens"
+            )
+        elif model_settings.get("embedder_type") == "glove":
+            model_settings["token_embedding_dimension"] = model_settings.get(
+                "token_embedding_dimension", 300
+            )
+
+        return model_settings
 
     @abstractmethod
     def _get(self, *args, **kwargs):
@@ -1314,10 +1320,10 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                 self.has_text_resolver = has_text_resolver
                 self.has_embedding_resolver = has_embedding_resolver
                 if not self.has_text_resolver and not self.has_embedding_resolver:
-                    msg = f"Atleast one of text or embedder resolver can be applied " \
+                    msg = f"At least one of text or embedder resolver can be applied " \
                           f"for string type data field ({self.field_name}) but continuing " \
-                          f"without fitting any resolvers due to your input configurations. " \
-                          f"This might limit your search space during inference!"
+                          f"without fitting any resolvers due to your input 'query_type'" \
+                          f"configuration. This might limit your search space during inference!"
                     logger.warning(msg)
                     return
                 new_hash = Hasher(algorithm="sha256").hash(
@@ -2028,28 +2034,9 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         # bug-fix: previously, '_embedder_model' is created only when 'model_type' is 'embedder'
         self._embedder_model = None
         if "embedder" in self.query_type:
-            model_settings = self.model_settings
-            # add defaults
-            if model_settings.get("embedder_type") == "bert":
-                pretrained_name_or_abspath = model_settings.get(
-                    "pretrained_name_or_abspath", "sentence-transformers/bert-base-nli-mean-tokens"
-                )
-                model_settings["pretrained_name_or_abspath"] = pretrained_name_or_abspath
-            elif model_settings.get("embedder_type") == "glove":
-                token_embedding_dimension = model_settings.get(
-                    "token_embedding_dimension", 300
-                )
-                model_settings["token_embedding_dimension"] = token_embedding_dimension
-            # set the value
-            self.model_settings = model_settings
-            # init an embedder with those model settings
             self._embedder_model = create_embedder_model(
                 app_path=self.app_path or DEFAULT_APP_PATH, config=self.model_settings
             )  # An app path is necessary for creating a cache path for dumping embeddings cache
-
-    @BaseQuestionAnswerer.model_settings.setter
-    def model_settings(self, value):
-        self._qa_config["model_settings"] = value
 
     @property
     def _es_client(self):
