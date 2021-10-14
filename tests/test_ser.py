@@ -20,27 +20,30 @@ DUCKLING_URL = "http://localhost:7151/parse"
 
 
 @pytest.mark.parametrize(
-    "query, predicted_texts, predicted_values",
+    "query, predicted_texts, predicted_values, conversion",
     [
-        ("is this room open for an hour", ["an hour"], [SECONDS_IN_HOUR]),
+        ("is this room open for an hour", ["an hour"], [1], SECONDS_IN_HOUR),
         (
             "is the room available for the next 5 and a half hours",
             ["5 and a half hours"],
-            [SECONDS_IN_HOUR * 5.5],
+            [330],
+            SECONDS_IN_MINUTE,
         ),
         (
             "does anyone have this room for 15 minutes",
             ["15 minutes"],
-            [SECONDS_IN_MINUTE * 15],
+            [15],
+            SECONDS_IN_MINUTE,
         ),
         (
             "is anyone using this room for the next 6 hours",
             ["6 hours"],
-            [SECONDS_IN_HOUR * 6],
+            [6],
+            SECONDS_IN_HOUR,
         ),
     ],
 )
-def test_duration(query, predicted_texts, predicted_values):
+def test_duration(query, predicted_texts, predicted_values, conversion):
     data = {"text": query, "reftime": NOW_TIMESTAMP, "latent": True}
 
     res = requests.post(DUCKLING_URL, data=data)
@@ -54,9 +57,16 @@ def test_duration(query, predicted_texts, predicted_values):
 
     for p in predicted_texts:
         assert p in response_texts
-
     for p in predicted_values:
-        assert p in response_values_normalized_seconds
+        assert p * conversion in response_values_normalized_seconds
+
+    candidates = DucklingRecognizer.get_instance().get_candidates_for_text(
+        query, entity_types=["sys_duration"], timestamp=NOW_TIMESTAMP
+    )
+    for p in predicted_texts:
+        assert p in [c["body"] for c in candidates]
+    for p in predicted_values:
+        assert p in [c["value"].get("value") for c in candidates]
 
 
 @pytest.mark.parametrize(
@@ -77,7 +87,7 @@ def test_duration(query, predicted_texts, predicted_values):
         (
             "set alarm for this morning",
             ["this morning"],
-            ["2018-12-13T04:00:00.000-08:00"],
+            ["2018-12-13T00:00:00.000-08:00"],
             ["2018-12-13T12:00:00.000-08:00"],
         ),
         (
@@ -108,6 +118,16 @@ def test_interval(query, predicted_texts, predicted_from, predicted_to):
     for p in predicted_to:
         assert p in response_to_value
 
+    candidates = DucklingRecognizer.get_instance().get_candidates_for_text(
+        query, entity_types=["sys_interval"], timestamp=NOW_TIMESTAMP
+    )
+    for p in predicted_texts:
+        assert p in [c["body"] for c in candidates]
+    for p in predicted_from:
+        assert p in [c["value"].get("from", {}).get("value") for c in candidates]
+    for p in predicted_to:
+        assert p in [c["value"].get("to", {}).get("value") for c in candidates]
+
 
 @pytest.mark.parametrize(
     "query, predicted_texts, predicted_values",
@@ -137,6 +157,14 @@ def test_number(query, predicted_texts, predicted_values):
     for p in predicted_values:
         assert p in response_values
 
+    candidates = DucklingRecognizer.get_instance().get_candidates_for_text(
+        query, entity_types=["sys_number"], timestamp=NOW_TIMESTAMP
+    )
+    for p in predicted_texts:
+        assert p in [c["body"] for c in candidates]
+    for p in predicted_values:
+        assert p in [c["value"].get("value") for c in candidates]
+
 
 @pytest.mark.parametrize(
     "query, predicted_texts, predicted_values",
@@ -161,6 +189,14 @@ def test_ordinal(query, predicted_texts, predicted_values):
         assert p in response_texts
     for p in predicted_values:
         assert p in response_values
+
+    candidates = DucklingRecognizer.get_instance().get_candidates_for_text(
+        query, entity_types=["sys_ordinal"], timestamp=NOW_TIMESTAMP
+    )
+    for p in predicted_texts:
+        assert p in [c["body"] for c in candidates]
+    for p in predicted_values:
+        assert p in [c["value"].get("value") for c in candidates]
 
 
 @pytest.mark.parametrize(
@@ -192,6 +228,47 @@ def test_phone_number(query, predicted_texts, predicted_values):
     for p in predicted_values:
         assert p in response_values
 
+    candidates = DucklingRecognizer.get_instance().get_candidates_for_text(
+        query, entity_types=["sys_phone-number"], timestamp=NOW_TIMESTAMP
+    )
+    for p in predicted_texts:
+        assert p in [c["body"] for c in candidates]
+    for p in predicted_values:
+        assert p in [c["value"].get("value") for c in candidates]
+
+
+@pytest.mark.parametrize(
+    "query, predicted_texts, predicted_values",
+    [
+        ("try 4111-1111-1111-1111", ["4111-1111-1111-1111"], ["4111111111111111"]),
+        ("3714-496353-98431 from amex", ["3714-496353-98431"], ["371449635398431"]),
+        ("card number 6011-1111-1111-1117", ["6011-1111-1111-1117"], ["6011111111111117"]),
+        ("1899028724221", ["1899028724221"], ["1899028724221"]),
+    ],
+)
+def test_credit_card(query, predicted_texts, predicted_values):
+    data = {"text": query, "reftime": NOW_TIMESTAMP, "latent": True}
+
+    res = requests.post(DUCKLING_URL, data=data)
+    responses = res.json()
+    response_texts = [r["body"] for r in responses]
+    response_values = [
+        r["value"]["value"] for r in responses if r["value"].get("value")
+    ]
+
+    for p in predicted_texts:
+        assert p in response_texts
+    for p in predicted_values:
+        assert p in response_values
+
+    candidates = DucklingRecognizer.get_instance().get_candidates_for_text(
+        query, entity_types=["sys_credit-card-number"], timestamp=NOW_TIMESTAMP
+    )
+    for p in predicted_texts:
+        assert p in [c["body"] for c in candidates]
+    for p in predicted_values:
+        assert p in [c["value"].get("value") for c in candidates]
+
 
 @pytest.mark.parametrize(
     "query, predicted_texts, predicted_values",
@@ -219,6 +296,14 @@ def test_temperature(query, predicted_texts, predicted_values):
         assert p in response_texts
     for p in predicted_values:
         assert p in response_values
+
+    candidates = DucklingRecognizer.get_instance().get_candidates_for_text(
+        query, entity_types=["sys_temperature"], timestamp=NOW_TIMESTAMP
+    )
+    for p in predicted_texts:
+        assert p in [c["body"] for c in candidates]
+    for p in predicted_values:
+        assert p in [c["value"].get("value") for c in candidates]
 
 
 @pytest.mark.parametrize(
@@ -276,6 +361,14 @@ def test_time(query, predicted_texts, predicted_values):
     for p in predicted_values:
         assert p in response_values
 
+    candidates = DucklingRecognizer.get_instance().get_candidates_for_text(
+        query, entity_types=["sys_time"], timestamp=NOW_TIMESTAMP
+    )
+    for p in predicted_texts:
+        assert p in [c["body"] for c in candidates]
+    for p in predicted_values:
+        assert p in [c["value"].get("value") for c in candidates]
+
 
 def test_system_entity_recognizer_component_no_config(kwik_e_mart_app_path):
     # If the app has no config, then we need to default to duckling
@@ -285,9 +378,7 @@ def test_system_entity_recognizer_component_no_config(kwik_e_mart_app_path):
     assert result[1] == 200
 
 
-def test_system_entity_recognizer_component_empty_config(
-    food_ordering_app_path, kwik_e_mart_app_path
-):
+def test_system_entity_recognizer_component_empty_config(food_ordering_app_path):
     # If the app has an empty config (ie. {}), then it should not run system entity
     recognizer = SystemEntityRecognizer.load_from_app_path(food_ordering_app_path)
     result = recognizer.parse("today is sunday")

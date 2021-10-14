@@ -201,7 +201,7 @@ def test_en_time_parse(en_mla, query, grain, value):
         ("diez dólares", "$", 10),
         ("dos dólares", "$", 2),
         ("setenta y ocho euros", "EUR", 78),
-        ("$ 58.67", "$", 58.67),
+        ("$ 58,67", "$", 58.67),
         ("cuatrocientos DOLARES", "$", 400),
         ("$ 100000", "$", 100000),
     ],
@@ -227,7 +227,7 @@ def test_es_duration_parse(es_mla, query, unit, value):
         ("treinta y ocho pájaros", "treinta y ocho", 38),
         ("1/4 manzana", "1/4", 0.25),
         ("1.394.345,45 ladrillos", "1.394.345,45", 1394345.45),
-        ("nueve mil ocho mujeres", "nueve", 9),
+        ("nueve mil ocho mujeres", "nueve mil ocho", 9008),
     ],
 )
 def test_es_cardinal_parse(es_mla, query, body, value):

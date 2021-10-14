@@ -339,8 +339,8 @@ class RoleClassifier(Classifier):
 
     def _get_examples_and_labels_hash(self, queries):
         hashable_queries = (
-            [self.domain + "###" + self.intent + "###" + self.entity_type + "###"] +
-            sorted(list(queries.raw_queries()))
+            [self.domain + "###" + self.intent + "###" + self.entity_type + "###"]
+            + sorted(list(queries.raw_queries()))
         )
         return self._resource_loader.hash_list(hashable_queries)
 

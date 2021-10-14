@@ -116,6 +116,7 @@ setup(
             "matplotlib~=3.3.1",
         ],
         "dvc": [
+            'pygit2>=1.5.0,<1.7; python_version < "3.7"',
             "dvc>=1.8.1"
         ]
     },
