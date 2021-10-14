@@ -178,7 +178,8 @@ class PlotManager:
             data_dict (dict): Dictionary containing the filtered nested data.
         """
         for selected_key in selected_keys:
-            data_dict = data_dict[selected_key]
+            if selected_key in data_dict:
+                data_dict = data_dict[selected_key]
         return data_dict
 
     @staticmethod
