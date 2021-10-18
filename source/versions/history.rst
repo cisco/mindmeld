@@ -1,6 +1,62 @@
 Package History
 ===============
 
+4.4.0 (2021-10-18)
+------------------
+
+Major Features and Improvements
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Implemented a text preparation pipeline that supports (multilingual tokenization)[https://www.mindmeld.com/docs/userguide/tokenizer.html] and makes our Preprocessors, Normalizers, Tokenizers, and Stemmers configurable.
+
+- Implemented (non-elasticsearch Question Answering capability)[https://www.mindmeld.com/docs/userguide/kb.html#questionanswerer-without-elasticsearch] that works similar to Elasticsearch based Question Answerer.
+
+- Implemented `deny_nlp` functionality for the `nlp.process` API [interface](https://github.com/cisco/mindmeld/pull/311/).
+
+- Added a [new blueprint](https://www.mindmeld.com/docs/blueprints/screening_app.html) for non-english MindMeld applications.
+
+- Implemented consistent input validation of APIs using Marshmallow
+
+- Implemented automatic annotation tools to bootstrap training data in MindMeld
+
+- Implemented multilingual annotation tools for automatically annotating non-english MindMeld applications
+
+- Implemented (active learning pipeline)[https://www.mindmeld.com/docs/walkthroughs/wt_active_learning.html] for MindMeld
+
+- Implemented multilingual [paraphrasing functionality](https://www.mindmeld.com/docs/userguide/augmentation.html) to make it easier to bootstrap small conversational applications with data augmentation.
+
+- Implemented query caching using sqlite db to reduce training time speed
+
+- Integrated with DagsHub to provide experiments tracking and intuitive UIs to track model performance
+
+- Updated Duckling dependency with the latest upstream changes
+
+
+Bug fixes
+^^^^^^^^^
+
+- Fixed custom validation [bug](https://github.com/cisco/mindmeld/issues/352) in Automatic Slotfilling
+- Fixed input validation [bug](https://github.com/cisco/mindmeld/issues/363) for certain queries
+- Fixed [serialization issues](https://github.com/cisco/mindmeld/issues/270) with responder object
+- Fixed [bug](https://github.com/cisco/mindmeld/issues/274) where duckling was not returning any entity candidates
+- Fixed RASA to MindMeld conversion [bug](https://github.com/cisco/mindmeld/pull/277)
+- Fixed a [path loading issue](https://github.com/cisco/mindmeld/issues/307) with Windows environments
+- Fixed a memory leak issue when loading multiple MindMeld apps in parallel (https://github.com/cisco/mindmeld/pull/296)
+- Fixed a `sys_candidate` value (bug)[https://github.com/cisco/mindmeld/pull/317]
+- Fixed a (bug)[https://github.com/cisco/mindmeld/pull/318] with the Conditional Random Field model
+- Fixed a feature extraction (bug)[https://github.com/cisco/mindmeld/pull/323] in MindMeld
+- Fixed Question Answerer issue (when using a compact json format for Knowledge Base)[https://github.com/cisco/mindmeld/issues/220] and tightened up its interface to (avoid conflicting usage)[https://github.com/cisco/mindmeld/issues/219] of app_namespace and app_path arguments.
+
+
+Legacy
+^^^^^^
+
+- Removed support for Python 3.5
+- Refactored our legacy tokenizer functionality to improve configurability and add new functionality
+- Refactored our Question Answerer component and improved it's interface
+
+
+
 4.3.2 (2020-10-15)
 ------------------
 
