@@ -9,7 +9,7 @@ Major Features and Improvements
 
 - Implemented a text preparation pipeline that supports (multilingual tokenization)[https://www.mindmeld.com/docs/userguide/tokenizer.html] and makes our Preprocessors, Normalizers, Tokenizers, and Stemmers configurable.
 
-- Implemented (non-elasticsearch Question Answering capability)[https://www.mindmeld.com/docs/userguide/kb.html#questionanswerer-without-elasticsearch] that is better than simple text matching.
+- Implemented (non-Elasticsearch Question Answering capability)[https://www.mindmeld.com/docs/userguide/kb.html#questionanswerer-without-elasticsearch] that is better than simple text matching.
 
 - Implemented `deny_nlp` functionality for the `nlp.process` API [interface](https://github.com/cisco/mindmeld/pull/311/).
 
