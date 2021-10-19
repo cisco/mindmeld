@@ -130,10 +130,9 @@ class LabelMap:
                         e = str(entity.entity.type)
                         entity_labels.add(f"{d}.{i}.B|{e}")
                         entity_labels.add(f"{d}.{i}.I|{e}")
-                # else:
+
                 e = "O|"
                 entity_labels.add(f"{d}.{i}.{e}")
-                    # entity_labels.add(f"{e}")
 
         entity_labels = sorted(list(entity_labels))
         return dict(zip(entity_labels, range(len(entity_labels))))

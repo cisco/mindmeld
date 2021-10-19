@@ -216,14 +216,15 @@ class MindMeldALClassifier(ALClassifier):
 
             domain = classifier.domain
             intent = classifier.intent
+            default_prob = 1.0
             default_tag = "O|"
             default_key = f"{domain}.{intent}.{default_tag}"
+            default_idx = tag_to_id[f"{default_key}"]
 
             if not classifier_eval:
                 for _ in range(len(queries)):
                     query_prob_vector = np.zeros(len(tag_to_id))
-                    index = tag_to_id[f"{default_key}"]
-                    query_prob_vector[index] = 1.0
+                    query_prob_vector[default_idx] = default_prob
                     queries_prob_vectors.append(query_prob_vector)
 
             else:
@@ -231,8 +232,7 @@ class MindMeldALClassifier(ALClassifier):
 
                     if not len(query.predicted):
                         query_prob_vector = np.zeros(len(tag_to_id))
-                        index = tag_to_id[f"{default_key}"]
-                        query_prob_vector[index] = 1.0
+                        query_prob_vector[default_idx] = default_prob
 
                     else:
                         # Create and populate a 2D vector (# tokens * # tags)
@@ -243,7 +243,8 @@ class MindMeldALClassifier(ALClassifier):
                             tags, probas = tags_probas_pair
                             for i, tag in enumerate(tags):
                                 key = f"{domain}.{intent}.{tag}"
-                                tag_index = tag_to_id[key]
+                                tag_index = tag_to_id.get(key, default_idx)
+                                # To-do: check default idx to default value map, whether needed.
                                 query_prob_vector_2d[token_idx][tag_index] = probas[i]
 
                         # Use the max uncertainty token from the vector for active learning
