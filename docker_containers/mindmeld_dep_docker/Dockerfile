@@ -63,12 +63,11 @@ RUN echo alias python=python3  >> /root/.bashrc
 RUN echo alias pip=pip3  >> /root/.bashrc
 
 RUN pip3 install --upgrade pip
-RUN pip3 install -U mindmeld
+RUN pip3 install -U mindmeld spacy==3.1.3
 RUN pip3 install click-log==0.1.8
 
 RUN export LC_ALL=C.UTF-8 && \
     export LANG=C.UTF-8 && \
-    pip3 install mindmeld --upgrade && \
     mindmeld num-parse --start
 
 # Expose ports.
@@ -80,7 +79,6 @@ EXPOSE 7151
 
 ENTRYPOINT export LC_ALL=C.UTF-8 && \
     export LANG=C.UTF-8 && \
-    pip3 install mindmeld --upgrade && \
     mindmeld num-parse --start && \
     su mindmeld -c "ES_JAVA_OPTS='-Xms1g -Xmx1g' /elasticsearch/bin/elasticsearch"
 

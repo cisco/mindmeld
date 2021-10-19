@@ -66,7 +66,7 @@ RUN echo alias python=python3  >> /root/.bashrc
 RUN echo alias pip=pip3  >> /root/.bashrc
 
 RUN pip3 install --upgrade pip
-RUN pip3 install -U mindmeld
+RUN pip3 install -U mindmeld spacy==3.1.3
 RUN pip3 install click-log==0.1.8
 
 ARG REBUILD_BLUEPRINT=unknown
@@ -76,7 +76,6 @@ RUN mkdir -p home_assistant && \
 
 RUN export LC_ALL=C.UTF-8 && \
     export LANG=C.UTF-8 && \
-    pip3 install mindmeld --upgrade && \
     su mindmeld -c "ES_JAVA_OPTS='-Xms1g -Xmx1g' /elasticsearch/bin/elasticsearch -d" && \
     mindmeld num-parse --start && \
     python3 -m home_assistant build
@@ -90,7 +89,6 @@ EXPOSE 7150
 
 ENTRYPOINT export LC_ALL=C.UTF-8 && \
     export LANG=C.UTF-8 && \
-    pip3 install mindmeld --upgrade && \
     su mindmeld -c "ES_JAVA_OPTS='-Xms1g -Xmx1g' /elasticsearch/bin/elasticsearch -d" && \
     mindmeld num-parse --start && \
     /wait_for_cluster_to_turn_green.sh && \
