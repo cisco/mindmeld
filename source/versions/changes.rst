@@ -12,7 +12,7 @@ support and also adds a new Spanish blueprint.
 
 Small amounts of training data lead to NLP inaccuracies. Paraphrasing allows application developers to
 increase the size of their training data up to 10x by augmenting it using paraphrased sentences. This capability
-is offered in select languages, including English and Spanish. More details can be found [here](https://www.mindmeld.com/docs/userguide/augmentation.html).
+is offered in select languages, including English and Spanish. More details can be found `here <https://www.mindmeld.com/docs/userguide/augmentation.html>`_.
 
 
 **2. Automatic Annotation **
