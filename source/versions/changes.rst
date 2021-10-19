@@ -49,7 +49,7 @@ MindMeld supports query caching to reduce training time and the memory footprint
 
 **8. MindMeld input validation **
 
-MindMeld supports consistent input validation for all of it's APIs.
+MindMeld supports consistent input validation for all of its APIs.
 
 **9. DagsHub integration **
 
