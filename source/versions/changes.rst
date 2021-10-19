@@ -66,7 +66,7 @@ the `deny_nlp` flag to the `nlp.process` API.
 
 **11. Updated Duckling **
 
-MindMeld has updated it's Duckling dependency to the latest changes made upstream of it.
+MindMeld has updated its Duckling dependency to the latest changes made upstream of it.
 
 
 MindMeld 4.3
