@@ -13,7 +13,7 @@ Major Features and Improvements
 
 - Implemented `deny_nlp` functionality for the `nlp.process` API [interface](https://github.com/cisco/mindmeld/pull/311/).
 
-- Added a [new blueprint](https://www.mindmeld.com/docs/blueprints/screening_app.html) for non-english MindMeld applications.
+- Added a [new blueprint](https://www.mindmeld.com/docs/blueprints/screening_app.html) for non-English MindMeld applications.
 
 - Implemented consistent input validation of APIs using Marshmallow
 
