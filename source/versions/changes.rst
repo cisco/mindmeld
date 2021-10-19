@@ -34,7 +34,7 @@ pretrained embedder-based resolvers are implemented in addition to the already a
 
 **5. Spanish Blueprint **
 
-MindMeld has a [new Spanish blueprint](https://www.mindmeld.com/docs/blueprints/screening_app.html) to aid with development for non-english MindMeld applications.
+MindMeld has a [new Spanish blueprint](https://www.mindmeld.com/docs/blueprints/screening_app.html) to aid with development for non-English MindMeld applications.
 
 **6. Active Learning **
 
