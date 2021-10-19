@@ -22,7 +22,7 @@ one can efficiently annotate both system entities and custom entities quickly.
 
 **3. East Asian Tokenization **
 
-Unlike latin languages, Japanese words are not separated by spaces. MindMeld has updated it's internal processing (pipeline)[https://www.mindmeld.com/docs/userguide/tokenizer.html]
+Unlike Latin-script languages, words in Japanese, Chinese and Korean (among others) are not separated by spaces. MindMeld has updated it's internal processing (pipeline)[https://www.mindmeld.com/docs/userguide/tokenizer.html]
  to handle such languages.
 
 **4. Non-Elasticsearch Entity Resolution and Question Answering **
