@@ -39,7 +39,7 @@ MindMeld has a [new Spanish blueprint](https://www.mindmeld.com/docs/blueprints/
 **6. Active Learning **
 
 Active learning is a modality-independent approach for improving the data acquisition capabilities for all machine learning models.
-MindMeld's active learning [tool](https://www.mindmeld.com/docs/walkthroughs/wt_active_learning.html) empowers teams to automatically
+MindMeld's [active learning tool](https://www.mindmeld.com/docs/walkthroughs/wt_active_learning.html) empowers teams to automatically
 select the most informative subsets from large datasets and unannotated user logs from production machine learning systems.
 Using this toot leads to efficient and accurate models as well as massively reduces the annotation time and costs for new data.
 
