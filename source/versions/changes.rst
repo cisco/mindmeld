@@ -5,7 +5,7 @@ MindMeld 4.4
 -------------
 
 MindMeld 4.4 packages several new features that help improve NLP performance of applications with a
-small amount of data. It continues to add deeper support for multi-lingual applications by adding east-asian tokenization
+small amount of data. It continues to add deeper support for multilingual applications by adding East-Asian tokenization
 support and also adds a new Spanish blueprint.
 
 **1. Paraphrasing **
