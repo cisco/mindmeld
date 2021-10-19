@@ -332,7 +332,7 @@ class MindMeldALClassifier(ALClassifier):
         """
         eval_stats = defaultdict(dict)
         eval_stats["num_sampled"] = len(data_bucket.sampled_queries)
-        confidences_2d, entity_confidences = self.train_single(
+        confidences_2d, entity_confidences, eval_stats = self.train_single(
             data_bucket, heuristic, eval_stats
         )
         return_confidences_3d = isinstance(heuristic, MULTI_MODEL_HEURISTICS)
@@ -436,10 +436,12 @@ class MindMeldALClassifier(ALClassifier):
                 heuristic=heuristic,
             )
             if eval_stats:
-                self._update_eval_stats_entity_level(eval_stats, er_eval_test_dict)
+                self._update_eval_stats_entity_level(
+                    eval_stats, er_eval_test_dict, dc_eval_test
+                )
             entity_confidences = er_queries_prob_vectors
 
-        return confidences_2d, entity_confidences
+        return confidences_2d, entity_confidences, eval_stats
 
     def train_multi(self, data_bucket: DataBucket):
         """Trains multiple models to get a 3D probability array for multi-model selection strategies.
@@ -731,7 +733,6 @@ class MindMeldALClassifier(ALClassifier):
                 er_eval_test = er.evaluate(queries=filtered_test_queries)
                 er_eval_test_dict[f"{domain}.{intent}"] = er_eval_test
 
-                # er_eval_test_dict[(domain, intent)] = er_eval_test
                 # Get Probability Vectors
                 er_queries_prob_vectors = MindMeldALClassifier._get_probs(
                     classifier=er,
@@ -754,7 +755,11 @@ class MindMeldALClassifier(ALClassifier):
         return er_queries_prob_vectors, er_eval_test_dict
 
     def _update_eval_stats_entity_level(
-        self, eval_stats: defaultdict, er_eval_test_dict: Dict
+        self,
+        eval_stats: defaultdict,
+        er_eval_test_dict: Dict,
+        verbose: bool = False,
+
     ):
         """Update the eval_stats dictionary with evaluation metrics from entity
         recognizers.
@@ -766,16 +771,25 @@ class MindMeldALClassifier(ALClassifier):
         """
         for domain_intent, er_eval_test in er_eval_test_dict.items():
             domain, intent = domain_intent.split(".")
-            if er_eval_test:
-                eval_stats["accuracies"][intent] = {
-                    "overall": er_eval_test.get_stats()["stats_overall"][
-                        self.aggregate_statistic
-                    ]
-                }
 
-                for e, entity in enumerate(er_eval_test.get_stats()["class_labels"]):
-                    eval_stats["accuracies"][intent][entity] = {
-                        "overall": er_eval_test.get_stats()["class_stats"][
+            if er_eval_test:
+                if domain not in eval_stats["accuracies"]:
+                    eval_stats["accuracies"].update({domain: {}})
+                if intent not in eval_stats["accuracies"][domain]:
+                    eval_stats["accuracies"][domain].update({intent: {}})
+
+                eval_stats["accuracies"][domain][intent]["entities"] = {
+                        "overall": er_eval_test.get_stats()["stats_overall"][
+                                self.aggregate_statistic
+                            ]
+                        }
+
+                if verbose:
+                    for e, entity in enumerate(er_eval_test.get_stats()["class_labels"]):
+                        eval_stats["accuracies"][domain][intent]["entities"][
+                            entity
+                        ] = er_eval_test.get_stats()["class_stats"][
                             self.class_level_statistic
                         ][e]
-                    }
+
+

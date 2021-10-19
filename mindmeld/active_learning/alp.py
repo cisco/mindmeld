@@ -24,6 +24,7 @@ from .plot_manager import PlotManager
 from .classifiers import MindMeldALClassifier
 from .heuristics import HeuristicsFactory
 
+from ..constants import TUNE_LEVEL_INTENT
 from ..resource_loader import ProcessedQueryList
 
 logger = logging.getLogger(__name__)
@@ -199,6 +200,8 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             experiment_dir_path=self.results_manager.experiment_folder,
             aggregate_statistic=self.aggregate_statistic,
             class_level_statistic=self.class_level_statistic,
+            plot_entities=self.entity_tuning,
+            plot_intents=(self.tuning_level==TUNE_LEVEL_INTENT)
         )
         plot_manager.generate_plots()
 

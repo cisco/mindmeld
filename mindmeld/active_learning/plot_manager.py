@@ -54,6 +54,8 @@ class PlotManager:
         experiment_dir_path: str,
         aggregate_statistic: str,
         class_level_statistic: str,
+        plot_entities: bool,
+        plot_intents: bool,
     ):
         """
         Args:
@@ -72,6 +74,8 @@ class PlotManager:
         )
         self.accuracies_data = self.get_accuracies_json_data()
         self.queries_data = self.get_queries_json_data()
+        self.plot_entities = plot_entities
+        self.plot_intents = plot_intents
 
         if not _is_module_available("matplotlib"):
             raise ModuleNotFoundError(
@@ -134,8 +138,6 @@ class PlotManager:
         self,
         function,
         plot_domain: bool = True,
-        plot_intents: bool = True,
-        plot_entities: bool = False,
     ):
         """Plotting wrapper functions for plots that use data from accuracies.json
         Args:
@@ -149,22 +151,25 @@ class PlotManager:
             return
         function(self, y_keys=["overall"])
         for domain in self.get_domain_list():
-            function(self, y_keys=[domain, "overall"])
-            if not plot_intents:
-                continue
-            for intent in self.get_intent_list(domain):
-                function(
-                    self,
-                    y_keys=[domain, intent, "overall"],
-                    use_aggregate_statistic=False,
-                )
-                if not plot_entities:
-                    continue
-                y_keys = [domain, intent, "entities", "overall"]
-                function(self, y_keys=y_keys)
-                for entity in self.get_entity_list(domain, intent):
-                    y_keys = [domain, intent, "entities", entity]
+            if self.plot_entities:
+                for intent in self.get_intent_list(domain):
+                    y_keys = [domain, intent, "entities", "overall"]
                     function(self, y_keys=y_keys)
+                    for entity in self.get_entity_list(domain, intent):
+                        y_keys = [domain, intent, "entities", entity]
+                        # print(y_keys)
+                        function(self, y_keys=y_keys)
+
+            if self.plot_intents:
+                function(self, y_keys=[domain, "overall"])
+                if not plot_intents:
+                    continue
+                for intent in self.get_intent_list(domain):
+                    function(
+                        self,
+                        y_keys=[domain, intent, "overall"],
+                        use_aggregate_statistic=False,
+                    )
 
     # Helper Methods
     @staticmethod
@@ -178,8 +183,7 @@ class PlotManager:
             data_dict (dict): Dictionary containing the filtered nested data.
         """
         for selected_key in selected_keys:
-            if selected_key in data_dict:
-                data_dict = data_dict[selected_key]
+            data_dict = data_dict.get(selected_key, 1.0)
         return data_dict
 
     @staticmethod
@@ -251,7 +255,8 @@ class PlotManager:
             ][domain].keys()
         )
         # The 'overall' score across intents is removed as it is not an intent
-        intent_list.remove("overall")
+        if "overall" in intent_list:
+            intent_list.remove("overall")
         return intent_list
 
     def get_entity_list(self, domain: str, intent: str) -> List:
