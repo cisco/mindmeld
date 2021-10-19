@@ -61,7 +61,7 @@ python -m <YOUR_APP_PATH> dvc --setup_dagshub
 
 **10. `deny_nlp` functionality for inference **
 
-MindMeld provides functionality to blacklist certain NLP components like domains and intents from being inferred by passing
+MindMeld provides functionality to block certain NLP components like domains and intents from being inferred by passing
 the `deny_nlp` flag to the `nlp.process` API.
 
 **11. Updated Duckling **
