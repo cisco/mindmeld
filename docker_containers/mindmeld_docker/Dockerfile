@@ -69,7 +69,6 @@ RUN pip3 install --upgrade pip
 RUN pip3 install -U mindmeld spacy==3.1.3
 RUN pip3 install click-log==0.1.8
 
-ARG REBUILD_BLUEPRINT=unknown
 RUN mkdir -p home_assistant && \
     wget https://blueprints.mindmeld.com/home_assistant/app.tar.gz -P /root/projects/ && \
     tar -xvf /root/projects/app.tar.gz -C ./home_assistant
