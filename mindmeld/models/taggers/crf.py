@@ -83,11 +83,11 @@ class ConditionalRandomFields(Tagger):
             tags = []
             preds = []
             for i in range(len(query_seq)):
-                tags.extend(list(marginals_dict[query_index][i].keys()))
-                preds.extend(list(marginals_dict[query_index][i].values()))
-            tag_maps.append(tags)
-            predictions.append(preds)
-        return [tag_maps, predictions]
+                tags.append(list(marginals_dict[query_index][i].keys()))
+                preds.append(list(marginals_dict[query_index][i].values()))
+            tag_maps.extend(tags)
+            predictions.extend(preds)
+        return [[tag_maps, predictions]]
         # for query_index, query_seq in enumerate(seq):
         #     query_marginal_tuples = []
         #     for i, tag in enumerate(query_seq):

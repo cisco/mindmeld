@@ -319,6 +319,7 @@ class TaggerModel(Model):
             examples, self.config, workspace_resource
         )
         # tags, probas = zip(*predicted_tags_probas[0])
+        # import pdb; pdb.set_trace()
         return tuple(zip(*predicted_tags_probas[0]))
         # tags, probas = predicted_tags_probas
 
@@ -356,7 +357,9 @@ class TaggerModel(Model):
         # probabilities for all tags across all tokens
         probas = []
         for example in examples:
+            # import pdb; pdb.set_trace()
             probas.append(self.predict_proba([example]))
+
 
         evaluations = [
             EvaluatedExample(e, labels[i], predictions[i], probas[i], self.config.label_type)
