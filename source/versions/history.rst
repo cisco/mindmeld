@@ -19,7 +19,7 @@ Major Features and Improvements
 
 - Implemented automatic annotation tools to bootstrap training data in MindMeld
 
-- Implemented multilingual annotation tools for automatically annotating non-english MindMeld applications
+- Implemented multilingual annotation tools for automatically annotating non-English MindMeld applications
 
 - Implemented (active learning pipeline)[https://www.mindmeld.com/docs/walkthroughs/wt_active_learning.html] for MindMeld
 
