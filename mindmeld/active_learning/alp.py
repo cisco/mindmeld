@@ -247,22 +247,24 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
 
                 num_unsampled = len(self.data_bucket.unsampled_queries)
 
-                if self.entity_tuning:
-                    confidence_2d_type = entity_confidences
-                else:
-                    confidence_2d_type = confidences_2d
-
                 if num_unsampled > 0:
                     newly_sampled_queries_ids = self.data_bucket.sample_and_update(
                         sampling_size=self._get_sampling_size(num_unsampled),
-                        confidences_2d=confidence_2d_type,
+                        confidences_2d=confidences_2d,
                         confidences_3d=confidences_3d,
+                        entity_confidences_2d=entity_confidences,
+                        entity_confidences_3d=None,
                         heuristic=heuristic,
                         confidence_segments=confidence_segments,
+                        entity_tuning=self.entity_tuning,
                     )
                 # Terminate on the first iteration if in selection mode.
                 if select_mode:
                     return self.data_bucket.get_queries(newly_sampled_queries_ids)
+
+                # if unsampled data is exhausted, end iterations for epoch.
+                if not len(self.data_bucket.unsampled_queries):
+                    break
 
     def _reset_data_bucket(self):
         """ Reset the DataBucket to the initial DataBucket after every epoch."""

@@ -300,8 +300,11 @@ class DataBucket:
         sampling_size: int,
         confidences_2d: List[List[float]],
         confidences_3d: List[List[List[float]]],
+        entity_confidences_2d: List[List[float]],
+        entity_confidences_3d: List[List[List[float]]],
         heuristic: Heuristic,
         confidence_segments: Dict = None,
+        entity_tuning: bool = False,
     ):
         """Method to sample a DataBucket's unsampled_queries and update its sampled_queries
         and newly_sampled_queries.
@@ -321,13 +324,26 @@ class DataBucket:
         if confidence_segments:
             params_rank_3d["confidence_segments"] = confidence_segments
 
-        ranked_indices = (
+        ranked_indices_2d = (
             heuristic.rank_3d(**params_rank_3d)
             if confidences_3d
             else heuristic.rank_2d(confidences_2d)
         )
-        newly_sampled_indices = ranked_indices[:sampling_size]
-        remaining_indices = ranked_indices[sampling_size:]
+
+        newly_sampled_indices = ranked_indices_2d[:sampling_size]
+        remaining_indices = ranked_indices_2d[sampling_size:]
+
+        if entity_tuning:
+            ranked_entity_indices = (
+                heuristic.rank_3d(entity_confidences_3d)
+                if confidences_3d
+                else heuristic.rank_2d(entity_confidences_2d)
+            )
+            newly_sampled_indices_entity = ranked_entity_indices[:sampling_size]
+            remaining_indices_entity = ranked_entity_indices[sampling_size:]
+
+            newly_sampled_indices = list(set(newly_sampled_indices).union(newly_sampled_indices_entity))
+            remaining_indices = list(set(remaining_indices).intersection(remaining_indices_entity))
 
         newly_sampled_queries_ids = [
             self.unsampled_queries.elements[i] for i in newly_sampled_indices

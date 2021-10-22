@@ -698,7 +698,7 @@ class MindMeldALClassifier(ALClassifier):
                 associated ic_eval_test object.
         """
         er_eval_test_dict = {}
-        unsampled_idx_preds_pairs = []
+        unsampled_idx_preds_pairs = {}
         for domain, intents in domain_to_intents.items():
             for intent in intents:
                 # Filter Queries
@@ -728,11 +728,13 @@ class MindMeldALClassifier(ALClassifier):
                 try:
                     er.fit(queries=filtered_sampled_queries)
                 except:
-                    logger.error(f"{intent}")
-                    continue
+                    pass
                 # Evaluate Test Queries
                 er_eval_test = er.evaluate(queries=filtered_test_queries)
                 er_eval_test_dict[f"{domain}.{intent}"] = er_eval_test
+                # except:
+                #     logger.error(f"{intent}")
+                #     # continue
 
                 # Get Probability Vectors
                 er_queries_prob_vectors = MindMeldALClassifier._get_probs(
@@ -743,16 +745,13 @@ class MindMeldALClassifier(ALClassifier):
                     heuristic=heuristic,
                 )
 
-                for i in range(len(filtered_unsampled_queries)):
-                    unsampled_idx_preds_pairs.append(
-                        (
-                            filtered_unsampled_queries_indices[i],
-                            er_queries_prob_vectors[i],
-                        )
-                    )
+                for i, index in enumerate(filtered_unsampled_queries_indices):
+                    unsampled_idx_preds_pairs[index] = er_queries_prob_vectors[i]
 
-        unsampled_idx_preds_pairs.sort(key=lambda x: x[0])
-        er_queries_prob_vectors = [x[1] for x in unsampled_idx_preds_pairs]
+        indices = list(unsampled_idx_preds_pairs.keys())
+        indices.sort()
+        er_queries_prob_vectors = [unsampled_idx_preds_pairs[index] for index in indices]
+        # import pdb; pdb.set_trace()
         return er_queries_prob_vectors, er_eval_test_dict
 
     def _update_eval_stats_entity_level(
