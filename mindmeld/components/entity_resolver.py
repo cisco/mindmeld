@@ -1686,6 +1686,14 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
             logger.error(str(f))
             logger.error(msg)
             return []
+        except RuntimeError as r:
+            # happens when the input is an empty string and an embedder models fails to embed it
+            msg = f"Failed to resolve entity {top_entity.text} for type {top_entity.type}"
+            if "mat1 and mat2 shapes cannot be multiplied" in str(r):
+                msg += ". This can happen if the input passed to embedder is an empty string!"
+            logger.error(str(r))
+            logger.error(msg)
+            raise RuntimeError(msg) from r
 
         return values
 

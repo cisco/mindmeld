@@ -462,26 +462,25 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
     necessary functionality for interacting with the application's knowledge base.
 
     This class uses Entity Resolvers in the backend to implement various underlying functionalities
-    of question answerer.
+    of question answerer. It consists of three important sub-classes: (1) *Indices* which maintains
+    the different indices including fit entity resolvers used for inference, (2) *FieldResource*
+    which forms the core of each index, encapsulating the fit resolvers and metadata related to each
+    KB field, (3) *Search* class that is used to build custom search similar to what
+    ElasticsearchQuestionAnswerer offers. In addition, NativeQuestionAnswerer also offers same apis
+    as the Elasticsearch one- .get(), .load_kb(), .build_search().
 
-    The created resolvers are dumped at DEFAULT_APP_PATH, whose directory serves as a common
-    site to host all app_namespace's indices, similar to how all the indices of Elasticsearch
-    are stored in a common directory on the disk.
+    The created resolvers are dumped at DEFAULT_APP_PATH, whose directory serves as a common site to
+    host all indices, similar to how all the indices of Elasticsearch are stored in a common
+    directory on the disk.
     """
 
-    @staticmethod
-    def get_resource_loader():
-        """
-        Returns a resource loader with default configuration of text preparation pipeline
-        """
-        _text_prep_pipeline = TextPreparationPipelineFactory.create_text_preparation_pipeline(
+    RESOURCE_LOADER = ResourceLoader.create_resource_loader(
+        app_path=None,
+        text_preparation_pipeline=TextPreparationPipelineFactory.create_text_preparation_pipeline(
             language="en",
             tokenizer=WhiteSpaceTokenizer()
         )
-        return ResourceLoader.create_resource_loader(
-            app_path=None,
-            text_preparation_pipeline=_text_prep_pipeline
-        )
+    )
 
     def _get(self, index, size=10, query_type=None, app_namespace=None, **kwargs):
 
@@ -543,11 +542,6 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
 
         # get index name with app scope, and make it ready for inference
         scoped_index_name = get_scoped_index_name(app_namespace, index)
-        try:
-            NativeQuestionAnswerer.ALL_INDICES.readify_index(scoped_index_name)
-        except KnowledgeBaseError as e:
-            raise ValueError("Knowledge base index '{}' does not exist.".format(index)) from e
-
         return NativeQuestionAnswerer.Search(index=scoped_index_name)
 
     def _load_kb(self,
@@ -655,34 +649,34 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                     all_id2value[key] = {}
                 all_id2value[key].update({_id: value})
 
-        # We can instantiate one resource loader for all entity resolvers built in Native QA
-        _resource_loader = self.get_resource_loader()
+        if clean:
+            NativeQuestionAnswerer.ALL_INDICES.delete_index(scoped_index_name)
 
-        # for each key/field in doc, reuse an already existing FieldResource metadata or create one
-        if not clean:
-            index_resources, _ = NativeQuestionAnswerer.ALL_INDICES.get_index_metadata(
-                scoped_index_name)  # reuse an already existing FieldResource metadata
-        else:
-            index_resources = {}  # create afresh
-        for key, id2value in all_id2value.items():
-            field_resource = index_resources.get(key)
+        index_resources = {}
+        # Fetch an index if it already exists
+        try:
+            index_resources = NativeQuestionAnswerer.ALL_INDICES.get_index(scoped_index_name)
+        except KnowledgeBaseError:
+            pass
+        for kb_field_name, id2value in all_id2value.items():
+            field_resource = index_resources.get(kb_field_name)
             if not field_resource:
                 field_resource = NativeQuestionAnswerer.FieldResource(
-                    index_name=scoped_index_name, field_name=key
+                    index_name=scoped_index_name, field_name=kb_field_name
                 )
             field_resource.update_resource(
                 id2value,
                 has_text_resolver=("text" in query_type or "keyword" in query_type),
-                has_embedding_resolver=match_regex(key, embedding_fields),
-                resolver_model_settings=model_settings,
+                has_embedding_resolver=match_regex(kb_field_name, embedding_fields),
+                resolver_model_settings=model_settings,  # same settings for all fields
                 clean=clean,
                 processor_type="text" if "text" in query_type else "keyword",
-                resource_loader=_resource_loader
+                resource_loader=NativeQuestionAnswerer.RESOURCE_LOADER  # one to all resolvers
             )
-            index_resources.update({key: field_resource})
+            index_resources.update({kb_field_name: field_resource})
 
         # update and dump
-        NativeQuestionAnswerer.ALL_INDICES.update_memory_and_dump_metadata_to_disk(
+        NativeQuestionAnswerer.ALL_INDICES.update_index_and_persist(
             scoped_index_name, index_resources, [*all_ids.keys()]
         )
 
@@ -694,8 +688,9 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
 
         '''
             {
-                index_name1: {key1: FieldResource1, key2: FieldResource2, ...},
-                index_name2: {...},
+                index_name1: {key11: FieldResource11, key12: FieldResource12, ...},
+                index_name2: {key21: FieldResource21, key22: FieldResource22, ...},
+                index_name3: {...},
                 ...
             }
         '''
@@ -705,7 +700,6 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
         to that specific field in the KB (across all ids in the KB) along with information such as
         what data-type that field belongs to (number, date, etc.), field name, & hash of the stored
         data. See `FieldResource` class docstrings for more details.
-
         """
 
         def __init__(self, app_path):
@@ -714,105 +708,144 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                 app_path (str): A folder wherein the indices are stored
             """
             self.app_path = app_path
-            self._indices = {}
-            self._indices_all_ids = {}  # maintained to keep a record of all doc ids of each KB
+            self._indices = {}  # Dict[str, Dict[str, FieldResource]]
+            # maintain a record of all doc ids of the indices when creating it from KB data
+            self._indices_all_ids = {}  # Dict[str, List[str]]
 
-        def __contains__(self, item):
-            return item in self._indices
+        def __contains__(self, index_name):
+            if (index_name not in self._indices) ^ (index_name not in self._indices_all_ids):
+                msg = f"Found an index name ({index_name}) present in only one of " \
+                      f"`self._indices` and `self._indices_all_ids`. Maybe an error during " \
+                      f"updating or loading the index?"
+                logger.debug(msg)
+                raise KeyError(msg)
+            return index_name in self._indices
 
         def _get_index_cache_path(self, index_name, app_path=None):
-            # ex: ~/.cache/mindmeld/question_answerers/{food_ordering}${restaurants}.pkl where
-            # self.app_path=~/.cache/mindmeld/question_answerers and
-            # index_name = {food_ordering}${restaurants}
+            """
+            Returns a  ache path for a specified index name using a (predetermined) formatted path.
+            If an app_path is specified, it is substituted for a default app path in that formatted
+            string.
+
+            Args:
+                index_name (str): A scoped index name
+                app_path (str, optional): The Mindmeld application's path where the index needs to
+                    be located. If unspecified, a default path is used.
+
+            Returns:
+                str: a path to cache indices
+
+            Example:
+                returns: ~/.cache/mindmeld/question_answerers/food_ordering$restaurants.pkl
+                when:    app_path=~/.cache/mindmeld/question_answerers and
+                when:    index_name = food_ordering$restaurants
+            """
             app_path = app_path or self.app_path
             return get_question_answerer_index_cache_file_path(app_path, index_name)
 
         # 'get' methods for accessing indices that are already loaded into memory
 
         def get_all_ids(self, index_name):
+            """
+            Returns all ids observed in the KB for the specified index name in chronological order.
+            The specified index must already be loaded into the memory to obtain ids.
+
+            Args:
+                index_name (str): A scoped index name
+
+            Returns:
+                List[str]: a list of ids observed in the KB during load-kb
+
+            Raises:
+                KeyError: When the specified (scoped) index name is not found in memory
+            """
             try:
                 return self._indices_all_ids[index_name]
             except KeyError as e:
                 msg = f"Index {index_name} does not exist in scope of {self.app_path}. " \
-                      f"Consider creating one before calling '.get_all_ids()'. "
+                      f"Consider creating or loading it before calling '.get_all_ids()'."
                 raise KeyError(msg) from e
 
-        def get(self, index_name):
+        def get_metadata(self, index_name):
             """
-            Returns the specified index's field resources if already loaded into memory,
-            else raises KeyError
-            """
-            try:
-                return self._indices[index_name]
-            except KeyError as e:
-                msg = f"Index {index_name} does not exist in scope of {self.app_path}. " \
-                      f"Consider creating one before calling '.get()'. "
-                raise KeyError(msg) from e
-
-        # 'get' methods that checks in-memory indices as well as disk path for loading indices
-
-        def is_available(self, index_name):
-            return index_name in self or os.path.exists(self._get_index_cache_path(index_name))
-
-        def get_index_metadata(self, index_name):
-            """
-            Returns the specified index's metadata. This method doesn't raise errors if no metadata
-            can be obtained and returns an empty dictionary in such cases. Use the
-            self.is_available() method to know whether a index is available or not.
-
-            Different from '.get()', this method checks all possible ways to retrieve meta data
-            for the chosen index. Notably, to reduce time complexity, if an index is loaded from
-            a cache path, resolvers (if any) are not fit automatically and one must fit them by
-            calling 'update_resource()' in FieldResource. Use this method only to obtain metadata
-            and not already fitted FieldResources!
-
-            Although self.readify_index() methods is a wrapper on top of this and is more intuitive
-            to use, this method i.e. self.get_index_metadata() is also important because during
-            load_kb(), we do not need to load fit resources as we will anyway fit the resource
-            on the latest KB data found.
+            Returns index's FieldResources' metadata objects if the index is available in memory.
 
             Args:
-                index_name (str): A scoped index name for loading metadata
+                index_name (str): A scoped index name
 
             Returns:
-                index_resources (Dict[str, FieldResource]): the field resources for each field in
-                    the KB data.
-                index_all_ids (List[str]): the list of ids observed for this KB
+                metadata (Dict[str, Bunch]): metadata associated with each field name of the index
+
+            Raises:
+                KeyError: When the specified (scoped) index name is not found in memory
             """
-            if index_name in self:
-                metadata, index_all_ids = self._get_index_metadata_from_memory(index_name)
-            elif self.is_available(index_name):
-                metadata, index_all_ids = self._get_index_metadata_from_disk(index_name)
+            try:
+                metadata = {
+                    field_name: field_resource.to_metadata()
+                    for field_name, field_resource in self._indices[index_name].items()
+                }
+            except KeyError as e:
+                msg = f"Index {index_name} does not exist in scope of {self.app_path}. " \
+                      f"Consider creating or loading it before calling '.get_all_ids()'."
+                raise KeyError(msg) from e
+
+            return metadata
+
+        def is_available(self, index_name):
+            """
+            Checks for availability of a specified index name both in memory (i.e. if already
+            loaded into memory at the time of checking) as well as in the cache path where are all
+            the indices' metadata are stored.
+
+            Args:
+                index_name (str): A scoped index name for checking its availability
+
+            Returns:
+                bool: True if index name is available in memory or in cache directory, else False
+            """
+            return index_name in self or os.path.exists(self._get_index_cache_path(index_name))
+
+        def get_index(self, index_name):
+            """
+            Returns the index corresponding to the specified index name. If the index is not found
+            in memory, this method looks up the cache path to obtain the index.
+
+            Args:
+                index_name (str): A scoped index name
+
+            Returns:
+                index_resources (Dict[str, FieldResource]): a dictionary of FieldResource, one for
+                    each field name in the index
+
+            Raises:
+                KnowledgeBaseError: if the specified index name is unavailable both in memory as
+                    well as disk
+            """
+            if self.is_available(index_name):
+                if index_name not in self:
+                    msg = f"Loading metadata for the scoped index name from disk: {index_name}"
+                    logger.info(msg)
+                    cache_path = self._get_index_cache_path(index_name)
+                    with open(cache_path, "rb") as opfile:
+                        metadata_objects = pickle.load(opfile)
+                    index_all_ids = metadata_objects.pop("__all_ids")
+                    index_resources = {}
+                    for field_name, cache_object in metadata_objects.items():
+                        field_resource = (
+                            NativeQuestionAnswerer.FieldResource.from_metadata(cache_object)
+                        )
+                        field_resource.load_resolvers(
+                            resource_loader=NativeQuestionAnswerer.RESOURCE_LOADER
+                        )
+                        index_resources.update({field_name: field_resource})
+                    self._indices.update({index_name: index_resources})
+                    self._indices_all_ids.update({index_name: index_all_ids})
             else:
-                msg = f"Index '{index_name}' is neither loaded nor available in the cache path. " \
-                      f"No metadata obtained for this index."
-                logger.info(msg)
-                return {}, {}
+                msg = f"Consider creating indices first before using them. Specified scoped " \
+                      f"index name {index_name} not found in list of known indices."
+                raise KnowledgeBaseError(msg)
 
-            # create field resource instance for each of the metadata
-            index_resources = {}
-            for field, cache_object in metadata.items():
-                field_resource = (
-                    NativeQuestionAnswerer.FieldResource.from_metadata(cache_object)
-                )
-                index_resources.update({field: field_resource})
-            return index_resources, index_all_ids
-
-        def _get_index_metadata_from_memory(self, index_name):
-            metadata = {
-                field_name: field_resource.to_metadata()
-                for field_name, field_resource in self._indices[index_name].items()
-            }
-            index_all_ids = self._indices_all_ids[index_name]
-            return metadata, index_all_ids
-
-        def _get_index_metadata_from_disk(self, index_name):
-            cache_path = self._get_index_cache_path(index_name)
-            with open(cache_path, "rb") as opfile:
-                metadata = pickle.load(opfile)
-                opfile.close()
-            index_all_ids = metadata.pop("__all_ids")
-            return metadata, index_all_ids
+            return self._indices[index_name]
 
         def delete_index(self, index_name):
             """
@@ -827,13 +860,11 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
             if cache_path and os.path.exists(cache_path):
                 os.remove(cache_path)
 
-        def update_memory_and_dump_metadata_to_disk(
-            self, index_name, index_resources, index_all_ids
-        ):
+        def update_index_and_persist(self, index_name, index_resources, index_all_ids):
             """
             Updates the specified index's resources in the memory as well as dumps the metadata into
             disk for fast loading time later on. Note that this method is best used with the
-            Resolver.load_kb() method wherein fit resources are created.
+            a load_kb() method wherein fit resources are frirst created before updating indices.
 
             During reloading of an index, use self.get_index_metadata() as well as
             fieldResource.update_resource() to obtain back a fit index.
@@ -853,44 +884,10 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
             # dump to disk
             cache_path = self._get_index_cache_path(index_name)
             os.makedirs(os.path.dirname(cache_path), exist_ok=True)
-            metadata, index_all_ids = self._get_index_metadata_from_memory(index_name)
+            metadata = self.get_metadata(index_name)
             metadata.update({"__all_ids": index_all_ids})
             with open(cache_path, "wb") as opfile:
                 pickle.dump(metadata, opfile)
-                opfile.close()
-
-        def readify_index(self, index_name):
-            """
-            Makes the index resource ready to be used for inference. If the index is in memory, it
-            means that the index resources are already ready to be used for inference. If not, this
-            method loads metadata, fits resources and gets them ready.
-            """
-            if index_name in self:
-                # in-memory indices are always fit indices
-                return
-            elif self.is_available(index_name):
-                index_resources, index_all_ids = self.get_index_metadata(index_name)
-                # Instantiate one resource loader for all resolvers being loaded in Native QA
-                _resource_loader = NativeQuestionAnswerer.get_resource_loader()
-                for field_name, field_resource in index_resources.items():
-                    field_resource.update_resource(
-                        id2value={},
-                        has_text_resolver=field_resource.has_text_resolver,
-                        has_embedding_resolver=field_resource.has_embedding_resolver,
-                        processor_type=field_resource.processor_type,
-                        resource_loader=_resource_loader
-                    )
-                    index_resources[field_name] = field_resource
-                # update memory
-                self._indices.update({index_name: index_resources})
-                self._indices_all_ids.update({index_name: index_all_ids})
-            else:
-                msg = f"The index '{index_name}' looks unavailable. " \
-                      f"Consider running '.load_kb(...)' to create indices " \
-                      f"before creating search/filter/sort queries. "
-                logger.error(msg)
-                raise KnowledgeBaseError(msg)
-            return
 
     class FieldResourceDataHelper:
         """ A class that holds methods to aid validating, formatting and scoring different data
@@ -906,6 +903,14 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
             '%m/%d/%Y', '%m/%d/%y', '%d/%m/%Y', '%d/%m/%y'
         )
 
+        @property
+        def data_types(self):
+            return self.__class__.DATA_TYPES
+
+        @property
+        def date_formats(self):
+            return self.__class__.DATE_FORMATS
+
         @staticmethod
         def _get_date(value: str):
             value_date = None
@@ -914,7 +919,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                 return value_date
 
             # check if value can be resolved as-is
-            for fmt in NativeQuestionAnswerer.FieldResourceDataHelper.DATE_FORMATS:
+            for fmt in NativeQuestionAnswerer.FieldResourceDataHelper.date_formats:
                 try:
                     value_date = datetime.strptime(value, fmt)
                     return value_date
@@ -922,7 +927,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                     pass
 
             # check if value can be resolved with some modifications
-            for fmt in NativeQuestionAnswerer.FieldResourceDataHelper.DATE_FORMATS:
+            for fmt in NativeQuestionAnswerer.FieldResourceDataHelper.date_formats:
                 for val in [value.replace("/", " "), value.replace("-", " ")]:
                     if val != value:
                         try:
@@ -1052,7 +1057,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
             list_of_numbers = [num / _max for num in list_of_numbers]
             return list_of_numbers
 
-    class FieldResourceProcessor(FieldResourceDataHelper):
+    class FieldResourceHelper(FieldResourceDataHelper):
 
         @staticmethod
         def _auto_string_processor(string_or_strings, query_type, language='english'):
@@ -1168,12 +1173,6 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
 
             return value
 
-        @staticmethod
-        def get_resolvers_cname(value):
-            if isinstance(value, (set, list)):
-                return list(value)[0]
-            return value
-
         def _get_resolvers_entity_map(self, id2value):
             """
             converts id2value into an entity map format and returns it
@@ -1198,7 +1197,13 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
             }
             return entity_map
 
-    class FieldResource(FieldResourceProcessor):
+        @staticmethod
+        def get_resolvers_cname(value):
+            if isinstance(value, (set, list)):
+                return list(value)[0]
+            return value
+
+    class FieldResource(FieldResourceHelper):
         """
         An object encapsulating all resources necessary for search/filter/sort-ing on any field in
         the Knowledge Base. This class should only be used as part of `Indices` class and not in
@@ -1276,9 +1281,6 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                 resource_loader (ResourceLoader, optional): a resource loader object
             """
 
-            if not id2value and not self.data_type:  # else, if required, update resolvers
-                return
-
             # reformat id2value's values if required and obtain data type from the data
             for _id, value in id2value.items():
                 # ignore null values
@@ -1331,32 +1333,151 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                 )
 
             # tfidf based text resolver
-            if self.has_text_resolver:
-                if (new_hash != self.hash) or (self.processor_type != processor_type):
-                    msg = f"Creating a text resolver for field '{self.field_name}' in " \
-                          f"index '{self.index_name}'."
+            if self.has_text_resolver and \
+                ((new_hash != self.hash) or (self.processor_type != processor_type)):
+                msg = f"Creating a text resolver for field '{self.field_name}' in " \
+                      f"index '{self.index_name}'."
+                logger.info(msg)
+                # update processor type
+                if processor_type not in ['text', 'keyword']:
+                    msg = f"Expected 'processor_type' to be among ['text', " \
+                          f"'keyword'] but found to be of value '{processor_type}'"
+                    raise ValueError(msg)
+                self.processor_type = processor_type
+                # obtain a cache path
+                resolver_cache_path = get_question_answerer_index_cache_file_path(
+                    app_path, get_scoped_index_name(
+                        get_scoped_index_name(self.index_name, self.field_name),
+                        "text_resolver"
+                    ))
+                # create a new resolver and fit
+                resolver_model_settings = resolver_model_settings or {}
+                self._text_resolver = TfIdfSparseCosSimEntityResolver(
+                    app_path=app_path,
+                    entity_type=get_scoped_index_name(self.index_name, self.field_name),
+                    config={"model_settings": {
+                        **resolver_model_settings,
+                        "augment_max_synonyms_embeddings": False}
+                    },
+                    resource_loader=resource_loader,
+                )
+                entity_map = self._get_resolvers_entity_map(
+                    dict(zip(
+                        self.id2value.keys(),
+                        self._auto_string_processor(
+                            [*self.id2value.values()],
+                            self.processor_type
+                        )
+                    ))
+                )
+                self._text_resolver.fit(entity_map=entity_map, clean=clean)
+                # dump
+                # ex: ~/.cache/mindmeld/question_answerers/
+                #           {food_ordering}${restaurants}${field_name}
+                #               .pkl
+                #               .pkl.hash
+                #               .config.pkl
+                self._text_resolver.dump(resolver_cache_path)
+
+            # embedder resolver
+            if self.has_embedding_resolver and new_hash != self.hash:
+                msg = f"Creating an embedder resolver for field '{self.field_name}' in " \
+                      f"index '{self.index_name}'."
+                logger.info(msg)
+                # obtain a cache path
+                resolver_cache_path = get_question_answerer_index_cache_file_path(
+                    app_path, get_scoped_index_name(
+                        get_scoped_index_name(self.index_name, self.field_name),
+                        "embedder_resolver"
+                    ))
+                # create a new resolver and fit
+                resolver_model_settings = resolver_model_settings or {}
+                self._embedding_resolver = EmbedderCosSimEntityResolver(
+                    app_path=app_path,
+                    entity_type=get_scoped_index_name(self.index_name, self.field_name),
+                    config={"model_settings": {**resolver_model_settings}},
+                    resource_loader=resource_loader
+                )
+                entity_map = self._get_resolvers_entity_map(
+                    self.id2value
+                )  # use same data as text resolver but without any processing!
+                self._embedding_resolver.fit(entity_map=entity_map, clean=clean)
+                # dump
+                # ex: ~/.cache/mindmeld/question_answerers/
+                #           {food_ordering}${restaurants}${field_name}
+                #               .pkl.hash
+                #               .config.pkl
+                #               .embedder_cache.pkl
+                self._embedding_resolver.dump(resolver_cache_path)
+
+            self.hash = new_hash
+
+        def load_resolvers(
+            self,
+            app_path=DEFAULT_APP_PATH,
+            resource_loader=None
+        ):
+            """
+            Loads a field resource by fitting with latest data (if id2value is passed) or by
+            loading already fit resolvers if no data changes take place.
+
+            Args:
+                app_path (str, optional): a path to create cache for embedder resolver
+                resource_loader (ResourceLoader, optional): a resource loader object
+            """
+
+            def _err_fn(msg):
+                logger.error(msg)
+                raise ValueError(msg)
+
+            err_msg = "Error in loading FieldResource: " \
+                      "'{name}' cannot be '{value}' when loading a " \
+                      "FieldResource from metadata object. Your metadata object might have " \
+                      "been corrupted.Consider loading kb with 'clean=True'."
+            if self.data_type is None:
+                _err_fn(err_msg.format(name="data_type", value=self.data_type))
+            if self.has_text_resolver is None:
+                _err_fn(err_msg.format(name="has_text_resolver", value=self.has_text_resolver))
+            if self.has_embedding_resolver is None:
+                _err_fn(err_msg.format(
+                    name="has_embedding_resolver", value=self.has_embedding_resolver))
+
+            if self.data_type in ["bool", "number", "location", "unknown"]:
+                # discard input arguments as resolvers are not applicable to these data types
+                if self.has_text_resolver or self.has_embedding_resolver:
+                    msg = f"Unable to create any resolver for the field {self.field_name} due to " \
+                          f"its marked data type '{self.data_type}'. "
                     logger.info(msg)
-                    # update processor type
-                    if processor_type not in ['text', 'keyword']:
-                        msg = f"Expected 'processor_type' to be among ['text', " \
-                              f"'keyword'] but found to be of value '{processor_type}'"
-                        raise ValueError(msg)
-                    self.processor_type = processor_type
+                self.has_text_resolver = False
+                self.has_embedding_resolver = False
+                return
+            else:  # ["string", "date"]
+                if not self.has_text_resolver and not self.has_embedding_resolver:
+                    msg = f"At least one of text or embedder resolver can be applied " \
+                          f"for string type data field ({self.field_name}) but continuing " \
+                          f"without fitting any resolvers due to your input 'query_type'" \
+                          f"configuration. This might limit your search space during inference!"
+                    logger.warning(msg)
+                    return
+
+            # tfidf based text resolver
+            if self.has_text_resolver:
+                msg = f"Loading a text resolver for field '{self.field_name}' in " \
+                      f"index '{self.index_name}'."
+                logger.info(msg)
+                if self.processor_type is None:
+                    _err_fn(err_msg.format(name="processor_type", value=self.processor_type))
+                try:
                     # obtain a cache path
                     resolver_cache_path = get_question_answerer_index_cache_file_path(
                         app_path, get_scoped_index_name(
                             get_scoped_index_name(self.index_name, self.field_name),
                             "text_resolver"
                         ))
-                    # create a new resolver and fit
-                    resolver_model_settings = resolver_model_settings or {}
+                    # create a new instance of resolver and load it
                     self._text_resolver = TfIdfSparseCosSimEntityResolver(
                         app_path=app_path,
                         entity_type=get_scoped_index_name(self.index_name, self.field_name),
-                        config={"model_settings": {
-                            **resolver_model_settings,
-                            "augment_max_synonyms_embeddings": False}
-                        },
                         resource_loader=resource_loader,
                     )
                     entity_map = self._get_resolvers_entity_map(
@@ -1368,110 +1489,42 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                             )
                         ))
                     )
-                    self._text_resolver.fit(entity_map=entity_map, clean=clean)
-                    # dump
-                    # ex: ~/.cache/mindmeld/question_answerers/
-                    #           {food_ordering}${restaurants}${field_name}
-                    #               .pkl
-                    #               .pkl.hash
-                    #               .config.pkl
-                    self._text_resolver.dump(resolver_cache_path)
-                elif not self._text_resolver:
-                    msg = f"Loading a text resolver for field '{self.field_name}' in " \
-                          f"index '{self.index_name}'."
-                    logger.info(msg)
-                    try:
-                        # obtain a cache path
-                        resolver_cache_path = get_question_answerer_index_cache_file_path(
-                            app_path, get_scoped_index_name(
-                                get_scoped_index_name(self.index_name, self.field_name),
-                                "text_resolver"
-                            ))
-                        # create a new instance of resolver and load it
-                        self._text_resolver = TfIdfSparseCosSimEntityResolver(
-                            app_path=app_path,
-                            entity_type=get_scoped_index_name(self.index_name, self.field_name),
-                            config={},  # resolver loads its own configs previously dumped
-                            resource_loader=resource_loader,
-                        )
-                        entity_map = self._get_resolvers_entity_map(
-                            dict(zip(
-                                self.id2value.keys(),
-                                self._auto_string_processor(
-                                    [*self.id2value.values()],
-                                    self.processor_type
-                                )
-                            ))
-                        )
-                        self._text_resolver.load(path=resolver_cache_path, entity_map=entity_map)
-                    except Exception as e:
-                        msg = "Couldn't load a text resolver from cache path. Consider " \
-                              "calling the 'load_kb()' method with argument 'clean=True'."
-                        logger.error(msg)
-                        raise KnowledgeBaseError(msg) from e
+                    self._text_resolver.load(path=resolver_cache_path, entity_map=entity_map)
+                except Exception as e:
+                    msg = "Couldn't load a text resolver from cache path. Consider " \
+                          "calling the 'load_kb()' method with argument 'clean=True'."
+                    logger.error(msg)
+                    raise KnowledgeBaseError(msg) from e
 
             # embedder resolver
             if self.has_embedding_resolver:
-                if new_hash != self.hash:
-                    msg = f"Creating an embedder resolver for field '{self.field_name}' in " \
-                          f"index '{self.index_name}'."
-                    logger.info(msg)
+                msg = f"Loading an embedder resolver for field '{self.field_name}' in " \
+                      f"index '{self.index_name}'."
+                logger.info(msg)
+                try:
                     # obtain a cache path
                     resolver_cache_path = get_question_answerer_index_cache_file_path(
                         app_path, get_scoped_index_name(
                             get_scoped_index_name(self.index_name, self.field_name),
                             "embedder_resolver"
                         ))
-                    # create a new resolver and fit
-                    resolver_model_settings = resolver_model_settings or {}
+                    # create a new instance of resolver and load it
                     self._embedding_resolver = EmbedderCosSimEntityResolver(
                         app_path=app_path,
                         entity_type=get_scoped_index_name(self.index_name, self.field_name),
-                        config={"model_settings": {**resolver_model_settings}},
-                        resource_loader=resource_loader
+                        resource_loader=resource_loader,
                     )
                     entity_map = self._get_resolvers_entity_map(
                         self.id2value
                     )  # use same data as text resolver but without any processing!
-                    self._embedding_resolver.fit(entity_map=entity_map, clean=clean)
-                    # dump
-                    # ex: ~/.cache/mindmeld/question_answerers/
-                    #           {food_ordering}${restaurants}${field_name}
-                    #               .pkl.hash
-                    #               .config.pkl
-                    #               .embedder_cache.pkl
-                    self._embedding_resolver.dump(resolver_cache_path)
-                elif not self._embedding_resolver:
-                    msg = f"Loading an embedder resolver for field '{self.field_name}' in " \
-                          f"index '{self.index_name}'."
-                    logger.info(msg)
-                    try:
-                        # obtain a cache path
-                        resolver_cache_path = get_question_answerer_index_cache_file_path(
-                            app_path, get_scoped_index_name(
-                                get_scoped_index_name(self.index_name, self.field_name),
-                                "embedder_resolver"
-                            ))
-                        # create a new instance of resolver and load it
-                        self._embedding_resolver = EmbedderCosSimEntityResolver(
-                            app_path=app_path,
-                            entity_type=get_scoped_index_name(self.index_name, self.field_name),
-                            config={},  # resolver loads its own configs previously dumped
-                            resource_loader=resource_loader,
-                        )
-                        entity_map = self._get_resolvers_entity_map(
-                            self.id2value
-                        )  # use same data as text resolver but without any processing!
-                        self._embedding_resolver.load(
-                            path=resolver_cache_path, entity_map=entity_map
-                        )
-                    except Exception as e:
-                        msg = "Couldn't load embedder resolver from cache path. Consider " \
-                              "calling the 'load_kb()' method with argument 'clean=True'."
-                        logger.error(e)
-                        raise KnowledgeBaseError(msg) from e
-
-            self.hash = new_hash
+                    self._embedding_resolver.load(
+                        path=resolver_cache_path, entity_map=entity_map
+                    )
+                except Exception as e:
+                    msg = "Couldn't load embedder resolver from cache path. Consider " \
+                          "calling the 'load_kb()' method with argument 'clean=True'."
+                    logger.error(e)
+                    raise KnowledgeBaseError(msg) from e
 
         def do_search(self, query_type, value, allowed_ids=None):
             """
@@ -1805,6 +1858,15 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
 
         @classmethod
         def from_metadata(cls, cache_object: Bunch):
+            """
+            Creates a fit resource from metadata
+
+            Args:
+                cache_object (Bunch): a Bunch dictionary object with attribute names and values
+
+            Returns:
+                FieldResource
+            """
             field_resource = cls(index_name=cache_object.index_name,
                                  field_name=cache_object.field_name)
             field_resource.data_type = cache_object.data_type
@@ -1816,6 +1878,16 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
             return field_resource
 
         def to_metadata(self):
+            """
+            Returns a Bunch object consisting of various details about the resource- (scoped) index
+            name, the name of the KB field for which the resource is built for, the field's data
+            type, all the KB data associated with this field, a hash that uniquely identifies the
+            data, the data processor type and the presence of text as well as embedder resolvers.
+            The returned metadata object does not contain any fit entity resolvers.
+
+            Returns:
+                Bunch: various meta information of this field resource
+            """
             cache_object = Bunch(
                 index_name=self.index_name,
                 field_name=self.field_name,
@@ -1915,7 +1987,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
 
             try:
                 # fetch all indexes
-                index_resources = NativeQuestionAnswerer.ALL_INDICES.get(self.index_name)
+                index_resources = NativeQuestionAnswerer.ALL_INDICES.get_index(self.index_name)
                 # obtain all doc ids in the order they were present in the KB
                 index_all_ids = (
                     NativeQuestionAnswerer.ALL_INDICES.get_all_ids(self.index_name)

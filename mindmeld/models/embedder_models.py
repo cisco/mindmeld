@@ -885,10 +885,12 @@ class GloveEmbedder(Embedder):
         # Create a custom pipeline config as the default config for en language eliminates some
         # punctuations that can be required in tasks such as entity resolution.
         pipeline_config = {
+            "language": "en",
+            "tokenizer": "WhiteSpaceTokenizer",
             "preprocessors": [],
             "normalizers": [],
-            "tokenizer": "WhiteSpaceTokenizer",
-            "stemmer": "EnglishNLTKStemmer"
+            "stemmer": None,
+            "keep_special_chars": True
         }
         self.text_preparation_pipeline = (
             TextPreparationPipelineFactory.create_text_preparation_pipeline(**pipeline_config)
@@ -914,8 +916,6 @@ class GloveEmbedder(Embedder):
         )
 
     def _encode(self, text_list):
-        if len(text_list) == 1 and text_list[0] == "%":
-            print("hello")
         token_list = [self._tokenize(text) for text in text_list]
         vector_list = [self.model.encode_sequence_of_tokens(tl) for tl in token_list]
         encoded_vecs = []
