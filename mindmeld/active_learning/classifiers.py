@@ -248,7 +248,10 @@ class MindMeldALClassifier(ALClassifier):
                                 query_prob_vector_2d[token_idx][tag_index] = probas[i]
 
                         # Use the max uncertainty token from the vector for active learning
-                        max_uncertainty_idx = heuristic.rank_2d(query_prob_vector_2d)[0]
+                        try:
+                            max_uncertainty_idx = heuristic.rank_2d(query_prob_vector_2d)[0]
+                        except:
+                            max_uncertainty_idx = heuristic.rank_3d([query_prob_vector_2d,query_prob_vector_2d])[0]
                         query_prob_vector = query_prob_vector_2d[max_uncertainty_idx]
 
                     queries_prob_vectors.append(query_prob_vector)
@@ -337,8 +340,8 @@ class MindMeldALClassifier(ALClassifier):
             data_bucket, heuristic, eval_stats
         )
         return_confidences_3d = isinstance(heuristic, MULTI_MODEL_HEURISTICS)
-        confidences_3d = (
-            self.train_multi(data_bucket) if return_confidences_3d else None
+        confidences_3d, entity_confidences_3d = (
+            self.train_multi(data_bucket, heuristic) if return_confidences_3d else None
         )
         domain_indices = (
             self.domain_indices if isinstance(heuristic, KLDivergenceSampling) else None
@@ -348,6 +351,7 @@ class MindMeldALClassifier(ALClassifier):
             confidences_2d,
             confidences_3d,
             entity_confidences,
+            entity_confidences_3d,
             domain_indices,
         )
 
@@ -444,7 +448,7 @@ class MindMeldALClassifier(ALClassifier):
 
         return confidences_2d, entity_confidences, eval_stats
 
-    def train_multi(self, data_bucket: DataBucket):
+    def train_multi(self, data_bucket: DataBucket, heuristic: Heuristic):
         """Trains multiple models to get a 3D probability array for multi-model selection strategies.
         Args:
             data_bucket (DataBucket): Databucket for current iteration
@@ -457,6 +461,7 @@ class MindMeldALClassifier(ALClassifier):
             unsampled_queries=data_bucket.unsampled_queries,
             test_queries=data_bucket.test_queries,
             label_map=data_bucket.label_map,
+            heuristic=heuristic,
         )
 
     def _train_multi(
@@ -465,6 +470,7 @@ class MindMeldALClassifier(ALClassifier):
         unsampled_queries: ProcessedQueryList,
         test_queries: ProcessedQueryList,
         label_map: LabelMap,
+        heuristic: Heuristic,
     ):
         """Helper function to train multiple models and obtain a 3D probability array.
         Args:
@@ -499,13 +505,15 @@ class MindMeldALClassifier(ALClassifier):
             for fold in fold_sampled_queries_ids
         ]
         confidences_3d = []
+        entity_confidences_3d = []
         for fold_sample_queries in fold_sampled_queries_lists:
-            confidences_3d.append(
-                self._train_single(
-                    fold_sample_queries, unsampled_queries, test_queries, label_map
+            confidences_2d, entity_confidences, eval_stats = self._train_single(
+                    fold_sample_queries, unsampled_queries, test_queries, label_map, heuristic
                 )
-            )
-        return confidences_3d
+            confidences_3d.append(confidences_2d)
+            entity_confidences_3d.append(entity_confidences)
+
+        return confidences_3d, entity_confidences_3d
 
     def domain_classifier_fit_eval(
         self,
