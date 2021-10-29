@@ -60,6 +60,8 @@ def test_glove_embedder():
     assert type(encoded_vec) == ndarray
 
 
+@pytest.mark.extras
+@pytest.mark.torch
 def test_custom_embedder():
     class MyCustomEmbedder(Embedder):
         def load(self, custom_dim=10):
