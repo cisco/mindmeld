@@ -107,21 +107,21 @@ class EntityRecognizer(Classifier):
         queries = self._resolve_queries(queries, label_set)
 
         new_hash = self._get_model_hash(self._model_config, queries)
-        cached_model = self._resource_loader.hash_to_model_path.get(new_hash)
+        cached_model_path = self._resource_loader.hash_to_model_path.get(new_hash)
         # After PR 356, entity.pkl file is not created when there are no entity types,
         # similar to not having domain.pkl or intent.pkl when there are less than 2 domains
         # or 2 intents respectively.
-        # Before this PR, not doing this dump leads to `cached_model=None` in above line.
-        # After this PR, this will be set to `cached_model=<>.pkl` path and the self.load() takes
-        # care of loading a NoneType model. Had it been `cached_model=None` like previously, the
-        # following code skips the `load_cached` check and directly attempts to create a new model.
-        # This is not an issue in domain and intent classifiers as the .fit() method is not called
-        # when there are less than 2 domains/intents.
+        # Before this PR, not doing this dump leads to `cached_model_path=None` in above line. After
+        # this PR, this will be set to `cached_model_path=<>.pkl` path and the self.load() takes
+        # care of loading a NoneType model. Had it been `cached_model_path=None` like previously,
+        # the following code skips the `load_cached` check and directly attempts to create a new
+        # model. This is not an issue in domain and intent classifiers as the .fit() method is not
+        # called when there are less than 2 domains/intents.
 
-        if incremental_timestamp and cached_model:
+        if incremental_timestamp and cached_model_path:
             logger.info("No need to fit.  Previous model is cached.")
             if load_cached:
-                self.load(cached_model)
+                self.load(cached_model_path)
                 return True
             return False
 

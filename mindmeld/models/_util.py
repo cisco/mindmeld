@@ -38,3 +38,14 @@ def _get_module_or_attr(module_name: str, func_name: str = None):
     if func_name not in dir(m):
         raise ImportError(f"Cannot import {func_name} from {module_name}")
     return getattr(m, func_name)
+
+
+def torch_op(op, *args, sub="", **kwargs):
+    """
+    A safe function caller for torch module
+    Usage:
+        call ```_torch("normalize", arg1, arg2, sub="nn.functional", p=2, dim=1)```
+        instead of ```torch.nn.functional.normalize(arg1, arg2, p=2, dim=1)```
+    """
+
+    return _get_module_or_attr(f"torch{'.' + sub if sub else ''}", op)(*args, **kwargs)
