@@ -609,7 +609,7 @@ This decorator replaces the need to define the ``@app.handle`` decorator. MindMe
   - ``value`` (str, optional): The resolved value of the entity. (Read :ref:`note <session_note>` for maintaining this value in the same session.)
   - ``default_eval`` (bool, optional): Use system validation (default: True).
   - ``hints`` (list, optional): Developer defined list of keywords to verify the user input against.
-  - ``custom_eval`` (func, optional): Custom validation function (should return either bool: validated or not) or a custom resolved value for the entity. If custom resolved value is returned, the slot response is considered to be valid. For this validation function, the developer is provided with the current turn's ``request`` object.
+  - ``custom_eval`` (str, optional): Custom validation function name (function should return either bool: validated or not) or a custom resolved value for the entity. If custom resolved value is returned, the slot response is considered to be valid. For this validation function, the developer is provided with the current turn's ``request`` object. The custom validation function should have a ``@app.register_func()`` decorator to register it with the application.
 
 Once the slot filling is complete, the filled in entities can be access through ``request.entities`` in the same manner as any other handler.
 
@@ -621,6 +621,7 @@ For the use case of transferring money in a banking assistant application, the f
 
     from mindmeld.core import FormEntity
 
+    @app.register_func()
     def test_for_money(request):
         return True if '$' in request.text else False
 
@@ -641,7 +642,7 @@ For the use case of transferring money in a banking assistant application, the f
             FormEntity(
                 entity='sys_amount-of-money',
                 responses=['And, how much do you want to transfer?'],
-                custom_eval=test_for_money # validates the user-response for this entity
+                custom_eval="test_for_money" # validates the user-response for this entity
                 ),                         # using this custom developer-defined function
                                            # checking for '$' sign.
             ],

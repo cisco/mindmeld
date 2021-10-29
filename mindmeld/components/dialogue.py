@@ -752,7 +752,7 @@ class AutoEntityFilling:
         self._app = app
         self._app.lazy_init()
         self._handler = handler
-        self._form = Form(entities=form['entities'], exit_keys=form.get('exit_keys'),
+        self._form = Form(entities=form.get('entities'), exit_keys=form.get('exit_keys'),
                           exit_msg=form.get('exit_msg'), max_retries=form.get('max_retries'))
         self._local_entity_form = None
         self._prompt_turn = None
@@ -878,7 +878,8 @@ class AutoEntityFilling:
             # If false, overall validation fails. If either true or a custom resolved
             # value is returned, then the validation succeeds.
 
-            _validity = slot.custom_eval(request)
+            custom_eval_func = self._app.registry.functions_registry[slot.custom_eval]
+            _validity = custom_eval_func(request)
             if _validity is False:
                 # For checking 'false' return cases
                 return False, _resolved_value
