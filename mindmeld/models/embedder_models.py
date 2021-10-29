@@ -21,6 +21,7 @@ import pickle
 import warnings
 from abc import ABC, abstractmethod
 from collections import OrderedDict
+from typing import List, Any, Callable
 
 import numpy as np
 from tqdm.autonotebook import trange
@@ -151,7 +152,7 @@ class Embedder(ABC):
                 return iter(self.data)
 
         def __len__(self):
-            len(self.data)
+            return len(self.data)
 
     def __init__(self, app_path=None, cache_path=None, **kwargs):
         """
@@ -167,7 +168,7 @@ class Embedder(ABC):
         """
 
         # load embedder model
-        self.model = self._load()
+        self.model = self.load()
 
         # obtain a cache path for creating an embedder cache object
         if cache_path is None:
@@ -189,7 +190,8 @@ class Embedder(ABC):
                     msg = f"Found a deprecated cache path at '{cache_path}' that contains " \
                           f"embeddings for a default configuration of embedder models. " \
                           f"If you wish to use mindmeld version greater than 4.3.4 to work with " \
-                          f"non-default embedder configurations, consider deleting this cache path."
+                          f"non-default embedder configurations, consider deleting this cache " \
+                          f"path manually and run again."
                     logger.warning(msg)
                 else:
                     # new usage:
@@ -217,23 +219,27 @@ class Embedder(ABC):
         self.cache_path = cache_path
         self.cache = Embedder.EmbeddingsCache(self.cache_path)
 
+    @property
+    def model_id(self):
+        """Returns a unique hash representation of the embedder model based on its name and configs
+        """
+        msg = "Embedder models need to have model ids to uniquely identify each model " \
+              "associated with a specific configuration. It can be set through the property " \
+              "setter 'model_id'. If unspecified, a default value ('default') is used instead."
+        logger.warning(msg)
+        return "default"
+
     @abstractmethod
-    def _load(self, **kwargs):
+    def load(self, **kwargs):
         """Loads the embedder model
 
         Returns:
             The model object.
         """
-
-        # backwards compatibility
-        if getattr(self, "load", None):
-            # implies `load()` is implemented as an abstract class instead of the new way `_load()`
-            getattr(self, "load")(**kwargs)
-
         raise NotImplementedError
 
     @abstractmethod
-    def _encode(self, text_list):
+    def encode(self, text_list):
         """
         Args:
             text_list (list): A list of text strings for which to generate the embeddings.
@@ -241,30 +247,14 @@ class Embedder(ABC):
         Returns:
             (list): A list of numpy arrays of the embeddings.
         """
-
-        # backwards compatibility
-        if getattr(self, "encode", None):
-            # implies `encode()` is implemented as an abstract class instead of new way `_encode()`
-            getattr(self, "encode")(text_list)
-
         raise NotImplementedError
 
-    # deprecated method, same functionality as 'dump_cache' method
-    def dump(self, cache_path=None):
-        msg = f"DeprecationWarning: Use {self.__class__.__name__}.dump_cache() instead of " \
-              f"{self.__class__.__name__}.dump()"
-        warnings.warn(msg, DeprecationWarning)
-        self.dump_cache(cache_path=cache_path)
+    def get_encodings(self, text_list, add_to_cache=True) -> List[Any]:
+        """
+        Fetches the encoded values from the cache, or generates them and adds to cache unless
+        add_to_cache is set to False. This method is wrapped around .encode() by maintaining an
+        embedding cache.
 
-    # deprecated method, use get_encodings() instead
-    def encode(self, text_list):
-        msg = f"DeprecationWarning: Use {self.__class__.__name__}.get_encodings() instead of " \
-              f"{self.__class__.__name__}.encode()"
-        warnings.warn(msg, DeprecationWarning)
-        return self.get_encodings(text_list, add_to_cache=False)
-
-    def get_encodings(self, text_list, add_to_cache=True):
-        """Fetches the encoded values from the cache, or generates them.
         Args:
             text_list (list): A list of text strings for which to get the embeddings.
             add_to_cache (bool): If True, adds the encodings to self.cache and returns embeddings
@@ -272,20 +262,31 @@ class Embedder(ABC):
         Returns:
             (list): A list of numpy arrays with the embeddings.
         """
-        encoded = [self.cache.get(text, None) for text in text_list]
+
+        uniques_text_list, uniques = [], {}
+        text_list_to_uniques_text_list_map = []
+        for text in text_list:
+            if text not in uniques:
+                uniques[text] = len(uniques)
+                uniques_text_list.append(text)
+            text_list_to_uniques_text_list_map.append(uniques[text])
+
+        encoded = [self.cache.get(text, None) for text in uniques_text_list]
         cache_miss_indices = [i for i, vec in enumerate(encoded) if vec is None]
-        text_to_encode = [text_list[i] for i in cache_miss_indices]
-        model_encoded_text = self._encode(text_to_encode)
+        text_to_encode = [uniques_text_list[i] for i in cache_miss_indices]
+        model_encoded_text = self.encode(text_to_encode)
 
         for i, v in enumerate(cache_miss_indices):
             encoded[v] = model_encoded_text[i]
             if add_to_cache:
                 self.cache[text_to_encode[i]] = model_encoded_text[i]
 
-        return encoded
+        return [encoded[text_list_to_uniques_text_list_map[i]] for i, text in enumerate(text_list)]
 
     def add_to_cache(self, mean_or_max_pooled_whitelist_embs):
-        """Manually add some max-pooled or mean-pooled embeddings to cache. This method is created
+        """
+        Method to add custom embeddings to cache without triggering `.encode()`. Example, one can
+        manually add some max-pooled or mean-pooled embeddings to cache. This method is created
         to entertain storing superficial text-encoding pairs (superficial because the encodings are
         not the encodings of the text itself but a combination of encodings of some list of texts
         from the same embedder model). For example, to add superficial entity embeddings as average
@@ -316,48 +317,16 @@ class Embedder(ABC):
     def clear_cache(self, cache_path=None):
         self.cache.clear(cache_path=cache_path or self.cache_path)
 
-    @staticmethod
-    def _pytorch_cos_sim(src_vecs, tgt_vecs, as_numpy=False):
-        """Computes the cosine similarity for 2d matrices
-
-        Args:
-            src_vecs: a 2d numpy array or pytorch tensor
-            tgt_vecs: a 2d numpy array or pytorch tensor
-            as_numpy: If true, returns the cosine similarity as a numpy 2d array instead of tensor
-        """
-
-        src_vecs = torch_op("as_tensor", src_vecs)
-        tgt_vecs = torch_op("as_tensor", tgt_vecs)
-
-        if len(src_vecs.shape) == 1:
-            src_vecs = src_vecs.view(1, -1)
-
-        if len(tgt_vecs.shape) == 1:
-            tgt_vecs = tgt_vecs.view(1, -1)
-
-        if len(src_vecs.shape) != 2 or len(tgt_vecs.shape) != 2:
-            msg = "Only 2-dimensional arrays/tensors are allowed in Embedder._pytorch_cos_sim()"
-            raise ValueError(msg)
-
-        # method specific to 2d tensors
-        # [n_src, emb_dim] * [n_tgt, emb_dim] -> [n_src, n_tgt]
-        a_norm = torch_op("normalize", src_vecs, sub="nn.functional", p=2, dim=1)
-        b_norm = torch_op("normalize", tgt_vecs, sub="nn.functional", p=2, dim=1)
-        similarity_scores = torch_op("mm", a_norm, b_norm.transpose(0, 1))
-
-        if as_numpy:
-            return similarity_scores.numpy()
-
-        return similarity_scores
-
-    def find_similarity(self,
-                        src_texts,
-                        tgt_texts=None,
-                        top_n=20,
-                        scores_normalizer=None,
-                        _sim_func=None,
-                        _return_as_dict=False,
-                        _no_sort=False):
+    def find_similarity(
+        self,
+        src_texts: List[str],
+        tgt_texts: List[str] = None,
+        top_n: int = 20,
+        scores_normalizer: str = None,
+        similarity_function: Callable[[List[Any], List[Any]], np.ndarray] = None,
+        _return_as_dict=False,
+        _no_sort=False
+    ):
         """Computes the cosine similarity
 
         Args:
@@ -368,7 +337,7 @@ class Embedder(ABC):
                 of tgt_texts
             scores_normalizer (str, optional): normalizer type to normalize scores. Allowed values
                 are: "min_max_scaler", "standard_scaler"
-            _sim_func (function, optional): if None, defaults to `_pytorch_cos_sim`. If
+            similarity_function (function, optional): if None, defaults to `pytorch_cos_sim`. If
                 specified, must take two numpy-array/pytorch-tensor arguments for similarity
                 computation with an optional argument to return results as numpy or tensor
             _return_as_dict (bool, optional): if the results should be returned as a dictionary of
@@ -378,8 +347,8 @@ class Embedder(ABC):
                 results and would like to save computational time without sorting.
         Returns:
             Union[dict, list[tuple]]: if _return_as_dict, returns a dictionary of tgt_texts and
-                their scores, else a list of sorted synonym names paired with their
-                similarity scores (descending order)
+                their scores, else a list of tuple each consisting of a src_text paired with its
+                similarity scores with all tgt_texts as a np array (sorted list in descending order)
         """
 
         is_single = False
@@ -394,12 +363,12 @@ class Embedder(ABC):
                   "index or if passing in an empty list of target texts to find similarity with."
             raise ValueError(msg)
         top_n = len(tgt_texts) if not top_n else top_n
-        _sim_func = _sim_func or self._pytorch_cos_sim
+        similarity_function = similarity_function or self.pytorch_cos_sim
 
         src_vecs = np.asarray(self.get_encodings(list(src_texts), add_to_cache=False))
         tgt_vecs = np.asarray(self.get_encodings(list(tgt_texts), add_to_cache=False))
 
-        similarity_scores_2d = _sim_func(src_vecs, tgt_vecs, as_numpy=True)  # a 2d numpy array
+        similarity_scores_2d = similarity_function(src_vecs, tgt_vecs)
 
         results = []
         for similarity_scores in similarity_scores_2d:
@@ -450,19 +419,51 @@ class Embedder(ABC):
         return results
 
     @staticmethod
+    def pytorch_cos_sim(src_vecs, tgt_vecs, return_tensor=False):
+        """Computes the cosine similarity for 2d matrices
+
+        Args:
+            src_vecs: a 2d numpy array or pytorch tensor
+            tgt_vecs: a 2d numpy array or pytorch tensor
+            return_tensor: If False, this method returns the cosine similarity as a numpy 2d array
+                instead of tensor, else returns 2d tensor output
+        """
+
+        src_vecs = torch_op("as_tensor", src_vecs)
+        tgt_vecs = torch_op("as_tensor", tgt_vecs)
+
+        if len(src_vecs.shape) == 1:
+            src_vecs = src_vecs.view(1, -1)
+
+        if len(tgt_vecs.shape) == 1:
+            tgt_vecs = tgt_vecs.view(1, -1)
+
+        if len(src_vecs.shape) != 2 or len(tgt_vecs.shape) != 2:
+            msg = "Only 2-dimensional arrays/tensors are allowed in Embedder.pytorch_cos_sim()"
+            raise ValueError(msg)
+
+        # method specific to 2d tensors
+        # [n_src, emb_dim] * [n_tgt, emb_dim] -> [n_src, n_tgt]
+        a_norm = torch_op("normalize", src_vecs, sub="nn.functional", p=2, dim=1)
+        b_norm = torch_op("normalize", tgt_vecs, sub="nn.functional", p=2, dim=1)
+        similarity_scores = torch_op("mm", a_norm, b_norm.transpose(0, 1))
+
+        if not return_tensor:
+            return similarity_scores.numpy()
+
+        return similarity_scores
+
+    @staticmethod
     def get_hashid(**kwargs):
         string = json.dumps(kwargs, sort_keys=True)
         return Hasher(algorithm="sha256").hash(string=string)
 
-    @property
-    def model_id(self):
-        """Returns a unique hash representation of the embedder model based on its name and configs
-        """
-        msg = "Embedder models need to have model ids to uniquely identify each model " \
-              "associated with a specific configuration. It can be set through the property " \
-              "setter 'model_id'. If unspecified, a default value ('default') is used instead."
-        logger.warning(msg)
-        return "default"
+    # deprecated method, same functionality as 'dump_cache' method
+    def dump(self, cache_path=None):
+        msg = f"DeprecationWarning: Use {self.__class__.__name__}.dump_cache() instead of " \
+              f"{self.__class__.__name__}.dump()"
+        warnings.warn(msg, DeprecationWarning)
+        self.dump_cache(cache_path=cache_path)
 
 
 class BertEmbedder(Embedder):  # pylint: disable=too-many-instance-attributes
@@ -745,7 +746,7 @@ class BertEmbedder(Embedder):  # pylint: disable=too-many-instance-attributes
 
         return all_embeddings
 
-    def _load(self):
+    def load(self):
 
         model = BertEmbedder.CACHE_MODELS.get(self._model_id, None)
 
@@ -783,7 +784,7 @@ class BertEmbedder(Embedder):  # pylint: disable=too-many-instance-attributes
 
         return model
 
-    def _encode(self, phrases):
+    def encode(self, phrases):
         """Encodes input text(s) into embeddings, one vector for each phrase
 
         Args:
@@ -906,7 +907,7 @@ class GloveEmbedder(Embedder):
 
         super().__init__(app_path=app_path, cache_path=cache_path, **kwargs)
 
-    def _load(self):
+    def load(self):
 
         return WordSequenceEmbedding(
             0,
@@ -915,7 +916,7 @@ class GloveEmbedder(Embedder):
             use_padding=False,
         )
 
-    def _encode(self, text_list):
+    def encode(self, text_list):
         token_list = [self._tokenize(text) for text in text_list]
         vector_list = [self.model.encode_sequence_of_tokens(tl) for tl in token_list]
         encoded_vecs = []

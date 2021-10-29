@@ -112,6 +112,10 @@ class QuestionAnswererFactory:
 
     @staticmethod
     def _get_config(config=None, app_path=None):
+        """
+        Returns inputted config if valid, else a question answerer config from app's config file
+        is loaded and returned.
+        """
         if not config:
             return get_classifier_config("question_answering", app_path=app_path)
         return config
@@ -176,130 +180,8 @@ class QuestionAnswererFactory:
         return QUESTION_ANSWERER_MODEL_MAPPINGS[model_type]
 
 
-class QuestionAnswerer:
-    """
-    Backwards compatible QuestionAnswerer class
-
-    old usages (allowed but will soon be deprecated)
-        # loading KB directly through class method
-        >>> QuestionAnswerer.load_kb(...)
-        # instantiating a QA object from QuestionAnswerer instead of QuestionAnswererFactory
-        >>> question_answerer = QuestionAnswerer(app_path, resource_loader, es_host, config)
-
-    new usages
-        >>> question_answerer = QuestionAnswererFactory.create_question_answerer(**kwargs)
-        # Use the QA object's methods to load KB and get search results, instead of class methods
-        >>> question_answerer.load_kb(...)
-        >>> question_answerer.get(...) # .get(...) and .build_search(...)
-    """
-
-    DEPRECATION_MESSAGE = \
-        "Calling QuestionAnswerer class directly will be deprecated in future versions. " \
-        "To instantiate a QA instance, use the QuestionAnswererFactory by calling " \
-        "'qa = QuestionAnswererFactory.create_question_answerer(**kwargs)'. " \
-        "An instantiated QA can then be used as 'qa.load_kb(...)', 'qa.get(...)', etc. " \
-        "See https://www.mindmeld.com/docs/userguide/kb.html for details about the various " \
-        "functionalities available with different question-answerers."
-
-    def __new__(cls, app_path=None, resource_loader=None, es_host=None, config=None, **kwargs):
-        """
-        This method is used to initialize a XxxQuestionAnswerer based on the model_type.
-
-        To keep the code base backwards compatible, we use a '__new__()' way of creating instances
-        alongside using a factory approach. For cases wherein a question-answerer is instantiated
-        from 'QuestionAnswerer' class instead of 'QuestionAnswererFactory.create_question_answerer',
-        this method is called before __init__ and returns an instance of a question-answerer.
-
-        Due to this reason, see that the order of the arguments is similar to the previous version
-        of QuestionAnswerer class in 'question_answerer.py'.
-        """
-
-        # can be deprecated in future
-        del resource_loader
-
-        warnings.warn(QuestionAnswerer.DEPRECATION_MESSAGE, DeprecationWarning)
-
-        kwargs.update({
-            "app_path": app_path,
-            "es_host": es_host,
-            "config": config,
-        })
-        return QuestionAnswererFactory.create_question_answerer(**kwargs)
-
-    @classmethod
-    def load_kb(cls,
-                app_namespace,
-                index_name,
-                data_file,
-                es_host=None,
-                es_client=None,
-                connect_timeout=2,
-                clean=False,
-                app_path=None,
-                config=None,
-                **kwargs):
-        """
-        Implemented to maintain backward compatibility. Should be removed in future versions.
-
-        Args:
-            app_namespace (str): The namespace of the app. Used to prevent
-                collisions between the indices of this app and those of other
-                apps.
-            index_name (str): The name of the new index to be created.
-            data_file (str): The path to the data file containing the documents
-                to be imported into the knowledge base index. It could be
-                either json or jsonl file.
-            es_host (str): The Elasticsearch host server.
-            es_client (Elasticsearch): The Elasticsearch client.
-            connect_timeout (int, optional): The amount of time for a
-                connection to the Elasticsearch host.
-            clean (bool): Set to true if you want to delete an existing index
-                and reindex it
-            app_path (str): The path to the directory containing the app's data
-            config (dict): The QA config if passed directly rather than loaded from the app config
-        """
-
-        warnings.warn(QuestionAnswerer.DEPRECATION_MESSAGE, DeprecationWarning)
-
-        # As a way to reduce entropy in using 'load_kb()' and it's related inconsistencies of not
-        # exposing 'app_namespace' argument in '.get()' and '.build_search()', this reformatting
-        # recommends that all these methods be used as instance methods and not as class methods.
-        # By doing so, each QA object is meant to be used for one app_path/app_namespace and all
-        # the indices in that app, while previously once could access any app's index.
-
-        msg = "Calling the 'load_kb(...)' method directly from the QuestionAnswerer object " \
-              "like 'QuestionAnswerer.load_kb(...)' will be deprecated. New usage: " \
-              "'qa = QuestionAnswererFactory.create_question_answerer(**kwargs); " \
-              "qa.load_kb(...)'. Note that this change might also " \
-              "lead to creating different QA instances for different configs. " \
-              "See https://www.mindmeld.com/docs/userguide/kb.html for more details. "
-        warnings.warn(msg, DeprecationWarning)
-
-        # add everything except 'index_name' and 'data_file' to kwargs, and create a QA instance
-        kwargs.update({
-            "app_namespace": app_namespace,
-            "es_host": es_host,
-            "es_client": es_client,
-            "connect_timeout": connect_timeout,
-            "clean": clean,
-            "config": config,
-            "app_path": app_path,
-        })
-        question_answerer = QuestionAnswererFactory.create_question_answerer(**kwargs)
-
-        # only retain 'connection_timeout', 'clean' information as everything else is already
-        #   absorbed during instantiation above; the recommended way of passing configs to QA is
-        #   by passing those details during initialization, that way there exists no discrepancies
-        #   between loading and inference.
-        kwargs.pop("app_namespace")
-        kwargs.pop("es_host")
-        kwargs.pop("es_client")
-        kwargs.pop("config")
-        kwargs.pop("app_path")
-        question_answerer.load_kb(index_name, data_file, **kwargs)
-
-
 class BaseQuestionAnswerer(ABC):
+    # TODO: change name to QuestionAnswerer upon removing existing QuestionAnswerer class
 
     def __init__(self, app_path=None, config=None, app_namespace=None, **_kwargs):
         """
@@ -349,39 +231,65 @@ class BaseQuestionAnswerer(ABC):
 
         # add defaults
         if model_settings.get("embedder_type") == "bert":
-            model_settings["pretrained_name_or_abspath"] = model_settings.get(
-                "pretrained_name_or_abspath", "sentence-transformers/bert-base-nli-mean-tokens"
-            )
+            default_pretrained_name_or_abspath = "sentence-transformers/bert-base-nli-mean-tokens"
+            pretrained_name_or_abspath = model_settings.get("pretrained_name_or_abspath")
+            if not pretrained_name_or_abspath:
+                msg = f"Using a default value ('{default_pretrained_name_or_abspath}') " \
+                      f"for the parameter 'pretrained_name_or_abspath' as NoneType value inputted."
+                logger.warning(msg)
+                pretrained_name_or_abspath = default_pretrained_name_or_abspath
+            model_settings["pretrained_name_or_abspath"] = pretrained_name_or_abspath
         elif model_settings.get("embedder_type") == "glove":
-            model_settings["token_embedding_dimension"] = model_settings.get(
-                "token_embedding_dimension", 300
-            )
+            default_token_embedding_dimension = 300
+            token_embedding_dimension = model_settings.get("token_embedding_dimension")
+            if not token_embedding_dimension:
+                msg = f"Using a default value ('{default_token_embedding_dimension}') " \
+                      f"for the parameter 'token_embedding_dimension' as NoneType value inputted."
+                logger.warning(msg)
+                token_embedding_dimension = default_token_embedding_dimension
+            model_settings["token_embedding_dimension"] = token_embedding_dimension
 
         return model_settings
 
-    @abstractmethod
-    def _get(self, *args, **kwargs):
-        raise NotImplementedError
+    def load_kb(self, index_name, data_file, **kwargs):
+        """Loads documents from disk into the specified index in the knowledge
+        base. If an index with the specified name doesn't exist, a new index
+        with that name will be created in the knowledge base.
 
-    @abstractmethod
-    def _build_search(self, *args, **kwargs):
-        raise NotImplementedError
+        Args:
+            index_name (str): The name of the new index to be created; can be any valid string
+            data_file (str): The path to the data file containing the documents
+                to be imported into the knowledge base index. It could be
+                either json or jsonl file.
 
-    @abstractmethod
-    def _load_kb(self, *args, **kwargs):
-        raise NotImplementedError
+        Optional Args (used by all QA classes):
+            app_namespace (str): A custom namespace of the app. Used to prevent collisions between
+                the indices of two apps with same app name.
+            clean (bool): Set to true if you want to delete an existing index and reindex it. If
+                False (default), ElasticsearchQA just updates its index with new objects not
+                deleting the old objects whereas NativeQA replaces old index with new index
+                consisting of the inputted data file's KB objects.
+            embedding_fields (list): List of embedding fields for the given index that can be
+                directly passed-in instead of adding them to QA config or overriding QA config.
+                Embedder information is generated and indexed only for the user specified fields
+                and not all KB field names. If this list is empty, no fields have the embedder
+                component even though 'embedder' keyword is specified in 'model_type'.
 
-    @staticmethod
-    def _resolve_deprecated_index_name(index_name, index):
-        if index:
-            msg = "Input the index name to a question answerer method by using the argument name " \
-                  "'index_name' instead of 'index'."
-            warnings.warn(msg, DeprecationWarning)
-        index_name = index_name or index
-        if not index_name:
-            msg = "Missing one required argument: 'index_name'"
-            raise TypeError(msg)
-        return index_name
+        Optional Args (Elasticsearch specific):
+            es_host (str): The Elasticsearch host server.
+            es_client (Elasticsearch): The Elasticsearch client.
+            connect_timeout (int): The amount of time for a connection to the Elasticsearch host.
+        """
+
+        if (
+            ("config" in kwargs and kwargs["config"])
+            or ("app_path" in kwargs and kwargs["app_path"])
+        ):
+            msg = "Passing 'config' or 'app_path' to '.load_kb()' method is no longer " \
+                  "supported. Create a Question Answerer instance with the required " \
+                  "configurations and/or app path before calling '.load_kb()'."
+            raise ValueError(msg)
+        self._load_kb(index_name, data_file, **kwargs)
 
     def get(self, index_name=None, size=10, query_type=None, app_namespace=None, **kwargs):
         """
@@ -420,40 +328,29 @@ class BaseQuestionAnswerer(ABC):
         return self._build_search(index=index_name, ranking_config=ranking_config,
                                   app_namespace=app_namespace, **kwargs)
 
-    def load_kb(self, index_name, data_file, **kwargs):
-        """Loads documents from disk into the specified index in the knowledge
-        base. If an index with the specified name doesn't exist, a new index
-        with that name will be created in the knowledge base.
+    @staticmethod
+    def _resolve_deprecated_index_name(index_name, index):
+        if index:
+            msg = "Input the index name to a question answerer method by using the argument name " \
+                  "'index_name' instead of 'index'."
+            warnings.warn(msg, DeprecationWarning)
+        index_name = index_name or index
+        if not index_name:
+            msg = "Missing one required argument: 'index_name'"
+            raise TypeError(msg)
+        return index_name
 
-        Args:
-            index_name (str): The name of the new index to be created.
-            data_file (str): The path to the data file containing the documents
-                to be imported into the knowledge base index. It could be
-                either json or jsonl file.
+    @abstractmethod
+    def _get(self, *args, **kwargs):
+        raise NotImplementedError
 
-        Optional Args (used by all QA classes):
-            app_namespace (str): The namespace of the app. Used to prevent
-                collisions between the indices of this app and those of other apps.
-            clean (bool): Set to true if you want to delete an existing index
-                and reindex it
-            embedding_fields (list): List of embedding fields can be directly passed in
-                instead of adding them to QA config
+    @abstractmethod
+    def _build_search(self, *args, **kwargs):
+        raise NotImplementedError
 
-        Optional Args (Elasticsearch specific):
-            es_host (str): The Elasticsearch host server.
-            es_client (Elasticsearch): The Elasticsearch client.
-            connect_timeout (int): The amount of time for a connection to the Elasticsearch host.
-        """
-
-        if (
-            ("config" in kwargs and kwargs["config"])
-            or ("app_path" in kwargs and kwargs["app_path"])
-        ):
-            msg = "Passing 'config' or 'app_path' to '.load_kb()' method is no longer " \
-                  "supported. Create a Question Answerer instance with the required " \
-                  "configurations and/or app path before calling '.load_kb()'."
-            raise ValueError(msg)
-        self._load_kb(index_name, data_file, **kwargs)
+    @abstractmethod
+    def _load_kb(self, *args, **kwargs):
+        raise NotImplementedError
 
 
 class NativeQuestionAnswerer(BaseQuestionAnswerer):
@@ -474,6 +371,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
     directory on the disk.
     """
 
+    # a common resource loaded generally used across all resolvers during loading process
     RESOURCE_LOADER = ResourceLoader.create_resource_loader(
         app_path=None,
         text_preparation_pipeline=TextPreparationPipelineFactory.create_text_preparation_pipeline(
@@ -481,68 +379,6 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
             tokenizer=WhiteSpaceTokenizer()
         )
     )
-
-    def _get(self, index, size=10, query_type=None, app_namespace=None, **kwargs):
-
-        doc_id = kwargs.get("id")
-
-        query_type = query_type or self.query_type
-
-        # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
-        app_namespace = app_namespace or self.app_namespace
-
-        # If an id was passed in, simply retrieve the specified document
-        if doc_id:
-            logger.info(
-                "Retrieve object from KB: index= '%s', id= '%s'.", index, doc_id
-            )
-            s = self.build_search(index, app_namespace=app_namespace)
-
-            if NativeQuestionAnswerer.FieldResource.is_number(doc_id):
-                # if a number, look for that exact doc_id; no fuzzy match like in Elasticsearch QA
-                s = s.filter(query_type=query_type, field="id", et=doc_id)  # et == equals to
-            else:
-                s = s.filter(query_type=query_type, id=doc_id)
-                # TODO: should consider s.query() to do fuzzy match like in Elasticsearch?
-                # s = s.query(query_type=query_type, id=doc_id)
-            results = s.execute(size=size)
-            return results
-
-        field = kwargs.pop("_sort", None)
-        sort_type = kwargs.pop("_sort_type", None)
-        location = kwargs.pop("_sort_location", None)
-
-        s = self.build_search(index, app_namespace=app_namespace).query(
-            query_type=query_type, **kwargs)
-        if field and (sort_type or location):
-            s.sort(field, sort_type=sort_type, location=location)
-
-        results = s.execute(size=size)
-        return results
-
-    def _build_search(self, index, ranking_config=None, app_namespace=None):
-        """Build a search object for advanced filtered search.
-
-        Args:
-            index (str): index name of knowledge base object.
-            ranking_config (dict, optional): overriding ranking configuration parameters.
-            app_namespace (str, optional): The namespace of the app. Used to prevent
-                collisions between the indices of this app and those of other apps.
-        Returns:
-            Search: a Search object for filtered search.
-        """
-
-        if ranking_config:
-            msg = f"'ranking_config' is currently discarded in {self.__class__.__name__}."
-            logger.warning(msg)
-            ranking_config = None
-
-        # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
-        app_namespace = app_namespace or self.app_namespace
-
-        # get index name with app scope, and make it ready for inference
-        scoped_index_name = get_scoped_index_name(app_namespace, index)
-        return NativeQuestionAnswerer.Search(index=scoped_index_name)
 
     def _load_kb(self,
                  index_name,
@@ -679,6 +515,68 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
         NativeQuestionAnswerer.ALL_INDICES.update_index_and_persist(
             scoped_index_name, index_resources, [*all_ids.keys()]
         )
+
+    def _get(self, index, size=10, query_type=None, app_namespace=None, **kwargs):
+
+        doc_id = kwargs.get("id")
+
+        query_type = query_type or self.query_type
+
+        # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
+        app_namespace = app_namespace or self.app_namespace
+
+        # If an id was passed in, simply retrieve the specified document
+        if doc_id:
+            logger.info(
+                "Retrieve object from KB: index= '%s', id= '%s'.", index, doc_id
+            )
+            s = self.build_search(index, app_namespace=app_namespace)
+
+            if NativeQuestionAnswerer.FieldResource.is_number(doc_id):
+                # if a number, look for that exact doc_id; no fuzzy match like in Elasticsearch QA
+                s = s.filter(query_type=query_type, field="id", et=doc_id)  # et == equals to
+            else:
+                s = s.filter(query_type=query_type, id=doc_id)
+                # TODO: should consider s.query() to do fuzzy match like in Elasticsearch?
+                # s = s.query(query_type=query_type, id=doc_id)
+            results = s.execute(size=size)
+            return results
+
+        field = kwargs.pop("_sort", None)
+        sort_type = kwargs.pop("_sort_type", None)
+        location = kwargs.pop("_sort_location", None)
+
+        s = self.build_search(index, app_namespace=app_namespace).query(
+            query_type=query_type, **kwargs)
+        if field and (sort_type or location):
+            s.sort(field, sort_type=sort_type, location=location)
+
+        results = s.execute(size=size)
+        return results
+
+    def _build_search(self, index, ranking_config=None, app_namespace=None):
+        """Build a search object for advanced filtered search.
+
+        Args:
+            index (str): index name of knowledge base object.
+            ranking_config (dict, optional): overriding ranking configuration parameters.
+            app_namespace (str, optional): The namespace of the app. Used to prevent
+                collisions between the indices of this app and those of other apps.
+        Returns:
+            Search: a Search object for filtered search.
+        """
+
+        if ranking_config:
+            msg = f"'ranking_config' is currently discarded in {self.__class__.__name__}."
+            logger.warning(msg)
+            ranking_config = None
+
+        # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
+        app_namespace = app_namespace or self.app_namespace
+
+        # get index name with app scope, and make it ready for inference
+        scoped_index_name = get_scoped_index_name(app_namespace, index)
+        return NativeQuestionAnswerer.Search(index=scoped_index_name)
 
     class Indices:
         """ An object that hold all the indices for an app_path
@@ -1333,8 +1231,10 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                 )
 
             # tfidf based text resolver
-            if self.has_text_resolver and \
-                ((new_hash != self.hash) or (self.processor_type != processor_type)):
+            if (
+                self.has_text_resolver and
+                ((new_hash != self.hash) or (self.processor_type != processor_type))
+            ):
                 msg = f"Creating a text resolver for field '{self.field_name}' in " \
                       f"index '{self.index_name}'."
                 logger.info(msg)
@@ -2162,131 +2062,6 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             except _getattr("elasticsearch", "ElasticsearchException") as e:
                 raise KnowledgeBaseError from e
 
-    def _get(self, index, size=10, query_type=None, app_namespace=None, **kwargs):
-        """Gets a collection of documents from the knowledge base matching the provided
-        search criteria. This API provides a simple interface for developers to specify a list of
-        knowledge base field and query string pairs to find best matches in a similar way as in
-        common Web search interfaces. The knowledge base fields to be used depend on the mapping
-        between NLU entity types and corresponding knowledge base objects. For example, a “cuisine”
-        entity type can be mapped to either a knowledge base object or an attribute of a knowledge
-        base object. The mapping is often application specific and is dependent on the data model
-        developers choose to use when building the knowledge base.
-
-        Examples:
-
-            >>> question_answerer.get(index='menu_items',
-                                      name='pork and shrimp',
-                                      restaurant_id='B01CGKGQ40',
-                                      _sort='price',
-                                      _sort_type='asc')
-
-        Args:
-            index (str): The name of an index.
-            size (int): The maximum number of records, default to 10.
-            query_type (str): Whether the search is over structured, unstructured and whether to use
-                              text signals for ranking, embedder signals, or both.
-            id (str): The id of a particular document to retrieve.
-            _sort (str): Specify the knowledge base field for custom sort.
-            _sort_type (str): Specify custom sort type. Valid values are 'asc', 'desc' and
-                              'distance'.
-            _sort_location (dict): The origin location to be used when sorting by distance.
-
-        Returns:
-            list: A list of matching documents.
-        """
-        doc_id = kwargs.get("id")
-
-        query_type = query_type or self.query_type
-
-        # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
-        app_namespace = app_namespace or self.app_namespace
-
-        # If an id was passed in, simply retrieve the specified document
-        if doc_id:
-            logger.info(
-                "Retrieve object from KB: index= '%s', id= '%s'.", index, doc_id
-            )
-            s = self.build_search(index, app_namespace=app_namespace)
-            s = s.filter(query_type=query_type, id=doc_id)
-            results = s.execute(size=size)
-            return results
-
-        sort_clause = {}
-        query_clauses = []
-
-        # iterate through keyword arguments to get KB field and value pairs for search and custom
-        # sort criteria
-        for key, value in kwargs.items():
-            logger.debug("Processing argument: key= %s value= %s.", key, value)
-            if key == "_sort":
-                sort_clause["field"] = value
-            elif key == "_sort_type":
-                sort_clause["type"] = value
-            elif key == "_sort_location":
-                sort_clause["location"] = value
-            elif "embedder" in query_type and self._embedder_model:
-                if "text" in query_type or "keyword" in query_type:
-                    query_clauses.append({key: value})
-                embedded_value = self._embedder_model.get_encodings([value])[0]
-                embedded_key = key + EMBEDDING_FIELD_STRING
-                query_clauses.append({embedded_key: embedded_value})
-            else:
-                query_clauses.append({key: value})
-                logger.debug("Added query clause: field= %s value= %s.", key, value)
-
-        logger.debug("Custom sort criteria %s.", sort_clause)
-
-        # build Search object with overriding ranking setting to require all query clauses are
-        # matched.
-        s = self.build_search(index, app_namespace=app_namespace,
-                              ranking_config={"query_clauses_operator": "and"})
-
-        # add query clauses to Search object.
-        for clause in query_clauses:
-            s = s.query(query_type=query_type, **clause)
-
-        # add custom sort clause if specified.
-        if sort_clause:
-            s = s.sort(
-                field=sort_clause.get("field"),
-                sort_type=sort_clause.get("type"),
-                location=sort_clause.get("location"),
-            )
-
-        results = s.execute(size=size)
-        return results
-
-    def _build_search(self, index, ranking_config=None, app_namespace=None):
-        """Build a search object for advanced filtered search.
-
-        Args:
-            index (str): index name of knowledge base object.
-            ranking_config (dict, optional): overriding ranking configuration parameters.
-            app_namespace (str, optional): The namespace of the app. Used to prevent
-                collisions between the indices of this app and those of other apps.
-        Returns:
-            Search: a Search object for filtered search.
-        """
-
-        # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
-        app_namespace = app_namespace or self.app_namespace
-
-        if not does_index_exist(app_namespace=app_namespace, index_name=index):
-            raise ValueError("Knowledge base index '{}' does not exist.".format(index))
-
-        # get index name with app scope
-        index = get_scoped_index_name(app_namespace, index)
-
-        # load knowledge base field information for the specified index.
-        self._load_field_info(index)
-
-        return ElasticsearchQuestionAnswerer.Search(
-            client=self._es_client,
-            index=index,
-            ranking_config=ranking_config,
-            field_info=self._es_field_info[index],
-        )
-
     def _load_kb(self,
                  index_name,
                  data_file,
@@ -2463,6 +2238,131 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             # as no cache_path is specified here, the cache is dumped at a path that is already
             # determined at the time of `embedder_model` initialization
             embedder_model.dump_cache()
+
+    def _get(self, index, size=10, query_type=None, app_namespace=None, **kwargs):
+        """Gets a collection of documents from the knowledge base matching the provided
+        search criteria. This API provides a simple interface for developers to specify a list of
+        knowledge base field and query string pairs to find best matches in a similar way as in
+        common Web search interfaces. The knowledge base fields to be used depend on the mapping
+        between NLU entity types and corresponding knowledge base objects. For example, a “cuisine”
+        entity type can be mapped to either a knowledge base object or an attribute of a knowledge
+        base object. The mapping is often application specific and is dependent on the data model
+        developers choose to use when building the knowledge base.
+
+        Examples:
+
+            >>> question_answerer.get(index='menu_items',
+                                      name='pork and shrimp',
+                                      restaurant_id='B01CGKGQ40',
+                                      _sort='price',
+                                      _sort_type='asc')
+
+        Args:
+            index (str): The name of an index.
+            size (int): The maximum number of records, default to 10.
+            query_type (str): Whether the search is over structured, unstructured and whether to use
+                              text signals for ranking, embedder signals, or both.
+            id (str): The id of a particular document to retrieve.
+            _sort (str): Specify the knowledge base field for custom sort.
+            _sort_type (str): Specify custom sort type. Valid values are 'asc', 'desc' and
+                              'distance'.
+            _sort_location (dict): The origin location to be used when sorting by distance.
+
+        Returns:
+            list: A list of matching documents.
+        """
+        doc_id = kwargs.get("id")
+
+        query_type = query_type or self.query_type
+
+        # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
+        app_namespace = app_namespace or self.app_namespace
+
+        # If an id was passed in, simply retrieve the specified document
+        if doc_id:
+            logger.info(
+                "Retrieve object from KB: index= '%s', id= '%s'.", index, doc_id
+            )
+            s = self.build_search(index, app_namespace=app_namespace)
+            s = s.filter(query_type=query_type, id=doc_id)
+            results = s.execute(size=size)
+            return results
+
+        sort_clause = {}
+        query_clauses = []
+
+        # iterate through keyword arguments to get KB field and value pairs for search and custom
+        # sort criteria
+        for key, value in kwargs.items():
+            logger.debug("Processing argument: key= %s value= %s.", key, value)
+            if key == "_sort":
+                sort_clause["field"] = value
+            elif key == "_sort_type":
+                sort_clause["type"] = value
+            elif key == "_sort_location":
+                sort_clause["location"] = value
+            elif "embedder" in query_type and self._embedder_model:
+                if "text" in query_type or "keyword" in query_type:
+                    query_clauses.append({key: value})
+                embedded_value = self._embedder_model.get_encodings([value])[0]
+                embedded_key = key + EMBEDDING_FIELD_STRING
+                query_clauses.append({embedded_key: embedded_value})
+            else:
+                query_clauses.append({key: value})
+                logger.debug("Added query clause: field= %s value= %s.", key, value)
+
+        logger.debug("Custom sort criteria %s.", sort_clause)
+
+        # build Search object with overriding ranking setting to require all query clauses are
+        # matched.
+        s = self.build_search(index, app_namespace=app_namespace,
+                              ranking_config={"query_clauses_operator": "and"})
+
+        # add query clauses to Search object.
+        for clause in query_clauses:
+            s = s.query(query_type=query_type, **clause)
+
+        # add custom sort clause if specified.
+        if sort_clause:
+            s = s.sort(
+                field=sort_clause.get("field"),
+                sort_type=sort_clause.get("type"),
+                location=sort_clause.get("location"),
+            )
+
+        results = s.execute(size=size)
+        return results
+
+    def _build_search(self, index, ranking_config=None, app_namespace=None):
+        """Build a search object for advanced filtered search.
+
+        Args:
+            index (str): index name of knowledge base object.
+            ranking_config (dict, optional): overriding ranking configuration parameters.
+            app_namespace (str, optional): The namespace of the app. Used to prevent
+                collisions between the indices of this app and those of other apps.
+        Returns:
+            Search: a Search object for filtered search.
+        """
+
+        # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
+        app_namespace = app_namespace or self.app_namespace
+
+        if not does_index_exist(app_namespace=app_namespace, index_name=index):
+            raise ValueError("Knowledge base index '{}' does not exist.".format(index))
+
+        # get index name with app scope
+        index = get_scoped_index_name(app_namespace, index)
+
+        # load knowledge base field information for the specified index.
+        self._load_field_info(index)
+
+        return ElasticsearchQuestionAnswerer.Search(
+            client=self._es_client,
+            index=index,
+            ranking_config=ranking_config,
+            field_info=self._es_field_info[index],
+        )
 
     class Search:
         """This class models a generic filtered search in knowledge base. It allows developers to
@@ -3271,6 +3171,129 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
             """
 
             return self.type in self.VECTOR_TYPES
+
+
+class QuestionAnswerer:
+    """
+    Backwards compatible QuestionAnswerer class
+
+    old usages (allowed but will soon be deprecated)
+        # loading KB directly through class method
+        >>> QuestionAnswerer.load_kb(...)
+        # instantiating a QA object from QuestionAnswerer instead of QuestionAnswererFactory
+        >>> question_answerer = QuestionAnswerer(app_path, resource_loader, es_host, config)
+
+    new usages
+        >>> question_answerer = QuestionAnswererFactory.create_question_answerer(**kwargs)
+        # Use the QA object's methods to load KB and get search results, instead of class methods
+        >>> question_answerer.load_kb(...)
+        >>> question_answerer.get(...) # .get(...) and .build_search(...)
+    """
+
+    DEPRECATION_MESSAGE = \
+        "Calling QuestionAnswerer class directly will be deprecated in future versions. " \
+        "To instantiate a QA instance, use the QuestionAnswererFactory by calling " \
+        "'qa = QuestionAnswererFactory.create_question_answerer(**kwargs)'. " \
+        "An instantiated QA can then be used as 'qa.load_kb(...)', 'qa.get(...)', etc. " \
+        "See https://www.mindmeld.com/docs/userguide/kb.html for details about the various " \
+        "functionalities available with different question-answerers."
+
+    def __new__(cls, app_path=None, resource_loader=None, es_host=None, config=None, **kwargs):
+        """
+        This method is used to initialize a XxxQuestionAnswerer based on the model_type.
+
+        To keep the code base backwards compatible, we use a '__new__()' way of creating instances
+        alongside using a factory approach. For cases wherein a question-answerer is instantiated
+        from 'QuestionAnswerer' class instead of 'QuestionAnswererFactory.create_question_answerer',
+        this method is called before __init__ and returns an instance of a question-answerer.
+
+        Due to this reason, see that the order of the arguments is similar to the previous version
+        of QuestionAnswerer class in 'question_answerer.py'.
+        """
+
+        # can be deprecated in future
+        del resource_loader
+
+        warnings.warn(QuestionAnswerer.DEPRECATION_MESSAGE, DeprecationWarning)
+
+        kwargs.update({
+            "app_path": app_path,
+            "es_host": es_host,
+            "config": config,
+        })
+        return QuestionAnswererFactory.create_question_answerer(**kwargs)
+
+    @classmethod
+    def load_kb(cls,
+                app_namespace,
+                index_name,
+                data_file,
+                es_host=None,
+                es_client=None,
+                connect_timeout=2,
+                clean=False,
+                app_path=None,
+                config=None,
+                **kwargs):
+        """
+        Implemented to maintain backward compatibility. Should be removed in future versions.
+
+        Args:
+            app_namespace (str): The namespace of the app. Used to prevent
+                collisions between the indices of this app and those of other
+                apps.
+            index_name (str): The name of the new index to be created.
+            data_file (str): The path to the data file containing the documents
+                to be imported into the knowledge base index. It could be
+                either json or jsonl file.
+            es_host (str): The Elasticsearch host server.
+            es_client (Elasticsearch): The Elasticsearch client.
+            connect_timeout (int, optional): The amount of time for a
+                connection to the Elasticsearch host.
+            clean (bool): Set to true if you want to delete an existing index
+                and reindex it
+            app_path (str): The path to the directory containing the app's data
+            config (dict): The QA config if passed directly rather than loaded from the app config
+        """
+
+        warnings.warn(QuestionAnswerer.DEPRECATION_MESSAGE, DeprecationWarning)
+
+        # As a way to reduce entropy in using 'load_kb()' and it's related inconsistencies of not
+        # exposing 'app_namespace' argument in '.get()' and '.build_search()', this reformatting
+        # recommends that all these methods be used as instance methods and not as class methods.
+        # By doing so, each QA object is meant to be used for one app_path/app_namespace and all
+        # the indices in that app, while previously once could access any app's index.
+
+        msg = "Calling the 'load_kb(...)' method directly from the QuestionAnswerer object " \
+              "like 'QuestionAnswerer.load_kb(...)' will be deprecated. New usage: " \
+              "'qa = QuestionAnswererFactory.create_question_answerer(**kwargs); " \
+              "qa.load_kb(...)'. Note that this change might also " \
+              "lead to creating different QA instances for different configs. " \
+              "See https://www.mindmeld.com/docs/userguide/kb.html for more details. "
+        warnings.warn(msg, DeprecationWarning)
+
+        # add everything except 'index_name' and 'data_file' to kwargs, and create a QA instance
+        kwargs.update({
+            "app_namespace": app_namespace,
+            "es_host": es_host,
+            "es_client": es_client,
+            "connect_timeout": connect_timeout,
+            "clean": clean,
+            "config": config,
+            "app_path": app_path,
+        })
+        question_answerer = QuestionAnswererFactory.create_question_answerer(**kwargs)
+
+        # only retain 'connection_timeout', 'clean' information as everything else is already
+        #   absorbed during instantiation above; the recommended way of passing configs to QA is
+        #   by passing those details during initialization, that way there exists no discrepancies
+        #   between loading and inference.
+        kwargs.pop("app_namespace")
+        kwargs.pop("es_host")
+        kwargs.pop("es_client")
+        kwargs.pop("config")
+        kwargs.pop("app_path")
+        question_answerer.load_kb(index_name, data_file, **kwargs)
 
 
 QUESTION_ANSWERER_MODEL_MAPPINGS = {

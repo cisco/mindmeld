@@ -371,7 +371,6 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
             os.makedirs(os.path.dirname(resolver_config_path), exist_ok=True)
             with open(resolver_config_path, "wb") as fp:
                 pickle.dump(self.resolver_configurations, fp)
-                fp.close()
 
             # save data hash
             # this hash is useful for avoiding re-fitting the resolver on unchanged data
@@ -429,7 +428,6 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
         hash_path = path + ".hash"
         with open(hash_path, "r") as hash_file:
             self.hash = hash_file.read()
-            hash_file.close()
         if new_hash != self.hash:
             msg = f"Found KB data to have changed when loading {self.__class__.__name__} " \
                   f"resolver ({str(self)}). Please fit using 'clean=True' " \
@@ -447,7 +445,6 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
         if os.path.exists(resolver_config_path):
             with open(resolver_config_path, "rb") as fp:
                 self.resolver_configurations = pickle.load(fp)
-                fp.close()
         else:
             msg = f"Cannot find a configs path for the resolver while loading the " \
                   f"resolver:{self.__class__.__name__}. This could have happened if you missed " \
@@ -1400,13 +1397,11 @@ class TfIdfSparseCosSimEntityResolver(BaseEntityResolver):
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "wb") as fp:
             pickle.dump(resolver_state, fp)
-            fp.close()
 
     def _load(self, path, entity_map):
         self.processed_entity_map = self.get_processed_entity_map(entity_map)
         with open(path, "rb") as fp:
             resolver_state = pickle.load(fp)
-            fp.close()
         self._unique_synonyms = resolver_state["unique_synonyms"]
         self._syn_tfidf_matrix = resolver_state["syn_tfidf_matrix"]
         self._vectorizer = resolver_state["vectorizer"]
