@@ -114,7 +114,7 @@ class SpacyModelFactory:
             spacy_model_name (str): Name of the Spacy NER model (Ex: "en_core_web_sm")
         """
         subprocess.run(
-            ["python", "-m", "spacy", "download", spacy_model_name], check=True
+            ["python", "-m", "spacy", "download", spacy_model_name, "—default-timeout=1000"], check=True
         )
 
     @staticmethod
