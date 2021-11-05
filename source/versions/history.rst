@@ -35,17 +35,17 @@ Major Features and Improvements
 Bug fixes
 ^^^^^^^^^
 
-- Fixed custom validation [bug](https://github.com/cisco/mindmeld/issues/352) in Automatic Slotfilling
-- Fixed input validation [bug](https://github.com/cisco/mindmeld/issues/363) for certain queries
-- Fixed [serialization issues](https://github.com/cisco/mindmeld/issues/270) with responder object
-- Fixed [bug](https://github.com/cisco/mindmeld/issues/274) where duckling was not returning any entity candidates
-- Fixed RASA to MindMeld conversion [bug](https://github.com/cisco/mindmeld/pull/277)
-- Fixed a [path loading issue](https://github.com/cisco/mindmeld/issues/307) with Windows environments
-- Fixed a memory leak issue when loading multiple MindMeld apps in parallel (https://github.com/cisco/mindmeld/pull/296)
-- Fixed a `sys_candidate` value (bug)[https://github.com/cisco/mindmeld/pull/317]
-- Fixed a (bug)[https://github.com/cisco/mindmeld/pull/318] with the Conditional Random Field model
-- Fixed a feature extraction [bug](https://github.com/cisco/mindmeld/pull/323) in MindMeld
-- Fixed Question Answerer issue [when using a compact json format for Knowledge Base](https://github.com/cisco/mindmeld/issues/220) and tightened up its interface to (avoid conflicting usage)[https://github.com/cisco/mindmeld/issues/219] of app_namespace and app_path arguments.
+- Fixed custom validation `bug <https://github.com/cisco/mindmeld/issues/352>`_ in Automatic Slotfilling
+- Fixed input validation `bug <https://github.com/cisco/mindmeld/issues/363>`_ for certain queries
+- Fixed `serialization issues <https://github.com/cisco/mindmeld/issues/270>`_ with responder object
+- Fixed `bug <https://github.com/cisco/mindmeld/issues/274>`_ where duckling was not returning any entity candidates
+- Fixed RASA to MindMeld conversion `bug <https://github.com/cisco/mindmeld/issues/277>`_
+- Fixed a `path loading issue <https://github.com/cisco/mindmeld/issues/307>`_ with Windows environments
+- Fixed a `memory leak issue <https://github.com/cisco/mindmeld/pull/296>`_ when loading multiple MindMeld apps in parallel
+- Fixed a `sys_candidate` value `bug <https://github.com/cisco/mindmeld/pull/317>`_
+- Fixed a `bug <https://github.com/cisco/mindmeld/pull/318>`_ with the Conditional Random Field model
+- Fixed a feature extraction `bug <https://github.com/cisco/mindmeld/pull/323>`_ in MindMeld
+- Fixed Question Answerer issue `when using a compact json format for Knowledge Base <https://github.com/cisco/mindmeld/issues/220>`_ and tightened up its interface to `avoid conflicting usage <https://github.com/cisco/mindmeld/issues/219>`_ of app_namespace and app_path arguments
 
 
 Legacy
