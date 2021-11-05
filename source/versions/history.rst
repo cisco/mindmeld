@@ -7,13 +7,13 @@ Package History
 Major Features and Improvements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Implemented a text preparation pipeline that supports (multilingual tokenization)[https://www.mindmeld.com/docs/userguide/tokenizer.html] and makes our Preprocessors, Normalizers, Tokenizers, and Stemmers configurable.
+- Implemented a text preparation pipeline that supports :doc:`multilingual tokenization <../userguide/tokenizer>` and makes our Preprocessors, Normalizers, Tokenizers, and Stemmers configurable.
 
-- Implemented (non-elasticsearch Question Answering capability)[https://www.mindmeld.com/docs/userguide/kb.html#questionanswerer-without-elasticsearch] that works similar to Elasticsearch based Question Answerer.
+- Implemented :ref:`non-elasticsearch Question Answering capability <non_elasticsearch_question_answerer>` that works similar to Elasticsearch based Question Answerer.
 
-- Implemented `deny_nlp` functionality for the `nlp.process` API [interface](https://github.com/cisco/mindmeld/pull/311/).
+- Implemented `deny_nlp` functionality for the `nlp.process` `API <https://github.com/cisco/mindmeld/pull/311/>`_.
 
-- Added a [new blueprint](https://www.mindmeld.com/docs/blueprints/screening_app.html) for non-english MindMeld applications.
+- Added a :doc:`new Spanish blueprint <../blueprints/screening_app>` for non-english MindMeld applications.
 
 - Implemented consistent input validation of APIs using Marshmallow
 
@@ -21,9 +21,9 @@ Major Features and Improvements
 
 - Implemented multilingual annotation tools for automatically annotating non-English MindMeld applications
 
-- Implemented (active learning pipeline)[https://www.mindmeld.com/docs/walkthroughs/wt_active_learning.html] for MindMeld
+- Implemented :doc:`active learning pipeline <../walkthroughs/wt_active_learning>` for MindMeld
 
-- Implemented multilingual [paraphrasing functionality](https://www.mindmeld.com/docs/userguide/augmentation.html) to make it easier to bootstrap small conversational applications with data augmentation.
+- Implemented multilingual :doc:`paraphrasing functionality <../userguide/augmentation>` to make it easier to bootstrap small conversational applications with data augmentation.
 
 - Implemented query caching using sqlite db to reduce training time speed
 
@@ -44,8 +44,8 @@ Bug fixes
 - Fixed a memory leak issue when loading multiple MindMeld apps in parallel (https://github.com/cisco/mindmeld/pull/296)
 - Fixed a `sys_candidate` value (bug)[https://github.com/cisco/mindmeld/pull/317]
 - Fixed a (bug)[https://github.com/cisco/mindmeld/pull/318] with the Conditional Random Field model
-- Fixed a feature extraction (bug)[https://github.com/cisco/mindmeld/pull/323] in MindMeld
-- Fixed Question Answerer issue (when using a compact json format for Knowledge Base)[https://github.com/cisco/mindmeld/issues/220] and tightened up its interface to (avoid conflicting usage)[https://github.com/cisco/mindmeld/issues/219] of app_namespace and app_path arguments.
+- Fixed a feature extraction [bug](https://github.com/cisco/mindmeld/pull/323) in MindMeld
+- Fixed Question Answerer issue [when using a compact json format for Knowledge Base](https://github.com/cisco/mindmeld/issues/220) and tightened up its interface to (avoid conflicting usage)[https://github.com/cisco/mindmeld/issues/219] of app_namespace and app_path arguments.
 
 
 Legacy
