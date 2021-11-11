@@ -300,8 +300,7 @@ class DataBucket:
         sampling_size: int,
         confidences_2d: List[List[float]],
         confidences_3d: List[List[List[float]]],
-        entity_confidences_2d: List[List[float]],
-        entity_confidences_3d: List[List[List[float]]],
+        entity_confidences: List[List[List[float]]],
         heuristic: Heuristic,
         confidence_segments: Dict = None,
         entity_tuning: bool = False,
@@ -334,11 +333,12 @@ class DataBucket:
         remaining_indices = ranked_indices_2d[sampling_size:]
 
         if entity_tuning:
-            ranked_entity_indices = (
-                heuristic.rank_3d(entity_confidences_3d)
-                if confidences_3d
-                else heuristic.rank_2d(entity_confidences_2d)
-            )
+            ranked_entity_indices = heuristic.rank_entities(entity_confidences)
+            # ranked_entity_indices = (
+            #     heuristic.rank_3d(entity_confidences_3d)
+            #     if confidences_3d
+            #     else heuristic.rank_2d(entity_confidences_2d)
+            # )
             newly_sampled_indices_entity = ranked_entity_indices[:sampling_size]
             remaining_indices_entity = ranked_entity_indices[sampling_size:]
 

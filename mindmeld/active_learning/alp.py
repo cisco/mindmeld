@@ -234,7 +234,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                     confidences_2d,
                     confidences_3d,
                     entity_confidences,
-                    entity_confidences_3d,
+                    # entity_confidences_3d,
                     confidence_segments,
                 ) = self.mindmeld_al_classifier.train(self.data_bucket, heuristic)
                 if not select_mode:
@@ -253,8 +253,8 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                         sampling_size=self._get_sampling_size(num_unsampled),
                         confidences_2d=confidences_2d,
                         confidences_3d=confidences_3d,
-                        entity_confidences_2d=entity_confidences,
-                        entity_confidences_3d=entity_confidences_3d,
+                        entity_confidences=entity_confidences,
+                        # entity_confidences_3d=entity_confidences_3d,
                         heuristic=heuristic,
                         confidence_segments=confidence_segments,
                         entity_tuning=self.entity_tuning,

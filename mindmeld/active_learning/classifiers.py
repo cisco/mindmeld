@@ -223,16 +223,17 @@ class MindMeldALClassifier(ALClassifier):
 
             if not classifier_eval:
                 for _ in range(len(queries)):
-                    query_prob_vector = np.zeros(len(tag_to_id))
-                    query_prob_vector[default_idx] = default_prob
-                    queries_prob_vectors.append(query_prob_vector)
+                    query_prob_vector_2d = np.zeros((1, len(tag_to_id)))
+
+                    query_prob_vector_2d[0][default_idx] = default_prob
+                    queries_prob_vectors.append(query_prob_vector_2d)
 
             else:
                 for query in classifier_eval.results:
 
                     if not len(query.predicted):
-                        query_prob_vector = np.zeros(len(tag_to_id))
-                        query_prob_vector[default_idx] = default_prob
+                        query_prob_vector_2d = np.zeros((1, len(tag_to_id)))
+                        query_prob_vector_2d[0][default_idx] = default_prob
 
                     else:
                         # Create and populate a 2D vector (# tokens * # tags)
@@ -248,13 +249,13 @@ class MindMeldALClassifier(ALClassifier):
                                 query_prob_vector_2d[token_idx][tag_index] = probas[i]
 
                         # Use the max uncertainty token from the vector for active learning
-                        try:
-                            max_uncertainty_idx = heuristic.rank_2d(query_prob_vector_2d)[0]
-                        except:
-                            max_uncertainty_idx = heuristic.rank_3d([query_prob_vector_2d,query_prob_vector_2d])[0]
-                        query_prob_vector = query_prob_vector_2d[max_uncertainty_idx]
+                        # try:
+                        #     max_uncertainty_idx = heuristic.rank_2d(query_prob_vector_2d)[0]
+                        # except:
+                        #     max_uncertainty_idx = heuristic.rank_3d([query_prob_vector_2d,query_prob_vector_2d])[0]
+                        # query_prob_vector = query_prob_vector_2d[max_uncertainty_idx]
 
-                    queries_prob_vectors.append(query_prob_vector)
+                    queries_prob_vectors.append(query_prob_vector_2d)
         return queries_prob_vectors
 
     @staticmethod
@@ -341,7 +342,7 @@ class MindMeldALClassifier(ALClassifier):
         )
         return_confidences_3d = isinstance(heuristic, MULTI_MODEL_HEURISTICS)
         confidences_3d, entity_confidences_3d = (
-            self.train_multi(data_bucket, heuristic) if return_confidences_3d else None
+            self.train_multi(data_bucket, heuristic) if return_confidences_3d else (None, None)
         )
         domain_indices = (
             self.domain_indices if isinstance(heuristic, KLDivergenceSampling) else None
@@ -351,7 +352,7 @@ class MindMeldALClassifier(ALClassifier):
             confidences_2d,
             confidences_3d,
             entity_confidences,
-            entity_confidences_3d,
+            # entity_confidences_3d,
             domain_indices,
         )
 
@@ -740,9 +741,6 @@ class MindMeldALClassifier(ALClassifier):
                 # Evaluate Test Queries
                 er_eval_test = er.evaluate(queries=filtered_test_queries)
                 er_eval_test_dict[f"{domain}.{intent}"] = er_eval_test
-                # except:
-                #     logger.error(f"{intent}")
-                #     # continue
 
                 # Get Probability Vectors
                 er_queries_prob_vectors = MindMeldALClassifier._get_probs(

@@ -202,6 +202,10 @@ class LeastConfidenceSampling(ABC):
         ]
         return Heuristic.ordered_indices_list_to_final_rank(all_ordered_sample_indices)
 
+    @staticmethod
+    def rank_entities():
+        pass
+
 
 class MarginSampling(ABC):
     @staticmethod
@@ -274,6 +278,28 @@ class EntropySampling(ABC):
             EntropySampling.rank_2d(c) for c in confidences_3d
         ]
         return Heuristic.ordered_indices_list_to_final_rank(all_ordered_sample_indices)
+
+    @staticmethod
+    def rank_entities(entity_confidences: List[List[List[float]]]) -> List[int]:
+        """Calculates the entropy score of the entity confidences per element.
+        Elements are ranked from highest to lowest entropy.
+        Returns:
+            Ranked lists based on either:
+            Token Entropy: Average of per token entropies across a query; or
+            Total Token Entropy: Sum of token entropies across a query.
+        """
+        sequence_entropy_list = []
+        for sequence in entity_confidences:
+            entropy_per_token = scipy_entropy(
+                np.array(sequence), axis=1, base=ENTROPY_LOG_BASE
+            )
+
+            total_entropy = sum(entropy_per_token)
+            total_token_entropy = total_entropy/len(entropy_per_token)
+            sequence_entropy_list.append(total_token_entropy)
+
+        high_to_low_entropy = np.argsort(sequence_entropy_list)[::-1]
+        return list(high_to_low_entropy)
 
 
 class DisagreementSampling(ABC):
