@@ -19,6 +19,7 @@ from typing import List, Dict
 from collections import defaultdict
 from scipy.stats import entropy as scipy_entropy
 import numpy as np
+import math
 
 from ..constants import (
     ENTROPY_LOG_BASE,
@@ -203,8 +204,20 @@ class LeastConfidenceSampling(ABC):
         return Heuristic.ordered_indices_list_to_final_rank(all_ordered_sample_indices)
 
     @staticmethod
-    def rank_entities():
-        pass
+    def rank_entities(entity_confidences: List[List[List[float]]]) -> List[int]:
+        query_uncertainty_list = []
+
+        for sequence in entity_confidences:
+            most_likely_sequence_prob = 1.
+            for token in sequence:
+                max_token_posterior = max(np.array(token))
+                most_likely_sequence_prob *= max_token_posterior
+
+            query_uncertainty = 1 - most_likely_sequence_prob
+            query_uncertainty_list.append(query_uncertainty)
+
+        high_to_low_uncertainties = np.argsort(query_uncertainty_list)[::-1]
+        return list(high_to_low_uncertainties)
 
 
 class MarginSampling(ABC):
@@ -244,6 +257,49 @@ class MarginSampling(ABC):
         """
         all_ordered_sample_indices = [MarginSampling.rank_2d(c) for c in confidences_3d]
         return Heuristic.ordered_indices_list_to_final_rank(all_ordered_sample_indices)
+
+    @staticmethod
+    def beam_search_decoder(predictions, top_k = 3):
+        output_sequences = [([], 0)]
+
+        #looping through all the predictions
+        for token_probs in predictions:
+            new_sequences = []
+
+            #append new tokens to old sequences and re-score
+            for old_seq, old_score in output_sequences:
+                for char_index in range(len(token_probs)):
+                    new_seq = old_seq + [char_index]
+                    #considering log-likelihood for scoring
+                    value = token_probs[char_index]
+                    if value:
+                        new_score = old_score + math.log(value)
+                    else:
+                        new_score = old_score - math.inf
+                    new_sequences.append((new_seq, new_score))
+
+            #sort all new sequences in the de-creasing order of their score
+            output_sequences = sorted(new_sequences, key = lambda val: val[1], reverse = True)
+
+            #select top-k based on score
+            output_sequences = output_sequences[:top_k]
+
+        return output_sequences
+
+    @staticmethod
+    def rank_entities(entity_confidences: List[List[List[float]]]) -> List[int]:
+        query_margin_list = []
+
+        for sequence in entity_confidences:
+            top_two_sequences = MarginSampling.beam_search_decoder(sequence, top_k=2)
+
+            # anti-log to get back probabilities
+            margin = math.exp(top_two_sequences[0][1]) - math.exp(top_two_sequences[1][1])
+
+            query_margin_list.append(margin)
+
+        low_to_high_margin = np.argsort(query_margin_list)
+        return list(low_to_high_margin)
 
 
 class EntropySampling(ABC):
