@@ -315,7 +315,7 @@ class TaggerModel(Model):
             self._resources, dynamic_resource=dynamic_resource,
             text_preparation_pipeline=self.text_preparation_pipeline
         )
-        predicted_tags_probas = self._clf.predict_proba(
+        predicted_tags_probas = self._clf.predict_proba_active_learning(
             examples, self.config, workspace_resource
         )
         # tags, probas = zip(*predicted_tags_probas[0])
