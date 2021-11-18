@@ -580,6 +580,7 @@ class TextPreparationPipelineFactory:
             TextPreparationPipeline: A TextPreparationPipeline class.
         """
         if app_path:
+            # Check if a custom TextPreparationPipeline has been created in app.py
             try:
                 app = get_app(app_path)
                 if hasattr(app, 'text_preparation_pipeline') and app.text_preparation_pipeline:
@@ -588,10 +589,7 @@ class TextPreparationPipelineFactory:
                     )
                     return app.text_preparation_pipeline
             except MindMeldImportError:
-                logger.warning(
-                    "Error importing application from %s. Using default TextPreparationPipeline.",
-                    app_path
-                )
+                pass
         return TextPreparationPipelineFactory.create_from_app_config(app_path)
 
     @staticmethod
