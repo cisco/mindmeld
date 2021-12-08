@@ -157,13 +157,10 @@ class PlotManager:
                     function(self, y_keys=y_keys)
                     for entity in self.get_entity_list(domain, intent):
                         y_keys = [domain, intent, "entities", entity]
-                        # print(y_keys)
                         function(self, y_keys=y_keys)
 
             if self.plot_intents:
                 function(self, y_keys=[domain, "overall"])
-                if not plot_intents:
-                    continue
                 for intent in self.get_intent_list(domain):
                     function(
                         self,

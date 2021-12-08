@@ -17,9 +17,9 @@ This module contains query selection heuristics for the Active Learning Pipeline
 from abc import ABC, abstractmethod
 from typing import List, Dict
 from collections import defaultdict
+import math
 from scipy.stats import entropy as scipy_entropy
 import numpy as np
-import math
 
 from ..constants import (
     ENTROPY_LOG_BASE,
@@ -208,7 +208,7 @@ class LeastConfidenceSampling(ABC):
         query_uncertainty_list = []
 
         for sequence in entity_confidences:
-            most_likely_sequence_prob = 1.
+            most_likely_sequence_prob = 1.0
             for token in sequence:
                 max_token_posterior = max(np.array(token))
                 most_likely_sequence_prob *= max_token_posterior
@@ -259,29 +259,31 @@ class MarginSampling(ABC):
         return Heuristic.ordered_indices_list_to_final_rank(all_ordered_sample_indices)
 
     @staticmethod
-    def beam_search_decoder(predictions, top_k = 3):
+    def beam_search_decoder(predictions, top_k=3):
         output_sequences = [([], 0)]
 
-        #looping through all the predictions
+        # looping through all the predictions
         for token_probs in predictions:
             new_sequences = []
 
-            #append new tokens to old sequences and re-score
+            # append new tokens to old sequences and re-score
             for old_seq, old_score in output_sequences:
-                for char_index in range(len(token_probs)):
+                for char_index, char in enumerate(token_probs):
                     new_seq = old_seq + [char_index]
-                    #considering log-likelihood for scoring
-                    value = token_probs[char_index]
+                    # considering log-likelihood for scoring
+                    value = char
                     if value:
                         new_score = old_score + math.log(value)
                     else:
                         new_score = old_score - math.inf
                     new_sequences.append((new_seq, new_score))
 
-            #sort all new sequences in the de-creasing order of their score
-            output_sequences = sorted(new_sequences, key = lambda val: val[1], reverse = True)
+            # sort all new sequences in the de-creasing order of their score
+            output_sequences = sorted(
+                new_sequences, key=lambda val: val[1], reverse=True
+            )
 
-            #select top-k based on score
+            # select top-k based on score
             output_sequences = output_sequences[:top_k]
 
         return output_sequences
@@ -294,7 +296,9 @@ class MarginSampling(ABC):
             top_two_sequences = MarginSampling.beam_search_decoder(sequence, top_k=2)
 
             # anti-log to get back probabilities
-            margin = math.exp(top_two_sequences[0][1]) - math.exp(top_two_sequences[1][1])
+            margin = math.exp(top_two_sequences[0][1]) - math.exp(
+                top_two_sequences[1][1]
+            )
 
             query_margin_list.append(margin)
 
@@ -351,7 +355,7 @@ class EntropySampling(ABC):
             )
 
             total_entropy = sum(entropy_per_token)
-            total_token_entropy = total_entropy/len(entropy_per_token)
+            total_token_entropy = total_entropy / len(entropy_per_token)
             sequence_entropy_list.append(total_token_entropy)
 
         high_to_low_entropy = np.argsort(sequence_entropy_list)[::-1]

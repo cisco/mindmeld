@@ -99,7 +99,6 @@ class ConditionalRandomFields(Tagger):
         X, _, _ = self.extract_features(examples, config, resources, in_memory=True)
         seq = self._clf.predict(X)
         marginals_dict = self._clf.predict_marginals(X)
-        marginal_tuples = []
         predictions = []
         tag_maps = []
         for query_index, query_seq in enumerate(seq):

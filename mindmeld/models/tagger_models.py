@@ -322,7 +322,6 @@ class TaggerModel(Model):
             )
             return tuple(zip(*predicted_tags_probas[0]))
 
-
         predicted_tags_probas = self._clf.predict_proba(
             examples, self.config, workspace_resource
         )

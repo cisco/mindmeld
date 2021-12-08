@@ -177,7 +177,6 @@ class MindMeldALClassifier(ALClassifier):
         classifier: Classifier,
         queries: ProcessedQueryList,
         tag_to_id: Dict,
-        heuristic: Heuristic,
     ):
         """Get the probability distribution for a query across domains or intents.
 
@@ -236,8 +235,7 @@ class MindMeldALClassifier(ALClassifier):
         classifier: Classifier,
         queries: ProcessedQueryList,
         nlp_component_to_id: Dict,
-        heuristic: Heuristic = None,
-        type=None,
+        nlp_component_type=None,
     ):
         """Get the probability distribution for a query across domains or intents.
 
@@ -250,12 +248,11 @@ class MindMeldALClassifier(ALClassifier):
         Returns:
             prob_vector (List[List]]): Probability distribution vectors for given queries.
         """
-        if type == "entity":
+        if nlp_component_type == "entity":
             return MindMeldALClassifier._get_entity_probs(
                 classifier=classifier,
                 queries=queries,
                 tag_to_id=nlp_component_to_id,
-                heuristic=heuristic,
             )
 
         queries_prob_vectors = []
@@ -315,10 +312,9 @@ class MindMeldALClassifier(ALClassifier):
         )
         return_confidences_3d = isinstance(heuristic, MULTI_MODEL_HEURISTICS)
 
-        # To-do:
-        # confidences_3d, entity_confidences_3d = (
-        #     self.train_multi(data_bucket, heuristic) if return_confidences_3d else (None, None)
-        # )
+        confidences_3d = (
+            self.train_multi(data_bucket, heuristic) if return_confidences_3d else (None, None)
+        )
 
         domain_indices = (
             self.domain_indices if isinstance(heuristic, KLDivergenceSampling) else None
@@ -481,15 +477,17 @@ class MindMeldALClassifier(ALClassifier):
             for fold in fold_sampled_queries_ids
         ]
         confidences_3d = []
-        entity_confidences_3d = []
         for fold_sample_queries in fold_sampled_queries_lists:
-            confidences_2d, entity_confidences, eval_stats = self._train_single(
-                    fold_sample_queries, unsampled_queries, test_queries, label_map, heuristic
-                )
+            confidences_2d, eval_stats = self._train_single(
+                fold_sample_queries,
+                unsampled_queries,
+                test_queries,
+                label_map,
+                heuristic,
+            )
             confidences_3d.append(confidences_2d)
-            entity_confidences_3d.append(entity_confidences)
 
-        return confidences_3d, entity_confidences_3d
+        return confidences_3d
 
     def domain_classifier_fit_eval(
         self,
@@ -662,7 +660,6 @@ class MindMeldALClassifier(ALClassifier):
         unsampled_queries: ProcessedQueryList,
         test_queries: ProcessedQueryList,
         domain_to_intents: Dict,
-        domain_to_intent2id: Dict,
         entity2id: Dict,
         heuristic: Heuristic,
     ):
@@ -672,7 +669,6 @@ class MindMeldALClassifier(ALClassifier):
             unsampled_queries (ProcessedQueryList): List of Unsampled Queries.
             test_queries (ProcessedQueryList): List of Test Queries.
             domain_to_intents (Dict): Dictionary mapping domain to list of intents.
-            domain_to_intent2id (Dict): Dictionary mapping intents to IDs.
             entity2id (Dict): Dictionary mapping entities to IDs.
 
         Returns:
@@ -709,10 +705,8 @@ class MindMeldALClassifier(ALClassifier):
                 )
                 # Train
                 er = self.nlp.domains[domain].intents[intent].entity_recognizer
-                try:
-                    er.fit(queries=filtered_sampled_queries)
-                except:
-                    pass
+                er.fit(queries=filtered_sampled_queries)
+
                 # Evaluate Test Queries
                 er_eval_test = er.evaluate(queries=filtered_test_queries)
                 er_eval_test_dict[f"{domain}.{intent}"] = er_eval_test
@@ -731,7 +725,9 @@ class MindMeldALClassifier(ALClassifier):
 
         indices = list(unsampled_idx_preds_pairs.keys())
         indices.sort()
-        er_queries_prob_vectors = [unsampled_idx_preds_pairs[index] for index in indices]
+        er_queries_prob_vectors = [
+            unsampled_idx_preds_pairs[index] for index in indices
+        ]
         return er_queries_prob_vectors, er_eval_test_dict
 
     def _update_eval_stats_entity_level(
@@ -739,7 +735,6 @@ class MindMeldALClassifier(ALClassifier):
         eval_stats: defaultdict,
         er_eval_test_dict: Dict,
         verbose: bool = False,
-
     ):
         """Update the eval_stats dictionary with evaluation metrics from entity
         recognizers.
@@ -759,17 +754,19 @@ class MindMeldALClassifier(ALClassifier):
                     eval_stats["accuracies"][domain].update({intent: {}})
 
                 eval_stats["accuracies"][domain][intent]["entities"] = {
-                        "overall": er_eval_test.get_stats()["stats_overall"][
-                                self.aggregate_statistic
-                            ]
-                        }
+                    "overall": er_eval_test.get_stats()["stats_overall"][
+                        self.aggregate_statistic
+                    ]
+                }
 
                 if verbose:
-                    for e, entity in enumerate(er_eval_test.get_stats()["class_labels"]):
+                    for e, entity in enumerate(
+                        er_eval_test.get_stats()["class_labels"]
+                    ):
                         eval_stats["accuracies"][domain][intent]["entities"][
                             entity
                         ] = er_eval_test.get_stats()["class_stats"][
                             self.class_level_statistic
-                        ][e]
-
-
+                        ][
+                            e
+                        ]

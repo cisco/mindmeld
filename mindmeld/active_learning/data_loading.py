@@ -337,8 +337,12 @@ class DataBucket:
             newly_sampled_indices_entity = ranked_entity_indices[:sampling_size]
             remaining_indices_entity = ranked_entity_indices[sampling_size:]
 
-            newly_sampled_indices = list(set(newly_sampled_indices).union(newly_sampled_indices_entity))
-            remaining_indices = list(set(remaining_indices).intersection(remaining_indices_entity))
+            newly_sampled_indices = list(
+                set(newly_sampled_indices).union(newly_sampled_indices_entity)
+            )
+            remaining_indices = list(
+                set(remaining_indices).intersection(remaining_indices_entity)
+            )
 
         newly_sampled_queries_ids = [
             self.unsampled_queries.elements[i] for i in newly_sampled_indices
@@ -437,7 +441,6 @@ class DataBucketFactory:
     @staticmethod
     def get_data_bucket_for_query_selection(
         app_path: str,
-        entity_tuning: bool,
         tuning_level: str,
         train_pattern: str,
         test_pattern: str,
@@ -484,7 +487,7 @@ class DataBucketFactory:
 
         if log_usage_pct < AL_MAX_LOG_USAGE_PCT:
             sampling_size = int(log_usage_pct * len(log_query_list))
-            log_class_labels, entity_labels = label_map.get_class_labels(
+            log_class_labels, _ = label_map.get_class_labels(
                 tuning_level, log_query_list
             )
             ranked_indices = stratified_random_sample(log_class_labels)

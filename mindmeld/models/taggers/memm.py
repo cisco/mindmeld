@@ -173,9 +173,12 @@ class MemmModel(Tagger):
             X, _ = self._preprocess_data([features])
             prediction = self._clf.predict_proba(X)[0]
             predictions.append(list(prediction))
-            tag_maps.append([self.class_encoder.inverse_transform(i) for i in range(len(prediction))])
+            tag_maps.append(
+                [
+                    self.class_encoder.inverse_transform(i) for i in range(len(prediction))
+                ]
+            )
         return [tag_maps, predictions]
-
 
     @staticmethod
     def _get_feature_selector(selector_type):

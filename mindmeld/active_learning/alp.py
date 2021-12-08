@@ -201,7 +201,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             aggregate_statistic=self.aggregate_statistic,
             class_level_statistic=self.class_level_statistic,
             plot_entities=self.entity_tuning,
-            plot_intents=(self.tuning_level==TUNE_LEVEL_INTENT)
+            plot_intents=(self.tuning_level == TUNE_LEVEL_INTENT)
         )
         plot_manager.generate_plots()
 
