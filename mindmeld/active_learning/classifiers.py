@@ -308,7 +308,7 @@ class MindMeldALClassifier(ALClassifier):
         eval_stats = defaultdict(dict)
         eval_stats["num_sampled"] = len(data_bucket.sampled_queries)
         confidences_2d, entity_confidences, eval_stats = self.train_single(
-            data_bucket, heuristic, eval_stats
+            data_bucket, eval_stats
         )
         return_confidences_3d = isinstance(heuristic, MULTI_MODEL_HEURISTICS)
 
@@ -330,7 +330,6 @@ class MindMeldALClassifier(ALClassifier):
     def train_single(
         self,
         data_bucket: DataBucket,
-        heuristic: Heuristic,
         eval_stats: defaultdict = None,
     ):
         """Trains a single model to get a 2D probability array for single-model selection strategies.
@@ -345,7 +344,6 @@ class MindMeldALClassifier(ALClassifier):
             unsampled_queries=data_bucket.unsampled_queries,
             test_queries=data_bucket.test_queries,
             label_map=data_bucket.label_map,
-            heuristic=heuristic,
             eval_stats=eval_stats,
         )
 
@@ -355,7 +353,6 @@ class MindMeldALClassifier(ALClassifier):
         unsampled_queries: ProcessedQueryList,
         test_queries: ProcessedQueryList,
         label_map: LabelMap,
-        heuristic: Heuristic,
         eval_stats: Dict = None,
     ):
         """Helper function to train a single model and obtain a 2D probability array.
@@ -408,9 +405,7 @@ class MindMeldALClassifier(ALClassifier):
                 unsampled_queries=unsampled_queries,
                 test_queries=test_queries,
                 domain_to_intents=label_map.domain_to_intents,
-                domain_to_intent2id=label_map.domain_to_intent2id,
                 entity2id=label_map.entity2id,
-                heuristic=heuristic,
             )
             if eval_stats:
                 self._update_eval_stats_entity_level(
@@ -478,7 +473,7 @@ class MindMeldALClassifier(ALClassifier):
         ]
         confidences_3d = []
         for fold_sample_queries in fold_sampled_queries_lists:
-            confidences_2d, eval_stats = self._train_single(
+            confidences_2d, _ = self._train_single(
                 fold_sample_queries,
                 unsampled_queries,
                 test_queries,
@@ -661,7 +656,6 @@ class MindMeldALClassifier(ALClassifier):
         test_queries: ProcessedQueryList,
         domain_to_intents: Dict,
         entity2id: Dict,
-        heuristic: Heuristic,
     ):
         """Fit and evaluate the entity recognizer.
         Args:
@@ -716,8 +710,7 @@ class MindMeldALClassifier(ALClassifier):
                     classifier=er,
                     queries=filtered_unsampled_queries,
                     nlp_component_to_id=entity2id,
-                    type="entity",
-                    heuristic=heuristic,
+                    nlp_component_type="entity",
                 )
 
                 for i, index in enumerate(filtered_unsampled_queries_indices):
