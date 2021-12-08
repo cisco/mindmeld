@@ -298,7 +298,7 @@ class TaggerModel(Model):
         ]
         return labels
 
-    def predict_proba(self, examples, dynamic_resource=None):
+    def predict_proba(self, examples, dynamic_resource=None, active_learning=False):
         """
         Args:
             examples (list of mindmeld.core.Query): a list of queries to train on
@@ -315,26 +315,30 @@ class TaggerModel(Model):
             self._resources, dynamic_resource=dynamic_resource,
             text_preparation_pipeline=self.text_preparation_pipeline
         )
-        predicted_tags_probas = self._clf.predict_proba_active_learning(
+
+        if active_learning:
+            predicted_tags_probas = self._clf.predict_proba_active_learning(
+                examples, self.config, workspace_resource
+            )
+            return tuple(zip(*predicted_tags_probas[0]))
+
+
+        predicted_tags_probas = self._clf.predict_proba(
             examples, self.config, workspace_resource
         )
-        # tags, probas = zip(*predicted_tags_probas[0])
-        # import pdb; pdb.set_trace()
-        return tuple(zip(*predicted_tags_probas[0]))
-        # tags, probas = predicted_tags_probas
+        tags, probas = zip(*predicted_tags_probas[0])
+        entity_confidence = []
+        entities = self._label_encoder.decode([tags], examples=[examples[0]])[0]
+        for entity in entities:
+            entity_proba = \
+                probas[entity.normalized_token_span.start: entity.normalized_token_span.end + 1]
+            # We assume that the score of the least likely tag in the sequence as the confidence
+            # score of the entire entity sequence
+            entity_confidence.append(min(entity_proba))
+        predicted_labels_scores = tuple(zip(entities, entity_confidence))
+        return predicted_labels_scores
 
-        # entity_confidence = []
-        # entities = self._label_encoder.decode([tags], examples=[examples[0]])[0]
-        # for entity in entities:
-        #     entity_proba = \
-        #         probas[entity.normalized_token_span.start: entity.normalized_token_span.end + 1]
-        #     # We assume that the score of the least likely tag in the sequence as the confidence
-        #     # score of the entire entity sequence
-        #     entity_confidence.append(min(entity_proba))
-        # predicted_labels_scores = tuple(zip(entities, entity_confidence))
-        # return predicted_labels_scores
-
-    def evaluate(self, examples, labels):
+    def evaluate(self, examples, labels, active_learning=False):
         """Evaluates a model against the given examples and labels
 
         Args:
@@ -354,15 +358,20 @@ class TaggerModel(Model):
 
         predictions = self.predict(examples)
 
-        # probabilities for all tags across all tokens
-        probas = []
-        for example in examples:
-            # import pdb; pdb.set_trace()
-            probas.append(self.predict_proba([example]))
+        if active_learning:
+            # if active learning, store entity confidences along with predicted tags
+            probas = []  # probabilities for all tags across all tokens
+            for example in examples:
+                probas.append(self.predict_proba([example], active_learning=True))
 
+            evaluations = [
+                EvaluatedExample(e, labels[i], predictions[i], probas[i], self.config.label_type)
+                for i, e in enumerate(examples)
+            ]
 
+        # For all other use cases, keep top predicted tag and probability
         evaluations = [
-            EvaluatedExample(e, labels[i], predictions[i], probas[i], self.config.label_type)
+            EvaluatedExample(e, labels[i], predictions[i], None, self.config.label_type)
             for i, e in enumerate(examples)
         ]
 

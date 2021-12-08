@@ -334,11 +334,6 @@ class DataBucket:
 
         if entity_tuning:
             ranked_entity_indices = heuristic.rank_entities(entity_confidences)
-            # ranked_entity_indices = (
-            #     heuristic.rank_3d(entity_confidences_3d)
-            #     if confidences_3d
-            #     else heuristic.rank_2d(entity_confidences_2d)
-            # )
             newly_sampled_indices_entity = ranked_entity_indices[:sampling_size]
             remaining_indices_entity = ranked_entity_indices[sampling_size:]
 

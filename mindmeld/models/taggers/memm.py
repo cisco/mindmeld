@@ -166,7 +166,6 @@ class MemmModel(Tagger):
             return []
 
         prev_tag = START_TAG
-        seq_log_probs = []
         predictions = []
         tag_maps = []
         for features in features_by_segment:
