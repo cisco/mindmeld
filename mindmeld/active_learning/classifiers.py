@@ -313,7 +313,7 @@ class MindMeldALClassifier(ALClassifier):
         return_confidences_3d = isinstance(heuristic, MULTI_MODEL_HEURISTICS)
 
         confidences_3d = (
-            self.train_multi(data_bucket, heuristic) if return_confidences_3d else (None, None)
+            self.train_multi(data_bucket, heuristic) if return_confidences_3d else None
         )
 
         domain_indices = (
@@ -473,12 +473,11 @@ class MindMeldALClassifier(ALClassifier):
         ]
         confidences_3d = []
         for fold_sample_queries in fold_sampled_queries_lists:
-            confidences_2d, _ = self._train_single(
+            confidences_2d, _, eval_stats = self._train_single(
                 fold_sample_queries,
                 unsampled_queries,
                 test_queries,
                 label_map,
-                heuristic,
             )
             confidences_3d.append(confidences_2d)
 

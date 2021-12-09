@@ -35,6 +35,7 @@ def tuning_data_bucket(kwik_e_mart_app_path):
     return DataBucketFactory.get_data_bucket_for_strategy_tuning(
         app_path=kwik_e_mart_app_path,
         tuning_level=TUNE_LEVEL_INTENT,
+        entity_tuning=False,
         train_pattern=DEFAULT_TRAIN_SET_REGEX,
         test_pattern=DEFAULT_TEST_SET_REGEX,
         train_seed_pct=0.2,
@@ -126,10 +127,10 @@ def test_data_bucket_factory(kwik_e_mart_app_path, tuning_data_bucket):
 
 
 # Test Filter Queries
-def test_filter_queries_by_domain(all_train_queries):
+def test_filter_queries_by_nlp_component(all_train_queries):
     domain_to_filter_by = "banking"
-    filtered_ids, filtered_queries = DataBucket.filter_queries_by_domain(
-        query_list=all_train_queries, domain=domain_to_filter_by
+    filtered_ids, filtered_queries = DataBucket.filter_queries_by_nlp_component(
+        query_list=all_train_queries, component_type="domain", component_name=domain_to_filter_by
     )
     assert len(filtered_ids) == len(filtered_queries)
     assert all(q.domain == domain_to_filter_by for q in filtered_queries)
