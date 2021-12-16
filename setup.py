@@ -54,7 +54,7 @@ test_requirements = [
 
 setup(
     name="mindmeld",
-    version="4.3.5rc12",
+    version="4.4.0",
     description="A Conversational AI platform.",
     long_description=readme,
     long_description_content_type="text/markdown",
@@ -116,6 +116,7 @@ setup(
             "matplotlib~=3.3.1",
         ],
         "dvc": [
+            'pygit2>=1.5.0,<1.7; python_version < "3.7"',
             "dvc>=1.8.1"
         ],
         "torch": [

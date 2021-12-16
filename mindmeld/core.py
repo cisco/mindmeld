@@ -12,6 +12,7 @@
 # limitations under the License.
 
 """This module contains a collection of the core data structures used in MindMeld."""
+from copy import deepcopy
 import logging
 from typing import Optional, List, Dict
 import immutables
@@ -695,25 +696,75 @@ class NestedEntity:
 
         """
 
+        def _get_token_start(full_norm_text, span_out):
+            """ Calculate the start of a token using the normalized tokens
+            combined as a string and delimited by space.
+
+            Args:
+                full_norm_text (str): Normalized tokens combined by space as a single string.
+                span_out (Span): Span of the token of interest in the full_norm_text.
+            Return:
+                tok_start (int): The starting token index.
+            """
+            # The span range is till the span_out or max to the second last char
+            tok_start = 0
+            span_range = min(span_out.start, len(full_norm_text) - 1)
+            for idx, current_char in enumerate(full_norm_text[:span_range]):
+                # Increment the counter only if a whitespace follows a non-whitespace
+                next_char = full_norm_text[idx + 1]
+                if not current_char.isspace() and next_char.isspace():
+                    tok_start += 1
+            return tok_start
+
         def _get_form_details(query_span, offset, form_in, form_out):
+            """ Get the transformed text, transformed text span, and token index span
+            for a given text token. By default, the normalized text form is used when
+            calculating the token index span as it accounts for custom tokenization.
+
+            Args:
+                query_span (Span): The text span for the token of interest
+                offset (int): Offset the final indexing to parent's indexing.
+                form_in (int): Integer value representing starting text format
+                form_out (int): Integer value representing final text format
+            Returns:
+                text (str): The transformed version of the input text.
+                span_out (Span): Span of the token of interest in the norm_form_full_text.
+                tok_span (Span): Span of normalized tokens for the given text.
+            """
             span_out = query.transform_span(query_span, form_in, form_out)
             full_text = query.get_text_form(form_out)
             text = span_out.slice(full_text)
-            # The span range is till the span_out or max to the second last char
-            tok_start = 0
-            span_range = min(span_out.start, len(full_text) - 1)
-            for idx, current_char in enumerate(full_text[:span_range]):
-                # Increment the counter only if a whitespace follows a non-whitespace
-                next_char = full_text[idx + 1]
-                if not current_char.isspace() and next_char.isspace():
-                    tok_start += 1
-            tok_span = Span(tok_start, tok_start - 1 + len(text.split()))
+
+            # Calculate Token Span Using the Normalized Text Form
+            # Creating a copy to avoid modifying the original query object
+            query_norm_form = deepcopy(query)
+            norm_form_span_out = query_norm_form.transform_span(
+                query_span, form_in, TEXT_FORM_NORMALIZED
+            )
+            norm_form_full_text = query_norm_form.get_text_form(TEXT_FORM_NORMALIZED)
+            norm_form_token_text = norm_form_span_out.slice(norm_form_full_text)
+            tok_start = _get_token_start(norm_form_full_text, norm_form_span_out)
+
+            # Using a min token len of 1 avoids token span of (x, x - 1) which can become negative.
+            norm_form_token_text_len = len(norm_form_token_text.split()) or 1
+            tok_span = Span(
+                start=tok_start,
+                end=tok_start + norm_form_token_text_len - 1
+            )
+
             # convert span from query's indexing to parent's indexing
             if offset is not None:
+
+                # Calculate Token Offset Based on the Query's Normalized Form
+                norm_form_offset_out = query_norm_form.transform_index(
+                    offset, form_in, TEXT_FORM_NORMALIZED
+                )
+                tok_offset = len(norm_form_full_text[:norm_form_offset_out].split())
+                tok_span.shift(-tok_offset)
+
+                # Calculate the Original Query's Offset Based on New Form
                 offset_out = query.transform_index(offset, form_in, form_out)
                 span_out = span_out.shift(-offset_out)
-                tok_offset = len(full_text[:offset_out].split())
-                tok_span.shift(-tok_offset)
 
             return text, span_out, tok_span
 
@@ -738,12 +789,10 @@ class NestedEntity:
                 ]
             )
         )
-
         if entity is None:
             if entity_type is None:
                 raise ValueError("Either 'entity' or 'entity_type' must be specified")
             entity = Entity(texts[0], entity_type, role=role)
-
         return cls(texts, spans, tok_spans, entity, children)
 
     @staticmethod
@@ -1004,7 +1053,7 @@ class FormEntity:
         default_eval(bool, optional): Use system validation (default: True)
         hints(list, optional): Developer defined list of keywords to verify the
         user input against
-        custom_eval(func, optional): custom validation function (should return either bool:
+        custom_eval(str, optional): custom validation function name (should return either bool:
         validated or not) or a custom resolved value for the entity. If custom resolved value
         is returned, the slot response is considered to be valid.
     """
@@ -1022,7 +1071,6 @@ class FormEntity:
     ):
         self.entity = entity
         self.role = role
-
         if isinstance(responses, str):
             responses = [responses]
         self.responses = responses or [
@@ -1039,8 +1087,9 @@ class FormEntity:
 
         if not self.entity or not isinstance(self.entity, str):
             raise TypeError("Entity cannot be empty.")
-        if self.custom_eval and not callable(custom_eval):
-            raise TypeError("Invalid custom validation function type.")
+
+        if self.custom_eval and not isinstance(self.custom_eval, str):
+            raise TypeError("'custom_eval' function should be a string.")
 
     def to_dict(self):
         """Converts the entity into a dictionary"""
@@ -1053,6 +1102,27 @@ class FormEntity:
                 base[field] = val
 
         return base
+
+
+class CallableRegistry:
+    """A registration class to map callable object names to corresponding objects."""
+    def __init__(self):
+        self._callable_functions_registry = {}
+
+    @property
+    def functions_registry(self):
+        """Getter for functions registry"""
+        return self._callable_functions_registry
+
+    @functions_registry.setter
+    def functions_registry(self, func_name, func):
+        """Populates the function registry map.
+
+        Args:
+            func_name (str): Name to be used as key for the function.
+            func (func): Callable function.
+        """
+        self._callable_functions_registry[func_name] = func
 
 
 def resolve_entity_conflicts(query_entities):

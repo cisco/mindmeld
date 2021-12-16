@@ -83,6 +83,7 @@ DVC_ADD_DOES_NOT_EXIST_HELP = "The folder {dvc_add_path} does not exist"
 DVC_COMMAND_HELP_MESSAGE = (
     "Options:"
     "\n\t--init\t\tInstantiate DVC within a repository"
+    "\n\t--setup-dagshub\t\tSetup a central model registry with DAGsHub"
     "\n\t--save\t\tSave built models using dvc"
     "\n\t--checkout HASH\tCheckout repo and models corresponding to git hash"
     "\n\t--destroy\tRemove all files associated with DVC from a directory"
@@ -164,15 +165,32 @@ def _bash_helper(command_list):
     return True, None
 
 
+# pylint: disable=too-many-return-statements
 @_app_cli.command("dvc", context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 @click.option(
-    "--init", is_flag=True, required=False, help="Instantiate DVC within a repository"
+    "--init",
+    is_flag=True,
+    required=False,
+    help="Instantiate DVC within a repository"
 )
 @click.option(
-    "--save", is_flag=True, required=False, help="Save built models using dvc"
+    "--setup_dagshub",
+    is_flag=True,
+    required=False,
+    help="Setup a central model registry with DAGsHub"
 )
-@click.option("--checkout", required=False, help="Instantiate DVC within a repository")
+@click.option(
+    "--save",
+    is_flag=True,
+    required=False,
+    help="Save built models using dvc"
+)
+@click.option(
+    "--checkout",
+    required=False,
+    help="Checkout repo and models corresponding to git hash"
+)
 @click.option(
     "--help",
     "help_",
@@ -186,7 +204,7 @@ def _bash_helper(command_list):
     required=False,
     help="Remove all files associated with dvc from directory",
 )
-def dvc(ctx, init, save, checkout, help_, destroy):
+def dvc(ctx, init, setup_dagshub, save, checkout, help_, destroy):
     app = ctx.obj.get("app")
     app_path = app.app_path
 
@@ -225,6 +243,83 @@ def dvc(ctx, init, save, checkout, help_, destroy):
         logger.info(
             "The newly generated dvc config file (.dvc/config) has been added to git staging"
         )
+    elif setup_dagshub:
+        click.clear()
+        click.secho(
+            'You will now set up a central model registry for you MindMeld project on DAGsHub.com',
+            fg='blue',
+            bg='white'
+        )
+        click.echo(
+            '===================================================================================='
+        )
+        click.echo(
+            '* If you don\'t have a DAGsHub account, sign up here <{0}>\n'
+            '* After signing up, create a DAGsHub project by:\n'
+            '    - Connecting an existing GitHub repository <{1}>, or\n'
+            '    - Create a new one from scratch <{2}>\n'.format(
+                click.style('https://dagshub.com/user/sign_up', fg='cyan'),
+                click.style('https://dagshub.com/repo/connect', fg='cyan'),
+                click.style('https://dagshub.com/repo/create', fg='cyan')
+            )
+        )
+        dagshub_remote_path = click.prompt('Please enter your DAGsHub project URL '
+                                           '(e.g. https://dagshub.com/username/projectname)')
+        dagshub_user = click.prompt('Please enter your DAGsHub username')
+        dagshub_password = click.prompt(
+            'Please enter your DAGsHub password or access token \n'
+            '(if you\'re not sure where to find it, go to <{0}>)'.format(
+                click.style('https://dagshub.com/user/settings/tokens', fg='cyan')
+            )
+        )
+
+        # Modify remote URL to be the DAGsHub project
+        success, error_string = _bash_helper(
+            ["dvc", "remote", "modify", "myremote", "url", dagshub_remote_path + '.dvc']
+        )
+        if not success:
+            logger.error("Error during DAGsHub remote set up: %s", error_string)
+            return
+
+        # Setup credentials for DAGsHub project
+        success, error_string = _bash_helper(
+            ["dvc", "remote", "modify", "myremote", "--local", "auth", "basic"]
+        )
+        if not success:
+            logger.error("Error during DAGsHub credential set up: %s", error_string)
+            return
+
+        success, error_string = _bash_helper(
+            ["dvc", "remote", "modify", "myremote", "--local", "user", dagshub_user]
+        )
+        if not success:
+            logger.error("Error during DAGsHub credential set up: %s", error_string)
+            return
+
+        success, error_string = _bash_helper(
+            ["dvc", "remote", "modify", "myremote", "--local", "password", dagshub_password]
+        )
+        if not success:
+            logger.error("Error during DAGsHub credential set up: %s", error_string)
+            return
+
+        # Add DVC config file to staging
+        success, error_string = _bash_helper(["git", "add", ".dvc/config"])
+        if not success:
+            logger.error("Error while adding dvc config file: %s", error_string)
+            return
+
+        logger.info(
+            "Set up DAGsHub central model repository in %s", dagshub_remote_path
+        )
+        logger.info(
+            "The updated dvc config file (.dvc/config) has been added to git staging"
+        )
+        logger.info(
+            "We recommend setting up your Git remote and pushing your code to it using "
+            "`git push` so that you can view your project in the DAGsHub UI."
+        )
+
     elif save:
         generated_model_folder = get_generated_data_folder(app_path)
 
@@ -647,9 +742,10 @@ def _find_duckling_os_executable():
 
 
 @shared_cli.command("num-parse", context_settings=CONTEXT_SETTINGS)
+@click.pass_context
 @click.option("--start/--stop", default=True, help="Start or stop numerical parser")
 @click.option("-p", "--port", required=False, default="7151")
-def num_parser(start, port):
+def num_parser(ctx, start, port):
     """Starts or stops the local numerical parser service."""
     if start:
         pid = _get_duckling_pid()
@@ -703,6 +799,13 @@ def num_parser(start, port):
                 ):
                     f.write(data)
                     f.flush()
+
+            # Verify the downloaded file
+            hash_digest = hashlib.sha256(open(exec_path, "rb").read()).hexdigest()
+            if hash_digest != path.DUCKLING_PATH_TO_SHA_MAPPINGS[exec_path]:
+                os.remove(exec_path)
+                logger.error("Binary file downloaded from %s does not match expected version", url)
+                ctx.exit(1)
 
         # make the file executable
         st = os.stat(exec_path)

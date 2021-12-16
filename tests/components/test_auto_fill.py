@@ -113,6 +113,7 @@ def test_auto_fill_invoke(kwik_e_mart_app):
     responder = DialogueResponder()
 
     # custom eval func
+    @app.register_func()
     def test_custom_eval(r):
         # entity already passed in, this is to check custom eval flow.
         del r
@@ -128,7 +129,7 @@ def test_auto_fill_invoke(kwik_e_mart_app):
                 entity="store_name",
                 value="23 Elm Street",
                 default_eval=False,
-                custom_eval=test_custom_eval,
+                custom_eval="test_custom_eval",
             )
         ],
     }
@@ -163,6 +164,7 @@ def test_auto_fill_custom_validation_resolution(kwik_e_mart_app):
     responder = DialogueResponder()
 
     # custom eval func
+    @app.register_func()
     def test_custom_eval(r):
         return 5 + 15
 
@@ -171,7 +173,7 @@ def test_auto_fill_custom_validation_resolution(kwik_e_mart_app):
             FormEntity(
                 entity="sys_number",
                 default_eval=False,
-                custom_eval=test_custom_eval,
+                custom_eval="test_custom_eval",
             )
         ],
     }

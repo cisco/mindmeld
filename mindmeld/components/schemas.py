@@ -400,7 +400,7 @@ class FormEntitySchema(Schema):
     custom_eval = fields.String(allow_none=True)
 
     def serialize_value(self, form):  # pylint: disable=no-self-use
-        if form:
+        if form.value:
             return form.value or dict(form.value)
 
     def deserialize_value(self, value):  # pylint: disable=no-self-use

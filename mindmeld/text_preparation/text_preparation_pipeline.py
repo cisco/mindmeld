@@ -168,6 +168,19 @@ class TextPreparationPipeline:
             preprocessed_text = preprocessor.process(preprocessed_text)
         return preprocessed_text
 
+    def custom_preprocessors_exist(self):
+        """ Checks if the current TextPreparationPipeline has preprocessors that is not
+        simply the NoOpPreprocessor or None.
+
+        Returns:
+            has_custom_preprocessors (bool): Whether atleast one custom preprocessor exists.
+        """
+        return (
+            self.preprocessors is not None
+            and len(self.preprocessors) >= 1
+            and not any([isinstance(elem, NoOpPreprocessor) for elem in self.preprocessors])
+        )
+
     def normalize(self, text, keep_special_chars=None):
         """Normalize Text.
         Args:
@@ -567,6 +580,7 @@ class TextPreparationPipelineFactory:
             TextPreparationPipeline: A TextPreparationPipeline class.
         """
         if app_path:
+            # Check if a custom TextPreparationPipeline has been created in app.py
             try:
                 app = get_app(app_path)
                 if hasattr(app, 'text_preparation_pipeline') and app.text_preparation_pipeline:
@@ -575,10 +589,7 @@ class TextPreparationPipelineFactory:
                     )
                     return app.text_preparation_pipeline
             except MindMeldImportError:
-                logger.warning(
-                    "Error importing application from %s. Using default TextPreparationPipeline.",
-                    app_path
-                )
+                pass
         return TextPreparationPipelineFactory.create_from_app_config(app_path)
 
     @staticmethod

@@ -46,6 +46,10 @@ GEN_INTENT_FOLDER = os.path.join(GEN_DOMAIN_FOLDER, "{intent}")
 GEN_INTENT_CHECKPOINT_FOLDER = os.path.join(GEN_DOMAIN_CHECKPOINT_FOLDER, "{intent}")
 ENTITY_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, "entity.pkl")
 ENTITY_MODEL_CHECKPOINT_PATH = os.path.join(GEN_INTENT_CHECKPOINT_FOLDER, "entity.pkl")
+RESOLVER_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, "{entity}-resolver.pkl")
+RESOLVER_MODEL_CHECKPOINT_PATH = os.path.join(
+    GEN_INTENT_CHECKPOINT_FOLDER, "{entity}-resolver.pkl"
+)
 ROLE_MODEL_PATH = os.path.join(GEN_INTENT_FOLDER, "{entity}-role.pkl")
 ROLE_MODEL_CHECKPOINT_PATH = os.path.join(
     GEN_INTENT_CHECKPOINT_FOLDER, "{entity}-role.pkl"
@@ -54,18 +58,16 @@ GAZETTEER_PATH = os.path.join(GEN_FOLDER, "gaz-{entity}.pkl")
 GEN_INDEXES_FOLDER = os.path.join(GEN_FOLDER, "indexes")
 GEN_INDEX_FOLDER = os.path.join(GEN_INDEXES_FOLDER, "{index}")
 RANKING_MODEL_PATH = os.path.join(GEN_INDEX_FOLDER, "ranking.pkl")
+GEN_QUESTION_ANSWERERS_FOLDER = os.path.join(GEN_FOLDER, "question_answerers")
+GEN_QUESTION_ANSWERER_INDICES_CACHE = os.path.join(GEN_QUESTION_ANSWERERS_FOLDER, "{uid}.pkl")
+NATIVE_QUESTION_ANSWERER_INDICES_CACHE_DEFAULT_FOLDER = os.path.join(
+    os.path.expanduser("~"), ".cache/mindmeld"
+)
 DEPRECATED_GEN_EMBEDDER_MODEL_PATH = os.path.join(
     GEN_INDEXES_FOLDER, "{embedder_type}_{model_name}_cache.pkl"
 )
 GEN_EMBEDDER_MODEL_PATH = os.path.join(
     GEN_INDEXES_FOLDER, "{model_id}_cache.pkl"
-)
-GEN_ENTITY_RESOLVERS_FOLDER = os.path.join(GEN_FOLDER, "entity_resolvers")
-GEN_ENTITY_RESOLVER_CACHE = os.path.join(GEN_ENTITY_RESOLVERS_FOLDER, "{uid}.pkl")
-GEN_QUESTION_ANSWERERS_FOLDER = os.path.join(GEN_FOLDER, "question_answerers")
-GEN_QUESTION_ANSWERER_INDICES_CACHE = os.path.join(GEN_QUESTION_ANSWERERS_FOLDER, "{uid}.pkl")
-NATIVE_QUESTION_ANSWERER_INDICES_CACHE_PATH = os.path.join(
-    os.path.expanduser("~"), ".cache/mindmeld"
 )
 
 # Domains sub tree for labeled queries
@@ -109,10 +111,10 @@ DUCKLING_UBUNTU20_PATH = os.path.join(
     RESOURCES_FOLDER, "duckling-x86_64-linux-ubuntu-20"
 )
 DUCKLING_OSX_PATH = os.path.join(RESOURCES_FOLDER, "duckling-x86_64-osx")
-DUCKLING_UBUNTU16_SHA = "70439797ccc968fae54b1a828bbe193701fc9b1a908b579f3c4f80f9c0473442"
-DUCKLING_UBUNTU18_SHA = "47e36db9bc30a67aac0144ef95e49cbd149ffaebcea474c793c5dd013e192352"
-DUCKLING_UBUNTU20_SHA = "8cf176080001c0ba37f8405d6262e33915a751295f3165ab9e7518f685852e90"
-DUCKLING_OSX_SHA = "a5e746b7b695f07b4eaf09e5c6f7c972afda26d1159992fa69bcc72fad1b953a"
+DUCKLING_UBUNTU16_SHA = "db730a5ffb045ef41d385316ddec00b02412e22da9a2c9e61ce0843f0fcb319a"
+DUCKLING_UBUNTU18_SHA = "c43b6c9ad987154e490ae6a3290aeaedd554e400015021160ebc36e3840a206e"
+DUCKLING_UBUNTU20_SHA = "1b870e5eaa0652aa7fe03bae4b0f867f59e35293e2298b76ce176055a02383a5"
+DUCKLING_OSX_SHA = "38dda5065b6e4753cf9d4c2f87a12bdae7b31a2a0e8202483dab4c4f8c00f665"
 DUCKLING_OS_MAPPINGS = {
     "ubuntu-16.04": DUCKLING_UBUNTU16_PATH,
     "ubuntu-18.04": DUCKLING_UBUNTU18_PATH,
@@ -134,6 +136,11 @@ PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH = os.path.join(
 PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH = os.path.join(
     EMBEDDINGS_FOLDER_PATH, "previously_used_word_embeddings.pkl"
 )
+# Use embedding path to store paraphraser model
+PARAPHRASER_FILE_PATH = os.path.join(EMBEDDINGS_FOLDER_PATH, "paraphrase_retain_entities.zip")
+PARAPHRASER_MODEL_PATH = os.path.join(EMBEDDINGS_FOLDER_PATH, "paraphrase_retain_entities")
+# Download default model from huggingface model hub. We may want to upload this to a S3 bucket too.
+HUGGINGFACE_PARAPHRASER_MODEL_PATH = 'tuner007/pegasus_paraphrase'
 
 # User specific directories
 USER_CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".mindmeld")
@@ -442,6 +449,44 @@ def get_role_model_paths(
 
 
 @safe_path
+def get_resolver_model_path(
+    app_path, domain, intent, entity, model_name=None, timestamp=None
+):
+    """Gets the path to the resolver model as well as the path to a
+    timestamp-cached resolver model.
+
+    Args:
+        app_path (str): The path to the app data.
+        domain (str): A domain under the application.
+        intent (str): A intent under the domain.
+        entity (str): An entity under the intent
+        model_name (str): The name of the model. Allows multiple models to be stored.
+        timestamp (str): The timestamp string to store cached models in
+
+    Returns:
+        (tuple) A tuple with the main model path and the cached model path
+
+    """
+    main_path = RESOLVER_MODEL_PATH.format(
+        app_path=app_path, domain=domain, intent=intent, entity=entity
+    )
+    main_path = _resolve_model_name(main_path)
+
+    ts_path = None
+    if timestamp:
+        ts_path = RESOLVER_MODEL_CHECKPOINT_PATH.format(
+            app_path=app_path,
+            domain=domain,
+            intent=intent,
+            entity=entity,
+            timestamp=timestamp,
+        )
+        ts_path = _resolve_model_name(ts_path, model_name)
+
+    return main_path, ts_path
+
+
+@safe_path
 def get_gazetteer_data_path(app_path, gaz_name, model_name=None):
     """Gets path to the saved gazetteer pickle.
 
@@ -572,20 +617,6 @@ def get_question_answerer_index_cache_file_path(app_path, uid):
         (str) The path for the .pkl cache.
     """
     return GEN_QUESTION_ANSWERER_INDICES_CACHE.format(app_path=app_path, uid=uid)
-
-
-@safe_path
-def get_entity_resolver_cache_file_path(app_path, uid):
-    """Gets the path to the entity resolver cache file for a given entity type and a chosen model type.
-
-    Args:
-        app_path (str): The path to the app data.
-        uid (str): A unique filename for the .pkl file
-
-    Returns:
-        (str) The path for the .pkl cache.
-    """
-    return GEN_ENTITY_RESOLVER_CACHE.format(app_path=app_path, uid=uid)
 
 
 @safe_path

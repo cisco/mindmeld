@@ -51,8 +51,6 @@ from .helpers import (
 from .._version import get_mm_version
 from ..text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
 
-# for backwards compatability for sklearn models serialized and dumped in previous version
-
 logger = logging.getLogger(__name__)
 
 
