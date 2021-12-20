@@ -240,7 +240,7 @@ class TextPreparationPipeline:
             )
             tokens = self.tokenizer.tokenize(unannotated_text)
             TextPreparationPipeline.convert_token_idx_unann_to_ann(
-                tokens, unann_to_ann_idx_map
+                tokens, unann_to_ann_idx_mapping
             )
             return tokens
         # Non-Spacy Tokenizer Handling
