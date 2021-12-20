@@ -63,7 +63,7 @@ RUN echo alias python=python3  >> /root/.bashrc
 RUN echo alias pip=pip3  >> /root/.bashrc
 
 RUN pip3 install --upgrade pip
-RUN pip3 install -U mindmeld spacy==3.1.3
+RUN pip3 install -U mindmeld spacy==3.2.1
 RUN pip3 install click-log==0.1.8
 
 RUN export LC_ALL=C.UTF-8 && \
