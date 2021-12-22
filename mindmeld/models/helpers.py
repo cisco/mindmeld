@@ -12,6 +12,7 @@
 # limitations under the License.
 
 """This module contains some helper functions for the models package"""
+import enum
 import json
 import logging
 import os
@@ -65,6 +66,11 @@ DEFAULT_SYS_ENTITIES = [
     "sys_duration",
     "sys_phone-number",
 ]
+
+
+class ModelType(enum.Enum):
+    TEXT_MODEL = "text"
+    TAGGER_MODEL = "tagger"
 
 
 def create_model(config):

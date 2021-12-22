@@ -14,6 +14,7 @@
 """
 This module contains the embedder model class.
 """
+import json
 import logging
 import os
 import pickle
@@ -29,6 +30,8 @@ from ._util import _is_module_available, _get_module_or_attr as _getattr, torch_
 from .helpers import register_embedder
 from .taggers.embeddings import WordSequenceEmbedding
 from .. import path
+from ..core import Bunch
+from ..resource_loader import Hasher
 from ..text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
 
 logger = logging.getLogger(__name__)

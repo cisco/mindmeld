@@ -34,7 +34,7 @@ from .path import EMBEDDINGS_FOLDER_PATH, \
     PARAPHRASER_FILE_PATH, \
     PARAPHRASER_MODEL_PATH, \
     HUGGINGFACE_PARAPHRASER_MODEL_PATH
-from .models.taggers.embeddings import TqdmUpTo
+from .models.containers import TqdmUpTo
 
 logger = logging.getLogger(__name__)
 

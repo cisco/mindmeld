@@ -20,6 +20,7 @@ from abc import abstractmethod
 from typing import List
 
 from .classification import BaseClassification
+from .helpers import EmbedderType
 from .layers import (
     EmbeddingLayer,
     CnnLayer,
@@ -61,8 +62,10 @@ class BaseTokenClassification(BaseClassification):
             if len(label_sequence) > required_seq_length:
                 return label_sequence[:required_seq_length]
             else:
-                return labels + [self.params.label_padding_idx] * (
-                    required_seq_length - len(label_sequence))
+                return (
+                    label_sequence + [self.params.label_padding_idx] *
+                    (required_seq_length - len(label_sequence))
+                )
 
         _required_seq_length = max([len(_split_lengths) for _split_lengths in split_lengths])
         return torch.as_tensor(
@@ -117,7 +120,7 @@ class BaseTokenClassification(BaseClassification):
 
     def forward(self, batch_data):
 
-        batch_data = self._to_device(batch_data)
+        batch_data = self.to_device(batch_data)
         batch_data = self._forward_core(batch_data)
 
         token_embs = batch_data["token_embs"]
@@ -148,64 +151,61 @@ class BaseTokenClassification(BaseClassification):
         return batch_data
 
     def predict(self, examples):
-        preds = []
+        predictions = []
         was_training = self.training
         self.eval()
         with torch.no_grad():
             for start_idx in range(0, len(examples), self.params.batch_size):
-                this_examples = examples[start_idx:start_idx + self.params.batch_size]
-                batch_data = self.encoder.batch_encode(this_examples)
-                this_logits = self.forward(batch_data)["logits"]
+                batch_examples = examples[start_idx:start_idx + self.params.batch_size]
+                batch_data = self.encoder.batch_encode(batch_examples)
+                batch_logits = self.forward(batch_data)["logits"]
                 # find predictions
                 if self.params.use_crf_layer:
                     # create a mask to ignore token positions that are padded
-                    mask = torch.as_tensor(pad_sequence([
-                        torch.as_tensor([1] * length_)
-                        for length_ in batch_data["seq_lengths"]],
+                    mask = pad_sequence(
+                        [torch.as_tensor([1] * length_) for length_ in batch_data["seq_lengths"]],
                         batch_first=True
-                    ), dtype=torch.uint8).to(self.params.device)  # [BS] -> [BS, SEQ_LEN]
-                    this_preds = self.crf_layer.decode(this_logits, mask=mask)  # -> List[List[int]]
+                    )
+                    # [BS] -> [BS, SEQ_LEN]
+                    mask = torch.as_tensor(mask, dtype=torch.uint8).to(self.params.device)
+                    batch_predictions = self.crf_layer.decode(batch_logits, mask=mask)
                 else:
-                    this_preds = torch.argmax(this_logits, dim=-1).tolist()
+                    batch_predictions = torch.argmax(batch_logits, dim=-1).tolist()
                 # trim predictions as per sequence length
-                this_preds = [
-                    pred_list[:list_len] for pred_list, list_len in
-                    zip(this_preds, batch_data["seq_lengths"])
+                batch_predictions = [
+                    predictions[:seq_length] for predictions, seq_length in
+                    zip(batch_predictions, batch_data["seq_lengths"])
                 ]
-                preds.extend(this_preds)
+                predictions.extend(batch_predictions)
         if was_training:
             self.train()
-        return preds
+        return predictions
 
     def predict_proba(self, examples):
-        preds = []
+        prediction_tuples = []
         was_training = self.training
         self.eval()
         with torch.no_grad():
             for start_idx in range(0, len(examples), self.params.batch_size):
-                this_examples = examples[start_idx:start_idx + self.params.batch_size]
-                batch_data = self.encoder.batch_encode(this_examples)
-                this_logits = self.forward(batch_data)["logits"]
-                # find predictions
+                batch_examples = examples[start_idx:start_idx + self.params.batch_size]
+                batch_data = self.encoder.batch_encode(batch_examples)
+                batch_logits = self.forward(batch_data)["logits"]
+                # find prediction probabilities
                 if self.params.use_crf_layer:
-                    # create a mask to ignore token positions that are padded
-                    mask = torch.as_tensor(
-                        pad_sequence([torch.as_tensor([1] * length_) for length_ in
-                                      batch_data["seq_lengths"]], batch_first=True),
-                        dtype=torch.uint8
-                    ).to(self.params.device)
-                    this_preds = self.crf_layer.decode(this_logits, mask=mask)  # -> List[List[int]]
+                    msg = f"Prediction probabilities cannot be computed when the param " \
+                          f"use_crf_layer is set to True in {self.__class__.__name__}"
+                    raise NotImplementedError(msg)
                 else:
-                    this_preds = torch.argmax(this_logits, dim=-1).tolist()
-                # trim predictions as per sequence length
-                this_preds = [
-                    pred_list[:list_len] for pred_list, list_len in
-                    zip(this_preds, batch_data["seq_lengths"])
-                ]
-                preds.extend(this_preds)
+                    batch_maxes = torch.max(batch_logits, dim=-1)
+                    batch_predictions = batch_maxes.indices.tolist()
+                    batch_probabilities = batch_maxes.values.tolist()
+                for preds, probs, seq_length in zip(
+                    batch_predictions, batch_probabilities, batch_data["seq_lengths"]
+                ):
+                    prediction_tuples.append(list(zip(preds, probs))[:seq_length])
         if was_training:
             self.train()
-        return preds
+        return prediction_tuples
 
     @abstractmethod
     def _init_core(self) -> None:
@@ -560,3 +560,38 @@ class BertForTokenClassification(BaseTokenClassification):
         last_hidden_state = self.dropout(last_hidden_state)
         batch_data.update({"token_embs": last_hidden_state})
         return batch_data
+
+
+def get_token_classifier_cls(classifier_type: str, embedder_type: str = None):
+    allowed_sequence_classifier_types = ["embedder", "cnn", "lstm"]
+    allowed_embedder_types = [v.value for v in EmbedderType.__members__.values()]
+
+    # disambiguation between glove, bert and non-pretrained embedders
+    def _resolve_and_return_embedder_class():
+        if embedder_type not in allowed_embedder_types:
+            msg = f"Need a valid 'embedder_type' param. Found value: {embedder_type}. " \
+                  f"Allowed values: {allowed_embedder_types}. "
+            raise ValueError(msg)
+        return {
+            None: EmbedderForTokenClassification,
+            "glove": EmbedderForTokenClassification,
+            "bert": BertForTokenClassification
+        }[embedder_type]
+
+    try:
+        classifier_cls = {
+            "embedder": _resolve_and_return_embedder_class(),
+            "lstm-pytorch": LstmForTokenClassification,
+            "cnn-lstm": CharCnnWithWordLstmForTokenClassification,
+            "lstm-lstm": CharLstmWithWordLstmForTokenClassification,
+        }[classifier_type]
+        if classifier_type not in ["embedder"] and embedder_type == "bert":
+            msg = "To use a embedder_type 'bert', classifier_type must be 'embedder'."
+            raise ValueError(msg)
+
+    except KeyError as e:
+        msg = f"Expected classifier_type amongst {allowed_sequence_classifier_types} but found " \
+              f"'{classifier_type}'."
+        raise ValueError(msg) from e
+
+    return classifier_cls

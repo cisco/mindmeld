@@ -19,6 +19,7 @@ import logging
 from abc import abstractmethod
 
 from .classification import BaseClassification
+from .helpers import EmbedderType
 from .layers import (
     EmbeddingLayer,
     CnnLayer,
@@ -90,7 +91,7 @@ class BaseSequenceClassification(BaseClassification):
 
     def forward(self, batch_data):
 
-        batch_data = self._to_device(batch_data)
+        batch_data = self.to_device(batch_data)
         batch_data = self._forward_core(batch_data)
 
         seq_embs = batch_data["seq_embs"]
@@ -111,10 +112,10 @@ class BaseSequenceClassification(BaseClassification):
     def predict(self, examples):
         logits = self._forward_with_batching_and_no_grad(examples)
         if self.params.num_labels == 2:
-            preds = (logits >= 0.5).long().view(-1)
+            predictions = (logits >= 0.5).long().view(-1)
         elif self.params.num_labels > 2:
-            preds = torch.argmax(logits, dim=-1)
-        return preds.tolist()
+            predictions = torch.argmax(logits, dim=-1)
+        return predictions.tolist()
 
     def predict_proba(self, examples):
         logits = self._forward_with_batching_and_no_grad(examples)
@@ -132,10 +133,10 @@ class BaseSequenceClassification(BaseClassification):
         self.eval()
         with torch.no_grad():
             for start_idx in range(0, len(examples), self.params.batch_size):
-                this_examples = examples[start_idx:start_idx + self.params.batch_size]
-                batch_data = self.encoder.batch_encode(this_examples)
-                this_logits = self.forward(batch_data)["logits"]
-                logits = torch.cat((logits, this_logits)) if logits is not None else this_logits
+                batch_examples = examples[start_idx:start_idx + self.params.batch_size]
+                batch_data = self.encoder.batch_encode(batch_examples)
+                batch_logits = self.forward(batch_data)["logits"]
+                logits = torch.cat((logits, batch_logits)) if logits is not None else batch_logits
         if was_training:
             self.train()
         return logits
@@ -392,3 +393,37 @@ class BertForSequenceClassification(BaseSequenceClassification):
         batch_data.update({"seq_embs": encodings})
 
         return batch_data
+
+
+def get_sequence_classifier_cls(classifier_type: str, embedder_type: str = None):
+    allowed_sequence_classifier_types = ["embedder", "cnn", "lstm"]
+    allowed_embedder_types = [v.value for v in EmbedderType.__members__.values()]
+
+    # disambiguation between glove, bert and non-pretrained embedders
+    def _resolve_and_return_embedder_class():
+        if embedder_type not in allowed_embedder_types:
+            msg = f"Need a valid 'embedder_type' param. Found value: {embedder_type}. " \
+                  f"Allowed values: {allowed_embedder_types}. "
+            raise ValueError(msg)
+        return {
+            None: EmbedderForSequenceClassification,
+            "glove": EmbedderForSequenceClassification,
+            "bert": BertForSequenceClassification
+        }[embedder_type]
+
+    try:
+        classifier_cls = {
+            "embedder": _resolve_and_return_embedder_class(),
+            "cnn": CnnForSequenceClassification,
+            "lstm": LstmForSequenceClassification,
+        }[classifier_type]
+        if classifier_type not in ["embedder"] and embedder_type == "bert":
+            msg = "To use a embedder_type 'bert', classifier_type must be 'embedder'."
+            raise ValueError(msg)
+
+    except KeyError as e:
+        msg = f"Expected classifier_type amongst {allowed_sequence_classifier_types} but found " \
+              f"'{classifier_type}'."
+        raise ValueError(msg) from e
+
+    return classifier_cls

@@ -14,12 +14,14 @@
 """
 This module consists of encoders that serve as input to pytorch modules
 """
+import json
 import logging
 import os
 from abc import abstractmethod, ABC
+from itertools import chain
 from typing import Dict, List, Union, Any, Tuple
 
-from .helpers import BatchData
+from .helpers import BatchData, TokenizerType
 from .._util import _get_module_or_attr
 from ..containers import HuggingfaceTransformersContainer
 
@@ -47,10 +49,10 @@ logger = logging.getLogger(__name__)
 
 class AbstractEncoder(ABC):
     """
-    Defines a state-ful tokenizer. Unlike the tokenizer in the text_preperation_pipeline, tokenizers
-    developed on top this abstract class tend to have a state such a vocabulary or a model that is
-    used for encoding a given piece of text into sequence of ids or a sequence of embeddings. These
-    outputs are used by the initial layers of neural nets.
+    Defines a stateful tokenizer. Unlike the tokenizer in the text_preperation_pipeline, tokenizers
+    derived from this abstract class have a state such a vocabulary or a trained/pretrained model
+    that is used for encoding an input textual string into sequence of ids or a sequence of
+    embeddings. These outputs are used by the initial layers of neural nets.
     """
 
     def __init__(self, **_kwargs):
@@ -60,7 +62,7 @@ class AbstractEncoder(ABC):
         logger.debug(msg)
 
     @abstractmethod
-    def fit(self, examples: List[str]):
+    def prepare(self, examples: List[str]):
         """
         Method that fits the tokenizer and creates a state that can be dumped or used for encoding
 
@@ -187,6 +189,13 @@ class AbstractVocabLookupEncoder(AbstractEncoder):
     Abstract class wrapped around AbstractEncoder that has a vocabulary lookup as the state.
     """
 
+    SPECIAL_TOKENS_DICT = {
+        "pad_token": "<PAD>",
+        "unk_token": "<UNK>",
+        "start_token": "<START>",
+        "end_token": "<END>",
+    }
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.token2id = {}
@@ -195,18 +204,12 @@ class AbstractVocabLookupEncoder(AbstractEncoder):
     def id2token(self):
         return {i: t for t, i in self.token2id.items()}
 
-    def fit(self, examples: List[str]):
+    def prepare(self, examples: List[str]):
         examples = [ex.strip() for ex in examples]
-        all_tokens = dict.fromkeys(sum([self._tokenize(text) for text in examples], []))
+        all_tokens = dict.fromkeys(chain.from_iterable([self._tokenize(text) for text in examples]))
         self.token2id = {t: i for i, t in enumerate(all_tokens)}
 
-        basic_special_tokens = {
-            "pad_token": "<PAD>",
-            "unk_token": "<UNK>",
-            "start_token": "<START>",
-            "end_token": "<END>",
-        }
-        for name, token in basic_special_tokens.items():
+        for name, token in self.__class__.SPECIAL_TOKENS_DICT.items():
             self.token2id.update({token: len(self.token2id)})
             setattr(self, f"{name}", token)
             setattr(self, f"{name}_idx", self.token2id[token])
@@ -217,7 +220,8 @@ class AbstractVocabLookupEncoder(AbstractEncoder):
         with open(filename, "w") as opfile:
             for token in self.token2id:
                 opfile.write(f"{token}\n")
-            opfile.close()
+        with open(os.path.join(path, "special_vocab.json"), "w") as fp:
+            json.dump(self.__class__.SPECIAL_TOKENS_DICT, fp, indent=4)
         msg = f"The state of {self.__class__.__name__} is successfully dumped at '{filename}'"
         logger.info(msg)
 
@@ -225,8 +229,13 @@ class AbstractVocabLookupEncoder(AbstractEncoder):
         filename = self._get_filename(path)
         with open(filename, "r") as opfile:
             tokens = [line.strip() for line in opfile]
-            opfile.close()
-        self.token2id = {t: i for i, t in enumerate(tokens)}
+            self.token2id = {t: i for i, t in enumerate(tokens)}
+        with open(os.path.join(path, "special_vocab.json"), "r") as fp:
+            special_tokens_dict = json.load(fp)
+            for name, token in special_tokens_dict.items():
+                setattr(self, f"{name}", token)
+                setattr(self, f"{name}_idx", self.token2id[token])
+
         msg = f"The state of {self.__class__.__name__} is successfully loaded from '{filename}'"
         logger.info(msg)
 
@@ -337,6 +346,13 @@ class WhitespaceAndCharDualEncoder(WhitespaceEncoder):
         super().__init__(**kwargs)
         self.char_token2id = {}
 
+    SPECIAL_CHAR_TOKENS_DICT = {
+        "char_pad_token": "<CHAR_PAD>",
+        "char_unk_token": "<CHAR_UNK>",
+        "char_start_token": "<CHAR_START>",
+        "char_end_token": "<CHAR_END>",
+    }
+
     @property
     def char_id2token(self):
         return {i: t for t, i in self.char_token2id.items()}
@@ -345,20 +361,16 @@ class WhitespaceAndCharDualEncoder(WhitespaceEncoder):
     def char_tokenize(text: str) -> List[str]:
         return list(text.strip("\n"))
 
-    def fit(self, examples: List[str]):
-        super().fit(examples)
+    def prepare(self, examples: List[str]):
+        super().prepare(examples)
 
         examples = [ex.strip() for ex in examples]
-        all_tokens = dict.fromkeys(sum([self.char_tokenize(text) for text in examples], []))
+        all_tokens = dict.fromkeys(
+            chain.from_iterable([self.char_tokenize(text) for text in examples])
+        )
         self.char_token2id = {t: i for i, t in enumerate(all_tokens)}
 
-        basic_special_tokens = {
-            "char_pad_token": "<PAD>",
-            "char_unk_token": "<UNK>",
-            "char_start_token": "<START>",
-            "char_end_token": "<END>",
-        }
-        for name, token in basic_special_tokens.items():
+        for name, token in self.__class__.SPECIAL_CHAR_TOKENS_DICT.items():
             self.char_token2id.update({token: len(self.char_token2id)})
             setattr(self, f"{name}", token)
             setattr(self, f"{name}_idx", self.char_token2id[token])
@@ -371,7 +383,8 @@ class WhitespaceAndCharDualEncoder(WhitespaceEncoder):
         with open(filename, "w") as opfile:
             for token in self.char_token2id:
                 opfile.write(f"{token}\n")
-            opfile.close()
+        with open(os.path.join(path, "special_char_vocab.json"), "w") as fp:
+            json.dump(self.__class__.SPECIAL_CHAR_TOKENS_DICT, fp, indent=4)
         msg = f"The state of {self.__class__.__name__} is successfully dumped at '{filename}'"
         logger.info(msg)
 
@@ -381,8 +394,13 @@ class WhitespaceAndCharDualEncoder(WhitespaceEncoder):
         filename = self._get_char_filename(path)
         with open(filename, "r") as opfile:
             tokens = [line.strip() for line in opfile]
-            opfile.close()
-        self.char_token2id = {t: i for i, t in enumerate(tokens)}
+            self.char_token2id = {t: i for i, t in enumerate(tokens)}
+        with open(os.path.join(path, "special_char_vocab.json"), "r") as fp:
+            special_char_tokens_dict = json.load(fp)
+            for name, token in special_char_tokens_dict.items():
+                setattr(self, f"{name}", token)
+                setattr(self, f"{name}_idx", self.char_token2id[token])
+
         msg = f"The state of {self.__class__.__name__} is successfully loaded from '{filename}'"
         logger.info(msg)
 
@@ -401,7 +419,7 @@ class WhitespaceAndCharDualEncoder(WhitespaceEncoder):
     ) -> BatchData:
 
         if add_terminals:
-            msg = f"The argument 'add_terminals' must be False to encode a batch using" \
+            msg = f"The argument 'add_terminals' must be False to encode a batch using " \
                   f"{self.__class__.__name__}."
             logger.error(msg)
             raise ValueError(msg)
@@ -548,7 +566,7 @@ class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
         if NO_TOKENIZERS_MODULE:
             raise ImportError("pip install tokenizers")
 
-    def fit(self, examples: List[str]):
+    def prepare(self, examples: List[str]):
         """
         references:
         - Huggingface: tutorials/python/training_from_memory.html @ https://tinyurl.com/6hxrtspa
@@ -558,7 +576,7 @@ class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
         self._prepare_pipeline()
         trainer = self.trainer(
             # vocab_size=30000,
-            special_tokens=AbstractHuggingfaceTrainableEncoder.SPECIAL_TOKENS
+            special_tokens=self.__class__.SPECIAL_TOKENS
         )
         self.tokenizer.train_from_iterator(examples, trainer=trainer, length=len(examples))
 
@@ -574,7 +592,7 @@ class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
             ],
         )
         self.tokenizer.enable_padding(
-            pad_id=AbstractHuggingfaceTrainableEncoder.SPECIAL_TOKENS.index("[PAD]"),
+            pad_id=self.__class__.SPECIAL_TOKENS.index("[PAD]"),
             pad_token="[PAD]"
         )
 
@@ -631,12 +649,12 @@ class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
         """
 
         if not add_terminals:
-            msg = f"The argument 'add_terminals' must be True to encode a batch using" \
+            msg = f"The argument 'add_terminals' must be True to encode a batch using " \
                   f"{self.__class__.__name__}."
             logger.error(msg)
             raise ValueError(msg)
 
-        # tokenize each word of each input seperately
+        # tokenize each word of each input separately
         # get maximum length of each example, accounting for terminal tokens- cls, sep
         # If padding_length is None, padding has to be done to the max length of the input batch
         tokenized_examples = [
@@ -706,11 +724,11 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
         self.pretrained_model_name_or_path = pretrained_model_name_or_path
         self.config, self.tokenizer = None, None
 
-    def fit(self, examples: List[str]):
+    def prepare(self, examples: List[str]):
         del examples
 
         if self.pretrained_model_name_or_path is None:
-            msg = f"Need a valid 'pretrained_model_name_or_path' path to fit" \
+            msg = f"Need a valid 'pretrained_model_name_or_path' path to fit " \
                   f"{self.__class__.__name__} but found value: {self.pretrained_model_name_or_path}"
             raise ValueError(msg)
 
@@ -746,7 +764,7 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
     ) -> BatchData:
 
         if not add_terminals:
-            msg = f"The argument 'add_terminals' must be True to encode a batch using" \
+            msg = f"The argument 'add_terminals' must be True to encode a batch using " \
                   f"{self.__class__.__name__}."
             logger.error(msg)
             raise ValueError(msg)
@@ -793,21 +811,21 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
 
 class InputEncoderFactory:
     TOKENIZER_NAME_TO_CLASS = {
-        "whitespace-tokenizer": WhitespaceEncoder,
-        "char-tokenizer": CharEncoder,
-        "whitespace_and_char-tokenizer": WhitespaceAndCharDualEncoder,
-        "bpe-tokenizer": BytePairEncodingEncoder,
-        "wordpiece-tokenizer": WordPieceEncoder,
-        "huggingface_pretrained-tokenizer": HuggingfacePretrainedEncoder,
+        TokenizerType.WHITESPACE_TOKENIZER: WhitespaceEncoder,
+        TokenizerType.CHAR_TOKENIZER: CharEncoder,
+        TokenizerType.WHITESPACE_AND_CHAR_DUAL_TOKENIZER: WhitespaceAndCharDualEncoder,
+        TokenizerType.BPE_TOKENIZER: BytePairEncodingEncoder,
+        TokenizerType.WORDPIECE_TOKENIZER: WordPieceEncoder,
+        TokenizerType.HUGGINGFACE_PRETRAINED_TOKENIZER: HuggingfacePretrainedEncoder,
     }
 
     @classmethod
-    def get_encoder_class_from_name(cls, tokenizer_type):
-        if tokenizer_type not in InputEncoderFactory.TOKENIZER_NAME_TO_CLASS:
-            msg = f"Expected tokenizer_type to among " \
-                  f"{[*InputEncoderFactory.TOKENIZER_NAME_TO_CLASS]} " \
-                  f"but found '{tokenizer_type}' in {cls.__class__.__name__}. " \
-                  f"Cannot create an input encoder."
+    def get_encoder_cls(cls, tokenizer_type: str):
+        try:
+            return InputEncoderFactory.TOKENIZER_NAME_TO_CLASS[TokenizerType(tokenizer_type)]
+        except ValueError as e:
+            msg = f"Expected tokenizer_type amongst " \
+                  f"{[v.value for v in TokenizerType.__members__.values()]} " \
+                  f"but found '{tokenizer_type}'. Cannot create an input encoder."
             logger.error(msg)
-            raise ValueError(msg)
-        return InputEncoderFactory.TOKENIZER_NAME_TO_CLASS[tokenizer_type]
+            raise ValueError(msg) from e

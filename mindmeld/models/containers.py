@@ -128,8 +128,9 @@ class GloVeEmbeddingsContainer:
 
             if file_name not in zip_file_object.namelist():
                 logger.info(
-                    "Embedding file with %s dimensions " "not found",
+                    "Embedding file with %s dimensions not found in %s file path",
                     self.token_dimension,
+                    file_name
                 )
                 return
 

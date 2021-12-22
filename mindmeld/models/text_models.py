@@ -38,8 +38,9 @@ from .helpers import (
     WORD_FREQ_RSC,
     WORD_NGRAM_FREQ_RSC,
 )
-from .model import ModelConfig, Model, PytorchModel
-from .nn_utils import sequence_classification as nn_modules, ALLOWED_EMBEDDER_TYPES
+from .model import ModelConfig, Model, PytorchModel, AbstractXxxModelFactory
+from .nn_utils import get_sequence_classifier_cls
+from ..resource_loader import ProcessedQueryList as PQL
 
 logger = logging.getLogger(__name__)
 
@@ -497,29 +498,13 @@ class PytorchTextModel(PytorchModel):
     def _get_model_constructor(self):
         """Returns the class of the actual underlying model"""
         classifier_type = self.config.model_settings["classifier_type"]
+        embedder_type = self.config.params.get(
+            "embedder_type") if self.config.params is not None else None
 
-        # dismabiguation between glove and bert embedder
-        def _resolve_and_return_embedder_class():
-            embedder_type = self.config.params.get("embedder_type")
-            if embedder_type not in ALLOWED_EMBEDDER_TYPES:
-                msg = f"Need a valid 'embedder_type' param in params field of config to load a " \
-                      f"embedder type model. Allowed values are {ALLOWED_EMBEDDER_TYPES}"
-                raise ValueError(msg)
-            return {
-                None: nn_modules.EmbedderForSequenceClassification,
-                "glove": nn_modules.EmbedderForSequenceClassification,
-                "bert": nn_modules.BertForSequenceClassification
-            }[embedder_type]
-
-        try:
-            return {
-                "embedder": _resolve_and_return_embedder_class(),
-                "cnn": nn_modules.CnnForSequenceClassification,
-                "lstm": nn_modules.LstmForSequenceClassification,
-            }[classifier_type]
-        except KeyError as e:
-            msg = "{}: Classifier type {!r} not recognized"
-            raise ValueError(msg.format(self.__class__.__name__, classifier_type)) from e
+        return get_sequence_classifier_cls(
+            classifier_type=classifier_type,
+            embedder_type=embedder_type
+        )
 
     def evaluate(self, examples, labels):
         """Evaluates a model against the given examples and labels
@@ -549,6 +534,11 @@ class PytorchTextModel(PytorchModel):
         if len(set(labels)) <= 1 or not examples:
             return self
 
+        if not isinstance(examples, PQL.QueryIterator):
+            msg = f"{self.__class__.__name__}.fit() only accepts QueryIterator type examples " \
+                  f"argument but the inputted type is {type(examples)} "
+            raise NotImplementedError(msg)
+
         # Encode classes
         y = self._label_encoder.encode(labels)
         encoded_y = self._class_encoder.fit_transform(y)
@@ -556,28 +546,30 @@ class PytorchTextModel(PytorchModel):
 
         params = params or self.config.params
         self._get_query_text_type(params)
-        examples = self._query2examples(examples)
-        self._validate_training_data(examples, y)
+        examples_texts = self._get_texts_from_examples(examples)
+        self._validate_training_data(examples_texts, y)
 
         self._clf = self._get_model_constructor()()  # gets the class name and then initializes
-        self._clf.fit(examples, y, **params)
+        self._clf.fit(examples_texts, y, **(params if params is not None else {}))
 
         return self
 
     def predict(self, examples, dynamic_resource=None):
         del dynamic_resource
 
-        examples = self._query2examples(examples)
-        y = self._clf.predict(examples)
+        examples_texts = self._get_texts_from_examples(examples)
+        y = self._clf.predict(examples_texts)
         predictions = self._class_encoder.inverse_transform(y)
         return self._label_encoder.decode(predictions)
 
-    def predict_proba(self, examples):
-        examples = self._query2examples(examples)
+    def predict_proba(self, examples, dynamic_resource=None):
+        del dynamic_resource
+
+        examples_texts = self._get_texts_from_examples(examples)
 
         # snippet re-used from ./text_model.py/TextModel._predict_proba()
         predictions = []
-        for row in self._clf.predict_proba(examples):
+        for row in self._clf.predict_proba(examples_texts):
             probabilities = {}
             top_class = None
             for class_index, proba in enumerate(row):
@@ -622,10 +614,10 @@ class PytorchTextModel(PytorchModel):
         return model
 
 
-class TextModelFactory:
+class TextModelFactory(AbstractXxxModelFactory):
 
     @staticmethod
-    def get_model_class(config: ModelConfig):
+    def get_model_cls(config: ModelConfig):
 
         CLASSES = [TextModel, PytorchTextModel]
         classifier_type = config.model_settings["classifier_type"]

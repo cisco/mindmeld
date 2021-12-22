@@ -20,7 +20,7 @@ import os
 import pickle
 from abc import ABC, abstractmethod
 from inspect import signature
-from typing import Union
+from typing import Union, Type, Dict, Any, Tuple, List
 
 from sklearn.externals import joblib
 from sklearn.model_selection import (
@@ -48,10 +48,19 @@ from .helpers import (
     get_label_encoder,
     ingest_dynamic_gazetteer,
 )
+from .nn_utils.helpers import EmbedderType
 from .._version import get_mm_version
-from ..text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
+from ..core import ProcessedQuery
+from ..resource_loader import ResourceLoader, ProcessedQueryList as PQL
+from ..text_preparation.text_preparation_pipeline import (
+    TextPreparationPipelineFactory,
+    TextPreparationPipeline
+)
 
 logger = logging.getLogger(__name__)
+
+Examples = Union[PQL.QueryIterator, PQL.ListIterator]
+Labels = Union[PQL.DomainIterator, PQL.IntentIterator, PQL.EntitiesIterator]
 
 
 class ModelConfig:
@@ -229,8 +238,8 @@ class AbstractModel(ABC):
     # all the access points of Classifier class and its sub-classes. In addition, it also introduces
     # the decoupled way of dumping/loading across different model types (meaning not all models are
     # dumped/loaded the same way). Furthermore, methods for validation are also introduced so as to
-    # cater to the model specific config validations. Lastly, this skleton also includes some common
-    # properties that could be used across all model types.
+    # cater to the model specific config validations. Lastly, this skeleton also includes some
+    # common properties that could be used across all model types.
 
     def __init__(self, config: ModelConfig):
         self.config = config
@@ -240,32 +249,38 @@ class AbstractModel(ABC):
         self._validate_model_configs()
 
     @abstractmethod
-    def initialize_resources(self, resource_loader, examples=None, labels=None):
+    def initialize_resources(
+        self, resource_loader: ResourceLoader, examples: Examples = None, labels: Labels = None
+    ):
         raise NotImplementedError
 
     @abstractmethod
-    def fit(self, examples, labels, params=None):
+    def fit(self, examples: Examples, labels: Labels, params: Dict = None):
         raise NotImplementedError
 
     @abstractmethod
-    def predict(self, examples, dynamic_resource=None):
+    def predict(
+        self, examples: Examples, dynamic_resource: Dict = None
+    ) -> Union[List[Any], List[List[Any]]]:
         raise NotImplementedError
 
     @abstractmethod
-    def predict_proba(self, examples):
+    def predict_proba(
+        self, examples: Examples, dynamic_resource: Dict = None
+    ) -> Union[List[Tuple[str, Dict[str, int]]],]:
         raise NotImplementedError
 
     @abstractmethod
-    def evaluate(self, examples, labels):
+    def evaluate(self, examples: Examples, labels: Labels):
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def load(cls, path):
+    def load(cls, path: str):
         raise NotImplementedError
 
     @classmethod
-    def load_model_config(cls, path):
+    def load_model_config(cls, path: str) -> ModelConfig:
         """
         Dumps the model's configs. Raises a FileNotFoundError if no configs file is found.
         For backwards compatability wherein TextModel was serialized and dumped, the textModel file
@@ -309,7 +324,7 @@ class AbstractModel(ABC):
 
         return model_config
 
-    def dump(self, path) -> None:
+    def dump(self, path: str):
         """
         Dumps the model's configs and calls the child model's dump method
 
@@ -326,7 +341,7 @@ class AbstractModel(ABC):
         # (eg. serialized dump for sklearn-based models, .bin files for pytorch-based models, etc.)
         self._dump(path)
 
-    def _dump_model_config(self, path) -> None:
+    def _dump_model_config(self, path: str):
         """
         Dumps the model's configs
         """
@@ -335,7 +350,7 @@ class AbstractModel(ABC):
         pickle.dump(self.config, open(model_configs_save_path, "wb"))
 
     @abstractmethod
-    def _dump(self, path) -> None:
+    def _dump(self, path: str):
         """
         Dumps the model and calls the underlying algo to dump its state.
 
@@ -345,14 +360,14 @@ class AbstractModel(ABC):
         pass
 
     @staticmethod
-    def _get_model_config_save_path(path):
+    def _get_model_config_save_path(path: str):
         head, ext = os.path.splitext(path)
         model_config_save_path = head + ".config" + ext
         os.makedirs(os.path.dirname(model_config_save_path), exist_ok=True)
         return model_config_save_path
 
-    def view_extracted_features(self, example, dynamic_resource=None):
-        # Not implemeneted for deep neural models
+    def view_extracted_features(self, example: ProcessedQuery, dynamic_resource: Dict = None):
+        # Not implemeneted unless overwritten by child class
         raise NotImplementedError
 
     def register_resources(self, **kwargs):  # pylint: disable=no-self-use
@@ -360,11 +375,11 @@ class AbstractModel(ABC):
         del kwargs
         pass
 
-    def get_resource(self, name):
+    def get_resource(self, name) -> Any:
         return self._resources.get(name)
 
     @property
-    def text_preparation_pipeline(self):
+    def text_preparation_pipeline(self) -> TextPreparationPipeline:
 
         text_preparation_pipeline = self._resources.get("text_preparation_pipeline")
 
@@ -751,66 +766,72 @@ class PytorchModel(AbstractModel):
 
     def initialize_resources(self, resource_loader, examples=None, labels=None):
         del resource_loader, examples, labels
-        # self._resources[
-        #     "text_preparation_pipeline"
-        # ] = resource_loader.get_text_preparation_pipeline()
 
     @staticmethod
-    def _validate_training_data(examples, labels):
+    def _validate_training_data(examples: List[Any], labels: Union[List[int], List[List[int]]]):
         if len(examples) != len(labels):
             msg = f"Number of 'labels' ({len(labels)}) must be same as number of 'examples' " \
                   f"({len(examples)})"
             raise AssertionError(msg)
 
-    def _get_query_text_type(self, params=None):
+    def _get_query_text_type(self, params: Dict = None, default: str = "processed_text"):
         """
         Returns the query text type to use for obtaining training examples from Query objects.
 
         Args:
             params (Dict, optional): The config params passed in to train the model
+            default (str, optional): The default text type to use in case no related configs found
 
         Returns:
             query_text_type (str): The choice of text type to use.
         """
 
         if params is None and self._query_text_type:
+            # this condition is satisfied during loading of models
             return self._query_text_type
 
-        # While the key '_query_text_type' in config params allows for end users to configure the
-        # choice of text type to be used, it also needs the user have knowledge about the different
-        # text types in a Query object. Hence, it is kept for developer/benchmarking puposes mainly.
-        # choices: "text", "processed_text", "normalized_text"
+        # While the key '_query_text_type' in config params allows for end-users to configure the
+        # choice of text_type to be used, it also needs the user to have knowledge about different
+        # text types in a Query object. Hence, this key is _underscored_ and is kept mainly for
+        # developer/benchmarking puposes.
+        query_text_type = params.get("_query_text_type", default) if params else default
+
+        # consider raw text for pretrained transformer models, else use processed text
+        if params and EmbedderType(params.get("embedder_type")) == EmbedderType.BERT:
+            query_text_type = "text"
+
+        # validation
         allowed_text_types = ["text", "processed_text", "normalized_text"]
-
-        if params is None:
-            query_text_type = "processed_text"
-        elif params.get("_query_text_type") is None:
-            if params.get("embedder_type") == "bert":
-                query_text_type = "text"
-            else:
-                query_text_type = "processed_text"
-        else:
-            query_text_type = params.get("_query_text_type")
-
         if query_text_type not in allowed_text_types:
             msg = f"The params 'query_text_type' can only be among " \
                   f"{allowed_text_types} but found value {query_text_type}."
             logger.error(msg)
             raise ValueError(msg)
 
-        self._query_text_type = query_text_type
+        self._query_text_type = query_text_type  # this var is dumped and loaded when loading models
+
         return self._query_text_type
 
-    def _query2examples(self, queries):
+    def _get_texts_from_examples(self, examples: PQL.QueryIterator):
         """
         Method that decides which text type- processed_text or raw_text -that needs to be used for
         neural model training/inference.
 
         Args:
-            queries (List[Query]): A list of query objects.
+            examples (QueryIterator): A list of ProcessedQuery objects.
 
         Returns:
-            examples (List[str]): A list of strings obtained from the query objects based on the
-                input configs
+            texts (List[str]): A list of strings obtained from the query objects based on the
+                provided input configs
         """
-        return [getattr(query, self._get_query_text_type()) for query in queries]
+        return [getattr(example, self._get_query_text_type()) for example in examples]
+
+
+class AbstractXxxModelFactory(ABC):
+    """
+    Abstract class for individual model factories like TextModelFactory and TaggerModelFactory
+    """
+
+    @abstractmethod
+    def get_model_cls(self, config: ModelConfig) -> Type[AbstractModel]:
+        raise NotImplementedError

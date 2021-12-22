@@ -19,8 +19,8 @@ appropriate models
 import logging
 from typing import Union, Type
 
-from .helpers import register_model
-from .model import ModelConfig, AbstractModel
+from .helpers import register_model, ModelType
+from .model import ModelConfig, AbstractModel, AbstractXxxModelFactory
 from .tagger_models import TaggerModelFactory
 from .text_models import TextModelFactory
 
@@ -36,14 +36,9 @@ class ModelFactory:
     dumped config, which is then used to load appropriate model and return it through a metadata
     dictionary object.
     """
-    MODEL_TYPE_TO_FACTORY = {
-        "text": TextModelFactory,
-        "tagger": TaggerModelFactory,
-    }
-    ALLOWED_MODEL_TYPES = [*MODEL_TYPE_TO_FACTORY.keys()]
 
     def __new__(cls, config: Union[dict, ModelConfig]) -> Type[AbstractModel]:
-        # method for backwards compatability in ./helpers/create_model()
+        # method for backwards compatibility in ./helpers/create_model()
         return cls.create_model_from_config(config)
 
     @classmethod
@@ -65,17 +60,15 @@ class ModelFactory:
             ValueError: When the configs are invalid
         """
 
-        if not (model_config and isinstance(model_config, (ModelConfig, dict))):
+        is_valid_config = model_config and isinstance(model_config, (ModelConfig, dict))
+        if not is_valid_config:
             msg = f"Need a valid model config to create a text/tagger model in ModelFactory. " \
                   f"Found model_config={model_config} of type({type(model_config)})"
             raise ValueError(msg)
 
-        # get model type upon validation
         model_config = cls._resolve_model_config(model_config)
         model_type = cls._get_model_type(model_config)
-
-        # instantiate and return appropriate model class from the model type
-        model_class = ModelFactory.MODEL_TYPE_TO_FACTORY[model_type].get_model_class(model_config)
+        model_class = cls._get_xxx_model_factory(model_type).get_model_cls(model_config)
         return model_class(model_config)
 
     @classmethod
@@ -105,16 +98,11 @@ class ModelFactory:
             raise ValueError(msg)
 
         try:
-            # if loading from path, determine the ABCModel type & return after doing xxxModel.load()
+            # if loading from path, determine the ABCModel type & return after doing XxxModel.load()
             model_config = AbstractModel.load_model_config(path)
-
-            # get model type upon validation
             model_config = cls._resolve_model_config(model_config)
             model_type = cls._get_model_type(model_config)
-
-            # load metadata and return
-            model_class = ModelFactory.MODEL_TYPE_TO_FACTORY[model_type].get_model_class(
-                model_config)
+            model_class = cls._get_xxx_model_factory(model_type).get_model_cls(model_config)
             return model_class.load(path)
 
         except FileNotFoundError:
@@ -154,7 +142,7 @@ class ModelFactory:
         return model_config
 
     @staticmethod
-    def _get_model_type(model_config: ModelConfig) -> str:
+    def _get_model_type(model_config: ModelConfig) -> ModelType:
         """
         Returns model type from the model config and validates if it is a valid type or not.
 
@@ -162,23 +150,41 @@ class ModelFactory:
             model_config (ModelConfig): An instance of ModelConfig
 
         Returns:
-            model_type (str): The model type obtained from configs
+            model_type (ModelType): The model type obtained from configs
 
         Raises:
             ValueError: When the model type is invalid
         """
+
+        model_type = model_config.model_type
+
         try:
-            model_type = model_config.model_type
-            assert model_type in ModelFactory.ALLOWED_MODEL_TYPES
-        except (KeyError, AssertionError) as e:
+            return ModelType(model_type)
+        except ValueError as e:
             msg = f"Invalid model configuration: Unknown model type {model_type}. " \
-                  f"Known types are: {ModelFactory.ALLOWED_MODEL_TYPES}"
+                  f"Known types are: {[v.value for v in ModelType.__members__.values()]}"
             raise ValueError(msg) from e
-        return model_type
+
+    @staticmethod
+    def _get_xxx_model_factory(model_type: ModelType) -> Type[AbstractXxxModelFactory]:
+        """
+        Returns a factory based on the provided model type
+
+        Args:
+            model_type (ModelType): An object of ModelType specifying the type of model to create
+
+        Returns:
+            model_factory (Type[AbstractXxxModelFactory]): A model factory for specified model_type
+        """
+
+        return {
+            ModelType.TEXT_MODEL: TextModelFactory,
+            ModelType.TAGGER_MODEL: TaggerModelFactory,
+        }[model_type]
 
     @staticmethod
     def register_models() -> None:
-        for model_type in ModelFactory.ALLOWED_MODEL_TYPES:
+        for model_type in [v.value for v in ModelType.__members__.values()]:
             register_model(model_type, ModelFactory)
         register_model("auto", ModelFactory)
 

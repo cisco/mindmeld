@@ -25,8 +25,8 @@ from .helpers import (
     get_seq_tag_accuracy_scorer,
     ingest_dynamic_gazetteer,
 )
-from .model import ModelConfig, Model, PytorchModel
-from .nn_utils import token_classification as nn_modules, ALLOWED_EMBEDDER_TYPES
+from .model import ModelConfig, Model, PytorchModel, AbstractXxxModelFactory
+from .nn_utils import get_token_classifier_cls
 from .taggers.crf import ConditionalRandomFields
 from .taggers.memm import MemmModel
 from ..exceptions import MindMeldError
@@ -438,30 +438,13 @@ class PytorchTaggerModel(PytorchModel):
     def _get_model_constructor(self):
         """Returns the class of the actual underlying model"""
         classifier_type = self.config.model_settings["classifier_type"]
+        embedder_type = self.config.params.get(
+            "embedder_type") if self.config.params is not None else None
 
-        # dismabiguation between glove and bert embedder
-        def _resolve_and_return_embedder_class():
-            embedder_type = self.config.params.get("embedder_type")
-            if embedder_type not in ALLOWED_EMBEDDER_TYPES:
-                msg = f"Need a valid 'embedder_type' param in params field of config to load a " \
-                      f"embedder type model. Allowed values are {ALLOWED_EMBEDDER_TYPES}"
-                raise ValueError(msg)
-            return {
-                None: nn_modules.EmbedderForTokenClassification,
-                "glove": nn_modules.EmbedderForTokenClassification,
-                "bert": nn_modules.BertForTokenClassification
-            }[embedder_type]
-
-        try:
-            return {
-                "embedder": _resolve_and_return_embedder_class(),
-                "lstm-pytorch": nn_modules.LstmForTokenClassification,
-                "cnn-lstm": nn_modules.CharCnnWithWordLstmForTokenClassification,
-                "lstm-lstm": nn_modules.CharLstmWithWordLstmForTokenClassification,
-            }[classifier_type]
-        except KeyError as e:
-            msg = "{}: Classifier type {!r} not recognized"
-            raise ValueError(msg.format(self.__class__.__name__, classifier_type)) from e
+        return get_token_classifier_cls(
+            classifier_type=classifier_type,
+            embedder_type=embedder_type
+        )
 
     def evaluate(self, examples, labels):
         """Evaluates a model against the given examples and labels
@@ -519,11 +502,11 @@ class PytorchTaggerModel(PytorchModel):
 
         params = params or self.config.params
         self._get_query_text_type(params)
-        examples = self._query2examples(examples)
-        self._validate_training_data(examples, y)
+        examples_texts = self._get_texts_from_examples(examples)
+        self._validate_training_data(examples_texts, y)
 
         self._clf = self._get_model_constructor()()  # gets the class name only
-        self._clf.fit(examples, y, **params)
+        self._clf.fit(examples_texts, y, **(params if params is not None else {}))
 
         return self
 
@@ -533,8 +516,9 @@ class PytorchTaggerModel(PytorchModel):
         if self._no_entities:
             return [()]
 
-        examples = self._query2examples(examples)
-        y = self._clf.predict(examples)
+        # snippet re-used from ./tagger_model.py/TaggerModel._predict_proba()
+        examples_texts = self._get_texts_from_examples(examples)
+        y = self._clf.predict(examples_texts)
         flat_y = sum(y, [])
         decoded_flat_y = self._class_encoder.inverse_transform(flat_y).tolist()
         decoded_y = []
@@ -551,11 +535,50 @@ class PytorchTaggerModel(PytorchModel):
         ]
         return labels
 
-    def predict_proba(self, examples):
+    def predict_proba(self, examples, dynamic_resource=None):
+        del dynamic_resource
+
         if self._no_entities:
             return []
 
-        raise NotImplementedError
+        # raise NotImplementedError
+
+        # if self._no_entities:
+        #     return []
+        #
+        # workspace_resource = ingest_dynamic_gazetteer(
+        #     self._resources, dynamic_resource=dynamic_resource,
+        #     text_preparation_pipeline=self.text_preparation_pipeline
+        # )
+        # predicted_tags_probas = self._clf.predict_proba(
+        #     examples, self.config, workspace_resource
+        # )
+        # tags, probas = zip(*predicted_tags_probas[0])
+        # entity_confidence = []
+        # entities = self._label_encoder.decode([tags], examples=[examples[0]])[0]
+        # for entity in entities:
+        #     entity_proba = \
+        #         probas[entity.normalized_token_span.start: entity.normalized_token_span.end + 1]
+        #     # We assume that the score of the least likely tag in the sequence as the confidence
+        #     # score of the entire entity sequence
+        #     entity_confidence.append(min(entity_proba))
+        # predicted_labels_scores = tuple(zip(entities, entity_confidence))
+        # return predicted_labels_scores
+
+        examples_texts = self._get_texts_from_examples(examples)
+        predicted_tags_probas = self._clf.predict_proba(examples_texts)
+        int_tags, probas = zip(*predicted_tags_probas[0])
+        tags = self._class_encoder.inverse_transform(int_tags).tolist()
+        entity_confidence = []
+        entities = self._label_encoder.decode([tags], examples=[examples[0]])[0]
+        for entity in entities:
+            entity_proba = \
+                probas[entity.normalized_token_span.start: entity.normalized_token_span.end + 1]
+            # We assume that the score of the least likely tag in the sequence as the confidence
+            # score of the entire entity sequence
+            entity_confidence.append(min(entity_proba))
+        predicted_labels_scores = tuple(zip(entities, entity_confidence))
+        return predicted_labels_scores
 
     def _dump(self, path):
 
@@ -596,16 +619,16 @@ class PytorchTaggerModel(PytorchModel):
         for ex, label_tokens in zip(examples, labels):
             ex_tokens = ex.split(" ")
             if len(ex_tokens) != len(label_tokens):
-                msg = f"Number of tokens in a sentence ({len(ex_tokens)}) must be same as the" \
+                msg = f"Number of tokens in a sentence ({len(ex_tokens)}) must be same as the " \
                       f"number of tokens in the corresponding token labels " \
-                      f"({len(label_tokens)}) for sentence '{ex}' with labels '{labels}'"
+                      f"({len(label_tokens)}) for sentence '{ex}' with labels '{label_tokens}'"
                 raise AssertionError(msg)
 
 
-class TaggerModelFactory:
+class TaggerModelFactory(AbstractXxxModelFactory):
 
     @staticmethod
-    def get_model_class(config: ModelConfig):
+    def get_model_cls(config: ModelConfig):
 
         CLASSES = [TaggerModel, PytorchTaggerModel]
         classifier_type = config.model_settings["classifier_type"]

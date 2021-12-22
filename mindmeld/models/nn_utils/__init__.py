@@ -11,32 +11,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .classification import EMBEDDER_TYPE_TO_ALLOWED_TOKENIZER_TYPES
 from .sequence_classification import (
     EmbedderForSequenceClassification,
     CnnForSequenceClassification,
     LstmForSequenceClassification,
-    BertForSequenceClassification
+    BertForSequenceClassification,
+    get_sequence_classifier_cls
 )
 from .token_classification import (
     EmbedderForTokenClassification,
     LstmForTokenClassification,
     CharCnnWithWordLstmForTokenClassification,
     CharLstmWithWordLstmForTokenClassification,
-    BertForTokenClassification
+    BertForTokenClassification,
+    get_token_classifier_cls
 )
 
-ALLOWED_EMBEDDER_TYPES = [None, *EMBEDDER_TYPE_TO_ALLOWED_TOKENIZER_TYPES]
-
 __all__ = [
-    "ALLOWED_EMBEDDER_TYPES",
     "EmbedderForSequenceClassification",
     "CnnForSequenceClassification",
     "LstmForSequenceClassification",
     "BertForSequenceClassification",
+    "get_sequence_classifier_cls",
     "EmbedderForTokenClassification",
     "LstmForTokenClassification",
     "CharCnnWithWordLstmForTokenClassification",
     "CharLstmWithWordLstmForTokenClassification",
     "BertForTokenClassification",
+    "get_token_classifier_cls",
 ]
