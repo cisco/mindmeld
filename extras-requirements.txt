@@ -9,4 +9,3 @@
 -e .[dvc]
 -e .[torch]
 -e .[transformers]
--e .[transformers_tokenizers]

@@ -92,7 +92,7 @@ setup(
         ],
         "bert": [  # sentence-transformers
             'torch~=1.7.0; python_version>="3.6"',
-            'transformers~=3.5.1; python_version>="3.6"',
+            'transformers~=4.15.0; python_version>="3.6"',
             'sentence-transformers~=0.3; python_version>="3.6"',
             # elasticsearch-py 7.14 breaks backwards compatibility with servers prior to 7.11
             'elasticsearch>=7.0,<7.14',
@@ -102,7 +102,7 @@ setup(
         ],
         "augment": [
             'torch~=1.7.0; python_version>="3.6"',
-            'transformers~=3.5.1; python_version>="3.6"',
+            'transformers~=4.15.0; python_version>="3.6"',
             'sentencepiece==0.1.91'
         ],
         "language_annotator": [
@@ -124,12 +124,7 @@ setup(
             'pytorch-crf~=0.7.2'
         ],
         "transformers": [  # huggingface-transformers
-            'transformers~=3.5.1; python_version>="3.6"',
-        ],
-        "transformers_tokenizers": [  # huggingface-transformers' tokenizers
-            # this requirement can be removed once transformers' requirement is upgraded to satisfy
-            # tokenizers>=0.10.1,<0.11
-            'tokenizers>=0.10.1,<0.11; python_version>="3.6"',
+            'transformers~=4.15.0; python_version>="3.6"',
         ],
     },
 )

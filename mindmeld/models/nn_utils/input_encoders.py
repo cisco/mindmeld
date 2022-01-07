@@ -21,8 +21,6 @@ from abc import abstractmethod, ABC
 from itertools import chain
 from typing import Dict, List, Union, Any, Tuple
 
-from packaging import version
-
 from .helpers import BatchData, TokenizerType
 from .._util import _get_module_or_attr
 from ..containers import HuggingfaceTransformersContainer
@@ -568,15 +566,6 @@ class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
         if NO_TOKENIZERS_MODULE:
             msg = "Must install extra [transformers] by running " \
                   "'pip install mindmeld[transformers]'"
-            raise ImportError(msg)
-
-        # TODO: remove this snippet upon upgrading transformers version requirement, so that
-        #       transformers will require tokenizers>=0.10.1 and hence no need to separately install
-        version_info = version.parse(_get_module_or_attr("tokenizers", "__version__"))
-        minimum_version_info = version.parse("0.10.1")
-        if version_info < minimum_version_info:
-            msg = "Must install extra [transformers_tokenizers] by running " \
-                  "'pip install mindmeld[transformers_tokenizers]'"
             raise ImportError(msg)
 
     def prepare(self, examples: List[str]):

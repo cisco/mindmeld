@@ -25,6 +25,8 @@ def resource_loader(query_factory):
     return ResourceLoader(APP_PATH, query_factory)
 
 
+@pytest.mark.extras
+@pytest.mark.torch
 class TestSequenceClassification:
     @classmethod
     def setup_class(cls):
@@ -61,8 +63,6 @@ class TestSequenceClassification:
                 labeled_data.append(markup.load_query(text, intent=intent))
         cls.labeled_data = ProcessedQueryList.from_in_memory_list(labeled_data)
 
-    @pytest.mark.extras
-    @pytest.mark.torch
     def test_default_embedder(self, resource_loader):
         """Tests that a fit succeeds"""
         config = {
@@ -80,8 +80,6 @@ class TestSequenceClassification:
 
         assert model.predict([markup.load_query("hi").query])[0] in ["greet", "exit"]
 
-    @pytest.mark.extras
-    @pytest.mark.torch
     def test_glove_embedder(self, resource_loader):
         """Tests that a fit succeeds"""
         config = {
@@ -107,8 +105,7 @@ class TestSequenceClassification:
 
         assert model.predict([markup.load_query("hi").query])[0] in ["greet", "exit"]
 
-    @pytest.mark.extras
-    @pytest.mark.bert
+    @pytest.mark.transformers
     def test_bert_embedder(self, resource_loader):
         """Tests that a fit succeeds"""
         config = {
@@ -141,8 +138,6 @@ class TestSequenceClassification:
 
         assert model.predict([markup.load_query("hi").query])[0] in ["greet", "exit"]
 
-    @pytest.mark.extras
-    @pytest.mark.torch
     def test_char_cnn(self, resource_loader):
         """Tests that a fit succeeds"""
         config = {
@@ -161,9 +156,7 @@ class TestSequenceClassification:
 
         assert model.predict([markup.load_query("hi").query])[0] in ["greet", "exit"]
 
-    @pytest.mark.extras
-    @pytest.mark.torch
-    @pytest.mark.transformers_tokenizers
+    @pytest.mark.transformers
     def test_bpe_cnn(self, resource_loader):
         """Tests that a fit succeeds"""
         config = {
@@ -182,9 +175,7 @@ class TestSequenceClassification:
 
         assert model.predict([markup.load_query("hi").query])[0] in ["greet", "exit"]
 
-    @pytest.mark.extras
-    @pytest.mark.torch
-    @pytest.mark.transformers_tokenizers
+    @pytest.mark.transformers
     def test_wordpiece_cnn(self, resource_loader):
         """Tests that a fit succeeds"""
         config = {
@@ -205,8 +196,6 @@ class TestSequenceClassification:
 
         assert model.predict([markup.load_query("hi").query])[0] in ["greet", "exit"]
 
-    @pytest.mark.extras
-    @pytest.mark.torch
     def test_word_cnn(self, resource_loader):
         """Tests that a fit succeeds"""
         config = {
@@ -225,8 +214,6 @@ class TestSequenceClassification:
 
         assert model.predict([markup.load_query("hi").query])[0] in ["greet", "exit"]
 
-    @pytest.mark.extras
-    @pytest.mark.torch
     def test_glove_cnn(self, resource_loader):
         """Tests that a fit succeeds"""
         config = {
@@ -245,8 +232,6 @@ class TestSequenceClassification:
 
         assert model.predict([markup.load_query("hi").query])[0] in ["greet", "exit"]
 
-    @pytest.mark.extras
-    @pytest.mark.torch
     def test_bert_cnn(self, resource_loader):
         """Tests that a fit succeeds"""
         config = {
@@ -266,8 +251,6 @@ class TestSequenceClassification:
             model.initialize_resources(resource_loader, examples, labels)
             model.fit(examples, labels)
 
-    @pytest.mark.extras
-    @pytest.mark.torch
     def test_char_lstm(self, resource_loader):
         """Tests that a fit succeeds"""
         config = {
@@ -286,9 +269,7 @@ class TestSequenceClassification:
 
         assert model.predict([markup.load_query("hi").query])[0] in ["greet", "exit"]
 
-    @pytest.mark.extras
-    @pytest.mark.torch
-    @pytest.mark.transformers_tokenizers
+    @pytest.mark.transformers
     def test_bpe_lstm(self, resource_loader):
         """Tests that a fit succeeds"""
         config = {
@@ -307,9 +288,7 @@ class TestSequenceClassification:
 
         assert model.predict([markup.load_query("hi").query])[0] in ["greet", "exit"]
 
-    @pytest.mark.extras
-    @pytest.mark.torch
-    @pytest.mark.transformers_tokenizers
+    @pytest.mark.transformers
     def test_wordpiece_lstm(self, resource_loader):
         """Tests that a fit succeeds"""
         config = {
@@ -330,8 +309,6 @@ class TestSequenceClassification:
 
         assert model.predict([markup.load_query("hi").query])[0] in ["greet", "exit"]
 
-    @pytest.mark.extras
-    @pytest.mark.torch
     def test_word_lstm(self, resource_loader):
         """Tests that a fit succeeds"""
         config = {
@@ -350,8 +327,6 @@ class TestSequenceClassification:
 
         assert model.predict([markup.load_query("hi").query])[0] in ["greet", "exit"]
 
-    @pytest.mark.extras
-    @pytest.mark.torch
     def test_glove_lstm(self, resource_loader):
         """Tests that a fit succeeds"""
         config = {
