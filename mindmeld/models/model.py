@@ -12,7 +12,6 @@
 # limitations under the License.
 
 """This module contains base classes for models defined in the models subpackage."""
-from __future__ import annotations
 
 import copy
 import json
@@ -162,7 +161,7 @@ class ModelConfig:
         """
         return json.dumps(self.to_dict(), sort_keys=True)
 
-    def resolve_config(self, new_config: ModelConfig):
+    def resolve_config(self, new_config: "ModelConfig"):
         """This method resolves any config incompatibility issues by
         loading the latest settings from the app config to the current config
 
@@ -281,7 +280,7 @@ class AbstractModel(ABC):
 
     @classmethod
     @abstractmethod
-    def load(cls, path: str) -> Type[AbstractModel]:
+    def load(cls, path: str) -> Type["AbstractModel"]:
         raise NotImplementedError
 
     @classmethod

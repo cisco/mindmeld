@@ -15,7 +15,6 @@
 Base for custom modules that are developed on top of nn layers that can do
 sequence or token classification
 """
-from __future__ import annotations
 
 import json
 import logging
