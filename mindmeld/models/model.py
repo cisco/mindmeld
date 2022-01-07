@@ -12,6 +12,8 @@
 # limitations under the License.
 
 """This module contains base classes for models defined in the models subpackage."""
+from __future__ import annotations
+
 import copy
 import json
 import logging
@@ -20,7 +22,7 @@ import os
 import pickle
 from abc import ABC, abstractmethod
 from inspect import signature
-from typing import Union, Type, Dict, Any, Tuple, List
+from typing import Union, Type, Dict, Any, Tuple, List, Pattern, Set
 
 from sklearn.externals import joblib
 from sklearn.model_selection import (
@@ -35,6 +37,7 @@ from sklearn.model_selection import (
 from sklearn.preprocessing import LabelEncoder as SKLabelEncoder
 
 from ._util import _is_module_available
+from .evaluation import EntityModelEvaluation, StandardModelEvaluation
 from .helpers import (
     CHAR_NGRAM_FREQ_RSC,
     ENABLE_STEMMING,
@@ -50,7 +53,7 @@ from .helpers import (
 )
 from .nn_utils.helpers import EmbedderType
 from .._version import get_mm_version
-from ..core import ProcessedQuery
+from ..core import ProcessedQuery, QueryEntity
 from ..resource_loader import ResourceLoader, ProcessedQueryList as PQL
 from ..text_preparation.text_preparation_pipeline import (
     TextPreparationPipelineFactory,
@@ -108,15 +111,15 @@ class ModelConfig:
 
     def __init__(
         self,
-        model_type=None,
-        example_type=None,
-        label_type=None,
-        features=None,
-        model_settings=None,
-        params=None,
-        param_selection=None,
-        train_label_set=None,
-        test_label_set=None,
+        model_type: str = None,
+        example_type: str = None,
+        label_type: str = None,
+        features: Dict = None,
+        model_settings: Dict = None,
+        params: Dict = None,
+        param_selection: Dict = None,
+        train_label_set: Pattern[str] = None,
+        test_label_set: Pattern[str] = None,
     ):
         for arg, val in {
             "model_type": model_type,
@@ -140,7 +143,7 @@ class ModelConfig:
         )
         return "{}({})".format(self.__class__.__name__, args_str)
 
-    def to_dict(self):
+    def to_dict(self) -> Dict:
         """Converts the model config object into a dict
 
         Returns:
@@ -151,7 +154,7 @@ class ModelConfig:
             result[attr] = getattr(self, attr)
         return result
 
-    def to_json(self):
+    def to_json(self) -> str:
         """Converts the model config object to JSON
 
         Returns:
@@ -159,7 +162,7 @@ class ModelConfig:
         """
         return json.dumps(self.to_dict(), sort_keys=True)
 
-    def resolve_config(self, new_config):
+    def resolve_config(self, new_config: ModelConfig):
         """This method resolves any config incompatibility issues by
         loading the latest settings from the app config to the current config
 
@@ -173,7 +176,7 @@ class ModelConfig:
         for setting in new_settings:
             setattr(self, setting, getattr(new_config, setting))
 
-    def get_ngram_lengths_and_thresholds(self, rname):
+    def get_ngram_lengths_and_thresholds(self, rname: str) -> Tuple:
         """
         Returns the n-gram lengths and thresholds to extract to optimize resource collection
 
@@ -214,7 +217,7 @@ class ModelConfig:
 
         return lengths, thresholds
 
-    def required_resources(self):
+    def required_resources(self) -> Set:
         """Returns the resources this model requires
 
         Returns:
@@ -232,14 +235,14 @@ class ModelConfig:
 class AbstractModel(ABC):
     """
     A minimalistic abstract class upon which all models are based.
-    """
 
-    # In order to maintain backwards compatability, the skeleton of this class is designed based on
-    # all the access points of Classifier class and its sub-classes. In addition, it also introduces
-    # the decoupled way of dumping/loading across different model types (meaning not all models are
-    # dumped/loaded the same way). Furthermore, methods for validation are also introduced so as to
-    # cater to the model specific config validations. Lastly, this skeleton also includes some
-    # common properties that could be used across all model types.
+    In order to maintain backwards compatability, the skeleton of this class is designed based on
+    all the access points of Classifier class and its sub-classes. In addition, it also introduces
+    the decoupled way of dumping/loading across different model types (meaning not all models are
+    dumped/loaded the same way). Furthermore, methods for validation are also introduced so as to
+    cater to the model specific config validations. Lastly, this skeleton also includes some
+    common properties that could be used across all model types.
+    """
 
     def __init__(self, config: ModelConfig):
         self.config = config
@@ -267,16 +270,18 @@ class AbstractModel(ABC):
     @abstractmethod
     def predict_proba(
         self, examples: Examples, dynamic_resource: Dict = None
-    ) -> Union[List[Tuple[str, Dict[str, int]]],]:
+    ) -> Union[List[Tuple[str, Dict[str, float]]], Tuple[Tuple[QueryEntity, float]]]:
         raise NotImplementedError
 
     @abstractmethod
-    def evaluate(self, examples: Examples, labels: Labels):
+    def evaluate(
+        self, examples: Examples, labels: Labels
+    ) -> Union[StandardModelEvaluation, EntityModelEvaluation]:
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def load(cls, path: str):
+    def load(cls, path: str) -> Type[AbstractModel]:
         raise NotImplementedError
 
     @classmethod
@@ -360,13 +365,15 @@ class AbstractModel(ABC):
         pass
 
     @staticmethod
-    def _get_model_config_save_path(path: str):
+    def _get_model_config_save_path(path: str) -> str:
         head, ext = os.path.splitext(path)
         model_config_save_path = head + ".config" + ext
         os.makedirs(os.path.dirname(model_config_save_path), exist_ok=True)
         return model_config_save_path
 
-    def view_extracted_features(self, example: ProcessedQuery, dynamic_resource: Dict = None):
+    def view_extracted_features(
+        self, example: ProcessedQuery, dynamic_resource: Dict = None
+    ) -> List[Dict]:
         # Not implemeneted unless overwritten by child class
         raise NotImplementedError
 
@@ -405,6 +412,7 @@ class Model(AbstractModel):
 
     # model scoring type
     LIKELIHOOD_SCORING = "log_loss"
+    ALLOWED_CLASSIFIER_TYPES: List[str] = NotImplemented
 
     def __init__(self, config):
         super().__init__(config)
@@ -752,6 +760,7 @@ class Model(AbstractModel):
 
 
 class PytorchModel(AbstractModel):
+    ALLOWED_CLASSIFIER_TYPES: List[str] = NotImplemented
 
     def __init__(self, config):
         if not _is_module_available('torch'):
@@ -774,7 +783,7 @@ class PytorchModel(AbstractModel):
                   f"({len(examples)})"
             raise AssertionError(msg)
 
-    def _get_query_text_type(self, params: Dict = None, default: str = "processed_text"):
+    def _get_query_text_type(self, params: Dict = None, default: str = "processed_text") -> str:
         """
         Returns the query text type to use for obtaining training examples from Query objects.
 
@@ -812,7 +821,7 @@ class PytorchModel(AbstractModel):
 
         return self._query_text_type
 
-    def _get_texts_from_examples(self, examples: PQL.QueryIterator):
+    def _get_texts_from_examples(self, examples: PQL.QueryIterator) -> List[str]:
         """
         Method that decides which text type- processed_text or raw_text -that needs to be used for
         neural model training/inference.

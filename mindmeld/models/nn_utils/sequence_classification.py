@@ -17,9 +17,10 @@ Custom modules built on top of nn layers that can do sequence classification
 
 import logging
 from abc import abstractmethod
+from typing import List
 
 from .classification import BaseClassification
-from .helpers import EmbedderType
+from .helpers import BatchData, EmbedderType, SequenceClassificationType
 from .layers import (
     EmbeddingLayer,
     CnnLayer,
@@ -39,15 +40,15 @@ logger = logging.getLogger(__name__)
 
 
 class BaseSequenceClassification(BaseClassification):
-    """Base class that defines all the necessary elements to succesfully train/infer
+    """Base class that defines all the necessary elements to successfully train/infer
      custom pytorch modules wrapped on top of this base class. Classes derived from
      this base can be trained for sequence classification.
     """
 
-    def _prepare_labels(self, labels, split_lengths):
+    def _prepare_labels(self, labels: List[int], max_length: int = None):
         # for sequence classification, the length of an example doesn't matter as we have only one
         # label for each example. hence, no need to do any padding or validation checks.
-        del split_lengths
+        del max_length
         return torch.as_tensor(labels, dtype=torch.long)
 
     def _init_graph(self):
@@ -103,7 +104,7 @@ class BaseSequenceClassification(BaseClassification):
         if targets is not None:
             if self.params.num_labels == 2:
                 loss = self.criterion(logits.view(-1), targets.float())
-            elif self.params.num_labels > 2:
+            else:  # self.params.num_labels > 2:
                 loss = self.criterion(logits, targets)
             batch_data.update({"loss": loss})
 
@@ -113,7 +114,7 @@ class BaseSequenceClassification(BaseClassification):
         logits = self._forward_with_batching_and_no_grad(examples)
         if self.params.num_labels == 2:
             predictions = (logits >= 0.5).long().view(-1)
-        elif self.params.num_labels > 2:
+        else:  # self.params.num_labels > 2:
             predictions = torch.argmax(logits, dim=-1)
         return predictions.tolist()
 
@@ -123,7 +124,7 @@ class BaseSequenceClassification(BaseClassification):
             probs = F.sigmoid(logits)
             # extending the results from shape [N,1] to [N,2] to give out class probs distinctly
             probs = torch.cat((1 - probs, probs), dim=-1)
-        elif self.params.num_labels > 2:
+        else:  # self.params.num_labels > 2:
             probs = F.softmax(logits, dim=-1)
         return probs.tolist()
 
@@ -146,7 +147,7 @@ class BaseSequenceClassification(BaseClassification):
         raise NotImplementedError
 
     @abstractmethod
-    def _forward_core(self, batch_data):
+    def _forward_core(self, batch_data: BatchData) -> BatchData:
         raise NotImplementedError
 
 
@@ -274,10 +275,11 @@ class BertForSequenceClassification(BaseSequenceClassification):
     def fit(self, examples, labels, **params):
         # overriding base class' method to set params, and then calling base class' .fit()
 
-        embedder_type = params.get("embedder_type", "bert")
-        if embedder_type != "bert":
-            msg = f"{self.name} can only be used with 'embedder_type': 'bert'. " \
-                  f"Other values passed through config params are not allowed"
+        embedder_type = params.get("embedder_type", EmbedderType.BERT.value)
+        if EmbedderType(embedder_type) != EmbedderType.BERT:
+            msg = f"{self.name} can only be used with 'embedder_type': " \
+                  f"'{EmbedderType.BERT.value}'. " \
+                  f"Other values passed through config params are not allowed."
             raise ValueError(msg)
 
         safe_values = {
@@ -300,7 +302,9 @@ class BertForSequenceClassification(BaseSequenceClassification):
             else:
                 params.update({k: v})
 
-        params.update({"embedder_type": "bert"})
+        params.update({
+            "embedder_type": embedder_type
+        })
 
         super().fit(examples, labels, **params)
 
@@ -360,11 +364,18 @@ class BertForSequenceClassification(BaseSequenceClassification):
 
     def _forward_core(self, batch_data):
 
+        # refer to https://huggingface.co/docs/transformers/master/en/main_classes/output
+        # for more details on huggingface's bert outputs
+
         bert_outputs = self.bert_model(**batch_data["hgf_encodings"], return_dict=True)
 
         if self.params.embedder_output_pooling_type != "first":
+            # 'last_hidden_state' refers to the tensor output of the final transformer layer (i.e.
+            # before the logit layer) and hence its dimension  [BS, SEQ_LEN, EMD_DIM]
             last_hidden_state = bert_outputs.get("last_hidden_state")  # [BS, SEQ_LEN, EMD_DIM]
             if last_hidden_state is None:
+                # TODO: All models might not have this key; can we enumerate a set of key names
+                #  instead?
                 msg = f"The choice of pretrained bert model " \
                       f"({self.params.pretrained_model_name_or_path}) " \
                       f"has no key 'last_hidden_state' in its output dictionary"
@@ -373,6 +384,8 @@ class BertForSequenceClassification(BaseSequenceClassification):
             seq_lengths = batch_data["seq_lengths"]  # [BS]
             encodings = self.emb_layer_pooling(last_hidden_state, seq_lengths)  # [BS, self.out_dim]
         else:
+            # 'pooler_output' refers to the last layer hidden-state of the first token of the
+            # sequence and hence its dimension [BS, self.out_dim]
             pooler_output = bert_outputs.get("pooler_output")  # [BS, self.out_dim]
             if pooler_output is None:
                 msg = f"The choice of pretrained bert model " \
@@ -396,34 +409,40 @@ class BertForSequenceClassification(BaseSequenceClassification):
 
 
 def get_sequence_classifier_cls(classifier_type: str, embedder_type: str = None):
-    allowed_sequence_classifier_types = ["embedder", "cnn", "lstm"]
-    allowed_embedder_types = [v.value for v in EmbedderType.__members__.values()]
-
-    # disambiguation between glove, bert and non-pretrained embedders
-    def _resolve_and_return_embedder_class():
-        if embedder_type not in allowed_embedder_types:
-            msg = f"Need a valid 'embedder_type' param. Found value: {embedder_type}. " \
-                  f"Allowed values: {allowed_embedder_types}. "
-            raise ValueError(msg)
-        return {
-            None: EmbedderForSequenceClassification,
-            "glove": EmbedderForSequenceClassification,
-            "bert": BertForSequenceClassification
-        }[embedder_type]
-
     try:
-        classifier_cls = {
-            "embedder": _resolve_and_return_embedder_class(),
-            "cnn": CnnForSequenceClassification,
-            "lstm": LstmForSequenceClassification,
-        }[classifier_type]
-        if classifier_type not in ["embedder"] and embedder_type == "bert":
-            msg = "To use a embedder_type 'bert', classifier_type must be 'embedder'."
-            raise ValueError(msg)
-
-    except KeyError as e:
-        msg = f"Expected classifier_type amongst {allowed_sequence_classifier_types} but found " \
-              f"'{classifier_type}'."
+        classifier_type = SequenceClassificationType(classifier_type)
+    except ValueError as e:
+        msg = f"Neural Nets' sequence classification module expects classifier_type to be amongst" \
+              f" {[v.value for v in SequenceClassificationType.__members__.values()]}" \
+              f" but found '{classifier_type}'."
         raise ValueError(msg) from e
 
-    return classifier_cls
+    try:
+        embedder_type = EmbedderType(embedder_type)
+    except ValueError as e:
+        msg = f"Neural Nets' sequence classification module expects embedder_type to be amongst " \
+              f" {[v.value for v in EmbedderType.__members__.values()]} " \
+              f" but found '{embedder_type}'."
+        raise ValueError(msg) from e
+
+    if (
+        embedder_type == EmbedderType.BERT and
+        classifier_type not in [SequenceClassificationType.EMBEDDER]
+    ):
+        msg = f"To use a embedder_type '{EmbedderType.BERT.value}', " \
+              f"classifier_type must be '{SequenceClassificationType.EMBEDDER.value}'."
+        raise ValueError(msg)
+
+    # disambiguation between glove, bert and non-pretrained embedders
+    def _resolve_and_return_embedder_class(_embedder_type):
+        return {
+            EmbedderType.NONE: EmbedderForSequenceClassification,
+            EmbedderType.GLOVE: EmbedderForSequenceClassification,
+            EmbedderType.BERT: BertForSequenceClassification
+        }[_embedder_type]
+
+    return {
+        SequenceClassificationType.EMBEDDER: _resolve_and_return_embedder_class(embedder_type),
+        SequenceClassificationType.CNN: CnnForSequenceClassification,
+        SequenceClassificationType.LSTM: LstmForSequenceClassification,
+    }[classifier_type]

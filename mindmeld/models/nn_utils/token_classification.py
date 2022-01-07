@@ -20,7 +20,7 @@ from abc import abstractmethod
 from typing import List
 
 from .classification import BaseClassification
-from .helpers import EmbedderType
+from .helpers import EmbedderType, TokenClassificationType
 from .layers import (
     EmbeddingLayer,
     CnnLayer,
@@ -49,27 +49,27 @@ logger = logging.getLogger(__name__)
 
 
 class BaseTokenClassification(BaseClassification):
-    """Base class that defines all the necessary elements to succesfully train/infer
+    """Base class that defines all the necessary elements to successfully train/infer
      custom pytorch modules wrapped on top of this base class. Classes derived from
      this base can be trained for sequence tagging aka. token classification.
     """
 
-    def _prepare_labels(self, labels: List[int], split_lengths: int):
-        # for token classification, the length of an example matters (i.e number of words in it)
-        # as the labels are one-to-one mapped each example. Hence, we need to do padding.
+    def _prepare_labels(self, labels: List[List[int]], max_length: int):
+        # for token classification, the length of an example matters (i.e. the number of
+        # (sub-)words in it) as the labels are one-to-one mapped per example. hence, we need
+        # to do padding with a label_padding_idx
 
-        def _trim_or_pad(label_sequence, required_seq_length):
-            if len(label_sequence) > required_seq_length:
-                return label_sequence[:required_seq_length]
+        def _trim_or_pad(label_sequence):
+            if len(label_sequence) > max_length:
+                return label_sequence[:max_length]
             else:
                 return (
                     label_sequence + [self.params.label_padding_idx] *
-                    (required_seq_length - len(label_sequence))
+                    (max_length - len(label_sequence))
                 )
 
-        _required_seq_length = max([len(_split_lengths) for _split_lengths in split_lengths])
         return torch.as_tensor(
-            [_trim_or_pad(_label_sequence, _required_seq_length) for _label_sequence in labels],
+            [_trim_or_pad(_label_sequence) for _label_sequence in labels],
             dtype=torch.long
         )
 
@@ -468,10 +468,11 @@ class BertForTokenClassification(BaseTokenClassification):
     def fit(self, examples, labels, **params):
         # overriding base class' method to set params, and then calling base class' .fit()
 
-        embedder_type = params.get("embedder_type", "bert")
-        if embedder_type != "bert":
-            msg = f"{self.name} can only be used with 'embedder_type': 'bert'. " \
-                  f"Other values passed through config params are not allowed"
+        embedder_type = params.get("embedder_type", EmbedderType.BERT.value)
+        if EmbedderType(embedder_type) != EmbedderType.BERT:
+            msg = f"{self.name} can only be used with 'embedder_type': " \
+                  f"'{EmbedderType.BERT.value}'. " \
+                  f"Other values passed through config params are not allowed."
             raise ValueError(msg)
 
         safe_values = {
@@ -494,7 +495,9 @@ class BertForTokenClassification(BaseTokenClassification):
             else:
                 params.update({k: v})
 
-        params.update({"embedder_type": "bert"})
+        params.update({
+            "embedder_type": embedder_type
+        })
 
         super().fit(examples, labels, **params)
 
@@ -549,7 +552,14 @@ class BertForTokenClassification(BaseTokenClassification):
         self.out_dim = self.params.emb_dim
 
     def _forward_core(self, batch_data):
+
+        # refer to https://huggingface.co/docs/transformers/master/en/main_classes/output
+        # for more details on huggingface's bert outputs
+
         bert_outputs = self.bert_model(**batch_data["hgf_encodings"], return_dict=True)
+
+        # 'last_hidden_state' refers to the tensor output of the final transformer layer (i.e.
+        # before the logit layer) and hence its dimension  [BS, SEQ_LEN, EMD_DIM]
         last_hidden_state = bert_outputs.get("last_hidden_state")  # [BS, SEQ_LEN, EMD_DIM]
         if last_hidden_state is None:
             msg = f"The choice of pretrained bert model " \
@@ -563,35 +573,41 @@ class BertForTokenClassification(BaseTokenClassification):
 
 
 def get_token_classifier_cls(classifier_type: str, embedder_type: str = None):
-    allowed_sequence_classifier_types = ["embedder", "cnn", "lstm"]
-    allowed_embedder_types = [v.value for v in EmbedderType.__members__.values()]
-
-    # disambiguation between glove, bert and non-pretrained embedders
-    def _resolve_and_return_embedder_class():
-        if embedder_type not in allowed_embedder_types:
-            msg = f"Need a valid 'embedder_type' param. Found value: {embedder_type}. " \
-                  f"Allowed values: {allowed_embedder_types}. "
-            raise ValueError(msg)
-        return {
-            None: EmbedderForTokenClassification,
-            "glove": EmbedderForTokenClassification,
-            "bert": BertForTokenClassification
-        }[embedder_type]
-
     try:
-        classifier_cls = {
-            "embedder": _resolve_and_return_embedder_class(),
-            "lstm-pytorch": LstmForTokenClassification,
-            "cnn-lstm": CharCnnWithWordLstmForTokenClassification,
-            "lstm-lstm": CharLstmWithWordLstmForTokenClassification,
-        }[classifier_type]
-        if classifier_type not in ["embedder"] and embedder_type == "bert":
-            msg = "To use a embedder_type 'bert', classifier_type must be 'embedder'."
-            raise ValueError(msg)
-
-    except KeyError as e:
-        msg = f"Expected classifier_type amongst {allowed_sequence_classifier_types} but found " \
-              f"'{classifier_type}'."
+        classifier_type = TokenClassificationType(classifier_type)
+    except ValueError as e:
+        msg = f"Neural Nets' token classification module expects classifier_type to be amongst" \
+              f" {[v.value for v in TokenClassificationType.__members__.values()]}" \
+              f" but found '{classifier_type}'."
         raise ValueError(msg) from e
 
-    return classifier_cls
+    try:
+        embedder_type = EmbedderType(embedder_type)
+    except ValueError as e:
+        msg = f"Neural Nets' token classification module expects embedder_type to be amongst" \
+              f" {[v.value for v in EmbedderType.__members__.values()]} " \
+              f" but found '{embedder_type}'."
+        raise ValueError(msg) from e
+
+    if (
+        embedder_type == EmbedderType.BERT and
+        classifier_type not in [TokenClassificationType.EMBEDDER]
+    ):
+        msg = f"To use a embedder_type '{EmbedderType.BERT.value}', " \
+              f"classifier_type must be '{TokenClassificationType.EMBEDDER.value}'."
+        raise ValueError(msg)
+
+    # disambiguation between glove, bert and non-pretrained embedders
+    def _resolve_and_return_embedder_class(_embedder_type):
+        return {
+            EmbedderType.NONE: EmbedderForTokenClassification,
+            EmbedderType.GLOVE: EmbedderForTokenClassification,
+            EmbedderType.BERT: BertForTokenClassification
+        }[_embedder_type]
+
+    return {
+        TokenClassificationType.EMBEDDER: _resolve_and_return_embedder_class(embedder_type),
+        TokenClassificationType.LSTM: LstmForTokenClassification,
+        TokenClassificationType.CNN_LSTM: CharCnnWithWordLstmForTokenClassification,
+        TokenClassificationType.LSTM_LSTM: CharLstmWithWordLstmForTokenClassification,
+    }[classifier_type]

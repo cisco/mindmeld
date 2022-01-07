@@ -30,6 +30,44 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+
+class BatchData(Bunch):
+    pass
+
+
+class ValidationMetricType(enum.Enum):
+    ACCURACY = "accuracy"
+    F1 = "f1"
+
+
+class TokenizerType(enum.Enum):
+    WHITESPACE_TOKENIZER = "whitespace-tokenizer"
+    CHAR_TOKENIZER = "char-tokenizer"
+    WHITESPACE_AND_CHAR_DUAL_TOKENIZER = "whitespace_and_char-tokenizer"
+    BPE_TOKENIZER = "bpe-tokenizer"
+    WORDPIECE_TOKENIZER = "wordpiece-tokenizer"
+    HUGGINGFACE_PRETRAINED_TOKENIZER = "huggingface_pretrained-tokenizer"
+
+
+class EmbedderType(enum.Enum):
+    NONE = None
+    GLOVE = "glove"
+    BERT = "bert"
+
+
+class SequenceClassificationType(enum.Enum):
+    EMBEDDER = "embedder"
+    CNN = "cnn"
+    LSTM = "lstm"
+
+
+class TokenClassificationType(enum.Enum):
+    EMBEDDER = "embedder"
+    LSTM = "lstm-pytorch"
+    CNN_LSTM = "cnn-lstm"
+    LSTM_LSTM = "lstm-lstm"
+
+
 DEFAULT_TRAINING_INFERENCE_PARAMS = {
     "device": "cuda" if is_cuda_available else "cpu",
     "number_of_epochs": 100,
@@ -80,7 +118,7 @@ DEFAULT_FORWARD_PASS_PARAMS = {
         "output_keep_prob": 0.7
     },
     "BertForSequenceClassification": {
-        "tokenizer_type": "huggingface_pretrained-tokenizer",
+        "tokenizer_type": TokenizerType.HUGGINGFACE_PRETRAINED_TOKENIZER.value,
         "embedder_output_keep_prob": 0.7,
         "embedder_output_pooling_type": "first",
         "output_keep_prob": 1.0,  # unnecessary upon using `embedder_output_keep_prob`
@@ -104,7 +142,7 @@ DEFAULT_FORWARD_PASS_PARAMS = {
     },
     "CharLstmWithWordLstmForTokenClassification": {
         **DEFAULT_TOKEN_CLASSIFICATION_PARAMS,
-        "tokenizer_type": "whitespace_and_char-tokenizer",
+        "tokenizer_type": TokenizerType.WHITESPACE_AND_CHAR_DUAL_TOKENIZER.value,
         "padding_idx": None,
         "update_embeddings": True,
         "embedder_output_keep_prob": 0.7,
@@ -121,7 +159,7 @@ DEFAULT_FORWARD_PASS_PARAMS = {
     },
     "CharCnnWithWordLstmForTokenClassification": {
         **DEFAULT_TOKEN_CLASSIFICATION_PARAMS,
-        "tokenizer_type": "whitespace_and_char-tokenizer",
+        "tokenizer_type": TokenizerType.WHITESPACE_AND_CHAR_DUAL_TOKENIZER.value,
         "padding_idx": None,
         "update_embeddings": True,
         "embedder_output_keep_prob": 0.7,
@@ -137,7 +175,7 @@ DEFAULT_FORWARD_PASS_PARAMS = {
     },
     "BertForTokenClassification": {
         **DEFAULT_TOKEN_CLASSIFICATION_PARAMS,
-        "tokenizer_type": "huggingface_pretrained-tokenizer",
+        "tokenizer_type": TokenizerType.HUGGINGFACE_PRETRAINED_TOKENIZER.value,
         "embedder_output_keep_prob": 0.7,
         "output_keep_prob": 1.0,  # unnecessary upon using `embedder_output_keep_prob`
         "use_crf_layer": False,  # Following BERT paper's best results,
@@ -145,14 +183,21 @@ DEFAULT_FORWARD_PASS_PARAMS = {
 }
 
 
-def get_default_params(module_name: str):
+def get_default_params(class_name: str):
+    """
+    Returns all the default params based on the inputted class name
+
+    Args:
+        class_name (str): A (child) class name from sequence_classification.py or
+            token_classification.py
+    """
     try:
         return {
             **DEFAULT_TRAINING_INFERENCE_PARAMS,
-            **DEFAULT_FORWARD_PASS_PARAMS[module_name]
+            **DEFAULT_FORWARD_PASS_PARAMS[class_name]
         }
     except KeyError as e:
-        msg = f"Cannot find module name {module_name} when looking for default params."
+        msg = f"Cannot find module name {class_name} when looking for default params."
         logger.error(msg)
         raise KeyError(msg) from e
 
@@ -197,27 +242,3 @@ def get_num_weights_of_model(pytorch_module):
         if param.requires_grad:
             n_requires_grad += t
     return n_requires_grad, n_total
-
-
-class BatchData(Bunch):
-    pass
-
-
-class EmbedderType(enum.Enum):
-    NONE = None
-    GLOVE = "glove"
-    BERT = "bert"
-
-
-class TokenizerType(enum.Enum):
-    WHITESPACE_TOKENIZER = "whitespace-tokenizer"
-    CHAR_TOKENIZER = "char-tokenizer"
-    WHITESPACE_AND_CHAR_DUAL_TOKENIZER = "whitespace_and_char-tokenizer"
-    BPE_TOKENIZER = "bpe-tokenizer"
-    WORDPIECE_TOKENIZER = "wordpiece-tokenizer"
-    HUGGINGFACE_PRETRAINED_TOKENIZER = "huggingface_pretrained-tokenizer"
-
-
-class ValidationMetricType(enum.Enum):
-    ACCURACY = "accuracy"
-    F1 = "f1"

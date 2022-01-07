@@ -39,7 +39,7 @@ from .helpers import (
     WORD_NGRAM_FREQ_RSC,
 )
 from .model import ModelConfig, Model, PytorchModel, AbstractXxxModelFactory
-from .nn_utils import get_sequence_classifier_cls
+from .nn_utils import get_sequence_classifier_cls, SequenceClassificationType
 from ..resource_loader import ProcessedQueryList as PQL
 
 logger = logging.getLogger(__name__)
@@ -493,13 +493,13 @@ class TextModel(Model):
 
 
 class PytorchTextModel(PytorchModel):
-    ALLOWED_CLASSIFIER_TYPES = ["embedder", "cnn", "lstm"]
+    ALLOWED_CLASSIFIER_TYPES = [v.value for v in SequenceClassificationType.__members__.values()]
 
     def _get_model_constructor(self):
         """Returns the class of the actual underlying model"""
         classifier_type = self.config.model_settings["classifier_type"]
-        embedder_type = self.config.params.get(
-            "embedder_type") if self.config.params is not None else None
+        embedder_type = self.config.params.get("embedder_type") \
+            if self.config.params is not None else None
 
         return get_sequence_classifier_cls(
             classifier_type=classifier_type,
@@ -535,6 +535,9 @@ class PytorchTextModel(PytorchModel):
             return self
 
         if not isinstance(examples, PQL.QueryIterator):
+            # pytorch text models are not implemented for role-classifiers, which pass-in an
+            # instance of ListIterator to fit() method as opposed to QueryIterator in case of
+            # domain- and intent-classifiers
             msg = f"{self.__class__.__name__}.fit() only accepts QueryIterator type examples " \
                   f"argument but the inputted type is {type(examples)} "
             raise NotImplementedError(msg)

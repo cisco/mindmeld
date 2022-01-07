@@ -26,7 +26,7 @@ from .helpers import (
     ingest_dynamic_gazetteer,
 )
 from .model import ModelConfig, Model, PytorchModel, AbstractXxxModelFactory
-from .nn_utils import get_token_classifier_cls
+from .nn_utils import get_token_classifier_cls, TokenClassificationType
 from .taggers.crf import ConditionalRandomFields
 from .taggers.memm import MemmModel
 from ..exceptions import MindMeldError
@@ -427,7 +427,7 @@ class TaggerModel(Model):
 
 
 class PytorchTaggerModel(PytorchModel):
-    ALLOWED_CLASSIFIER_TYPES = ["embedder", "lstm-pytorch", "cnn-lstm", "lstm-lstm"]
+    ALLOWED_CLASSIFIER_TYPES = [v.value for v in TokenClassificationType.__members__.values()]
 
     def __init__(self, config):
         super().__init__(config)
@@ -438,8 +438,8 @@ class PytorchTaggerModel(PytorchModel):
     def _get_model_constructor(self):
         """Returns the class of the actual underlying model"""
         classifier_type = self.config.model_settings["classifier_type"]
-        embedder_type = self.config.params.get(
-            "embedder_type") if self.config.params is not None else None
+        embedder_type = self.config.params.get("embedder_type") \
+            if self.config.params is not None else None
 
         return get_token_classifier_cls(
             classifier_type=classifier_type,
@@ -540,30 +540,6 @@ class PytorchTaggerModel(PytorchModel):
 
         if self._no_entities:
             return []
-
-        # raise NotImplementedError
-
-        # if self._no_entities:
-        #     return []
-        #
-        # workspace_resource = ingest_dynamic_gazetteer(
-        #     self._resources, dynamic_resource=dynamic_resource,
-        #     text_preparation_pipeline=self.text_preparation_pipeline
-        # )
-        # predicted_tags_probas = self._clf.predict_proba(
-        #     examples, self.config, workspace_resource
-        # )
-        # tags, probas = zip(*predicted_tags_probas[0])
-        # entity_confidence = []
-        # entities = self._label_encoder.decode([tags], examples=[examples[0]])[0]
-        # for entity in entities:
-        #     entity_proba = \
-        #         probas[entity.normalized_token_span.start: entity.normalized_token_span.end + 1]
-        #     # We assume that the score of the least likely tag in the sequence as the confidence
-        #     # score of the entire entity sequence
-        #     entity_confidence.append(min(entity_proba))
-        # predicted_labels_scores = tuple(zip(entities, entity_confidence))
-        # return predicted_labels_scores
 
         examples_texts = self._get_texts_from_examples(examples)
         predicted_tags_probas = self._clf.predict_proba(examples_texts)

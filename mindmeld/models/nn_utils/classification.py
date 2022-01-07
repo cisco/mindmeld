@@ -15,6 +15,8 @@
 Base for custom modules that are developed on top of nn layers that can do
 sequence or token classification
 """
+from __future__ import annotations
+
 import json
 import logging
 import os
@@ -22,7 +24,7 @@ import shutil
 import uuid
 from abc import abstractmethod
 from itertools import chain
-from typing import Dict, Union, List
+from typing import Dict, Union, List, Tuple
 
 import numpy as np
 from sklearn.metrics import accuracy_score, f1_score
@@ -61,8 +63,11 @@ logger = logging.getLogger(__name__)
 
 class BaseClassification(nn_module):
     """
-    A base class for sequence and token classifiation using deep neural nets. The trainable examples
-    inputted to the methods of this class are generally in the form of strings or list of strings.
+    A base class for sequence & token classification using deep neural nets. Both the classification
+     submodules have a common fit() method defined in this base class, which also drives the
+     training of pytorch based deep nets. The net's computational graph is defined only when the
+     fit() method is called. This base class also holds few common utility methods and
+     further defines the skeleton of the children classes through abstract methods.
     """
 
     def __init__(self):
@@ -76,22 +81,38 @@ class BaseClassification(nn_module):
         self.ready = False  # True when .fit() is called or loaded from a checkpoint, else False
         self.dirty = False  # True when the model weights aren't saved to disk yet, else False
 
+        self.out_dim = float('-inf')
+
     def __repr__(self):
         return f"<{self.name}> ready:{self.ready} dirty:{self.dirty}"
 
     def get_default_params(self) -> Dict:
         return get_default_params(self.__class__.__name__)
 
-    def print_and_return_model_info(self) -> str:
+    def log_and_return_model_info(self, verbose: bool = False) -> str:
+        """
+        Logs and returns the details of the underlying torch.nn model, such as occupying disk space
+        when dumped, number of parameters, the device on which the model is placed, etc.
+
+        Args:
+            verbose (bool): Determines the amount of information to be logged and returned.
+        """
         msg = f"{self.name} " \
-              f"ready:{self.ready} dirty:{self.dirty} device:{self.params.device}\n" \
-              f"\tNumber of weights (trainable, all):{get_num_weights_of_model(self)} \n" \
-              f"\tDisk Size (in MB): {get_disk_space_of_model(self):.4f}"
-        logger.info(msg)
+              f"ready:{self.ready} dirty:{self.dirty} device:{self.params.device} " \
+              f"\n\tNumber of weights (trainable, all):{get_num_weights_of_model(self)} "
+        verbose_msg = msg + (
+            f"\n\tDisk Size (in MB): {get_disk_space_of_model(self):.4f} " if verbose else ""
+        )
+        logger.info(verbose_msg)
         return msg
 
     def to_device(self, batch_data: BatchData) -> BatchData:
-        """method for gpu usage and data loading"""
+        """
+        Places pytorch tensors on the device configured through the params
+
+        Args:
+            batch_data (BatchData): A BatchData object consisting different tensor objects
+        """
         for k, v in batch_data.items():
             if v is not None and isinstance(v, torch.Tensor):
                 batch_data[k] = v.to(self.params.device)
@@ -104,14 +125,23 @@ class BaseClassification(nn_module):
                 batch_data[k] = self.to_device(batch_data[k])
         return batch_data
 
-    def fit(self, examples, labels, **params):  # pylint: disable=too-many-locals
+    # pylint: disable=too-many-locals
+    def fit(self, examples: List[str], labels: Union[List[int], List[List[int]]], **params):
         """
         Trains the underlying neural model on the inputted data and finally retains the best scored
         model among all iterations.
 
         Because of possibly large sized neural models, instead of retaining a copy of best set of
-        model weights on RAM, it is advisable to dump them in a temporary folder and upon training,
-        load the best checkpointed weights.
+        model weights on RAM, it is advisable to dump them in a temporary folder and upon completing
+        the training process, load the best checkpoint weights.
+
+        Args:
+            examples (List[str]): A list of text strings that will be used for model training and
+                validation
+            labels (Union[List[int], List[List[int]]]): A list of labels passed in as integers
+                corresponding to the examples. The encoded labels must have values between 0 and
+                n_classes-1 -- one label per example in case of sequence classification and a
+                sequence of labels per example in case of token classification
         """
 
         if self.ready:
@@ -134,8 +164,8 @@ class BaseClassification(nn_module):
 
         # update number of labels in params upon identifying the unique labels
         try:
-            # labels for sequence classification are of type List[str] whereas for token
-            # classification they are List[List[str]] ; this try-except tries to obtain the number
+            # labels for sequence classification are of type List[int] whereas for token
+            # classification they are List[List[int]]; this try-except tries to obtain the number
             # of unique label strings for the purpose of classification
             num_labels = len(set(labels))
         except TypeError:
@@ -150,7 +180,6 @@ class BaseClassification(nn_module):
         # init the graph and move model to device, inputs are moved to device on-the-go
         self._init_graph()
         self.to(self.params.device)
-        self.print_and_return_model_info()
 
         # dumping weights during training process into a temp folder instead of keeping in
         # memory to reduce memory usage
@@ -170,6 +199,13 @@ class BaseClassification(nn_module):
         )
         optimizer, scheduler = self._create_optimizer_and_scheduler(num_training_steps)
 
+        # set verbosity boolean
+        _verbose = (
+            logger.getEffectiveLevel() == logging.INFO or
+            logger.getEffectiveLevel() == logging.DEBUG
+        )
+        self.log_and_return_model_info(_verbose)
+
         # training w/ validation
         best_dev_score, best_dev_epoch = -np.inf, -1
         msg = f"Beginning to train for {self.params.number_of_epochs} number of epochs"
@@ -177,10 +213,6 @@ class BaseClassification(nn_module):
         if self.params.number_of_epochs < 1:
             raise ValueError("Param 'number_of_epochs' must be a positive integer greater than 0")
         patience_counter = 0
-        verbose = (
-            logger.getEffectiveLevel() == logging.INFO or
-            logger.getEffectiveLevel() == logging.DEBUG
-        )
         for epoch in range(1, self.params.number_of_epochs + 1):
             # patience before terminating due to no dev score improvements
             if patience_counter >= self.params.patience:
@@ -191,7 +223,7 @@ class BaseClassification(nn_module):
             self.train()
             optimizer.zero_grad()
             train_loss, train_batches = 0.0, 0.0
-            t = tqdm(range(0, len(train_examples), self.params.batch_size), disable=not verbose)
+            t = tqdm(range(0, len(train_examples), self.params.batch_size), disable=not _verbose)
             for start_idx in t:
                 batch_examples = train_examples[start_idx:start_idx + self.params.batch_size]
                 batch_labels = train_labels[start_idx:start_idx + self.params.batch_size]
@@ -201,7 +233,11 @@ class BaseClassification(nn_module):
                     add_terminals=self.params.add_terminals
                 )
                 batch_data.update({
-                    "labels": self._prepare_labels(batch_labels, batch_data["split_lengths"])
+                    "labels": self._prepare_labels(
+                        batch_labels,
+                        # pad to the max length amongst encoded examples
+                        max([len(_split_lengths) for _split_lengths in batch_data["split_lengths"]])
+                    )
                 })
                 batch_data = self.forward(batch_data)
                 loss = batch_data["loss"]
@@ -229,7 +265,7 @@ class BaseClassification(nn_module):
             train_loss = train_loss / train_batches
             # dev evaluation
             predictions, targets = [], []
-            t = tqdm(range(0, len(dev_examples), self.params.batch_size), disable=not verbose)
+            t = tqdm(range(0, len(dev_examples), self.params.batch_size), disable=not _verbose)
             for start_idx in t:
                 batch_examples = dev_examples[start_idx:start_idx + self.params.batch_size]
                 batch_labels_targetted = dev_labels[start_idx:start_idx + self.params.batch_size]
@@ -300,9 +336,10 @@ class BaseClassification(nn_module):
         self.dirty = True
 
     @staticmethod
-    def _validate_and_update_params(**params):
+    def _validate_and_update_params(**params) -> Dict:
+        """Common validation and updation of the params dict before creating encoders and layers"""
 
-        # populate few required keys
+        # populate few required key-values (ensures the key-values are populated if not inputted)
         params.update({
             "add_terminals": params.get("add_terminals"),
             "padding_length": params.get("padding_length"),
@@ -340,7 +377,8 @@ class BaseClassification(nn_module):
 
         return params
 
-    def _prepare_input_encoder(self, examples, **params) -> Dict:
+    def _prepare_input_encoder(self, examples: List[str], **params) -> Dict:
+        """Sets the input encoder and returns an updated param dict"""
 
         # create and fit encoder
         self.encoder = InputEncoderFactory.get_encoder_cls(params.get("tokenizer_type"))(**params)
@@ -352,6 +390,7 @@ class BaseClassification(nn_module):
         return params
 
     def _prepare_embedder(self, **params) -> Dict:
+        """Sets the embedder if required and returns an updated param dict"""
 
         # check: cannot specify any conflicting params as required by child class
         if self.encoder is None:
@@ -359,7 +398,7 @@ class BaseClassification(nn_module):
 
         # check: cannot specify any conflicting params as required by child class
         embedder_type = params.get("embedder_type")
-        if embedder_type == "glove":
+        if EmbedderType(embedder_type) == EmbedderType.GLOVE:
             # load glove embs
             glove_container = GloVeEmbeddingsContainer()
             token2emb = glove_container.get_pretrained_word_to_embeddings_dict()
@@ -378,7 +417,7 @@ class BaseClassification(nn_module):
                     i: token2emb[t] for t, i in self.encoder.get_vocab().items() if t in token2emb
                 },
             })
-        elif embedder_type == "bert":
+        elif EmbedderType(embedder_type) == EmbedderType.BERT:
             # the bert model is directly loaded in _init_core() itself
             params.update({
                 "embedder_type": embedder_type,
@@ -394,7 +433,8 @@ class BaseClassification(nn_module):
 
         return params
 
-    def _create_optimizer_and_scheduler(self, num_training_steps):
+    def _create_optimizer_and_scheduler(self, num_training_steps: int) -> Tuple:
+        """Sets an optimizer and scheduler for training torch.nn net"""
         del num_training_steps
 
         # load a torch optimizer
@@ -406,13 +446,11 @@ class BaseClassification(nn_module):
         return optimizer, scheduler
 
     @abstractmethod
-    def _prepare_labels(
-        self, labels: Union[List[int], List[List[int]]], split_lengths: "Tensor2d[int]"
-    ):
+    def _prepare_labels(self, labels: Union[List[int], List[List[int]]], max_length: int):
         raise NotImplementedError
 
     @abstractmethod
-    def _init_graph(self) -> None:
+    def _init_graph(self):
         raise NotImplementedError
 
     @abstractmethod
@@ -421,14 +459,33 @@ class BaseClassification(nn_module):
 
     @abstractmethod
     def predict(self, examples: List[str]) -> Union[List[int], List[List[int]]]:
+        """
+        Returns predicted class labels
+
+        Args:
+            examples (List[str]): The list of examples for which predictions are computed and
+                returned.
+        """
         raise NotImplementedError
 
     @abstractmethod
     def predict_proba(self, examples: List[str]) -> Union[List[List[int]], List[List[List[int]]]]:
+        """
+        Returns predicted class probabilities
+
+        Args:
+            examples (List[str]): The list of examples for which class prediction probabilities
+                are computed and returned.
+        """
         raise NotImplementedError
 
     def dump(self, path: str):
         """
+        Dumps underlying torch.nn model, encoder state and params
+
+        Args:
+            path (str): The path header where the files are dumped.
+
         The following states are dumped into different files:
             - Pytorch model weights
             - Encoder state
@@ -456,6 +513,12 @@ class BaseClassification(nn_module):
 
     @classmethod
     def load(cls, path: str):
+        """
+        Loads states from a dumped path
+
+        Args:
+            path (str): The path header wherein dumped files are present.
+        """
         # resolve path
         path = os.path.abspath(os.path.splitext(path)[0]) + ".pytorch_model"
 

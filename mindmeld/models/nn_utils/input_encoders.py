@@ -127,14 +127,14 @@ class AbstractEncoder(ABC):
                 (description follows):
                 - seq_lengths: Number of tokens in each example before adding padding tokens. It
                     also includes terminal tokens as well, if they are added. If using an encoder
-                    that splits words in subwords, then seq_lengths implies number of words instead
-                    of number of subwords, along with any added terminal tokens. This number is
+                    that splits words in sub-words, then seq_lengths implies number of words instead
+                    of number of sub-words, along with any added terminal tokens. This number is
                     useful in case of token classifiers which require token-level (aka.
                     word-level) outputs as well as in sequence classifiers models such as LSTM.
-                - split_lengths: The length of each subgroup (i.e. group of subwords) in each
+                - split_lengths: The length of each subgroup (i.e. group of sub-words) in each
                     example. Due to its definition, it obviously does not include any terminal
                     tokens in its counts. This can be seen as a fine-grained information to
-                    seq_lengths values for the encoders with subword tokenization. This is again
+                    seq_lengths values for the encoders with sub-word tokenization. This is again
                     useful in cases of token classifiers to flexibly choose between representations
                     of first sub-word or mean/max pool of sub-words' representations in order to
                     obtain the word-level representations. For lookup table based encoders where
@@ -165,7 +165,7 @@ class AbstractEncoder(ABC):
             encoders cannot be used in such scenarios. If not using a CRF layer, one can use any
             encoders by setting it to True but care must be taken to modify labels accordingly.
             Hence, it is advisable to use `split_lengths` for padding labels in case of token
-            classsification instead of `seq_lengths`
+            classification instead of `seq_lengths`
         """
         raise NotImplementedError("Subclasses must implement this method")
 
@@ -664,12 +664,12 @@ class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
         padding_length = min(max_curr_len, padding_length) if padding_length else max_curr_len
         padding_length = padding_length - 2  # -2 to sum to padding_length after adding cls, sep
 
-        subgrouped_examples = [
+        sub_grouped_examples = [
             _trim_list_of_subtokens_groups(t_ex, padding_length) for t_ex in
             tokenized_examples
-        ]  # List[List[List[str]]], innermost List[str] is a list of subwords for a given word
-        tokenized_examples = [" ".join(sum(ex, [])) for ex in subgrouped_examples]
-        split_lengths = [[len(x) for x in ex] for ex in subgrouped_examples]  # len of each subgroup
+        ]  # List[List[List[str]]], innermost List[str] is a list of sub-words for a given word
+        tokenized_examples = [" ".join(sum(ex, [])) for ex in sub_grouped_examples]
+        split_lengths = [[len(x) for x in ex] for ex in sub_grouped_examples]
 
         output = self.tokenizer.encode_batch(
             tokenized_examples, add_special_tokens=True
@@ -780,12 +780,12 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
         padding_length = min(max_curr_len, padding_length) if padding_length else max_curr_len
         padding_length = padding_length - 2  # -2 to sum to padding_length after adding cls, sep
 
-        subgrouped_examples = [
+        sub_grouped_examples = [
             _trim_list_of_subtokens_groups(t_ex, padding_length) for t_ex in
             tokenized_examples
         ]
-        tokenized_examples = [" ".join(sum(ex, [])) for ex in subgrouped_examples]
-        split_lengths = [[len(x) for x in ex] for ex in subgrouped_examples]  # len of each subgroup
+        tokenized_examples = [" ".join(sum(ex, [])) for ex in sub_grouped_examples]
+        split_lengths = [[len(x) for x in ex] for ex in sub_grouped_examples]
 
         hgf_encodings = self.tokenizer(
             tokenized_examples, padding=True, truncation=True, max_length=None,

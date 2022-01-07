@@ -12,6 +12,9 @@
 # limitations under the License.
 
 import logging
+from typing import List, Union, Dict
+
+import numpy as np
 
 from .._util import _get_module_or_attr
 
@@ -26,21 +29,39 @@ except ImportError:
     nn_module = object
     pass
 
-SEED = 7246
-
 logger = logging.getLogger(__name__)
 
 
 class EmbeddingLayer(nn_module):
-    """A pytorch wrapper layer for embeddings that takes input as a batched sequence of ids
-    and outputs embeddings correponding to those ids
+    """A pytorch wrapper layer for embeddings that takes input a batched sequence of ids
+    and outputs embeddings corresponding to those ids
     """
 
     def __init__(
-        self, num_tokens, emb_dim, padding_idx=None,
-        embedding_weights=None, update_embeddings=True,
-        embeddings_dropout=0.5, coefficients=None, update_coefficients=True
+        self,
+        num_tokens: int,
+        emb_dim: int,
+        padding_idx: int = None,
+        embedding_weights: Dict[int, Union[List, np.ndarray]] = None,
+        update_embeddings: bool = True,
+        embeddings_dropout: float = 0.5,
+        coefficients: List[float] = None,
+        update_coefficients: bool = True
     ):
+        """
+        Args:
+            num_tokens (int): size of the dictionary of embeddings
+            emb_dim (int): the size of each embedding vector
+            padding_idx (int, Optional): If given, pads the output with the embedding vector at
+                `padding_idx` (initialized to zeros) whenever it encounters the index.
+            embedding_weights (Dict[int, Union[List, np.ndarray]], Optional): weights to overwrite
+                the already initialized embedding weights
+            update_embeddings (bool, Optional): whether to freeze or train the embedding weights
+            embeddings_dropout (float, Optional): dropout rate to apply on the forward call
+            coefficients (List[float], Optional): weight coefficients for the dictionary of
+                embeddings
+            update_coefficients (bool, Optional): whether to freeze or train the coefficients
+        """
         super().__init__()
 
         self.embeddings = nn.Embedding(num_tokens, emb_dim, padding_idx=padding_idx)
@@ -64,12 +85,14 @@ class EmbeddingLayer(nn_module):
                       f"embeddings ({num_tokens})"
                 raise ValueError(msg)
             self.embedding_for_coefficients = nn.Embedding(num_tokens, 1, padding_idx=padding_idx)
-            self.embedding_for_coefficients.load_state_dict({'weight': coefficients})
+            self.embedding_for_coefficients.load_state_dict(
+                {'weight': torch.as_tensor(coefficients).view(-1, 1)}
+            )
             self.embedding_for_coefficients.weight.requires_grad = update_coefficients
 
         self.dropout = nn.Dropout(embeddings_dropout)
 
-    def forward(self, padded_token_ids):
+    def forward(self, padded_token_ids: "Tensor2d[int]") -> "Tensor3d[float]":
         # padded_token_ids: dim: [BS, SEQ_LEN]
         # returns:          dim: [BS, SEQ_LEN, EMB_DIM]
 
@@ -88,8 +111,19 @@ class EmbeddingLayer(nn_module):
 
 
 class CnnLayer(nn_module):
+    """A pytorch wrapper layer for 2D Convolutions
+    """
 
-    def __init__(self, emb_dim, kernel_sizes, num_kernels):
+    def __init__(self, emb_dim: int, kernel_sizes: List[int], num_kernels: List[int]):
+        """
+        Args:
+            emb_dim (int): the size of embedding vectors or last dimension of hidden state prior
+                to this CNN layer (i.e. width for convolution filters)
+            kernel_sizes (List[int]): the length of each kernel provided as a list of lengths
+                (i.e. length for convolution filters)
+            num_kernels (List[int]): the number of kernels for each kernel size provided as a list
+                of numbers (one number per provided size of kernel)
+        """
         super().__init__()
 
         if isinstance(num_kernels, list) and len(num_kernels) != len(kernel_sizes):
@@ -106,18 +140,18 @@ class CnnLayer(nn_module):
         self.convs = nn.ModuleList()
         # Unsqueeze input dim [BS, SEQ_LEN, EMD_DIM] to [BS, 1, SEQ_LEN, EMDDIM] and send as input
         # Each conv module output's dimensions are [BS, n, SEQ_LEN, 1]
-        for length, n in zip(kernel_sizes, num_kernels):
+        for kernel_size, num_kernel in zip(kernel_sizes, num_kernels):
             self.convs.append(
                 nn.Sequential(
-                    nn.Conv2d(1, n, (length, emb_dim), padding=(length - 1, 0),
+                    nn.Conv2d(1, num_kernel, (kernel_size, emb_dim), padding=(kernel_size - 1, 0),
                               dilation=1, bias=True, padding_mode='zeros'),
                     nn.ReLU(),
                 )
             )
 
-    def forward(self, padded_token_embs):
+    def forward(self, padded_token_embs: "Tensor3d[float]") -> "Tensor2d[float]":
         # padded_token_embs: dim: [BS, SEQ_LEN, EMD_DIM]
-        # returns:          dim: [BS, EMB_DIM`]
+        # returns:           dim: [BS, EMB_DIM`]
 
         # [BS, SEQ_LEN, EMD_DIM] -> [BS, 1, SEQ_LEN, EMD_DIM]
         embs_unsqueezed = torch.unsqueeze(padded_token_embs, dim=1)
@@ -135,8 +169,27 @@ class CnnLayer(nn_module):
 
 
 class LstmLayer(nn_module):
+    """A pytorch wrapper layer for BiLSTMs
+    """
 
-    def __init__(self, emb_dim, hidden_dim, num_layers, lstm_dropout, bidirectional):
+    def __init__(
+        self,
+        emb_dim: int,
+        hidden_dim: int,
+        num_layers: int,
+        lstm_dropout: float,
+        bidirectional: bool
+    ):
+        """
+        Args:
+            emb_dim (int): the size of embedding vectors or last dimension of hidden state prior
+                to this LSTM layer
+            hidden_dim (int): the hidden dimension for nn.LSTM
+            num_layers (int): the number of nn.LSTM layers to stack
+            lstm_dropout (float): the dropout rate for nn.LSTM
+            bidirectional (bool): whether LSTMs should be applied on both forward and
+                backward sequences of the input or not
+        """
         super().__init__()
 
         self.lstm = nn.LSTM(
@@ -144,10 +197,14 @@ class LstmLayer(nn_module):
             bidirectional=bidirectional, batch_first=True
         )
 
-    def forward(self, padded_token_embs, lengths):
+    def forward(
+        self,
+        padded_token_embs: "Tensor3d[float]",
+        lengths: "Tensor1d[int]",
+    ) -> "Tensor3d[float]":
         # padded_token_embs: dim: [BS, SEQ_LEN, EMD_DIM]
-        # lengths:          dim: [BS]
-        # returns:          dim: [BS, SEQ_LEN, EMB_DIM]
+        # lengths:           dim: [BS]
+        # returns:           dim: [BS, SEQ_LEN, EMB_DIM]
 
         # [BS, SEQ_LEN, EMD_DIM] -> [BS, SEQ_LEN, EMD_DIM*(2 if bidirectional else 1)]
         lengths = lengths.to(torch.device("cpu"))
@@ -160,20 +217,42 @@ class LstmLayer(nn_module):
 
 
 class PoolingLayer(nn_module):
+    """A pooling layer for Tensor3d objects that pools along the last dimension. Assumes that
+    padding if any exists on the right side of inputs (i.e. not in the beginning of inputs)
+    """
 
-    def __init__(self, pooling_type):
+    def __init__(self, pooling_type: str):
+        """
+        Args:
+            pooling_type (str): the choice of pooling; to be amongst following:
+                first: the first index of each sequence will be the pooled output (similar to CLS
+                    token in BERT models)
+                last: the last index of each sequence will be the pooled output (useful for pooling
+                    outputs from nn.LSTM)
+                max: max pool across last dimension will be the pooled output
+                mean: mean pool across last dimension will be the pooled output
+                mean_sqrt: similar to 'mean' but slashed by the square root of sequence length
+        """
         super().__init__()
 
         pooling_type = pooling_type.lower()
 
-        ALLOWED_TYPES = ["first", "last", "max", "mean", "mean_sqrt"]
-        assert pooling_type in ALLOWED_TYPES
+        allowed_pooling_types = ["first", "last", "max", "mean", "mean_sqrt"]
+        if pooling_type not in allowed_pooling_types:
+            msg = f"Expected pooling_type amongst {allowed_pooling_types} " \
+                  f"but found '{pooling_type}'"
+            raise ValueError(msg)
 
+        # assumption: first token is never a pad token for the passed inputs
         self._requires_length = ["last", "max", "mean", "mean_sqrt"]
 
         self.pooling_type = pooling_type
 
-    def forward(self, padded_token_embs, lengths=None):
+    def forward(
+        self,
+        padded_token_embs: "Tensor3d[float]",
+        lengths: "Tensor1d[int]" = None,
+    ) -> "Tensor2d[float]":
         # padded_token_embs: dim: [BS, SEQ_LEN, EMD_DIM]
         # lengths:           dim: [BS]
         # returns:           dim: [BS, EMD_DIM]
@@ -189,17 +268,18 @@ class PoolingLayer(nn_module):
             outputs = padded_token_embs[range(padded_token_embs.shape[0]), last_seq_idxs, :]
         else:
             mask = pad_sequence(
-                [torch.as_tensor([1] * length_) for length_ in lengths], batch_first=True
+                [torch.as_tensor([1] * length_) for length_ in lengths],
+                batch_first=True,
+                padding_value=0.0,
             ).unsqueeze(-1).expand(padded_token_embs.size()).float()
             if self.pooling_type == "max":
                 padded_token_embs[mask == 0] = -1e9  # set to a large negative value
-                outputs, _ = torch.max(padded_token_embs, dim=1)[0]
+                outputs, _ = torch.max(padded_token_embs, dim=1)
             elif self.pooling_type == "mean":
-                summed_padded_token_embs = torch.sum(padded_token_embs, dim=1)
-                expanded_lengths = lengths.unsqueeze(dim=1).expand(summed_padded_token_embs.size())
-                outputs = torch.div(summed_padded_token_embs, expanded_lengths)
+                summed_padded_token_embs = torch.sum(padded_token_embs * mask, dim=1)
+                outputs = summed_padded_token_embs / mask.sum(1)
             elif self.pooling_type == "mean_sqrt":
-                summed_padded_token_embs = torch.sum(padded_token_embs, dim=1)
+                summed_padded_token_embs = torch.sum(padded_token_embs * mask, dim=1)
                 expanded_lengths = lengths.unsqueeze(dim=1).expand(summed_padded_token_embs.size())
                 outputs = torch.div(summed_padded_token_embs, torch.sqrt(expanded_lengths))
 
@@ -207,47 +287,66 @@ class PoolingLayer(nn_module):
 
 
 class SplittingAndPoolingLayer(nn_module):
-    """
-    Pooling class that first splits a sequence of representations into subgroups of representations
-    based on lengths of subgroups inputted, and pools each subgroup separately.
+    """Pooling class that first splits a sequence of representations into subgroups of
+    representations based on lengths of subgroups inputted, and pools each subgroup separately.
     """
 
-    def __init__(self, pooling_type):
+    def __init__(self, pooling_type: str):
+        """
+        Args:
+            pooling_type (str): the choice of pooling; to be amongst following:
+                first: the first index of each subsequence will be the pooled output of that
+                    subgroup(e.g. token classification using BERT models with sub-word tokenization)
+                last: the last index of each subsequence will be the pooled output of that subgroup
+                    (e.g. for word level representations when using a character BiLSTM)
+                max: max pool across subsequence will be the pooled output of that subgroup
+                mean: mean pool across subsequence will be the pooled output of that subgroup
+                    (e.g. token classification using BERT models with sub-word tokenization)
+                mean_sqrt: similar to 'mean' but slashed by the square root of subsequence length
+        """
         super().__init__()
 
-        pooling_type = pooling_type.lower()
+        self.pooling_type = pooling_type.lower()
+        self.pooling_layer = PoolingLayer(pooling_type=self.pooling_type)
 
-        ALLOWED_TYPES = ["first", "last", "max", "mean", "mean_sqrt"]
-        assert pooling_type in ALLOWED_TYPES
-
-        self.pooling_type = pooling_type
-
-    def _split_and_pool(self, tensor_2d, list_of_subgroup_length, discard_terminals):
-        # tensor_2d:         dim: [SEQ_LEN, EMD_DIM]
-        # discard_terminals  bool
-        # returns:           dim: [BS', EMD_DIM]
+    def _split_and_pool(
+        self,
+        tensor_2d: "Tensor2d[float]",
+        list_of_subgroup_lengths: List[int],
+        discard_terminals: bool
+    ):
+        # tensor_2d:                 dim: [SEQ_LEN, EMD_DIM]
+        # list_of_subgroup_lengths:  dim: List of int summing up to SEQ_LEN' <= SEQ_LEN
+        # discard_terminals:         bool
+        # returns:                   dim: [SEQ_LEN``, EMD_DIM]
 
         if discard_terminals:
-            n_representations = sum(list_of_subgroup_length) + 2
+            # since list_of_subgroup_lengths consists of lengths of only non-terminal subgroups but
+            # the inputted tensor_2d consists of terminals
+            n_representations = sum(list_of_subgroup_lengths) + 2
             tensor_2d = tensor_2d[:n_representations]
             tensor_2d = tensor_2d[1:-1]  # discard terminal representations
         else:
-            n_representations = sum(list_of_subgroup_length)
+            n_representations = sum(list_of_subgroup_lengths)
             tensor_2d = tensor_2d[:n_representations]
 
-        splits = torch.split(tensor_2d, list_of_subgroup_length, dim=0)
+        splits = torch.split(tensor_2d, list_of_subgroup_lengths, dim=0)
         padded_token_embs = pad_sequence(splits, batch_first=True)  # [BS', SEQ_LEN', EMD_DIM]
 
-        if self.pooling_type == "first":
-            outputs = padded_token_embs[:, 0, :]
-        else:
-            raise NotImplementedError("Pooling types other than 'first' are not yet implemeneted.")
+        # return dims: [len(list_of_subgroup_lengths), EMD_DIM]
+        return self.pooling_layer(
+            padded_token_embs=padded_token_embs,
+            lengths=list_of_subgroup_lengths
+        )
 
-        return outputs
-
-    def forward(self, padded_token_embs, span_lengths, discard_terminals=None):
+    def forward(
+        self,
+        padded_token_embs: "Tensor3d[float]",
+        span_lengths: List[List[int]],
+        discard_terminals: bool = None
+    ):
         # padded_token_embs: dim: [BS, SEQ_LEN, EMD_DIM]
-        # span_lengths:      dim: List[List of Int summing up to SEQ_LEN' <= SEQ_LEN]
+        # span_lengths:      dim: List[List of int summing up to SEQ_LEN' <= SEQ_LEN]
         # discard_terminals: bool
         # returns:           dim: [BS, SEQ_LEN', EMD_DIM]
 

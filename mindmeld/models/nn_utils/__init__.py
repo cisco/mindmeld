@@ -11,6 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from .helpers import (
+    TokenizerType,
+    EmbedderType,
+    SequenceClassificationType,
+    TokenClassificationType
+)
 from .sequence_classification import (
     EmbedderForSequenceClassification,
     CnnForSequenceClassification,
@@ -39,4 +45,8 @@ __all__ = [
     "CharLstmWithWordLstmForTokenClassification",
     "BertForTokenClassification",
     "get_token_classifier_cls",
+    "TokenizerType",
+    "EmbedderType",
+    "SequenceClassificationType",
+    "TokenClassificationType",
 ]
