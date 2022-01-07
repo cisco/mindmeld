@@ -32,6 +32,8 @@ def test_create_model_from_config_dict():
     assert isinstance(model, TextModel)
 
 
+@pytest.mark.extras
+@pytest.mark.torch
 def test_create_model_from_config_object():
     config = {
         "model_type": "text",
@@ -43,6 +45,8 @@ def test_create_model_from_config_object():
     assert isinstance(model, PytorchTextModel)
 
 
+@pytest.mark.extras
+@pytest.mark.torch
 def test_create_model_from_helpers():
     config = {
         "model_type": "tagger",
@@ -55,6 +59,8 @@ def test_create_model_from_helpers():
     assert isinstance(model, PytorchTaggerModel)
 
 
+@pytest.mark.extras
+@pytest.mark.torch
 def test_create_model_from_helpers_without_input_type():
     config = {
         "model_type": "tagger",
@@ -77,6 +83,8 @@ def test_create_model_from_incomplete_config_without_model_settings():
         del model
 
 
+@pytest.mark.extras
+@pytest.mark.torch
 def test_create_model_from_incomplete_config_without_params():
     incomplete_config = {
         "model_type": "tagger",
