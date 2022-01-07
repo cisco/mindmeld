@@ -126,5 +126,10 @@ setup(
         "transformers": [  # huggingface-transformers
             'transformers~=3.5.1; python_version>="3.6"',
         ],
+        "transformers_tokenizers": [  # huggingface-transformers' tokenizers
+            # this requirement can be removed once transformers' requirement is upgraded to satisfy
+            # tokenizers>=0.10.1,<0.11
+            'tokenizers>=0.10.1,<0.11; python_version>="3.6"',
+        ],
     },
 )

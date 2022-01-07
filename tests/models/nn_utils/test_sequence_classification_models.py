@@ -163,6 +163,7 @@ class TestSequenceClassification:
 
     @pytest.mark.extras
     @pytest.mark.torch
+    @pytest.mark.transformers_tokenizers
     def test_bpe_cnn(self, resource_loader):
         """Tests that a fit succeeds"""
         config = {
@@ -171,6 +172,29 @@ class TestSequenceClassification:
             "label_type": CLASS_LABEL_TYPE,
             "model_settings": {"classifier_type": "cnn"},
             "params": {"emb_dim": 30, "tokenizer_type": "bpe-tokenizer", "add_terminals": True},
+        }
+
+        examples = self.labeled_data.queries()
+        labels = self.labeled_data.intents()
+        model = ModelFactory.create_model_from_config(ModelConfig(**config))
+        model.initialize_resources(resource_loader, examples, labels)
+        model.fit(examples, labels)
+
+        assert model.predict([markup.load_query("hi").query])[0] in ["greet", "exit"]
+
+    @pytest.mark.extras
+    @pytest.mark.torch
+    @pytest.mark.transformers_tokenizers
+    def test_wordpiece_cnn(self, resource_loader):
+        """Tests that a fit succeeds"""
+        config = {
+            "model_type": "text",
+            "example_type": QUERY_EXAMPLE_TYPE,
+            "label_type": CLASS_LABEL_TYPE,
+            "model_settings": {"classifier_type": "cnn"},
+            "params": {
+                "emb_dim": 30, "tokenizer_type": "wordpiece-tokenizer", "add_terminals": True
+            },
         }
 
         examples = self.labeled_data.queries()
@@ -264,6 +288,7 @@ class TestSequenceClassification:
 
     @pytest.mark.extras
     @pytest.mark.torch
+    @pytest.mark.transformers_tokenizers
     def test_bpe_lstm(self, resource_loader):
         """Tests that a fit succeeds"""
         config = {
@@ -272,6 +297,29 @@ class TestSequenceClassification:
             "label_type": CLASS_LABEL_TYPE,
             "model_settings": {"classifier_type": "lstm"},
             "params": {"emb_dim": 30, "tokenizer_type": "bpe-tokenizer", "add_terminals": True},
+        }
+
+        examples = self.labeled_data.queries()
+        labels = self.labeled_data.intents()
+        model = ModelFactory.create_model_from_config(ModelConfig(**config))
+        model.initialize_resources(resource_loader, examples, labels)
+        model.fit(examples, labels)
+
+        assert model.predict([markup.load_query("hi").query])[0] in ["greet", "exit"]
+
+    @pytest.mark.extras
+    @pytest.mark.torch
+    @pytest.mark.transformers_tokenizers
+    def test_wordpiece_lstm(self, resource_loader):
+        """Tests that a fit succeeds"""
+        config = {
+            "model_type": "text",
+            "example_type": QUERY_EXAMPLE_TYPE,
+            "label_type": CLASS_LABEL_TYPE,
+            "model_settings": {"classifier_type": "lstm"},
+            "params": {
+                "emb_dim": 30, "tokenizer_type": "wordpiece-tokenizer", "add_terminals": True
+            },
         }
 
         examples = self.labeled_data.queries()
