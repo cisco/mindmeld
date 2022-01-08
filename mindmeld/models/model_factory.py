@@ -20,7 +20,7 @@ import logging
 from typing import Union, Type
 
 from .helpers import register_model, ModelType
-from .model import ModelConfig, AbstractModel, AbstractXxxModelFactory
+from .model import ModelConfig, AbstractModel, AbstractModelFactory
 from .tagger_models import TaggerModelFactory
 from .text_models import TextModelFactory
 
@@ -68,7 +68,7 @@ class ModelFactory:
 
         model_config = cls._resolve_model_config(model_config)
         model_type = cls._get_model_type(model_config)
-        model_class = cls._get_xxx_model_factory(model_type).get_model_cls(model_config)
+        model_class = cls._get_model_factory(model_type).get_model_cls(model_config)
         return model_class(model_config)
 
     @classmethod
@@ -102,7 +102,7 @@ class ModelFactory:
             model_config = AbstractModel.load_model_config(path)
             model_config = cls._resolve_model_config(model_config)
             model_type = cls._get_model_type(model_config)
-            model_class = cls._get_xxx_model_factory(model_type).get_model_cls(model_config)
+            model_class = cls._get_model_factory(model_type).get_model_cls(model_config)
             return model_class.load(path)
 
         except FileNotFoundError:
@@ -166,7 +166,7 @@ class ModelFactory:
             raise ValueError(msg) from e
 
     @staticmethod
-    def _get_xxx_model_factory(model_type: ModelType) -> Type[AbstractXxxModelFactory]:
+    def _get_model_factory(model_type: ModelType) -> Type[AbstractModelFactory]:
         """
         Returns a factory based on the provided model type
 
@@ -174,7 +174,7 @@ class ModelFactory:
             model_type (ModelType): An object of ModelType specifying the type of model to create
 
         Returns:
-            model_factory (Type[AbstractXxxModelFactory]): A model factory for specified model_type
+            model_factory (Type[AbstractModelFactory]): A model factory for specified model_type
         """
 
         return {

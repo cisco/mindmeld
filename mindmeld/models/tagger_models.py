@@ -25,7 +25,7 @@ from .helpers import (
     get_seq_tag_accuracy_scorer,
     ingest_dynamic_gazetteer,
 )
-from .model import ModelConfig, Model, PytorchModel, AbstractXxxModelFactory
+from .model import ModelConfig, Model, PytorchModel, AbstractModelFactory
 from .nn_utils import get_token_classifier_cls, TokenClassificationType
 from .taggers.crf import ConditionalRandomFields
 from .taggers.memm import MemmModel
@@ -501,7 +501,7 @@ class PytorchTaggerModel(PytorchModel):
         y = list(encoded_y)
 
         params = params or self.config.params
-        self._get_query_text_type(params)
+        self._set_query_text_type(params, default="normalized_text")
         examples_texts = self._get_texts_from_examples(examples)
         self._validate_training_data(examples_texts, y)
 
@@ -601,7 +601,7 @@ class PytorchTaggerModel(PytorchModel):
                 raise AssertionError(msg)
 
 
-class TaggerModelFactory(AbstractXxxModelFactory):
+class TaggerModelFactory(AbstractModelFactory):
 
     @staticmethod
     def get_model_cls(config: ModelConfig):

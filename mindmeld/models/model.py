@@ -782,21 +782,18 @@ class PytorchModel(AbstractModel):
                   f"({len(examples)})"
             raise AssertionError(msg)
 
-    def _get_query_text_type(self, params: Dict = None, default: str = "processed_text") -> str:
+    def _set_query_text_type(self, params: Dict = None, default: str = None):
         """
         Returns the query text type to use for obtaining training examples from Query objects.
 
         Args:
             params (Dict, optional): The config params passed in to train the model
             default (str, optional): The default text type to use in case no related configs found
-
-        Returns:
-            query_text_type (str): The choice of text type to use.
         """
 
         if params is None and self._query_text_type:
             # this condition is satisfied during loading of models
-            return self._query_text_type
+            return
 
         # While the key '_query_text_type' in config params allows for end-users to configure the
         # choice of text_type to be used, it also needs the user to have knowledge about different
@@ -804,9 +801,13 @@ class PytorchModel(AbstractModel):
         # developer/benchmarking puposes.
         query_text_type = params.get("_query_text_type", default) if params else default
 
-        # consider raw text for pretrained transformer models, else use processed text
-        if params and EmbedderType(params.get("embedder_type")) == EmbedderType.BERT:
-            query_text_type = "text"
+        # consider raw text for pretrained transformer models
+        if not query_text_type:
+            if params and EmbedderType(params.get("embedder_type")) == EmbedderType.BERT:
+                query_text_type = "text"
+
+        # if a NoneType value is found, use the processed_text by default
+        query_text_type = query_text_type or "processed_text"
 
         # validation
         allowed_text_types = ["text", "processed_text", "normalized_text"]
@@ -817,8 +818,6 @@ class PytorchModel(AbstractModel):
             raise ValueError(msg)
 
         self._query_text_type = query_text_type  # this var is dumped and loaded when loading models
-
-        return self._query_text_type
 
     def _get_texts_from_examples(self, examples: PQL.QueryIterator) -> List[str]:
         """
@@ -832,10 +831,15 @@ class PytorchModel(AbstractModel):
             texts (List[str]): A list of strings obtained from the query objects based on the
                 provided input configs
         """
-        return [getattr(example, self._get_query_text_type()) for example in examples]
+        if not self._query_text_type:
+            msg = "The instance attribute '_query_text_type' must be set by calling " \
+                  "_set_query_text_type() method before calling the " \
+                  "_get_texts_from_examples() method."
+            raise ValueError(msg)
+        return [getattr(example, self._query_text_type) for example in examples]
 
 
-class AbstractXxxModelFactory(ABC):
+class AbstractModelFactory(ABC):
     """
     Abstract class for individual model factories like TextModelFactory and TaggerModelFactory
     """

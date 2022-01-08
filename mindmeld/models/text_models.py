@@ -38,7 +38,7 @@ from .helpers import (
     WORD_FREQ_RSC,
     WORD_NGRAM_FREQ_RSC,
 )
-from .model import ModelConfig, Model, PytorchModel, AbstractXxxModelFactory
+from .model import ModelConfig, Model, PytorchModel, AbstractModelFactory
 from .nn_utils import get_sequence_classifier_cls, SequenceClassificationType
 from ..resource_loader import ProcessedQueryList as PQL
 
@@ -536,10 +536,11 @@ class PytorchTextModel(PytorchModel):
 
         if not isinstance(examples, PQL.QueryIterator):
             # pytorch text models are not implemented for role-classifiers, which pass-in an
-            # instance of ListIterator to fit() method as opposed to QueryIterator in case of
+            # instance of ListIterator to this fit() method as opposed to QueryIterator in case of
             # domain- and intent-classifiers
-            msg = f"{self.__class__.__name__}.fit() only accepts QueryIterator type examples " \
-                  f"argument but the inputted type is {type(examples)} "
+            msg = f"{self.__class__.__name__}.fit() only accepts QueryIterator as the first " \
+                  f"argument but found type: {type(examples)}. This might happen if trying to" \
+                  f"create a deep neural net based classifier for role classification."
             raise NotImplementedError(msg)
 
         # Encode classes
@@ -548,7 +549,7 @@ class PytorchTextModel(PytorchModel):
         y = list(encoded_y)
 
         params = params or self.config.params
-        self._get_query_text_type(params)
+        self._set_query_text_type(params)
         examples_texts = self._get_texts_from_examples(examples)
         self._validate_training_data(examples_texts, y)
 
@@ -617,7 +618,7 @@ class PytorchTextModel(PytorchModel):
         return model
 
 
-class TextModelFactory(AbstractXxxModelFactory):
+class TextModelFactory(AbstractModelFactory):
 
     @staticmethod
     def get_model_cls(config: ModelConfig):
