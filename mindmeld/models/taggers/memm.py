@@ -154,13 +154,13 @@ class MemmModel(Tagger):
             seq_log_probs.append([prev_tag, prediction[predicted_tag]])
         return seq_log_probs
 
-    def predict_proba_active_learning(self, examples, config, resources):
+    def predict_proba_distribution(self, examples, config, resources):
         return [
-            self._predict_proba_active_learning_example(example, config, resources)
+            self._predict_proba_distribution_example(example, config, resources)
             for example in examples
         ]
 
-    def _predict_proba_active_learning_example(self, example, config, resources):
+    def _predict_proba_distribution_example(self, example, config, resources):
         features_by_segment = self.extract_example_features(example, config, resources)
         if len(features_by_segment) == 0:
             return []

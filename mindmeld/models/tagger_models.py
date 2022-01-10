@@ -298,7 +298,7 @@ class TaggerModel(Model):
         ]
         return labels
 
-    def predict_proba(self, examples, dynamic_resource=None, active_learning=False):
+    def predict_proba(self, examples, dynamic_resource=None, fetch_distribution=False):
         """
         Args:
             examples (list of mindmeld.core.Query): a list of queries to train on
@@ -316,8 +316,8 @@ class TaggerModel(Model):
             text_preparation_pipeline=self.text_preparation_pipeline
         )
 
-        if active_learning:
-            predicted_tags_probas = self._clf.predict_proba_active_learning(
+        if fetch_distribution:
+            predicted_tags_probas = self._clf.predict_proba_distribution(
                 examples, self.config, workspace_resource
             )
             return tuple(zip(*predicted_tags_probas[0]))
@@ -337,7 +337,7 @@ class TaggerModel(Model):
         predicted_labels_scores = tuple(zip(entities, entity_confidence))
         return predicted_labels_scores
 
-    def evaluate(self, examples, labels, active_learning=False):
+    def evaluate(self, examples, labels, fetch_distribution=False):
         """Evaluates a model against the given examples and labels
 
         Args:
@@ -357,11 +357,11 @@ class TaggerModel(Model):
 
         predictions = self.predict(examples)
 
-        if active_learning:
+        if fetch_distribution:
             # if active learning, store entity confidences along with predicted tags
             probas = []  # probabilities for all tags across all tokens
             for example in examples:
-                probas.append(self.predict_proba([example], active_learning=True))
+                probas.append(self.predict_proba([example], fetch_distribution=True))
 
             evaluations = [
                 EvaluatedExample(e, labels[i], predictions[i], probas[i], self.config.label_type)

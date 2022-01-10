@@ -386,7 +386,7 @@ class TextModel(Model):
         }.get(scale_type)
         return scaler
 
-    def evaluate(self, examples, labels, active_learning=False):
+    def evaluate(self, examples, labels):
         """Evaluates a model against the given examples and labels
 
         Args:

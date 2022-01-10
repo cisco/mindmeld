@@ -18,7 +18,7 @@ This module contains classes used to load queries for the Active Learning Pipeli
 from typing import Dict, List
 import logging
 
-from .heuristics import Heuristic, stratified_random_sample
+from .heuristics import Heuristic, stratified_random_sample, EntropySampling
 
 from ..auto_annotator import BootstrapAnnotator
 from ..components._config import DEFAULT_AUTO_ANNOTATOR_CONFIG
@@ -333,10 +333,17 @@ class DataBucket:
         remaining_indices = ranked_indices_2d[sampling_size:]
 
         if entity_tuning:
-            ranked_entity_indices = heuristic.rank_entities(entity_confidences)
+            try:
+                ranked_entity_indices = heuristic.rank_entities(entity_confidences)
+            except:
+                # if heuristic does not have entity AL support default to entropy
+                heuristic = EntropySampling
+                ranked_entity_indices = heuristic.rank_entities(entity_confidences)
+
             newly_sampled_indices_entity = ranked_entity_indices[:sampling_size]
             remaining_indices_entity = ranked_entity_indices[sampling_size:]
 
+            # to-do: random select and restrict to batch size
             newly_sampled_indices = list(
                 set(newly_sampled_indices).union(newly_sampled_indices_entity)
             )

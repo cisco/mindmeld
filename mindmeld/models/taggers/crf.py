@@ -84,7 +84,7 @@ class ConditionalRandomFields(Tagger):
             marginal_tuples.append(query_marginal_tuples)
         return marginal_tuples
 
-    def predict_proba_active_learning(self, examples, config, resources):
+    def predict_proba_distribution(self, examples, config, resources):
         """
         Args:
             examples (list of mindmeld.core.Query): a list of queries to predict on

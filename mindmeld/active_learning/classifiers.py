@@ -176,68 +176,78 @@ class MindMeldALClassifier(ALClassifier):
     def _get_entity_probs(
         classifier: Classifier,
         queries: ProcessedQueryList,
-        tag_to_id: Dict,
+        entity_tag_to_id: Dict,
     ):
-        """Get the probability distribution for a query across domains or intents.
+        """Get the probability distribution for a query across entities.
+            For each token within a query, this function will obtain the probability distribution
+            for entity tags as predicted by the entity recognition model.
+            output dimension will be: [# queries] * [# tokens] * [# tags]
 
         Args:
             classifier (MindMeld Classifer): Domain or Intent Classifier
             queries (ProcessedQueryList): List of MindMeld queries
-            tag_to_id (Dict): Dictionary mapping domain or intent names to vector index
+            entity_tag_to_id (Dict): Dictionary mapping domain or intent names to vector index
                 positions.
 
         Returns:
-            prob_vector (List[List]]): Probability distribution vectors for given queries.
+            prob_vector (List[List[List]]]): Probability distribution vectors for given queries.
         """
         queries_prob_vectors = []
-        if queries:
-            classifier_eval = classifier.evaluate(queries=queries, active_learning=True)
+        if not queries:
+            return queries_prob_vectors
 
-            domain = classifier.domain
-            intent = classifier.intent
-            default_prob = 1.0
-            default_tag = "O|"
-            default_key = f"{domain}.{intent}.{default_tag}"
-            default_idx = tag_to_id[f"{default_key}"]
+        # to-do: change flag
+        classifier_eval = classifier.evaluate(queries=queries, fetch_distribution=True)
 
-            if not classifier_eval:
-                for _ in range(len(queries)):
-                    query_prob_vector_2d = np.zeros((1, len(tag_to_id)))
+        domain = classifier.domain
+        intent = classifier.intent
+        # default is set to 1 so that if there are no entities, this token/query will not get preference
+        # setting it to 0 would have caused active learning to select these tokens/queries first.
+        default_prob = 1.0
+        default_tag = "O|"
+        default_key = f"{domain}.{intent}.{default_tag}"
+        default_idx = entity_tag_to_id[f"{default_key}"]
 
-                    query_prob_vector_2d[0][default_idx] = default_prob
-                    queries_prob_vectors.append(query_prob_vector_2d)
+        if not classifier_eval:
+            # if no classifier is fit, then the evaluation object cannot be created.
+            # This case is the default.
+            for _ in range(len(queries)):
+                query_prob_vector_2d = np.zeros((1, len(entity_tag_to_id)))
+
+                query_prob_vector_2d[0][default_idx] = default_prob
+                queries_prob_vectors.append(query_prob_vector_2d)
+            return queries_prob_vectors
+
+        # Else, if there is classifier eval object
+        for query in classifier_eval.results:
+
+            if not (query.predicted and query.probas):
+                query_prob_vector_2d = np.zeros((1, len(entity_tag_to_id)))
+                query_prob_vector_2d[0][default_idx] = default_prob
 
             else:
-                for query in classifier_eval.results:
+                # Create and populate a 2D vector (# tokens * # tags)
+                query_prob_vector_2d = np.zeros(
+                    (len(query.probas), len(entity_tag_to_id))
+                )
+                for token_idx, tags_probas_pair in enumerate(query.probas):
+                    tags, probas = tags_probas_pair
+                    for i, tag in enumerate(tags):
+                        key = f"{domain}.{intent}.{tag}"
+                        tag_index = entity_tag_to_id.get(key, default_idx)
+                        # To-do: check default idx to default value map, whether needed.
+                        query_prob_vector_2d[token_idx][tag_index] = probas[i]
 
-                    if not (query.predicted and query.probas):
-                        query_prob_vector_2d = np.zeros((1, len(tag_to_id)))
-                        query_prob_vector_2d[0][default_idx] = default_prob
-
-                    else:
-                        # Create and populate a 2D vector (# tokens * # tags)
-                        query_prob_vector_2d = np.zeros(
-                            (len(query.probas), len(tag_to_id))
-                        )
-                        for token_idx, tags_probas_pair in enumerate(query.probas):
-                            tags, probas = tags_probas_pair
-                            for i, tag in enumerate(tags):
-                                key = f"{domain}.{intent}.{tag}"
-                                tag_index = tag_to_id.get(key, default_idx)
-                                # To-do: check default idx to default value map, whether needed.
-                                query_prob_vector_2d[token_idx][tag_index] = probas[i]
-
-                    queries_prob_vectors.append(query_prob_vector_2d)
+            queries_prob_vectors.append(query_prob_vector_2d)
         return queries_prob_vectors
 
     @staticmethod
-    def _get_probs(
+    def _get_classifier_probs(
         classifier: Classifier,
         queries: ProcessedQueryList,
-        nlp_component_to_id: Dict,
         nlp_component_type=None,
     ):
-        """Get the probability distribution for a query across domains or intents.
+        """Get the probability distribution for a query across domains or intents
 
         Args:
             classifier (MindMeld Classifer): Domain or Intent Classifier
@@ -248,13 +258,6 @@ class MindMeldALClassifier(ALClassifier):
         Returns:
             prob_vector (List[List]]): Probability distribution vectors for given queries.
         """
-        if nlp_component_type == "entity":
-            return MindMeldALClassifier._get_entity_probs(
-                classifier=classifier,
-                queries=queries,
-                tag_to_id=nlp_component_to_id,
-            )
-
         queries_prob_vectors = []
         if queries:
             classifier_eval = classifier.evaluate(queries=queries)
@@ -265,6 +268,40 @@ class MindMeldALClassifier(ALClassifier):
                 queries_prob_vectors.append(query_prob_vector)
             assert len(queries_prob_vectors) == len(queries)
         return queries_prob_vectors
+
+    @staticmethod
+    def _get_probs(
+        classifier: Classifier,
+        queries: ProcessedQueryList,
+        nlp_component_to_id: Dict,
+        nlp_component_type=None,
+    ):
+        """Get the probability distribution for a query across domains, intents or entities.
+
+        Args:
+            classifier (MindMeld Classifer): Domain or Intent Classifier
+            queries (ProcessedQueryList): List of MindMeld queries
+            nlp_component_to_id (Dict): Dictionary mapping domain or intent names to vector index
+                positions.
+            nlp_component_type (str): Domain/Intent/Entity
+
+        Returns:
+            prob_vector (List[List]]): Probability distribution vectors for given queries.
+        """
+        # If type is entity, get recognizer probabilities
+        if nlp_component_type == "entity":
+            return MindMeldALClassifier._get_entity_probs(
+                classifier=classifier,
+                queries=queries,
+                entity_tag_to_id=nlp_component_to_id,
+            )
+
+        # Else obtain classifier probabilities
+        return MindMeldALClassifier._get_classifier_probs(
+            classifier=classifier,
+            queries=queries,
+            nlp_component_to_id=nlp_component_to_id,
+        )
 
     def _pad_intent_probs(
         self, ic_queries_prob_vectors: List[List[float]], intents: List
@@ -428,7 +465,6 @@ class MindMeldALClassifier(ALClassifier):
             unsampled_queries=data_bucket.unsampled_queries,
             test_queries=data_bucket.test_queries,
             label_map=data_bucket.label_map,
-            heuristic=heuristic,
         )
 
     def _train_multi(
@@ -437,7 +473,6 @@ class MindMeldALClassifier(ALClassifier):
         unsampled_queries: ProcessedQueryList,
         test_queries: ProcessedQueryList,
         label_map: LabelMap,
-        heuristic: Heuristic,
     ):
         """Helper function to train multiple models and obtain a 3D probability array.
         Args:
@@ -473,7 +508,7 @@ class MindMeldALClassifier(ALClassifier):
         ]
         confidences_3d = []
         for fold_sample_queries in fold_sampled_queries_lists:
-            confidences_2d, _, eval_stats = self._train_single(
+            confidences_2d, _, _ = self._train_single(
                 fold_sample_queries,
                 unsampled_queries,
                 test_queries,
@@ -752,6 +787,7 @@ class MindMeldALClassifier(ALClassifier):
                 }
 
                 if verbose:
+                    # To generate plots at a sub-entity level (B, I, O tags)
                     for e, entity in enumerate(
                         er_eval_test.get_stats()["class_labels"]
                     ):
@@ -759,6 +795,4 @@ class MindMeldALClassifier(ALClassifier):
                             entity
                         ] = er_eval_test.get_stats()["class_stats"][
                             self.class_level_statistic
-                        ][
-                            e
-                        ]
+                        ][e]

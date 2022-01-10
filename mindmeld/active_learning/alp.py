@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 class ActiveLearningPipeline:  # pylint: disable=R0902
     """Class that executes the strategy tuning and query selection process for the Active
-    Learning Pipeline. """
+    Learning Pipeline."""
 
     def __init__(  # pylint: disable=R0913
         self,
@@ -173,7 +173,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
     def select_queries(self):
         """Selects the next batch of queries to label from a set of log queries."""
         logger.info("Loading queries for active-learning selection.")
-        self.data_bucket = DataBucketFactory.get_data_bucket_for_query_selection(  # pylint: disable=E1121, E501
+        self.data_bucket = DataBucketFactory.get_data_bucket_for_query_selection(  # pylint: disable=E501
             self.app_path,
             self.entity_tuning,
             self.tuning_level,
@@ -201,7 +201,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             aggregate_statistic=self.aggregate_statistic,
             class_level_statistic=self.class_level_statistic,
             plot_entities=self.entity_tuning,
-            plot_intents=(self.tuning_level == TUNE_LEVEL_INTENT)
+            plot_intents=(self.tuning_level == TUNE_LEVEL_INTENT),
         )
         plot_manager.generate_plots()
 

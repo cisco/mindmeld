@@ -151,6 +151,7 @@ class PlotManager:
             return
         function(self, y_keys=["overall"])
         for domain in self.get_domain_list():
+            # To-do: check if order can be reversed
             if self.plot_entities:
                 for intent in self.get_intent_list(domain):
                     y_keys = [domain, intent, "entities", "overall"]
