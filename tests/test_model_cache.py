@@ -34,8 +34,8 @@ def test_model_accuracies_are_similar_before_and_after_caching(kwik_e_mart_app_p
     intent_eval = nlp.domains["store_info"].intent_classifier.evaluate()
     entity_eval = (
         nlp.domains["store_info"]
-        .intents["get_store_hours"]
-        .entity_recognizer.evaluate()
+            .intents["get_store_hours"]
+            .entity_recognizer.evaluate()
     )
     intent_accuracy_no_cache = intent_eval.get_accuracy()
     entity_accuracy_no_cache = entity_eval.get_accuracy()
@@ -52,11 +52,35 @@ def test_model_accuracies_are_similar_before_and_after_caching(kwik_e_mart_app_p
     intent_eval = nlp.domains["store_info"].intent_classifier.evaluate()
     entity_eval = (
         nlp.domains["store_info"]
-        .intents["get_store_hours"]
-        .entity_recognizer.evaluate()
+            .intents["get_store_hours"]
+            .entity_recognizer.evaluate()
     )
     intent_accuracy_cached = intent_eval.get_accuracy()
     entity_accuracy_cached = entity_eval.get_accuracy()
 
     assert intent_accuracy_no_cache == intent_accuracy_cached
     assert entity_accuracy_no_cache == entity_accuracy_cached
+
+
+def test_model_cache_files_present_after_second_incremental_build(kwik_e_mart_app_path):
+    # clear model cache
+    model_cache_path = MODEL_CACHE_PATH.format(app_path=kwik_e_mart_app_path)
+    try:
+        shutil.rmtree(MODEL_CACHE_PATH.format(app_path=kwik_e_mart_app_path))
+    except FileNotFoundError:
+        pass
+
+    # Make sure no cache exists
+    assert os.path.exists(model_cache_path) is False
+    nlp = NaturalLanguageProcessor(kwik_e_mart_app_path)
+    nlp.build(incremental=True)
+    nlp.dump()
+    initial_timestamp = nlp.incremental_timestamp
+
+    nlp = NaturalLanguageProcessor(kwik_e_mart_app_path)
+    nlp.build(incremental=True)
+    nlp.dump()
+    new_timestamp = nlp.incremental_timestamp
+
+    nlp.load(initial_timestamp)
+    nlp.load(new_timestamp)
