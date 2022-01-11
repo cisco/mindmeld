@@ -25,8 +25,23 @@ from concurrent.futures import ProcessPoolExecutor, wait
 from copy import deepcopy
 from multiprocessing import cpu_count
 from weakref import WeakValueDictionary
+
 from tqdm import tqdm
+
+from ._config import (
+    get_nlp_config,
+    get_language_config,
+)
+from ._util import TreeNlp, MaskState
+from .domain_classifier import DomainClassifier
+from .entity_recognizer import EntityRecognizer
+from .entity_resolver import EntityResolverFactory
+from .intent_classifier import IntentClassifier
+from .parser import Parser
+from .role_classifier import RoleClassifier
+from .schemas import validate_locale_code_with_ref_language_code, _validate_mask_nlp
 from .. import path
+from ..constants import SYSTEM_ENTITY_PREFIX
 from ..core import Bunch, ProcessedQuery, QueryEntity, Entity, NestedEntity
 from ..exceptions import (
     AllowedNlpClassesKeyError,
@@ -36,24 +51,11 @@ from ..exceptions import (
     InvalidMaskError,
 )
 from ..markup import TIME_FORMAT, process_markup
+from ..models.helpers import get_ngrams_upto_n, GAZETTEER_RSC
 from ..path import get_app
 from ..query_factory import QueryFactory
 from ..resource_loader import ResourceLoader
 from ..system_entity_recognizer import SystemEntityRecognizer
-from ._config import (
-    get_nlp_config,
-    get_language_config,
-)
-from .domain_classifier import DomainClassifier
-from .entity_recognizer import EntityRecognizer
-from .entity_resolver import EntityResolverFactory, ElasticsearchConnectionError
-from .intent_classifier import IntentClassifier
-from .parser import Parser
-from ._util import TreeNlp, MaskState
-from .role_classifier import RoleClassifier
-from .schemas import validate_locale_code_with_ref_language_code, _validate_mask_nlp
-from ..models.helpers import get_ngrams_upto_n, GAZETTEER_RSC
-from ..constants import SYSTEM_ENTITY_PREFIX
 
 # ignore sklearn DeprecationWarning, https://github.com/scikit-learn/scikit-learn/issues/10449
 warnings.filterwarnings(action="ignore", category=DeprecationWarning)
@@ -1636,60 +1638,92 @@ class EntityProcessor(Processor):
             self.resource_loader, domain, intent, entity_type
         )
         self.entity_resolver = EntityResolverFactory.create_resolver(
-            app_path,
-            entity_type,
-            resource_loader=self.resource_loader
+            app_path, entity_type, resource_loader=self.resource_loader
         )
 
         self.progress_bar = progress_bar
         if isinstance(self.progress_bar, tqdm):
             self.progress_bar.total += 1
 
+    @property
+    def ready(self):
+        # either one can trigger a call to dump method in build_resursive()
+        return self._ready_rc or self._ready_er
+
+    @ready.setter
+    def ready(self, val):
+        self._ready_rc = val
+        self._ready_er = val
+
     def _build(self, incremental=False, label_set=None, load_cached=True):
         """Builds the models for this entity type"""
-        self.ready = self.role_classifier.fit(
+        self._ready_rc = self.role_classifier.fit(
             label_set=label_set,
             incremental_timestamp=self.incremental_timestamp,
             load_cached=load_cached
         )
-        self.entity_resolver.fit()
+        self.entity_resolver.fit(clean=bool(self.incremental_timestamp))
+        self._ready_er = self.entity_resolver.dirty
+
         if isinstance(self.progress_bar, tqdm):
             self.progress_bar.update(1)
             self.progress_bar.refresh()
 
     def _dump(self):
-        model_path, incremental_model_path = path.get_role_model_paths(
-            self._app_path,
-            self.domain,
-            self.intent,
-            self.type,
-            timestamp=self.incremental_timestamp,
-        )
-        self.role_classifier.dump(
-            model_path, incremental_model_path=incremental_model_path
-        )
-
-    def unload(self):
-        self.ready = False
-        self.role_classifier.unload()
-
-    def _load(self, incremental_timestamp=None):
-        try:
+        if self._ready_rc:
             model_path, incremental_model_path = path.get_role_model_paths(
                 self._app_path,
                 self.domain,
                 self.intent,
                 self.type,
-                timestamp=incremental_timestamp,
+                timestamp=self.incremental_timestamp,
             )
-            self.role_classifier.load(
-                incremental_model_path if incremental_timestamp else model_path
+            self.role_classifier.dump(
+                model_path, incremental_model_path=incremental_model_path
             )
-            self.entity_resolver.load()
-        except ElasticsearchConnectionError:
-            logger.warning("Cannot connect to ES, so Entity Resolver is not loaded.")
+
+        if self._ready_er:
+            model_path, incremental_model_path = path.get_resolver_model_path(
+                self._app_path,
+                self.domain,
+                self.intent,
+                self.type,
+                timestamp=self.incremental_timestamp,
+            )
+            self.entity_resolver.dump(
+                model_path, incremental_model_path=incremental_model_path
+            )
+
+    def unload(self):
+        self._ready_rc = False
+        self.role_classifier.unload()
+        self._ready_er = False
+        self.entity_resolver.unload()
+
+    def _load(self, incremental_timestamp=None):
+        model_path, incremental_model_path = path.get_role_model_paths(
+            self._app_path,
+            self.domain,
+            self.intent,
+            self.type,
+            timestamp=incremental_timestamp,
+        )
+        self.role_classifier.load(
+            incremental_model_path if incremental_timestamp else model_path
+        )
+        model_path, incremental_model_path = path.get_resolver_model_path(
+            self._app_path,
+            self.domain,
+            self.intent,
+            self.type,
+            timestamp=incremental_timestamp,
+        )
+        self.entity_resolver.load(
+            incremental_model_path if incremental_timestamp else model_path
+        )
 
     def _evaluate(self, print_stats, label_set="test"):
+        # evaluation can be done only for role classifier and not for entity resolver
         if len(self.role_classifier.roles) > 1:
             role_eval = self.role_classifier.evaluate(label_set=label_set)
             if role_eval:

@@ -90,6 +90,9 @@ setup(
             'tensorflow~=1.2; python_version < "3.7"',
             'tensorflow>=1.13.1,<2.0; python_version >= "3.7"',
         ],
+        "torch": [
+            'torch~=1.7.0; python_version>="3.6"',
+        ],
         "bert": [
             'torch~=1.7.0; python_version>="3.6"',
             'transformers~=3.5.1; python_version>="3.6"',
