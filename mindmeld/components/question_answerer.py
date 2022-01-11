@@ -50,9 +50,11 @@ from ..exceptions import (
 from ..models import create_embedder_model
 from ..path import (
     get_question_answerer_index_cache_file_path,
-    NATIVE_QUESTION_ANSWERER_INDICES_CACHE_PATH
+    NATIVE_QUESTION_ANSWERER_INDICES_CACHE_DEFAULT_FOLDER as DEFAULT_APP_PATH
 )
 from ..resource_loader import Hasher, ResourceLoader
+from ..text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
+from ..text_preparation.tokenizers import WhiteSpaceTokenizer
 
 if _is_module_available("elasticsearch"):
     from ._elasticsearch_helpers import (
@@ -72,15 +74,22 @@ if _is_module_available("elasticsearch"):
 logger = logging.getLogger(__name__)
 
 DEFAULT_QUERY_TYPE = "keyword"
-ALL_QUERY_TYPES = ["keyword", "text", "embedder",
-                   "embedder_keyword", "keyword_embedder",
-                   "embedder_text", "text_embedder"]
+ALL_QUERY_TYPES = ["keyword", "text", "embedder", "embedder_keyword", "embedder_text"]
 EMBEDDING_FIELD_STRING = "_embedding"
 
 
-class BaseQuestionAnswerer(ABC):
+class QuestionAnswererFactory:
+    """
+    Factory class for creating QuestionAnswerers
 
-    def __init__(self, **kwargs):
+    usage
+        >>> question_answerer = QuestionAnswererFactory.create_question_answerer(**kwargs)
+        >>> question_answerer.load_kb(...)
+        >>> question_answerer.get(...) # .get(...) or .build_search(...)
+    """
+
+    @classmethod
+    def create_question_answerer(cls, app_path=None, config=None, app_namespace=None, **kwargs):
         """
         Args:
             app_path (str, optional): The path to the directory containing the app's data. If
@@ -89,31 +98,120 @@ class BaseQuestionAnswerer(ABC):
                 collisions between the indices of this app and those of other apps.
             config (dict, optional): The QA config if passed directly rather than loaded from the
                 app config
-            resource_loader (ResourceLoader, optional): An object which can load resources for the
-                question answerer.
         """
 
-        if not kwargs.get("app_path") and not kwargs.get("app_namespace"):
+        config = cls._get_config(config, app_path)
+        reformatted_config = cls._correct_deprecated_qa_config(config)
+
+        model_type = reformatted_config.get("model_type")
+        question_answerer_class = cls._get_question_answerer_class(model_type)
+
+        return question_answerer_class(
+            app_path=app_path, config=reformatted_config, app_namespace=app_namespace, **kwargs
+        )
+
+    @staticmethod
+    def _get_config(config=None, app_path=None):
+        """
+        Returns inputted config if valid, else a question answerer config from app's config file
+        is loaded and returned.
+        """
+        if not config:
+            return get_classifier_config("question_answering", app_path=app_path)
+        return config
+
+    @staticmethod
+    def _correct_deprecated_qa_config(config):
+        """
+        for backwards compatibility
+          if the config is supplied in deprecated format, its format is corrected and returned,
+          else it is not modified and returned as-is
+
+        deprecated usage
+            >>> config = {
+                    "model_type": "keyword",  # or "text", "embedder", "embedder_keyword", etc.
+                    "model_settings": {
+                        ...
+                    }
+                }
+
+        new usage
+            >>> config = {
+                    "model_type": "elasticsearch",  # or "native"
+                    "model_settings": {
+                        "query_type": "keyword",  # or "text", "embedder", "embedder_keyword", etc.
+                        ...
+                    }
+                }
+        """
+        if not config.get("model_settings", {}).get("query_type"):
+            model_type = config.get("model_type")
+            if not model_type:
+                msg = f"Invalid 'model_type': {model_type} found while creating a QuestionAnswerer"
+                raise ValueError(msg)
+            if model_type in QUESTION_ANSWERER_MODEL_MAPPINGS:
+                raise ValueError(
+                    "Could not find `query_type` in `model_settings` of question answerer")
+            else:
+                msg = "Using deprecated config format for Question Answerer. " \
+                      "See https://www.mindmeld.com/docs/userguide/kb.html for more details."
+                warnings.warn(msg, DeprecationWarning)
+                config = copy.deepcopy(config)
+                model_settings = config.get("model_settings", {})
+                model_settings.update({"query_type": model_type})
+                config["model_settings"] = model_settings
+                config["model_type"] = "elasticsearch"
+        return config
+
+    @staticmethod
+    def _get_question_answerer_class(model_type):
+
+        if model_type not in QUESTION_ANSWERER_MODEL_MAPPINGS:
+            msg = f"Expected 'model_type' in config of Question Answerer among " \
+                  f"{[*QUESTION_ANSWERER_MODEL_MAPPINGS]} but found {model_type}"
+            raise ValueError(msg)
+
+        if model_type == "elasticsearch" and not _is_module_available("elasticsearch"):
+            raise ImportError(
+                "Must install the extra [elasticsearch] by running 'pip install "
+                "mindmeld[elasticsearch]' to use Elasticsearch for question answering."
+            )
+
+        return QUESTION_ANSWERER_MODEL_MAPPINGS[model_type]
+
+
+class BaseQuestionAnswerer(ABC):
+    # TODO: change name to QuestionAnswerer upon removing existing QuestionAnswerer class
+
+    def __init__(self, app_path=None, config=None, app_namespace=None, **_kwargs):
+        """
+        Args:
+            app_path (str, optional): The path to the directory containing the app's data. If
+                provided, used to obtain default 'app_namespace' and QA configurations
+            config (dict, optional): The QA config if passed directly rather than loaded from the
+                app config
+            app_namespace (str, optional): The namespace of the app. Used to prevent collisions
+                between the indices of this app and those of other apps. If None, it's value is
+                determined from the app_path.
+        """
+
+        if not app_path and not app_namespace:
             msg = f"At least one of 'app_path' or 'app_namespace' must be inputted as arguments " \
                   f"while creating an instance of {self.__class__.__name__} in order to " \
-                  f"distinctly identify the Knowledge Base indices being created. Using the " \
-                  f"default 'app_path' as the current working directory path: '{os.getcwd()}'."
-            logger.warning(msg)
+                  f"distinctly identify the Knowledge Base indices being created."
+            logger.error(msg)
+            raise ValueError(msg)
 
-        app_path = kwargs.get("app_path") or os.getcwd()  # app_path can be NoneType as well!
-        self.app_path = os.path.abspath(app_path)
-        self.app_namespace = kwargs.get("app_namespace") or get_app_namespace(self.app_path)
-        self.resource_loader = (
-            kwargs.get("resource_loader") or ResourceLoader.create_resource_loader(self.app_path)
-        )
+        self.app_path = os.path.abspath(app_path) if app_path else app_path
+        self.app_namespace = app_namespace or get_app_namespace(self.app_path)
+
         self._qa_config = (
-            kwargs.get("config")
-            or get_classifier_config("question_answering", app_path=self.app_path)
+            config or get_classifier_config("question_answering", app_path=self.app_path)
         )
 
     def __repr__(self):
-        return f"<{self.__class__.__name__} query_type: {self.query_type} " \
-               f"app_path: {self.app_path} app_namespace: {self.app_namespace}>"
+        return f"<{self.__class__.__name__} query_type:{self.query_type} " \
+               f"app_path:{self.app_path} app_namespace:{self.app_namespace}>"
 
     @property
     def model_type(self) -> str:
@@ -129,31 +227,69 @@ class BaseQuestionAnswerer(ABC):
 
     @property
     def model_settings(self) -> dict:
-        return self._qa_config.get("model_settings", {})
+        model_settings = self._qa_config.get("model_settings", {})
 
-    @abstractmethod
-    def _get(self, *args, **kwargs):
-        raise NotImplementedError
+        # add defaults
+        if model_settings.get("embedder_type") == "bert":
+            default_pretrained_name_or_abspath = "sentence-transformers/bert-base-nli-mean-tokens"
+            pretrained_name_or_abspath = model_settings.get("pretrained_name_or_abspath")
+            if not pretrained_name_or_abspath:
+                msg = f"Using a default value ('{default_pretrained_name_or_abspath}') " \
+                      f"for the parameter 'pretrained_name_or_abspath' as NoneType value inputted."
+                logger.warning(msg)
+                pretrained_name_or_abspath = default_pretrained_name_or_abspath
+            model_settings["pretrained_name_or_abspath"] = pretrained_name_or_abspath
+        elif model_settings.get("embedder_type") == "glove":
+            default_token_embedding_dimension = 300
+            token_embedding_dimension = model_settings.get("token_embedding_dimension")
+            if not token_embedding_dimension:
+                msg = f"Using a default value ('{default_token_embedding_dimension}') " \
+                      f"for the parameter 'token_embedding_dimension' as NoneType value inputted."
+                logger.warning(msg)
+                token_embedding_dimension = default_token_embedding_dimension
+            model_settings["token_embedding_dimension"] = token_embedding_dimension
 
-    @abstractmethod
-    def _build_search(self, *args, **kwargs):
-        raise NotImplementedError
+        return model_settings
 
-    @abstractmethod
-    def _load_kb(self, *args, **kwargs):
-        raise NotImplementedError
+    def load_kb(self, index_name, data_file, **kwargs):
+        """Loads documents from disk into the specified index in the knowledge
+        base. If an index with the specified name doesn't exist, a new index
+        with that name will be created in the knowledge base.
 
-    @staticmethod
-    def _resolve_deprecated_index_name(index_name, index):
-        if index:
-            msg = "Input the index name to a question answerer method by using the argument name " \
-                  "'index_name' instead of 'index'."
-            warnings.warn(msg, DeprecationWarning)
-        index_name = index_name or index
-        if not index_name:
-            msg = "Missing one required argument: 'index_name'"
-            raise TypeError(msg)
-        return index_name
+        Args:
+            index_name (str): The name of the new index to be created; can be any valid string
+            data_file (str): The path to the data file containing the documents
+                to be imported into the knowledge base index. It could be
+                either json or jsonl file.
+
+        Optional Args (used by all QA classes):
+            app_namespace (str): A custom namespace of the app. Used to prevent collisions between
+                the indices of two apps with same app name.
+            clean (bool): Set to true if you want to delete an existing index and reindex it. If
+                False (default), ElasticsearchQA just updates its index with new objects not
+                deleting the old objects whereas NativeQA replaces old index with new index
+                consisting of the inputted data file's KB objects.
+            embedding_fields (list): List of embedding fields for the given index that can be
+                directly passed-in instead of adding them to QA config or overriding QA config.
+                Embedder information is generated and indexed only for the user specified fields
+                and not all KB field names. If this list is empty, no fields have the embedder
+                component even though 'embedder' keyword is specified in 'model_type'.
+
+        Optional Args (Elasticsearch specific):
+            es_host (str): The Elasticsearch host server.
+            es_client (Elasticsearch): The Elasticsearch client.
+            connect_timeout (int): The amount of time for a connection to the Elasticsearch host.
+        """
+
+        if (
+            ("config" in kwargs and kwargs["config"])
+            or ("app_path" in kwargs and kwargs["app_path"])
+        ):
+            msg = "Passing 'config' or 'app_path' to '.load_kb()' method is no longer " \
+                  "supported. Create a Question Answerer instance with the required " \
+                  "configurations and/or app path before calling '.load_kb()'."
+            raise ValueError(msg)
+        self._load_kb(index_name, data_file, **kwargs)
 
     def get(self, index_name=None, size=10, query_type=None, app_namespace=None, **kwargs):
         """
@@ -192,40 +328,29 @@ class BaseQuestionAnswerer(ABC):
         return self._build_search(index=index_name, ranking_config=ranking_config,
                                   app_namespace=app_namespace, **kwargs)
 
-    def load_kb(self, index_name, data_file, **kwargs):
-        """Loads documents from disk into the specified index in the knowledge
-        base. If an index with the specified name doesn't exist, a new index
-        with that name will be created in the knowledge base.
+    @staticmethod
+    def _resolve_deprecated_index_name(index_name, index):
+        if index:
+            msg = "Input the index name to a question answerer method by using the argument name " \
+                  "'index_name' instead of 'index'."
+            warnings.warn(msg, DeprecationWarning)
+        index_name = index_name or index
+        if not index_name:
+            msg = "Missing one required argument: 'index_name'"
+            raise TypeError(msg)
+        return index_name
 
-        Args:
-            index_name (str): The name of the new index to be created.
-            data_file (str): The path to the data file containing the documents
-                to be imported into the knowledge base index. It could be
-                either json or jsonl file.
+    @abstractmethod
+    def _get(self, *args, **kwargs):
+        raise NotImplementedError
 
-        Optional Args (used by all QA classes):
-            app_namespace (str): The namespace of the app. Used to prevent
-                collisions between the indices of this app and those of other apps.
-            clean (bool): Set to true if you want to delete an existing index
-                and reindex it
-            embedding_fields (list): List of embedding fields can be directly passed in
-                instead of adding them to QA config
+    @abstractmethod
+    def _build_search(self, *args, **kwargs):
+        raise NotImplementedError
 
-        Optional Args (Elasticsearch specific):
-            es_host (str): The Elasticsearch host server.
-            es_client (Elasticsearch): The Elasticsearch client.
-            connect_timeout (int): The amount of time for a connection to the Elasticsearch host.
-        """
-
-        if (
-            ("config" in kwargs and kwargs["config"])
-            or ("app_path" in kwargs and kwargs["app_path"])
-        ):
-            msg = "Passing 'config' or 'app_path' to '.load_kb()' method is no longer " \
-                  "supported. Create a Question Answerer instance with the required " \
-                  "configurations and/or app path before calling '.load_kb()'."
-            raise ValueError(msg)
-        self._load_kb(index_name, data_file, **kwargs)
+    @abstractmethod
+    def _load_kb(self, *args, **kwargs):
+        raise NotImplementedError
 
 
 class NativeQuestionAnswerer(BaseQuestionAnswerer):
@@ -234,75 +359,26 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
     necessary functionality for interacting with the application's knowledge base.
 
     This class uses Entity Resolvers in the backend to implement various underlying functionalities
-    of question answerer.
+    of question answerer. It consists of three important sub-classes: (1) *Indices* which maintains
+    the different indices including fit entity resolvers used for inference, (2) *FieldResource*
+    which forms the core of each index, encapsulating the fit resolvers and metadata related to each
+    KB field, (3) *Search* class that is used to build custom search similar to what
+    ElasticsearchQuestionAnswerer offers. In addition, NativeQuestionAnswerer also offers same apis
+    as the Elasticsearch one- .get(), .load_kb(), .build_search().
 
+    The created resolvers are dumped at DEFAULT_APP_PATH, whose directory serves as a common site to
+    host all indices, similar to how all the indices of Elasticsearch are stored in a common
+    directory on the disk.
     """
 
-    def _get(self, index, size=10, query_type=None, app_namespace=None, **kwargs):
-
-        doc_id = kwargs.get("id")
-
-        query_type = query_type or self.query_type
-
-        # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
-        app_namespace = app_namespace or self.app_namespace
-
-        # If an id was passed in, simply retrieve the specified document
-        if doc_id:
-            logger.info(
-                "Retrieve object from KB: index= '%s', id= '%s'.", index, doc_id
-            )
-            s = self.build_search(index, app_namespace=app_namespace)
-
-            if NativeQuestionAnswerer.FieldResource.is_number(doc_id):
-                # if a number, look for that exact doc_id; no fuzzy match like in Elasticsearch QA
-                s = s.filter(query_type=query_type, field="id", et=doc_id)  # et == equals to
-            else:
-                s = s.filter(query_type=query_type, id=doc_id)
-                # TODO: should consider s.query() to do fuzzy match like in Elasticsearch?
-                # s = s.query(query_type=query_type, id=doc_id)
-            results = s.execute(size=size)
-            return results
-
-        field = kwargs.pop("_sort", None)
-        sort_type = kwargs.pop("_sort_type", None)
-        location = kwargs.pop("_sort_location", None)
-
-        s = self.build_search(index, app_namespace=app_namespace).query(
-            query_type=query_type, **kwargs)
-        if field and (sort_type or location):
-            s.sort(field, sort_type=sort_type, location=location)
-
-        results = s.execute(size=size)
-        return results
-
-    def _build_search(self, index, ranking_config=None, app_namespace=None):
-        """Build a search object for advanced filtered search.
-
-        Args:
-            index (str): index name of knowledge base object.
-            ranking_config (dict, optional): overriding ranking configuration parameters.
-            app_namespace (str, optional): The namespace of the app. Used to prevent
-                collisions between the indices of this app and those of other apps.
-        Returns:
-            Search: a Search object for filtered search.
-        """
-
-        if ranking_config:
-            msg = f"'ranking_config' is currently discarded in {self.__class__.__name__}."
-            logger.warning(msg)
-            ranking_config = None
-
-        # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
-        app_namespace = app_namespace or self.app_namespace
-
-        # get index name with app scope
-        scoped_index_name = get_scoped_index_name(app_namespace, index)
-
-        if scoped_index_name not in NativeQuestionAnswerer.ALL_INDICES:
-            raise ValueError("Knowledge base index '{}' does not exist.".format(index))
-
-        return NativeQuestionAnswerer.Search(index=scoped_index_name)
+    # a common resource loaded generally used across all resolvers during loading process
+    RESOURCE_LOADER = ResourceLoader.create_resource_loader(
+        app_path=None,
+        text_preparation_pipeline=TextPreparationPipelineFactory.create_text_preparation_pipeline(
+            language="en",
+            tokenizer=WhiteSpaceTokenizer()
+        )
+    )
 
     def _load_kb(self,
                  index_name,
@@ -409,28 +485,98 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                     all_id2value[key] = {}
                 all_id2value[key].update({_id: value})
 
-        # for each key/field in doc, reuse an already existing FieldResource metadata or create one
-        index_resources = \
-            NativeQuestionAnswerer.ALL_INDICES.get_index_metadata(scoped_index_name)
-        for key, id2value in all_id2value.items():
-            field_resource = index_resources.get(key)
+        if clean:
+            NativeQuestionAnswerer.ALL_INDICES.delete_index(scoped_index_name)
+
+        index_resources = {}
+        # Fetch an index if it already exists
+        try:
+            index_resources = NativeQuestionAnswerer.ALL_INDICES.get_index(scoped_index_name)
+        except KnowledgeBaseError:
+            pass
+        for kb_field_name, id2value in all_id2value.items():
+            field_resource = index_resources.get(kb_field_name)
             if not field_resource:
                 field_resource = NativeQuestionAnswerer.FieldResource(
-                    index_name=scoped_index_name, field_name=key)
+                    index_name=scoped_index_name, field_name=kb_field_name
+                )
             field_resource.update_resource(
                 id2value,
                 has_text_resolver=("text" in query_type or "keyword" in query_type),
-                has_embedding_resolver=match_regex(key, embedding_fields),
-                resolver_settings=model_settings,
-                lazy_clean=clean,
+                has_embedding_resolver=match_regex(kb_field_name, embedding_fields),
+                resolver_model_settings=model_settings,  # same settings for all fields
+                clean=clean,
                 processor_type="text" if "text" in query_type else "keyword",
+                resource_loader=NativeQuestionAnswerer.RESOURCE_LOADER  # one to all resolvers
             )
-            index_resources.update({key: field_resource})
+            index_resources.update({kb_field_name: field_resource})
 
         # update and dump
-        NativeQuestionAnswerer.ALL_INDICES.update_and_dump_index(
+        NativeQuestionAnswerer.ALL_INDICES.update_index_and_persist(
             scoped_index_name, index_resources, [*all_ids.keys()]
         )
+
+    def _get(self, index, size=10, query_type=None, app_namespace=None, **kwargs):
+
+        doc_id = kwargs.get("id")
+
+        query_type = query_type or self.query_type
+
+        # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
+        app_namespace = app_namespace or self.app_namespace
+
+        # If an id was passed in, simply retrieve the specified document
+        if doc_id:
+            logger.info(
+                "Retrieve object from KB: index= '%s', id= '%s'.", index, doc_id
+            )
+            s = self.build_search(index, app_namespace=app_namespace)
+
+            if NativeQuestionAnswerer.FieldResource.is_number(doc_id):
+                # if a number, look for that exact doc_id; no fuzzy match like in Elasticsearch QA
+                s = s.filter(query_type=query_type, field="id", et=doc_id)  # et == equals to
+            else:
+                s = s.filter(query_type=query_type, id=doc_id)
+                # TODO: should consider s.query() to do fuzzy match like in Elasticsearch?
+                # s = s.query(query_type=query_type, id=doc_id)
+            results = s.execute(size=size)
+            return results
+
+        field = kwargs.pop("_sort", None)
+        sort_type = kwargs.pop("_sort_type", None)
+        location = kwargs.pop("_sort_location", None)
+
+        s = self.build_search(index, app_namespace=app_namespace).query(
+            query_type=query_type, **kwargs)
+        if field and (sort_type or location):
+            s.sort(field, sort_type=sort_type, location=location)
+
+        results = s.execute(size=size)
+        return results
+
+    def _build_search(self, index, ranking_config=None, app_namespace=None):
+        """Build a search object for advanced filtered search.
+
+        Args:
+            index (str): index name of knowledge base object.
+            ranking_config (dict, optional): overriding ranking configuration parameters.
+            app_namespace (str, optional): The namespace of the app. Used to prevent
+                collisions between the indices of this app and those of other apps.
+        Returns:
+            Search: a Search object for filtered search.
+        """
+
+        if ranking_config:
+            msg = f"'ranking_config' is currently discarded in {self.__class__.__name__}."
+            logger.warning(msg)
+            ranking_config = None
+
+        # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
+        app_namespace = app_namespace or self.app_namespace
+
+        # get index name with app scope, and make it ready for inference
+        scoped_index_name = get_scoped_index_name(app_namespace, index)
+        return NativeQuestionAnswerer.Search(index=scoped_index_name)
 
     class Indices:
         """ An object that hold all the indices for an app_path
@@ -440,8 +586,9 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
 
         '''
             {
-                index_name1: {key1: FieldResource1, key2: FieldResource2, ...},
-                index_name2: {...},
+                index_name1: {key11: FieldResource11, key12: FieldResource12, ...},
+                index_name2: {key21: FieldResource21, key22: FieldResource22, ...},
+                index_name3: {...},
                 ...
             }
         '''
@@ -451,109 +598,194 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
         to that specific field in the KB (across all ids in the KB) along with information such as
         what data-type that field belongs to (number, date, etc.), field name, & hash of the stored
         data. See `FieldResource` class docstrings for more details.
-
         """
 
-        def __init__(self, indices_cache_path=None):
-            self._indices = {}
-            self._indices_all_ids = {}  # maintained to keep a record of all doc ids of each KB
-            self.indices_cache_path = (
-                indices_cache_path or NATIVE_QUESTION_ANSWERER_INDICES_CACHE_PATH
-            )
+        def __init__(self, app_path):
+            """
+            Args:
+                app_path (str): A folder wherein the indices are stored
+            """
+            self.app_path = app_path
+            self._indices = {}  # Dict[str, Dict[str, FieldResource]]
+            # maintain a record of all doc ids of the indices when creating it from KB data
+            self._indices_all_ids = {}  # Dict[str, List[str]]
 
-        def __contains__(self, item):
-            return item in self._indices
+        def __contains__(self, index_name):
+            if (index_name not in self._indices) ^ (index_name not in self._indices_all_ids):
+                msg = f"Found an index name ({index_name}) present in only one of " \
+                      f"`self._indices` and `self._indices_all_ids`. Maybe an error during " \
+                      f"updating or loading the index?"
+                logger.debug(msg)
+                raise KeyError(msg)
+            return index_name in self._indices
 
-        def _get_index_cache_path(self, index_name):
-            return get_question_answerer_index_cache_file_path(self.indices_cache_path, index_name)
+        def _get_index_cache_path(self, index_name, app_path=None):
+            """
+            Returns a  ache path for a specified index name using a (predetermined) formatted path.
+            If an app_path is specified, it is substituted for a default app path in that formatted
+            string.
 
-        def _create_metadata_for_dumping(self, index_name):
-            index_resources = self._indices[index_name]
-            dump = {field: resource.to_metadata() for field, resource in index_resources.items()}
-            return dump
+            Args:
+                index_name (str): A scoped index name
+                app_path (str, optional): The Mindmeld application's path where the index needs to
+                    be located. If unspecified, a default path is used.
 
-        def get(self, index_name):
-            try:
-                return self._indices[index_name]
-            except KeyError as e:
-                msg = f"Index {index_name} does not exist in scope of {self.indices_cache_path}. " \
-                      f"Consider creating one before calling '.get()'. "
-                raise KeyError(msg) from e
+            Returns:
+                str: a path to cache indices
+
+            Example:
+                returns: ~/.cache/mindmeld/question_answerers/food_ordering$restaurants.pkl
+                when:    app_path=~/.cache/mindmeld/question_answerers and
+                when:    index_name = food_ordering$restaurants
+            """
+            app_path = app_path or self.app_path
+            return get_question_answerer_index_cache_file_path(app_path, index_name)
+
+        # 'get' methods for accessing indices that are already loaded into memory
 
         def get_all_ids(self, index_name):
+            """
+            Returns all ids observed in the KB for the specified index name in chronological order.
+            The specified index must already be loaded into the memory to obtain ids.
+
+            Args:
+                index_name (str): A scoped index name
+
+            Returns:
+                List[str]: a list of ids observed in the KB during load-kb
+
+            Raises:
+                KeyError: When the specified (scoped) index name is not found in memory
+            """
             try:
                 return self._indices_all_ids[index_name]
             except KeyError as e:
-                msg = f"Index {index_name} does not exist in scope of {self.indices_cache_path}. " \
-                      f"Consider creating one before calling '.get_all_ids()'. "
+                msg = f"Index {index_name} does not exist in scope of {self.app_path}. " \
+                      f"Consider creating or loading it before calling '.get_all_ids()'."
                 raise KeyError(msg) from e
 
-        def get_index_metadata(self, index_name):
+        def get_metadata(self, index_name):
             """
-            Different from '.get()', this method checks all possible ways to retrieve meta data
-            for the chosen index. Notably, to reduce time complexity, if an index is loaded from
-            a cache path, resolvers (if any) are not fit automatically and one must fit them by
-            calling 'update_resource()' in FieldResource.
+            Returns index's FieldResources' metadata objects if the index is available in memory.
 
-            Use this method only to obtain metadata.
+            Args:
+                index_name (str): A scoped index name
+
+            Returns:
+                metadata (Dict[str, Bunch]): metadata associated with each field name of the index
+
+            Raises:
+                KeyError: When the specified (scoped) index name is not found in memory
             """
+            try:
+                metadata = {
+                    field_name: field_resource.to_metadata()
+                    for field_name, field_resource in self._indices[index_name].items()
+                }
+            except KeyError as e:
+                msg = f"Index {index_name} does not exist in scope of {self.app_path}. " \
+                      f"Consider creating or loading it before calling '.get_all_ids()'."
+                raise KeyError(msg) from e
 
-            cache_path = self._get_index_cache_path(index_name)
+            return metadata
 
-            if index_name in self:
-                metadata_dump = self._create_metadata_for_dumping(index_name)
+        def is_available(self, index_name):
+            """
+            Checks for availability of a specified index name both in memory (i.e. if already
+            loaded into memory at the time of checking) as well as in the cache path where are all
+            the indices' metadata are stored.
 
-            elif os.path.exists(cache_path):
-                opfile = open(cache_path, "rb")
-                metadata_dump = pickle.load(opfile)
-                metadata_dump.pop("__all_ids", None)
-                opfile.close()
+            Args:
+                index_name (str): A scoped index name for checking its availability
 
+            Returns:
+                bool: True if index name is available in memory or in cache directory, else False
+            """
+            return index_name in self or os.path.exists(self._get_index_cache_path(index_name))
+
+        def get_index(self, index_name):
+            """
+            Returns the index corresponding to the specified index name. If the index is not found
+            in memory, this method looks up the cache path to obtain the index.
+
+            Args:
+                index_name (str): A scoped index name
+
+            Returns:
+                index_resources (Dict[str, FieldResource]): a dictionary of FieldResource, one for
+                    each field name in the index
+
+            Raises:
+                KnowledgeBaseError: if the specified index name is unavailable both in memory as
+                    well as disk
+            """
+            if self.is_available(index_name):
+                if index_name not in self:
+                    msg = f"Loading metadata for the scoped index name from disk: {index_name}"
+                    logger.info(msg)
+                    cache_path = self._get_index_cache_path(index_name)
+                    with open(cache_path, "rb") as opfile:
+                        metadata_objects = pickle.load(opfile)
+                    index_all_ids = metadata_objects.pop("__all_ids")
+                    index_resources = {}
+                    for field_name, cache_object in metadata_objects.items():
+                        field_resource = (
+                            NativeQuestionAnswerer.FieldResource.from_metadata(cache_object)
+                        )
+                        field_resource.load_resolvers(
+                            resource_loader=NativeQuestionAnswerer.RESOURCE_LOADER
+                        )
+                        index_resources.update({field_name: field_resource})
+                    self._indices.update({index_name: index_resources})
+                    self._indices_all_ids.update({index_name: index_all_ids})
             else:
-                return {}
+                msg = f"Consider creating indices first before using them. Specified scoped " \
+                      f"index name {index_name} not found in list of known indices."
+                raise KnowledgeBaseError(msg)
 
-            # create field resource instance for each of the metadata
-            index_resources = {}
-            for field, cache_object in metadata_dump.items():
-                field_resource = (
-                    NativeQuestionAnswerer.FieldResource.from_metadata(cache_object)
-                )
-                index_resources.update({field: field_resource})
-            return index_resources
+            return self._indices[index_name]
 
         def delete_index(self, index_name):
-
-            # clear field resources
+            """
+            Deletes the index both from memory as well as disk
+            """
             if index_name in self:
                 del self._indices[index_name]  # free the pointer
 
             # clear index dump cache path, if required
+            # Note: This might not delete the entity resolver data and need methods for doing same.
             cache_path = self._get_index_cache_path(index_name)
             if cache_path and os.path.exists(cache_path):
                 os.remove(cache_path)
 
-        def update_and_dump_index(self, index_name, index_resources, index_all_ids):
-            # a method to be used with load_kb() function
+        def update_index_and_persist(self, index_name, index_resources, index_all_ids):
+            """
+            Updates the specified index's resources in the memory as well as dumps the metadata into
+            disk for fast loading time later on. Note that this method is best used with the
+            a load_kb() method wherein fit resources are frirst created before updating indices.
 
-            # update
+            During reloading of an index, use self.get_index_metadata() as well as
+            fieldResource.update_resource() to obtain back a fit index.
+
+            Args:
+                index_name (str): A scoped index name for loading metadata
+                index_resources (Dict[str, FieldResource]): Dict curated with all the KB fields and
+                    their FieldResources
+                 index_all_ids (List[str]): List of all ids observed for this index in the order
+                    they are present in the KB.
+            """
+
+            # update memory
             self._indices.update({index_name: index_resources})
             self._indices_all_ids.update({index_name: index_all_ids})
 
-            # create repo for dumping if required
+            # dump to disk
             cache_path = self._get_index_cache_path(index_name)
-            dir_name = os.path.dirname(cache_path)
-            if not os.path.exists(dir_name):
-                os.makedirs(dir_name)
-
-            # dump
-            metadata_dump = self._create_metadata_for_dumping(index_name)
-            metadata_dump.update({"__all_ids": index_all_ids})
-            opfile = open(cache_path, "wb")
-            pickle.dump(metadata_dump, opfile)
-            opfile.close()
-
-        def is_available(self, index_name):
-            return index_name in self or os.path.exists(self._get_index_cache_path(index_name))
+            os.makedirs(os.path.dirname(cache_path), exist_ok=True)
+            metadata = self.get_metadata(index_name)
+            metadata.update({"__all_ids": index_all_ids})
+            with open(cache_path, "wb") as opfile:
+                pickle.dump(metadata, opfile)
 
     class FieldResourceDataHelper:
         """ A class that holds methods to aid validating, formatting and scoring different data
@@ -569,6 +801,14 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
             '%m/%d/%Y', '%m/%d/%y', '%d/%m/%Y', '%d/%m/%y'
         )
 
+        @property
+        def data_types(self):
+            return self.__class__.DATA_TYPES
+
+        @property
+        def date_formats(self):
+            return self.__class__.DATE_FORMATS
+
         @staticmethod
         def _get_date(value: str):
             value_date = None
@@ -577,7 +817,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                 return value_date
 
             # check if value can be resolved as-is
-            for fmt in NativeQuestionAnswerer.FieldResourceDataHelper.DATE_FORMATS:
+            for fmt in NativeQuestionAnswerer.FieldResourceDataHelper.date_formats:
                 try:
                     value_date = datetime.strptime(value, fmt)
                     return value_date
@@ -585,7 +825,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                     pass
 
             # check if value can be resolved with some modifications
-            for fmt in NativeQuestionAnswerer.FieldResourceDataHelper.DATE_FORMATS:
+            for fmt in NativeQuestionAnswerer.FieldResourceDataHelper.date_formats:
                 for val in [value.replace("/", " "), value.replace("-", " ")]:
                     if val != value:
                         try:
@@ -715,50 +955,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
             list_of_numbers = [num / _max for num in list_of_numbers]
             return list_of_numbers
 
-    class FieldResource(FieldResourceDataHelper):
-        """
-        An object encapsulating all resources necessary for search/filter/sort-ing on any field in
-        the Knowledge Base. This class should only be used as part of `Indices` class and not in
-        isolation.
-
-        This class currently supports:
-        - location strings,
-        - date strings,
-        - boolean,
-        - number,
-        - strings, and
-        - list of strings.
-
-        Any other data type (eg. dictionary type) is currently not supported and is marked as an
-        'unknown' data type. Such unknown data types fields do not have any associated resolvers.
-        """
-
-        def __init__(self, index_name, field_name):
-
-            # details to establish a scoped field name
-            self.index_name = index_name
-            self.field_name = field_name
-
-            # vars that contain data of the field
-            self.data_type = None
-            self.id2value = {}  # TODO: duplicate data also exist in resolver object if created
-            self.hash = None  # to identify any data changes before build resolver
-
-            # details to create any required resolvers
-            self.processor_type = None
-            self.has_text_resolver = None
-            self.has_embedding_resolver = None
-
-            # required resolvers
-            self._text_resolver = None  # an entity resolver if string type data
-            self._embedding_resolver = None  # an embedding based entity resolver
-
-        def __repr__(self):
-            return f"{self.__class__.__name__} " \
-                   f"field_name: {self.field_name} " \
-                   f"data_type: {self.data_type} " \
-                   f"has_text_resolver: {self.has_text_resolver} " \
-                   f"has_embedding_resolver: {self.has_embedding_resolver}"
+    class FieldResourceHelper(FieldResourceDataHelper):
 
         @staticmethod
         def _auto_string_processor(string_or_strings, query_type, language='english'):
@@ -814,9 +1011,9 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
             else:
                 raise ValueError("Input to auto processor must be string or list of strings")
 
-        def _update_data_type(self, value):
+        def _resolve_data_type(self, known_data_type, value):
 
-            if self.data_type is not None:
+            if known_data_type is not None:
                 return
 
             try:
@@ -825,50 +1022,606 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                 pass
 
             if self.is_location(value):
-                self.data_type = "location"
+                observed_data_type = "location"
             elif self.is_bool(value):
-                self.data_type = "bool"
+                observed_data_type = "bool"
             elif self.is_number(value):
-                self.data_type = "number"
+                observed_data_type = "number"
             elif self.is_string(value) or self.is_list_of_strings(value):
-                self.data_type = "string"
+                observed_data_type = "string"
             elif self.is_date(value):
-                self.data_type = "date"
+                observed_data_type = "date"
             else:
-                self.data_type = "unknown"
+                observed_data_type = "unknown"
 
-        def _validate_and_reformat_value(self, value, _id=None):
+            return observed_data_type
+
+        def _validate_and_reformat_value(
+            self, known_data_type, value, _id=None, field_name=None, index_name=None
+        ):
 
             def _raise_error():
-                errmsg = f"Formatting error for the field {self.field_name}" \
+                errmsg = f"Formatting error for the field {field_name}" \
                          f"{' in doc id' if _id else ''} {str(_id) if _id else ''} " \
-                         f"in index {self.index_name}. Found an unexpected type {type(value)} " \
-                         f"but expected the field value to have type {self.data_type}"
+                         f"in index {index_name}. Found an unexpected type {type(value)} " \
+                         f"but expected the field value to have type {known_data_type}"
                 logger.error(errmsg)
                 raise TypeError(errmsg)
 
-            if self.data_type == "location":
+            if known_data_type == "location":
                 if not self.is_location(value):
                     _raise_error()
-            elif self.data_type == "bool":
+            elif known_data_type == "bool":
                 if not self.is_bool(value):
                     _raise_error()
-            elif self.data_type == "number":
+            elif known_data_type == "number":
                 if not self.is_number(value):
                     _raise_error()
-            elif self.data_type == "string":
+            elif known_data_type == "string":
                 if self.is_string(value):
                     value = value.strip()
                 elif self.is_list_of_strings(value):
                     value = [val.strip() for val in value]
                 else:
                     _raise_error()
-            elif self.data_type == "date":
+            elif known_data_type == "date":
                 value = value.strip()
                 if not self.is_date(value):
                     _raise_error()
 
             return value
+
+        def _get_resolvers_entity_map(self, id2value):
+            """
+            converts id2value into an entity map format and returns it
+            """
+
+            def _get_resolvers_whitelist(value):
+                if isinstance(value, (set, list)):
+                    return list(value)[1:]
+                return []
+
+            # new: https://github.com/cisco/mindmeld/issues/291
+            #   making 'value' into a list for cname and whitelist conversion.
+            #   If more than one items in 'value', all items after first one go into whitelist
+            entity_map = {
+                "entities": [
+                    {
+                        "id": _id,
+                        "cname": self.get_resolvers_cname(value),
+                        "whitelist": _get_resolvers_whitelist(value)
+                    } for _id, value in id2value.items()
+                ]
+            }
+            return entity_map
+
+        @staticmethod
+        def get_resolvers_cname(value):
+            if isinstance(value, (set, list)):
+                return list(value)[0]
+            return value
+
+    class FieldResource(FieldResourceHelper):
+        """
+        An object encapsulating all resources necessary for search/filter/sort-ing on any field in
+        the Knowledge Base. This class should only be used as part of `Indices` class and not in
+        isolation.
+
+        This class currently supports:
+        - location strings,
+        - date strings,
+        - boolean,
+        - number,
+        - strings, and
+        - list of strings.
+
+        Any other data type (eg. dictionary type) is currently not supported and is marked as an
+        'unknown' data type. Such unknown data types fields do not have any associated resolvers.
+        """
+
+        def __init__(self, index_name, field_name):
+
+            # details to establish a scoped field name
+            self.index_name = index_name
+            self.field_name = field_name
+
+            # vars that contain data of the field
+            self.data_type = None
+            self.id2value = {}  # Resolvers don't dump data; so no data duplication on the disk
+            self.hash = None  # to identify any data changes before build resolver
+
+            # details to create any required resolvers
+            self.processor_type = None
+            self.has_text_resolver = None
+            self.has_embedding_resolver = None
+
+            # required resolvers
+            self._text_resolver = None  # an entity resolver if string type data
+            self._embedding_resolver = None  # an embedding based entity resolver
+
+        def __repr__(self):
+            return f"{self.__class__.__name__} " \
+                   f"field_name: {self.field_name} " \
+                   f"data_type: {self.data_type} " \
+                   f"has_text_resolver: {self.has_text_resolver} " \
+                   f"has_embedding_resolver: {self.has_embedding_resolver}"
+
+        def update_resource(
+            self,
+            id2value,
+            has_text_resolver,
+            has_embedding_resolver,
+            resolver_model_settings=None,
+            clean=False,
+            app_path=DEFAULT_APP_PATH,
+            processor_type="keyword",
+            resource_loader=None
+        ):
+            """
+            Updates a field resource by fitting with latest data (if id2value is passed) or by
+            loading already fit resolvers if no data changes take place.
+
+            While loading from metadata, the `self.id2value` data is also loaded, which is in turn
+            used to create the `new_hash`. Even if the `new_hash` is same as `self.hash` (implying
+            no data changes), if the `self._text_resolver` is not fit but is required, the resolver
+            is loaded instead of fitting.
+
+            Args:
+                id2value (dict): a mapping between documnet ids & values of the chosen KB field
+                has_text_resolver (bool): If a tfidf resolver is to be created
+                has_embedding_resolver (bool): If a embedder resolver is to be created
+                resolver_model_settings (dict): A dictionary cocnsisting of model settings for the
+                    resolver models. Currently, the same setting is passed to all kinds of resolver
+                    models.
+                clean (bool, optional): if True, resolvers are fit with clean=True
+                app_path (str, optional): a path to create cache for embedder resolver
+                processor_type (str, optional, "text" or "keyword"): processor for tfidf resolver
+                resource_loader (ResourceLoader, optional): a resource loader object
+            """
+
+            # reformat id2value's values if required and obtain data type from the data
+            for _id, value in id2value.items():
+                # ignore null values
+                if not isinstance(value, bool) and not value:
+                    continue
+                # first non empty value will determine the data type of this field if not already
+                #   determined. will be 'unknown' if all values are empty or if there is a ambiguity
+                #   in deciding the data type.
+                if not self.data_type:
+                    self.data_type = self._resolve_data_type(self.data_type, value)
+                # validation and re-formatting to update database, no change for unknown data type
+                try:
+                    value = self._validate_and_reformat_value(
+                        self.data_type, value, _id, self.field_name, self.index_name
+                    )
+                except TypeError:
+                    # implies that this field had different observed data type across different docs
+                    self.data_type = "unknown"
+                self.id2value.update({_id: value})
+            # self.id2value is None (i.e initialized default) in cases wherein empty id2value is
+            # passed in input arguments or if all KB objects have null data for this field
+            if not self.id2value:
+                msg = f"Found no data for field {self.field_name}. "
+                logger.warning(msg)
+                self.data_type = "unknown"
+
+            # compute hash on latest data and ascertain resolver(s) requirement
+            new_hash = None
+            if self.data_type in ["bool", "number", "location", "unknown"]:
+                # discard input arguments as resolvers are not applicable to these data types
+                if has_text_resolver or has_embedding_resolver:
+                    msg = f"Unable to create any resolver for the field {self.field_name} due to " \
+                          f"its marked data type '{self.data_type}'. "
+                    logger.info(msg)
+                self.has_text_resolver = False
+                self.has_embedding_resolver = False
+                return
+            else:  # ["string", "date"]
+                self.has_text_resolver = has_text_resolver
+                self.has_embedding_resolver = has_embedding_resolver
+                if not self.has_text_resolver and not self.has_embedding_resolver:
+                    msg = f"At least one of text or embedder resolver can be applied " \
+                          f"for string type data field ({self.field_name}) but continuing " \
+                          f"without fitting any resolvers due to your input 'query_type'" \
+                          f"configuration. This might limit your search space during inference!"
+                    logger.warning(msg)
+                    return
+                new_hash = Hasher(algorithm="sha256").hash(
+                    string=json.dumps(self.id2value, sort_keys=True)
+                )
+
+            # tfidf based text resolver
+            if (
+                self.has_text_resolver and
+                ((new_hash != self.hash) or (self.processor_type != processor_type))
+            ):
+                msg = f"Creating a text resolver for field '{self.field_name}' in " \
+                      f"index '{self.index_name}'."
+                logger.info(msg)
+                # update processor type
+                if processor_type not in ['text', 'keyword']:
+                    msg = f"Expected 'processor_type' to be among ['text', " \
+                          f"'keyword'] but found to be of value '{processor_type}'"
+                    raise ValueError(msg)
+                self.processor_type = processor_type
+                # obtain a cache path
+                resolver_cache_path = get_question_answerer_index_cache_file_path(
+                    app_path, get_scoped_index_name(
+                        get_scoped_index_name(self.index_name, self.field_name),
+                        "text_resolver"
+                    ))
+                # create a new resolver and fit
+                resolver_model_settings = resolver_model_settings or {}
+                self._text_resolver = TfIdfSparseCosSimEntityResolver(
+                    app_path=app_path,
+                    entity_type=get_scoped_index_name(self.index_name, self.field_name),
+                    config={"model_settings": {
+                        **resolver_model_settings,
+                        "augment_max_synonyms_embeddings": False}
+                    },
+                    resource_loader=resource_loader,
+                )
+                entity_map = self._get_resolvers_entity_map(
+                    dict(zip(
+                        self.id2value.keys(),
+                        self._auto_string_processor(
+                            [*self.id2value.values()],
+                            self.processor_type
+                        )
+                    ))
+                )
+                self._text_resolver.fit(entity_map=entity_map, clean=clean)
+                # dump
+                # ex: ~/.cache/mindmeld/question_answerers/
+                #           {food_ordering}${restaurants}${field_name}
+                #               .pkl
+                #               .pkl.hash
+                #               .config.pkl
+                self._text_resolver.dump(resolver_cache_path)
+
+            # embedder resolver
+            if self.has_embedding_resolver and new_hash != self.hash:
+                msg = f"Creating an embedder resolver for field '{self.field_name}' in " \
+                      f"index '{self.index_name}'."
+                logger.info(msg)
+                # obtain a cache path
+                resolver_cache_path = get_question_answerer_index_cache_file_path(
+                    app_path, get_scoped_index_name(
+                        get_scoped_index_name(self.index_name, self.field_name),
+                        "embedder_resolver"
+                    ))
+                # create a new resolver and fit
+                resolver_model_settings = resolver_model_settings or {}
+                self._embedding_resolver = EmbedderCosSimEntityResolver(
+                    app_path=app_path,
+                    entity_type=get_scoped_index_name(self.index_name, self.field_name),
+                    config={"model_settings": {**resolver_model_settings}},
+                    resource_loader=resource_loader
+                )
+                entity_map = self._get_resolvers_entity_map(
+                    self.id2value
+                )  # use same data as text resolver but without any processing!
+                self._embedding_resolver.fit(entity_map=entity_map, clean=clean)
+                # dump
+                # ex: ~/.cache/mindmeld/question_answerers/
+                #           {food_ordering}${restaurants}${field_name}
+                #               .pkl.hash
+                #               .config.pkl
+                #               .embedder_cache.pkl
+                self._embedding_resolver.dump(resolver_cache_path)
+
+            self.hash = new_hash
+
+        def load_resolvers(
+            self,
+            app_path=DEFAULT_APP_PATH,
+            resource_loader=None
+        ):
+            """
+            Loads a field resource by fitting with latest data (if id2value is passed) or by
+            loading already fit resolvers if no data changes take place.
+
+            Args:
+                app_path (str, optional): a path to create cache for embedder resolver
+                resource_loader (ResourceLoader, optional): a resource loader object
+            """
+
+            def _err_fn(msg):
+                logger.error(msg)
+                raise ValueError(msg)
+
+            err_msg = "Error in loading FieldResource: " \
+                      "'{name}' cannot be '{value}' when loading a " \
+                      "FieldResource from metadata object. Your metadata object might have " \
+                      "been corrupted.Consider loading kb with 'clean=True'."
+            if self.data_type is None:
+                _err_fn(err_msg.format(name="data_type", value=self.data_type))
+            if self.has_text_resolver is None:
+                _err_fn(err_msg.format(name="has_text_resolver", value=self.has_text_resolver))
+            if self.has_embedding_resolver is None:
+                _err_fn(err_msg.format(
+                    name="has_embedding_resolver", value=self.has_embedding_resolver))
+
+            if self.data_type in ["bool", "number", "location", "unknown"]:
+                # discard input arguments as resolvers are not applicable to these data types
+                if self.has_text_resolver or self.has_embedding_resolver:
+                    msg = f"Unable to create any resolver for the field {self.field_name} due to " \
+                          f"its marked data type '{self.data_type}'. "
+                    logger.info(msg)
+                self.has_text_resolver = False
+                self.has_embedding_resolver = False
+                return
+            else:  # ["string", "date"]
+                if not self.has_text_resolver and not self.has_embedding_resolver:
+                    msg = f"At least one of text or embedder resolver can be applied " \
+                          f"for string type data field ({self.field_name}) but continuing " \
+                          f"without fitting any resolvers due to your input 'query_type'" \
+                          f"configuration. This might limit your search space during inference!"
+                    logger.warning(msg)
+                    return
+
+            # tfidf based text resolver
+            if self.has_text_resolver:
+                msg = f"Loading a text resolver for field '{self.field_name}' in " \
+                      f"index '{self.index_name}'."
+                logger.info(msg)
+                if self.processor_type is None:
+                    _err_fn(err_msg.format(name="processor_type", value=self.processor_type))
+                try:
+                    # obtain a cache path
+                    resolver_cache_path = get_question_answerer_index_cache_file_path(
+                        app_path, get_scoped_index_name(
+                            get_scoped_index_name(self.index_name, self.field_name),
+                            "text_resolver"
+                        ))
+                    # create a new instance of resolver and load it
+                    self._text_resolver = TfIdfSparseCosSimEntityResolver(
+                        app_path=app_path,
+                        entity_type=get_scoped_index_name(self.index_name, self.field_name),
+                        resource_loader=resource_loader,
+                    )
+                    entity_map = self._get_resolvers_entity_map(
+                        dict(zip(
+                            self.id2value.keys(),
+                            self._auto_string_processor(
+                                [*self.id2value.values()],
+                                self.processor_type
+                            )
+                        ))
+                    )
+                    self._text_resolver.load(path=resolver_cache_path, entity_map=entity_map)
+                except Exception as e:
+                    msg = "Couldn't load a text resolver from cache path. Consider " \
+                          "calling the 'load_kb()' method with argument 'clean=True'."
+                    logger.error(msg)
+                    raise KnowledgeBaseError(msg) from e
+
+            # embedder resolver
+            if self.has_embedding_resolver:
+                msg = f"Loading an embedder resolver for field '{self.field_name}' in " \
+                      f"index '{self.index_name}'."
+                logger.info(msg)
+                try:
+                    # obtain a cache path
+                    resolver_cache_path = get_question_answerer_index_cache_file_path(
+                        app_path, get_scoped_index_name(
+                            get_scoped_index_name(self.index_name, self.field_name),
+                            "embedder_resolver"
+                        ))
+                    # create a new instance of resolver and load it
+                    self._embedding_resolver = EmbedderCosSimEntityResolver(
+                        app_path=app_path,
+                        entity_type=get_scoped_index_name(self.index_name, self.field_name),
+                        resource_loader=resource_loader,
+                    )
+                    entity_map = self._get_resolvers_entity_map(
+                        self.id2value
+                    )  # use same data as text resolver but without any processing!
+                    self._embedding_resolver.load(
+                        path=resolver_cache_path, entity_map=entity_map
+                    )
+                except Exception as e:
+                    msg = "Couldn't load embedder resolver from cache path. Consider " \
+                          "calling the 'load_kb()' method with argument 'clean=True'."
+                    logger.error(e)
+                    raise KnowledgeBaseError(msg) from e
+
+        def do_search(self, query_type, value, allowed_ids=None):
+            """
+            Retrieves doc ids with corresponding similarity scores for the given query
+
+            Args:
+                query_type (str): one of ALL_QUERY_TYPES
+                value (str): A string to do similarity search
+                allowed_ids (iterable, optional): if not None, only docs containing these ids are
+                    populated in the results
+            Returns:
+                dict: a mapping between _ids recorded in this field and their corresponding scores
+            """
+
+            self._do_search_validation(query_type)
+
+            value = self._validate_and_reformat_value(self.data_type, value)
+
+            def update_scores(resolver, value_string, this_field_scores, n_scores, allowed_cnames):
+
+                # obtain synonyms' scores without sorting! (saves compute time)
+                # also, do matching against selected cnames only
+                predictions = resolver.predict(
+                    value_string, top_n=None, allowed_cnames=allowed_cnames
+                )
+                # retain only top scored entries for each id
+                _best_scores = {}
+                for prediction in predictions:
+                    _id, _score = prediction["id"], prediction["score"]
+                    if _id not in _best_scores:
+                        _best_scores[_id] = _score
+                    else:
+                        _best_scores[_id] = max(_best_scores[_id], _score)
+                # for missing doc ids, populate the minimum score
+                # in cases where there was no training data for resolver, all ids are absent
+                #   in the returned predictions! And then the _best_scores will be empty
+                if _best_scores:
+                    min_best_scores = min([*_best_scores.values()])
+                    for _id in self.id2value.keys():
+                        if allowed_ids and _id not in allowed_ids:
+                            continue
+                        if _id not in _best_scores:
+                            _best_scores[_id] = min_best_scores
+                    # retain only top scored entries for each id
+                    this_field_scores = {
+                        _id: (this_field_scores.get(_id, 0.0) + _score) / (n_scores + 1)
+                        for _id, _score in _best_scores.items()
+                    }
+                    n_scores += 1
+
+                # if no predictions are obtained from resolver, these values are same as input
+                return this_field_scores, n_scores
+
+            # maps doc ids with their similarity scores
+            this_field_scores = {}
+            n_scores = 0
+
+            if ("text" in query_type or "keyword" in query_type) and self._text_resolver:
+                # get processor type, process the value and then obtain similarities
+                processor_type = "text" if "text" in query_type else "keyword"
+                if processor_type != self.processor_type:
+                    msg = f"Using different text processing during loading KB " \
+                          f"({self.processor_type}) vs during inference ({processor_type}) " \
+                          f"for the field {self.field_name} in index {self.index_name}"
+                    logger.warning(msg)
+                new_value = self._auto_string_processor(value, processor_type)
+                if allowed_ids:
+                    filtered_cnames = [
+                        self.get_resolvers_cname(self._auto_string_processor(val, processor_type))
+                        for _id, val in self.id2value.items() if _id in allowed_ids
+                    ]
+                else:
+                    filtered_cnames = None
+                this_field_scores, n_scores = update_scores(
+                    self._text_resolver, new_value, this_field_scores, n_scores, filtered_cnames
+                )
+            elif "text" in query_type or "keyword" in query_type:
+                msg = f"No text based resolver configured for field {self.field_name} " \
+                      f"in index {self.index_name}."
+                logger.warning(msg)
+
+            if "embedder" in query_type and self._embedding_resolver:
+                if allowed_ids:
+                    filtered_cnames = [
+                        self.get_resolvers_cname(val)
+                        for _id, val in self.id2value.items() if _id in allowed_ids
+                    ]
+                else:
+                    filtered_cnames = None
+                this_field_scores, n_scores = update_scores(
+                    self._embedding_resolver, value, this_field_scores, n_scores, filtered_cnames
+                )
+            elif "embedder" in query_type:
+                msg = f"No embedder based resolver configured for field {self.field_name} " \
+                      f"in index {self.index_name}."
+                logger.warning(msg)
+
+            # Case where-in no resolver exists (eg. "unknown" data type)
+            if not this_field_scores:
+                this_field_scores = {_id: 0.0 for _id in self.id2value.keys()}
+
+            return this_field_scores
+
+        def do_filter(self, allowed_ids, filter_text=None, gt=None, gte=None, lt=None, lte=None,
+                      et=None, boolean=None):
+            """
+            Filters a list of docs to a subset based on some criteria such as a boolean value
+            or {>,<,=} operations or a text snippet.
+            """
+
+            if not allowed_ids:
+                return allowed_ids
+
+            self._do_filter_validation(filter_text, gt, gte, lt, lte, et, boolean)
+
+            def _is_valid(value):
+                if gt and not (value > gt):
+                    return False
+                if gte and not (value >= gte):
+                    return False
+                if lt and not (value < lt):
+                    return False
+                if lte and not (value <= lte):
+                    return False
+                if et and not (value != et):
+                    return False
+                return True
+
+            if self.data_type in ["number"]:
+
+                def is_valid(value):
+                    return _is_valid(value)
+
+            elif self.data_type in ["date"]:
+
+                def is_valid(value):
+                    return _is_valid(abs(self.date_scorer(value)))  # returns number of days
+
+            elif self.data_type in ["bool"]:
+
+                def is_valid(value):
+                    return value == boolean
+
+            elif self.data_type in ["string"]:
+
+                # different from Elasticsearch filtering on strings, this method only allows
+                #   exact presence of that input text and not a fuzzy match!
+
+                filter_text = self._validate_and_reformat_value(self.data_type, filter_text)
+                filter_text_aliases = {filter_text, filter_text.lower()}
+
+                def is_valid(value):
+                    if value in filter_text_aliases:
+                        return True
+                    if value.lower() in filter_text_aliases:
+                        return True
+                    return False
+
+            allowed_ids = {_id: None for _id in allowed_ids if
+                           _id in self.id2value and is_valid(self.id2value[_id])}
+
+            return allowed_ids
+
+        def do_sort(self, curated_docs, sort_type, location=None):
+
+            if not curated_docs:
+                return curated_docs
+
+            self._do_sort_validation(sort_type, location)
+
+            validated_curated_docs, field_values = [], []
+            for doc in curated_docs:
+                _id = doc["_id"]
+                value = self.id2value.get(_id)
+                if value is None:
+                    msg = f"Discarding doc with id: {doc['id']} while sorting as no " \
+                          f"{self.field_name} field available for it."
+                    logger.info(msg)
+                    continue
+                validated_curated_docs.append(doc)
+                field_values.append(value)
+            curated_docs = validated_curated_docs
+
+            if self.data_type == "location":
+                sort_type = "asc"
+                field_values = [
+                    self.location_scorer(value, location) for value in field_values
+                ]
+            elif self.data_type == "number":
+                field_values = [self.number_scorer(value) for value in field_values]
+            elif self.data_type == "date":
+                field_values = [self.date_scorer(value) for value in field_values]
+
+            _, results = zip(*sorted(enumerate(curated_docs),
+                                     key=lambda x: field_values[x[0]],
+                                     reverse=sort_type != "asc"))
+            return results
 
         def _do_search_validation(self, query_type):
 
@@ -960,355 +1713,6 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
                     + " 'number', 'date' or 'location' fields."
                 )
 
-        @staticmethod
-        def _get_resolvers_cname(value):
-            if isinstance(value, (set, list)):
-                return list(value)[0]
-            return value
-
-        @staticmethod
-        def _get_resolvers_whitelist(value):
-            if isinstance(value, (set, list)):
-                return list(value)[1:]
-            return []
-
-        def _get_resolvers_entity_map(self, id2value):
-            """
-            converts id2value into an entity map format and returns it
-            """
-            # new: https://github.com/cisco/mindmeld/issues/291
-            #   making 'value' into a list for cname and whitelist conversion.
-            #   If more than one items in 'value', all items after first one go into whitelist
-            entity_map = {
-                "entities": [
-                    {
-                        "id": _id,
-                        "cname": self._get_resolvers_cname(value),
-                        "whitelist": self._get_resolvers_whitelist(value)
-                    } for _id, value in id2value.items()
-                ]
-            }
-            return entity_map
-
-        def update_resource(self, id2value, has_text_resolver, has_embedding_resolver,
-                            resolver_settings, lazy_clean=False,
-                            app_path=NATIVE_QUESTION_ANSWERER_INDICES_CACHE_PATH,
-                            processor_type="keyword"):
-            """
-            Updates a field resource by augmenting/updating latest data and resolvers
-
-            Args:
-                id2value (dict): a mapping between documnet ids & values of the chosen KB field
-                has_text_resolver (bool): If a tfidf resolver is to be created
-                has_embedding_resolver (bool): If a embedder resolver is to be created
-                resolver_settings (dict): a ER- or QA- config with 'model_settings' keyword;
-                    used while fitting any resolver
-                lazy_clean (bool, optional): if True, resolvers are fit with clean=True; tagged lazy
-                    because the embedder cache, if cleaned, is cleaned later than the index cache
-                app_path (str, optional): a path to create cache for embedder resolver
-                processor_type (str, optional, "text" or "keyword"): processor for tfidf resolver
-            """
-
-            if not id2value and not self.data_type:  # else, if required, update resolvers
-                return
-
-            # update id2cname and compute hash
-            for _id, value in id2value.items():
-                # ignore null values
-                if not isinstance(value, bool) and not value:
-                    continue
-                # first non empty value will determine the data type of this field if not already
-                #   determined. will be 'unknown' if all values are empty or if there is a ambiguity
-                #   in deciding the data type.
-                if not self.data_type:
-                    self._update_data_type(value)
-                # validation and re-formatting to update database, no change for unknown data type
-                try:
-                    value = self._validate_and_reformat_value(value, _id)
-                except TypeError:
-                    # implies that this field had different observed data type across different docs
-                    self.data_type = "unknown"
-                self.id2value.update({_id: value})
-
-            # in cases where all docs have null data for this field
-            if not self.id2value:
-                msg = f"Found no data for field {self.field_name}. "
-                logger.warning(msg)
-                self.data_type = "unknown"
-
-            # ascertain resolver(s) requirement
-            new_hash = None
-            if self.data_type in ["bool", "number", "location", "unknown"]:
-                # discard input arguments as resolvers are not applicable to these data types
-                if has_text_resolver or has_embedding_resolver:
-                    msg = f"Unable to create any resolver for the field {self.field_name} due to " \
-                          f"its marked data type {self.data_type}. "
-                    logger.info(msg)
-                self.has_text_resolver = False
-                self.has_embedding_resolver = False
-                return
-            else:  # ["string", "date"]
-                self.has_text_resolver = has_text_resolver
-                self.has_embedding_resolver = has_embedding_resolver
-                if not self.has_text_resolver and not self.has_embedding_resolver:
-                    msg = f"Atleast one of text or embedder resolver needs to be applied " \
-                          f"for string(s) type data field ({self.field_name}). "
-                    logger.error(msg)
-                    return
-                new_hash = Hasher(algorithm="sha256").hash(
-                    string=json.dumps(self.id2value, sort_keys=True)
-                )
-
-            # tfidf based text resolver
-            if (
-                self.has_text_resolver
-                and (not self._text_resolver
-                     or new_hash != self.hash
-                     or self.processor_type != processor_type)
-            ):
-                # log info
-                msg = f"Creating a text resolver for field '{self.field_name}' in " \
-                      f"index '{self.index_name}'."
-                logger.info(msg)
-                # update processor type
-                if processor_type not in ['text', 'keyword']:
-                    msg = f"Expected 'processor_type' to be among ['text', 'keyword'] but found " \
-                          f"to be '{processor_type}'"
-                    raise ValueError(msg)
-                self.processor_type = processor_type
-                # create a new resolver and fit
-                self._text_resolver = (
-                    TfIdfSparseCosSimEntityResolver(
-                        app_path=app_path,  # not required to supply, can be None!
-                        entity_type=get_scoped_index_name(self.index_name, self.field_name),
-                        config={"model_settings": {**resolver_settings}})
-                )
-                # format id2value data into an 'entity_map' format for resolvers
-                values = self._auto_string_processor([*self.id2value.values()], self.processor_type)
-                processed_id2value = dict(zip(self.id2value.keys(), values))
-                entity_map = self._get_resolvers_entity_map(processed_id2value)
-                self._text_resolver.fit(entity_map=entity_map, clean=lazy_clean)
-
-            # embedder based resolver
-            if (
-                self.has_embedding_resolver
-                and (not self._embedding_resolver or new_hash != self.hash)
-            ):
-                # log info
-                msg = f"Creating an embedder resolver for field '{self.field_name}' in " \
-                      f"index '{self.index_name}'."
-                logger.info(msg)
-                # create a new resolver and fit
-                self._embedding_resolver = (
-                    EmbedderCosSimEntityResolver(
-                        app_path=app_path,
-                        entity_type=get_scoped_index_name(self.index_name, self.field_name),
-                        config={"model_settings": {**resolver_settings}})
-                )
-                # use same data as text resolver but without any processing!
-                entity_map = self._get_resolvers_entity_map(self.id2value)
-                # fit() also includes dumping cache in case of embedding resolver
-                self._embedding_resolver.fit(entity_map=entity_map, clean=lazy_clean)
-
-            self.hash = new_hash
-
-        def do_search(self, query_type, value, allowed_ids=None):
-            """
-            Retrieves doc ids with corresponding similarity scores for the given query
-
-            Args:
-                query_type (str): one of ALL_QUERY_TYPES
-                value (str): A string to do similarity search
-                allowed_ids (iterable, optional): if not None, only docs containing these ids are
-                    populated in the results
-            Returns:
-                dict: a mapping between _ids recorded in this field and their corresponding scores
-            """
-
-            self._do_search_validation(query_type)
-
-            value = self._validate_and_reformat_value(value)
-
-            def update_scores(resolver, value_string, this_field_scores, n_scores, allowed_cnames):
-
-                # obtain synonyms' scores without sorting! (saves compute time)
-                # also, do matching against selected cnames only
-                predictions = resolver.predict(
-                    value_string, top_n=None, allowed_cnames=allowed_cnames
-                )
-                # retain only top scored entries for each id
-                _best_scores = {}
-                for prediction in predictions:
-                    _id, _score = prediction["id"], prediction["score"]
-                    if _id not in _best_scores:
-                        _best_scores[_id] = _score
-                    else:
-                        _best_scores[_id] = max(_best_scores[_id], _score)
-                # for missing doc ids, populate the minimum score
-                # in cases where there was no training data for resolver, all ids are absent
-                #   in the returned predictions! And then the _best_scores will be empty
-                if _best_scores:
-                    min_best_scores = min([*_best_scores.values()])
-                    for _id in self.id2value.keys():
-                        if allowed_ids and _id not in allowed_ids:
-                            continue
-                        if _id not in _best_scores:
-                            _best_scores[_id] = min_best_scores
-                    # retain only top scored entries for each id
-                    this_field_scores = {
-                        _id: (this_field_scores.get(_id, 0.0) + _score) / (n_scores + 1)
-                        for _id, _score in _best_scores.items()
-                    }
-                    n_scores += 1
-
-                # if no predictions are obtained from resolver, these values are same as input
-                return this_field_scores, n_scores
-
-            # maps doc ids with their similarity scores
-            this_field_scores = {}
-            n_scores = 0
-
-            if ("text" in query_type or "keyword" in query_type) and self._text_resolver:
-                # get processor type, process the value and then obtain similarities
-                processor_type = "text" if "text" in query_type else "keyword"
-                if processor_type != self.processor_type:
-                    msg = f"Using different text processing during loading KB " \
-                          f"({self.processor_type}) vs during inference ({processor_type}) " \
-                          f"for the field {self.field_name} in index {self.index_name}"
-                    logger.warning(msg)
-                new_value = self._auto_string_processor(value, processor_type)
-                if allowed_ids:
-                    filtered_cnames = [
-                        self._get_resolvers_cname(self._auto_string_processor(val, processor_type))
-                        for _id, val in self.id2value.items() if _id in allowed_ids
-                    ]
-                else:
-                    filtered_cnames = None
-                this_field_scores, n_scores = update_scores(
-                    self._text_resolver, new_value, this_field_scores, n_scores, filtered_cnames
-                )
-            elif "text" in query_type or "keyword" in query_type:
-                msg = f"No text based resolver configured for field {self.field_name} " \
-                      f"in index {self.index_name}."
-                logger.warning(msg)
-
-            if "embedder" in query_type and self._embedding_resolver:
-                if allowed_ids:
-                    filtered_cnames = [
-                        self._get_resolvers_cname(val)
-                        for _id, val in self.id2value.items() if _id in allowed_ids
-                    ]
-                else:
-                    filtered_cnames = None
-                this_field_scores, n_scores = update_scores(
-                    self._embedding_resolver, value, this_field_scores, n_scores, filtered_cnames
-                )
-            elif "embedder" in query_type:
-                msg = f"No embedder based resolver configured for field {self.field_name} " \
-                      f"in index {self.index_name}."
-                logger.warning(msg)
-
-            # Case where-in no resolver exists (eg. "unknown" data type)
-            if not this_field_scores:
-                this_field_scores = {_id: 0.0 for _id in self.id2value.keys()}
-
-            return this_field_scores
-
-        def do_filter(self, allowed_ids, filter_text=None, gt=None, gte=None, lt=None, lte=None,
-                      et=None, boolean=None):
-            """
-            Filters a list of docs to a subset based on some criteria such as a boolean value
-            or {>,<,=} operations or a text snippet.
-            """
-
-            if not allowed_ids:
-                return allowed_ids
-
-            self._do_filter_validation(filter_text, gt, gte, lt, lte, et, boolean)
-
-            def _is_valid(value):
-                if gt and not (value > gt):
-                    return False
-                if gte and not (value >= gte):
-                    return False
-                if lt and not (value < lt):
-                    return False
-                if lte and not (value <= lte):
-                    return False
-                if et and not (value != et):
-                    return False
-                return True
-
-            if self.data_type in ["number"]:
-
-                def is_valid(value):
-                    return _is_valid(value)
-
-            elif self.data_type in ["date"]:
-
-                def is_valid(value):
-                    return _is_valid(abs(self.date_scorer(value)))  # returns number of days
-
-            elif self.data_type in ["bool"]:
-
-                def is_valid(value):
-                    return value == boolean
-
-            elif self.data_type in ["string"]:
-
-                # different from Elasticsearch filtering on strings, this method only allows
-                #   exact presence of that input text and not a fuzzy match!
-
-                filter_text = self._validate_and_reformat_value(filter_text)
-                filter_text_aliases = {filter_text, filter_text.lower()}
-
-                def is_valid(value):
-                    if value in filter_text_aliases:
-                        return True
-                    if value.lower() in filter_text_aliases:
-                        return True
-                    return False
-
-            allowed_ids = {_id: None for _id in allowed_ids if
-                           _id in self.id2value and is_valid(self.id2value[_id])}
-
-            return allowed_ids
-
-        def do_sort(self, curated_docs, sort_type, location=None):
-
-            if not curated_docs:
-                return curated_docs
-
-            self._do_sort_validation(sort_type, location)
-
-            validated_curated_docs, field_values = [], []
-            for doc in curated_docs:
-                _id = doc["_id"]
-                value = self.id2value.get(_id)
-                if value is None:
-                    msg = f"Discarding doc with id: {doc['id']} while sorting as no " \
-                          f"{self.field_name} field available for it."
-                    logger.info(msg)
-                    continue
-                validated_curated_docs.append(doc)
-                field_values.append(value)
-            curated_docs = validated_curated_docs
-
-            if self.data_type == "location":
-                sort_type = "asc"
-                field_values = [
-                    self.location_scorer(value, location) for value in field_values
-                ]
-            elif self.data_type == "number":
-                field_values = [self.number_scorer(value) for value in field_values]
-            elif self.data_type == "date":
-                field_values = [self.date_scorer(value) for value in field_values]
-
-            _, results = zip(*sorted(enumerate(curated_docs),
-                                     key=lambda x: field_values[x[0]],
-                                     reverse=sort_type != "asc"))
-            return results
-
         @property
         def doc_ids(self):
             return [*self.id2value.keys()]
@@ -1354,6 +1758,15 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
 
         @classmethod
         def from_metadata(cls, cache_object: Bunch):
+            """
+            Creates a fit resource from metadata
+
+            Args:
+                cache_object (Bunch): a Bunch dictionary object with attribute names and values
+
+            Returns:
+                FieldResource
+            """
             field_resource = cls(index_name=cache_object.index_name,
                                  field_name=cache_object.field_name)
             field_resource.data_type = cache_object.data_type
@@ -1365,6 +1778,16 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
             return field_resource
 
         def to_metadata(self):
+            """
+            Returns a Bunch object consisting of various details about the resource- (scoped) index
+            name, the name of the KB field for which the resource is built for, the field's data
+            type, all the KB data associated with this field, a hash that uniquely identifies the
+            data, the data processor type and the presence of text as well as embedder resolvers.
+            The returned metadata object does not contain any fit entity resolvers.
+
+            Returns:
+                Bunch: various meta information of this field resource
+            """
             cache_object = Bunch(
                 index_name=self.index_name,
                 field_name=self.field_name,
@@ -1464,7 +1887,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
 
             try:
                 # fetch all indexes
-                index_resources = NativeQuestionAnswerer.ALL_INDICES.get(self.index_name)
+                index_resources = NativeQuestionAnswerer.ALL_INDICES.get_index(self.index_name)
                 # obtain all doc ids in the order they were present in the KB
                 index_all_ids = (
                     NativeQuestionAnswerer.ALL_INDICES.get_all_ids(self.index_name)
@@ -1550,7 +1973,13 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
 
             return curated_docs
 
-    ALL_INDICES = Indices()
+    @classmethod
+    def _unload_all_indices(cls):
+        NativeQuestionAnswerer.ALL_INDICES = NativeQuestionAnswerer.Indices(
+            app_path=DEFAULT_APP_PATH
+        )
+
+    ALL_INDICES = Indices(app_path=DEFAULT_APP_PATH)
 
 
 class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
@@ -1560,7 +1989,6 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
     This class uses Elasticsearch in the backend to implement various underlying functionalities
     of question answerer.
-
     """
 
     def __init__(self, **kwargs):
@@ -1568,9 +1996,7 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
         Args:
             app_path (str): The path to the directory containing the app's data
-            resource_loader (ResourceLoader): An object which can load resources for the answerer
             es_host (str): The Elasticsearch host server
-            config (dict): The QA config if passed directly rather than loaded from the app config
         """
         super().__init__(**kwargs)
         self._es_host = kwargs.get("es_host")
@@ -1580,7 +2006,9 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
         # bug-fix: previously, '_embedder_model' is created only when 'model_type' is 'embedder'
         self._embedder_model = None
         if "embedder" in self.query_type:
-            self._embedder_model = create_embedder_model(self.app_path, self.model_settings)
+            self._embedder_model = create_embedder_model(
+                app_path=self.app_path or DEFAULT_APP_PATH, config=self.model_settings
+            )  # An app path is necessary for creating a cache path for dumping embeddings cache
 
     @property
     def _es_client(self):
@@ -1633,131 +2061,6 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
                 raise KnowledgeBaseError from e
             except _getattr("elasticsearch", "ElasticsearchException") as e:
                 raise KnowledgeBaseError from e
-
-    def _get(self, index, size=10, query_type=None, app_namespace=None, **kwargs):
-        """Gets a collection of documents from the knowledge base matching the provided
-        search criteria. This API provides a simple interface for developers to specify a list of
-        knowledge base field and query string pairs to find best matches in a similar way as in
-        common Web search interfaces. The knowledge base fields to be used depend on the mapping
-        between NLU entity types and corresponding knowledge base objects. For example, a “cuisine”
-        entity type can be mapped to either a knowledge base object or an attribute of a knowledge
-        base object. The mapping is often application specific and is dependent on the data model
-        developers choose to use when building the knowledge base.
-
-        Examples:
-
-            >>> question_answerer.get(index='menu_items',
-                                      name='pork and shrimp',
-                                      restaurant_id='B01CGKGQ40',
-                                      _sort='price',
-                                      _sort_type='asc')
-
-        Args:
-            index (str): The name of an index.
-            size (int): The maximum number of records, default to 10.
-            query_type (str): Whether the search is over structured, unstructured and whether to use
-                              text signals for ranking, embedder signals, or both.
-            id (str): The id of a particular document to retrieve.
-            _sort (str): Specify the knowledge base field for custom sort.
-            _sort_type (str): Specify custom sort type. Valid values are 'asc', 'desc' and
-                              'distance'.
-            _sort_location (dict): The origin location to be used when sorting by distance.
-
-        Returns:
-            list: A list of matching documents.
-        """
-        doc_id = kwargs.get("id")
-
-        query_type = query_type or self.query_type
-
-        # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
-        app_namespace = app_namespace or self.app_namespace
-
-        # If an id was passed in, simply retrieve the specified document
-        if doc_id:
-            logger.info(
-                "Retrieve object from KB: index= '%s', id= '%s'.", index, doc_id
-            )
-            s = self.build_search(index, app_namespace=app_namespace)
-            s = s.filter(query_type=query_type, id=doc_id)
-            results = s.execute(size=size)
-            return results
-
-        sort_clause = {}
-        query_clauses = []
-
-        # iterate through keyword arguments to get KB field and value pairs for search and custom
-        # sort criteria
-        for key, value in kwargs.items():
-            logger.debug("Processing argument: key= %s value= %s.", key, value)
-            if key == "_sort":
-                sort_clause["field"] = value
-            elif key == "_sort_type":
-                sort_clause["type"] = value
-            elif key == "_sort_location":
-                sort_clause["location"] = value
-            elif "embedder" in query_type and self._embedder_model:
-                if "text" in query_type or "keyword" in query_type:
-                    query_clauses.append({key: value})
-                embedded_value = self._embedder_model.get_encodings([value])[0]
-                embedded_key = key + EMBEDDING_FIELD_STRING
-                query_clauses.append({embedded_key: embedded_value})
-            else:
-                query_clauses.append({key: value})
-                logger.debug("Added query clause: field= %s value= %s.", key, value)
-
-        logger.debug("Custom sort criteria %s.", sort_clause)
-
-        # build Search object with overriding ranking setting to require all query clauses are
-        # matched.
-        s = self.build_search(index, app_namespace=app_namespace,
-                              ranking_config={"query_clauses_operator": "and"})
-
-        # add query clauses to Search object.
-        for clause in query_clauses:
-            s = s.query(query_type=query_type, **clause)
-
-        # add custom sort clause if specified.
-        if sort_clause:
-            s = s.sort(
-                field=sort_clause.get("field"),
-                sort_type=sort_clause.get("type"),
-                location=sort_clause.get("location"),
-            )
-
-        results = s.execute(size=size)
-        return results
-
-    def _build_search(self, index, ranking_config=None, app_namespace=None):
-        """Build a search object for advanced filtered search.
-
-        Args:
-            index (str): index name of knowledge base object.
-            ranking_config (dict, optional): overriding ranking configuration parameters.
-            app_namespace (str, optional): The namespace of the app. Used to prevent
-                collisions between the indices of this app and those of other apps.
-        Returns:
-            Search: a Search object for filtered search.
-        """
-
-        # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
-        app_namespace = app_namespace or self.app_namespace
-
-        if not does_index_exist(app_namespace=app_namespace, index_name=index):
-            raise ValueError("Knowledge base index '{}' does not exist.".format(index))
-
-        # get index name with app scope
-        index = get_scoped_index_name(app_namespace, index)
-
-        # load knowledge base field information for the specified index.
-        self._load_field_info(index)
-
-        return ElasticsearchQuestionAnswerer.Search(
-            client=self._es_client,
-            index=index,
-            ranking_config=ranking_config,
-            field_info=self._es_field_info[index],
-        )
 
     def _load_kb(self,
                  index_name,
@@ -1932,7 +2235,134 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
         # Saves the embedder model cache to disk
         if embedder_model:
+            # as no cache_path is specified here, the cache is dumped at a path that is already
+            # determined at the time of `embedder_model` initialization
             embedder_model.dump_cache()
+
+    def _get(self, index, size=10, query_type=None, app_namespace=None, **kwargs):
+        """Gets a collection of documents from the knowledge base matching the provided
+        search criteria. This API provides a simple interface for developers to specify a list of
+        knowledge base field and query string pairs to find best matches in a similar way as in
+        common Web search interfaces. The knowledge base fields to be used depend on the mapping
+        between NLU entity types and corresponding knowledge base objects. For example, a “cuisine”
+        entity type can be mapped to either a knowledge base object or an attribute of a knowledge
+        base object. The mapping is often application specific and is dependent on the data model
+        developers choose to use when building the knowledge base.
+
+        Examples:
+
+            >>> question_answerer.get(index='menu_items',
+                                      name='pork and shrimp',
+                                      restaurant_id='B01CGKGQ40',
+                                      _sort='price',
+                                      _sort_type='asc')
+
+        Args:
+            index (str): The name of an index.
+            size (int): The maximum number of records, default to 10.
+            query_type (str): Whether the search is over structured, unstructured and whether to use
+                              text signals for ranking, embedder signals, or both.
+            id (str): The id of a particular document to retrieve.
+            _sort (str): Specify the knowledge base field for custom sort.
+            _sort_type (str): Specify custom sort type. Valid values are 'asc', 'desc' and
+                              'distance'.
+            _sort_location (dict): The origin location to be used when sorting by distance.
+
+        Returns:
+            list: A list of matching documents.
+        """
+        doc_id = kwargs.get("id")
+
+        query_type = query_type or self.query_type
+
+        # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
+        app_namespace = app_namespace or self.app_namespace
+
+        # If an id was passed in, simply retrieve the specified document
+        if doc_id:
+            logger.info(
+                "Retrieve object from KB: index= '%s', id= '%s'.", index, doc_id
+            )
+            s = self.build_search(index, app_namespace=app_namespace)
+            s = s.filter(query_type=query_type, id=doc_id)
+            results = s.execute(size=size)
+            return results
+
+        sort_clause = {}
+        query_clauses = []
+
+        # iterate through keyword arguments to get KB field and value pairs for search and custom
+        # sort criteria
+        for key, value in kwargs.items():
+            logger.debug("Processing argument: key= %s value= %s.", key, value)
+            if key == "_sort":
+                sort_clause["field"] = value
+            elif key == "_sort_type":
+                sort_clause["type"] = value
+            elif key == "_sort_location":
+                sort_clause["location"] = value
+            elif "embedder" in query_type and self._embedder_model:
+                if "text" in query_type or "keyword" in query_type:
+                    query_clauses.append({key: value})
+                embedded_value = self._embedder_model.get_encodings([value])[0]
+                embedded_key = key + EMBEDDING_FIELD_STRING
+                query_clauses.append({embedded_key: embedded_value})
+            else:
+                query_clauses.append({key: value})
+                logger.debug("Added query clause: field= %s value= %s.", key, value)
+
+        logger.debug("Custom sort criteria %s.", sort_clause)
+
+        # build Search object with overriding ranking setting to require all query clauses are
+        # matched.
+        s = self.build_search(index, app_namespace=app_namespace,
+                              ranking_config={"query_clauses_operator": "and"})
+
+        # add query clauses to Search object.
+        for clause in query_clauses:
+            s = s.query(query_type=query_type, **clause)
+
+        # add custom sort clause if specified.
+        if sort_clause:
+            s = s.sort(
+                field=sort_clause.get("field"),
+                sort_type=sort_clause.get("type"),
+                location=sort_clause.get("location"),
+            )
+
+        results = s.execute(size=size)
+        return results
+
+    def _build_search(self, index, ranking_config=None, app_namespace=None):
+        """Build a search object for advanced filtered search.
+
+        Args:
+            index (str): index name of knowledge base object.
+            ranking_config (dict, optional): overriding ranking configuration parameters.
+            app_namespace (str, optional): The namespace of the app. Used to prevent
+                collisions between the indices of this app and those of other apps.
+        Returns:
+            Search: a Search object for filtered search.
+        """
+
+        # fix related to Issue 219: https://github.com/cisco/mindmeld/issues/219
+        app_namespace = app_namespace or self.app_namespace
+
+        if not does_index_exist(app_namespace=app_namespace, index_name=index):
+            raise ValueError("Knowledge base index '{}' does not exist.".format(index))
+
+        # get index name with app scope
+        index = get_scoped_index_name(app_namespace, index)
+
+        # load knowledge base field information for the specified index.
+        self._load_field_info(index)
+
+        return ElasticsearchQuestionAnswerer.Search(
+            client=self._es_client,
+            index=index,
+            ranking_config=ranking_config,
+            field_info=self._es_field_info[index],
+        )
 
     class Search:
         """This class models a generic filtered search in knowledge base. It allows developers to
@@ -2745,60 +3175,53 @@ class ElasticsearchQuestionAnswerer(BaseQuestionAnswerer):
 
 class QuestionAnswerer:
     """
-    Factory class with backwards compatability
+    Backwards compatible QuestionAnswerer class
 
-    deprecated usages
+    old usages (allowed but will soon be deprecated)
+        # loading KB directly through class method
         >>> QuestionAnswerer.load_kb(...)
+        # instantiating a QA object from QuestionAnswerer instead of QuestionAnswererFactory
+        >>> question_answerer = QuestionAnswerer(app_path, resource_loader, es_host, config)
 
     new usages
-        >>> question_answerer = QuestionAnswerer(app_path, resource_loader, es_host, config)
-        # or ...
-        >>> question_answerer = QuestionAnswerer.create_question_answerer(**kwargs)
-        # And then ...
+        >>> question_answerer = QuestionAnswererFactory.create_question_answerer(**kwargs)
+        # Use the QA object's methods to load KB and get search results, instead of class methods
         >>> question_answerer.load_kb(...)
-        >>> question_answerer.get(...) # .get(...), .build_search(...)
+        >>> question_answerer.get(...) # .get(...) and .build_search(...)
     """
+
+    DEPRECATION_MESSAGE = \
+        "Calling QuestionAnswerer class directly will be deprecated in future versions. " \
+        "To instantiate a QA instance, use the QuestionAnswererFactory by calling " \
+        "'qa = QuestionAnswererFactory.create_question_answerer(**kwargs)'. " \
+        "An instantiated QA can then be used as 'qa.load_kb(...)', 'qa.get(...)', etc. " \
+        "See https://www.mindmeld.com/docs/userguide/kb.html for details about the various " \
+        "functionalities available with different question-answerers."
 
     def __new__(cls, app_path=None, resource_loader=None, es_host=None, config=None, **kwargs):
         """
-        This method is used to initialize a XxxQuestionAnswerer based on the model_type
+        This method is used to initialize a XxxQuestionAnswerer based on the model_type.
 
         To keep the code base backwards compatible, we use a '__new__()' way of creating instances
         alongside using a factory approach. For cases wherein a question-answerer is instantiated
-        from 'QuestionAnswerer' class instead of  'QuestionAnswerer.create_question_answerer',
+        from 'QuestionAnswerer' class instead of 'QuestionAnswererFactory.create_question_answerer',
         this method is called before __init__ and returns an instance of a question-answerer.
 
-        See that the input arguments are kept as-is with respect to the '__init__()' of
-        'ElasticsearchQuestionAnswerer' class which was the 'QuestionAnswerer' class in previous
-        version of 'question_answerer.py'
+        Due to this reason, see that the order of the arguments is similar to the previous version
+        of QuestionAnswerer class in 'question_answerer.py'.
         """
+
+        # can be deprecated in future
+        del resource_loader
+
+        warnings.warn(QuestionAnswerer.DEPRECATION_MESSAGE, DeprecationWarning)
 
         kwargs.update({
             "app_path": app_path,
-            "resource_loader": resource_loader,
             "es_host": es_host,
             "config": config,
         })
-        return cls.create_question_answerer(**kwargs)
-
-    @classmethod
-    def create_question_answerer(cls, **kwargs):
-        """
-        Args:
-            app_path (str, optional): The path to the directory containing the app's data. If
-                provided, used to obtain default 'app_namespace' and QA configurations
-            app_namespace (str, optional): The namespace of the app. Used to prevent
-                collisions between the indices of this app and those of other apps.
-            config (dict, optional): The QA config if passed directly rather than loaded from the
-                app config
-            resource_loader (ResourceLoader, optional): An object which can load resources for the
-                question answerer.
-        """
-
-        config = cls._get_config(kwargs.get("config"), kwargs.get("app_path"))
-        config = cls._correct_deprecated_qa_config(config)
-        kwargs.update({"config": config})
-        return cls._get_question_answerer_class(config.get("model_type"))(**kwargs)
+        return QuestionAnswererFactory.create_question_answerer(**kwargs)
 
     @classmethod
     def load_kb(cls,
@@ -2833,12 +3256,18 @@ class QuestionAnswerer:
             config (dict): The QA config if passed directly rather than loaded from the app config
         """
 
+        warnings.warn(QuestionAnswerer.DEPRECATION_MESSAGE, DeprecationWarning)
+
         # As a way to reduce entropy in using 'load_kb()' and it's related inconsistencies of not
         # exposing 'app_namespace' argument in '.get()' and '.build_search()', this reformatting
-        # recommends that all these methods be used as instance methods and not as class methods
+        # recommends that all these methods be used as instance methods and not as class methods.
+        # By doing so, each QA object is meant to be used for one app_path/app_namespace and all
+        # the indices in that app, while previously once could access any app's index.
+
         msg = "Calling the 'load_kb(...)' method directly from the QuestionAnswerer object " \
               "like 'QuestionAnswerer.load_kb(...)' will be deprecated. New usage: " \
-              "'qa = QuestionAnswerer(...); qa.load_kb(...)'. Note that this change might also " \
+              "'qa = QuestionAnswererFactory.create_question_answerer(**kwargs); " \
+              "qa.load_kb(...)'. Note that this change might also " \
               "lead to creating different QA instances for different configs. " \
               "See https://www.mindmeld.com/docs/userguide/kb.html for more details. "
         warnings.warn(msg, DeprecationWarning)
@@ -2853,11 +3282,11 @@ class QuestionAnswerer:
             "config": config,
             "app_path": app_path,
         })
-        question_answerer = cls.create_question_answerer(**kwargs)
+        question_answerer = QuestionAnswererFactory.create_question_answerer(**kwargs)
 
         # only retain 'connection_timeout', 'clean' information as everything else is already
-        #   absorbed during initialization; the recommended way of passing configs to QA is by
-        #   passing those details during initialization, that way there exists no discrepancies
+        #   absorbed during instantiation above; the recommended way of passing configs to QA is
+        #   by passing those details during initialization, that way there exists no discrepancies
         #   between loading and inference.
         kwargs.pop("app_namespace")
         kwargs.pop("es_host")
@@ -2865,72 +3294,6 @@ class QuestionAnswerer:
         kwargs.pop("config")
         kwargs.pop("app_path")
         question_answerer.load_kb(index_name, data_file, **kwargs)
-
-    @staticmethod
-    def _get_config(config=None, app_path=None):
-        if not config:
-            return get_classifier_config("question_answering", app_path=app_path)
-        return config
-
-    @staticmethod
-    def _correct_deprecated_qa_config(config):
-        """
-        for backwards compatability
-          if the config is supplied in deprecated format, its format is corrected and returned,
-          else it is not modified and returned as-is
-
-        deprecated usage
-            >>> config = {
-                    "model_type": "keyword",  # or "text", "embedder", "embedder_keyword", etc.
-                    "model_settings": {
-                        ...
-                    }
-                }
-
-        new usage
-            >>> config = {
-                    "model_type": "elasticsearch",  # or "native"
-                    "model_settings": {
-                        "query_type": "keyword",  # or "text", "embedder", "embedder_keyword", etc.
-                        ...
-                    }
-                }
-        """
-
-        if not config.get("model_settings", {}).get("query_type"):
-            model_type = config.get("model_type")
-            if not model_type:
-                msg = f"Invalid 'model_type': {model_type} found while creating a QuestionAnswerer"
-                raise ValueError(msg)
-            if model_type in QUESTION_ANSWERER_MODEL_MAPPINGS:
-                raise ValueError(
-                    "Could not find `query_type` in `model_settings` of question answerer")
-            else:
-                msg = "Using deprecated config format for Question Answerer. " \
-                      "See https://www.mindmeld.com/docs/userguide/kb.html for more details."
-                warnings.warn(msg, DeprecationWarning)
-                config = copy.deepcopy(config)
-                model_settings = config.get("model_settings", {})
-                model_settings.update({"query_type": model_type})
-                config["model_settings"] = model_settings
-                config["model_type"] = "elasticsearch"
-
-        return config
-
-    @staticmethod
-    def _get_question_answerer_class(model_type):
-
-        if model_type not in QUESTION_ANSWERER_MODEL_MAPPINGS:
-            msg = f"Expected 'model_type' in config of Question Answerer among " \
-                  f"{[*QUESTION_ANSWERER_MODEL_MAPPINGS]} but found {model_type}"
-            raise ValueError(msg)
-
-        if model_type == "elasticsearch" and not _is_module_available("elasticsearch"):
-            raise ImportError("Must install the extra [elasticsearch] by running "
-                              "'pip install mindmeld[elasticsearch]' "
-                              "to use Elasticsearch for question answering.")
-
-        return QUESTION_ANSWERER_MODEL_MAPPINGS[model_type]
 
 
 QUESTION_ANSWERER_MODEL_MAPPINGS = {

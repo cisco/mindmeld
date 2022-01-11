@@ -183,7 +183,7 @@ Import the Data into the Knowledge Base
       mm.configure_logs()
       mm.blueprint('food_ordering')
 
-The :meth:`load_kb()` API loads data into the knowledge base from JSON-formatted data files. If the index of specified objects is already present in the knowledge base, the new objects are imported into the existing index. If no index for the specified objects exists, the question answerer creates one.
+The :meth:`load_kb()` API loads data into the knowledge base from JSON-formatted data files. If the index of specified objects is already present in the knowledge base, the new objects are imported into the existing index. If no index for the specified objects exists, the question answerer creates one. Remember that in absence of any custom config, an Elasticsearch-backed QuestionAnswerer is loaded by default. If you do not wish to use Elasticsearch, you can use an alternate choice following the :ref:`QuestionAnswerer without Elasticsearch backend <non_elasticsearch_question_answerer>` section below.
 
 Use :meth:`load_kb()` to load a data file from a path and create an index for the objects in the data file. Substitute a data file, index name, and app name for those used in the example.
 

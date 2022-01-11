@@ -107,7 +107,7 @@ class EntityRecognizer(Classifier):
         queries = self._resolve_queries(queries, label_set)
 
         new_hash = self._get_model_hash(self._model_config, queries)
-        cached_model = self._resource_loader.hash_to_model_path.get(new_hash)
+        cached_model_path = self._resource_loader.hash_to_model_path.get(new_hash)
         # After PR 356, entity.pkl file is not created when there are no entity types,
         # similar to not having domain.pkl or intent.pkl when there are less than 2 domains
         # or 2 intents respectively.
@@ -118,6 +118,7 @@ class EntityRecognizer(Classifier):
         # This is not an issue in domain and intent classifiers as the .fit() method is not called
         # when there are less than 2 domains/intents.
 
+
         # Load labeled data
         examples, labels = self._get_examples_and_labels(queries)
 
@@ -125,10 +126,10 @@ class EntityRecognizer(Classifier):
             # Build entity types set
             self.entity_types = {entity.entity.type for label in labels for entity in label}
 
-        if incremental_timestamp and cached_model:
+        if incremental_timestamp and cached_model_path:
             logger.info("No need to fit.  Previous model is cached.")
             if load_cached:
-                self.load(cached_model)
+                self.load(cached_model_path)
                 return True
             return False
 
