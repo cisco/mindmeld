@@ -111,8 +111,7 @@ class RoleClassifier(Classifier):
 
         if examples:
             # Build roles set
-            for label in labels:
-                self.roles.add(label)
+            self.roles.update(labels)
 
         if incremental_timestamp and cached_model_path:
             logger.info("No need to fit. Previous model is cached.")
