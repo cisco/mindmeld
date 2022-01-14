@@ -88,7 +88,8 @@ class BaseSequenceClassification(BaseClassification):
                   f"A valid number is equal to or greater than 2"
             raise ValueError(msg)
 
-        print(f"{self.name} is initialized")
+        msg = f"{self.name} is initialized"
+        logger.info(msg)
 
     def forward(self, batch_data):
 
@@ -100,7 +101,7 @@ class BaseSequenceClassification(BaseClassification):
         logits = self.classifier_head(seq_embs)
         batch_data.update({"logits": logits})
 
-        targets = batch_data.get("labels")
+        targets = batch_data.pop("_labels", None)
         if targets is not None:
             if self.params.num_labels == 2:
                 loss = self.criterion(logits.view(-1), targets.float())
@@ -135,7 +136,11 @@ class BaseSequenceClassification(BaseClassification):
         with torch.no_grad():
             for start_idx in range(0, len(examples), self.params.batch_size):
                 batch_examples = examples[start_idx:start_idx + self.params.batch_size]
-                batch_data = self.encoder.batch_encode(batch_examples)
+                batch_data = self.encoder.batch_encode(
+                    batch_examples,
+                    padding_length=self.params.padding_length,
+                    add_terminals=self.params.add_terminals,
+                )
                 batch_logits = self.forward(batch_data)["logits"]
                 logits = torch.cat((logits, batch_logits)) if logits is not None else batch_logits
         if was_training:
@@ -179,7 +184,12 @@ class EmbedderForSequenceClassification(BaseSequenceClassification):
 
     def _forward_core(self, batch_data):
         seq_ids = batch_data["seq_ids"]  # [BS, SEQ_LEN]
-        seq_lengths = batch_data["seq_lengths"]  # [BS]
+
+        seq_lengths = []
+        for seq_len, split_lengths in zip(batch_data["seq_lengths"], batch_data["split_lengths"]):
+            n_terminals = seq_len - len(split_lengths)
+            seq_lengths.append(sum(split_lengths) + n_terminals)
+        seq_lengths = torch.as_tensor(seq_lengths, dtype=torch.long)
 
         encodings = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, EMD_DIM]
         encodings = self.emb_layer_pooling(encodings, seq_lengths)  # [BS, self.out_dim]
@@ -259,7 +269,12 @@ class LstmForSequenceClassification(BaseSequenceClassification):
 
     def _forward_core(self, batch_data):
         seq_ids = batch_data["seq_ids"]  # [BS, SEQ_LEN]
-        seq_lengths = batch_data["seq_lengths"]  # [BS]
+
+        seq_lengths = []
+        for seq_len, split_lengths in zip(batch_data["seq_lengths"], batch_data["split_lengths"]):
+            n_terminals = seq_len - len(split_lengths)
+            seq_lengths.append(sum(split_lengths) + n_terminals)
+        seq_lengths = torch.as_tensor(seq_lengths, dtype=torch.long)  # [BS]
 
         encodings = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, EMD_DIM]
         encodings = self.lstm_layer(encodings, seq_lengths)  # [BS, SEQ_LEN, self.out_dim]
@@ -290,14 +305,16 @@ class BertForSequenceClassification(BaseSequenceClassification):
             "patience": 4,
             "batch_size": 16,
             "gradient_accumulation_steps": 2,
-            "max_grad_norm": 1.0
+            "max_grad_norm": 1.0,
+            # special tokens might be added differently for different transformer models
+            "embedder_output_pooling_type": "first",
         }
 
         for k, v in safe_values.items():
             v_inputted = params.get(k, v)
             if v != v_inputted:
-                msg = f"{self.name} can be best used with '{k}' equal to '{v}'. Other " \
-                      f"values passed through config params might lead to unexpected results."
+                msg = f"{self.name} can be best used with '{k}' equal to '{v}'. Other values " \
+                      f"passed through config params might sometimes lead to unexpected results."
                 logger.warning(msg)
             else:
                 params.update({k: v})
@@ -374,31 +391,40 @@ class BertForSequenceClassification(BaseSequenceClassification):
             # before the logit layer) and hence its dimension  [BS, SEQ_LEN, EMD_DIM]
             last_hidden_state = bert_outputs.get("last_hidden_state")  # [BS, SEQ_LEN, EMD_DIM]
             if last_hidden_state is None:
-                # TODO: All models might not have this key; can we enumerate a set of key names
-                #  instead?
+                # TODO: Do all huggingface models have this key? Are there any alternatives for this
+                #  key? If so, we can enumerate the set of key names instead of just one key name?
                 msg = f"The choice of pretrained bert model " \
                       f"({self.params.pretrained_model_name_or_path}) " \
-                      f"has no key 'last_hidden_state' in its output dictionary"
+                      f"has no key 'last_hidden_state' in its output dictionary."
                 raise ValueError(msg)
             last_hidden_state = self.dropout(last_hidden_state)
-            seq_lengths = batch_data["seq_lengths"]  # [BS]
+            seq_lengths = []
+            for seq_len, split_lengths in zip(
+                batch_data["seq_lengths"], batch_data["split_lengths"]
+            ):
+                n_terminals = seq_len - len(split_lengths)
+                seq_lengths.append(sum(split_lengths) + n_terminals)
+            seq_lengths = torch.as_tensor(seq_lengths, dtype=torch.long)
             encodings = self.emb_layer_pooling(last_hidden_state, seq_lengths)  # [BS, self.out_dim]
         else:
-            # 'pooler_output' refers to the last layer hidden-state of the first token of the
-            # sequence and hence its dimension [BS, self.out_dim]
+            # 'pooler_output' refers to the first token's (aka. CLS) representation obtained form
+            # the last hidden layer, and hence its dimension [BS, self.out_dim]
             pooler_output = bert_outputs.get("pooler_output")  # [BS, self.out_dim]
             if pooler_output is None:
-                msg = f"The choice of pretrained bert model " \
-                      f"({self.params.pretrained_model_name_or_path}) " \
-                      "has no key 'pooler_output' in its output dictionary. " \
-                      "Considering to obtain " \
-                      "the first embedding of last_hidden_state."
+                msg = f"The chosen pretrained bert ({self.params.pretrained_model_name_or_path}) " \
+                      "has no key 'pooler_output' in its output dictionary (maybe the selected " \
+                      "choice of transformers model has no CLS kind-of token?). " \
+                      "Continuing to obtain the first representation of the last hidden state " \
+                      "due to the passed-in value for embedder output pooling type param: " \
+                      f"{self.params.embedder_output_pooling_type}. " \
+                      f"If you wish to pool differently (eg. mean pooling), change the param " \
+                      f"value in configs and run training."
                 logger.error(msg)
                 last_hidden_state = bert_outputs.get("last_hidden_state")  # [BS, SEQ_LEN, EMD_DIM]
                 if last_hidden_state is None:
                     msg = f"The choice of pretrained bert model " \
                           f"({self.params.pretrained_model_name_or_path}) " \
-                          f"has no key 'last_hidden_state' in its output dictionary"
+                          f"has no key 'last_hidden_state' in its output dictionary."
                     raise ValueError(msg)
                 pooler_output = last_hidden_state[:, 0, :]  # [BS, self.out_dim]
             encodings = self.dropout(pooler_output)
@@ -429,7 +455,7 @@ def get_sequence_classifier_cls(classifier_type: str, embedder_type: str = None)
         embedder_type == EmbedderType.BERT and
         classifier_type not in [SequenceClassificationType.EMBEDDER]
     ):
-        msg = f"To use a embedder_type '{EmbedderType.BERT.value}', " \
+        msg = f"To use the embedder_type '{EmbedderType.BERT.value}', " \
               f"classifier_type must be '{SequenceClassificationType.EMBEDDER.value}'."
         raise ValueError(msg)
 

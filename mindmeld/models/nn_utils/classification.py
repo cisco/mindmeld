@@ -229,10 +229,10 @@ class BaseClassification(nn_module):
                 batch_data = self.encoder.batch_encode(
                     examples=batch_examples,
                     padding_length=self.params.padding_length,
-                    add_terminals=self.params.add_terminals
+                    add_terminals=self.params.add_terminals,
                 )
                 batch_data.update({
-                    "labels": self._prepare_labels(
+                    "_labels": self._prepare_labels(  # `_` 'cause this key is for intermediate use
                         batch_labels,
                         # pad to the max length amongst encoded examples
                         max([len(_split_lengths) for _split_lengths in batch_data["split_lengths"]])
@@ -351,7 +351,10 @@ class BaseClassification(nn_module):
 
         # validate tokenizer_type param
         allowed_tokenizer_types = {
-            EmbedderType.GLOVE: [TokenizerType.WHITESPACE_TOKENIZER, ],
+            EmbedderType.GLOVE: [
+                TokenizerType.WHITESPACE_TOKENIZER,
+                TokenizerType.WHITESPACE_AND_CHAR_DUAL_TOKENIZER,
+            ],
             EmbedderType.BERT: [TokenizerType.HUGGINGFACE_PRETRAINED_TOKENIZER, ]
         }
         if params.get("embedder_type") and params.get("tokenizer_type"):

@@ -32,6 +32,50 @@ logger = logging.getLogger(__name__)
 
 
 class BatchData(Bunch):
+    """
+    A dictionary-like object that exposes its keys as attributes and holds various inputs as well
+    as outputs of neural models related to a batch of data, such as tensor encodings, lengths of
+    inputs etc.
+
+    Following is the description of the different keys that serve as inputs to neural models:
+        - seq_lengths: Number of tokens in each example before adding padding tokens. The number
+            includes terminal tokens too if they are added before padding. If using an encoder
+            that splits words in sub-words, seq_lengths still implies number of words (instead
+            of number of sub-words) along with any added terminal tokens; this number is
+            useful in case of token classifiers which require token-level (aka.
+            word-level) outputs as well as in sequence classifiers models such as LSTM.
+        - split_lengths: The length of each subgroup (i.e. group of sub-words) in each
+            example. Due to its definition, it obviously does not include any terminal
+            tokens in its counts. This can be seen as fine-grained information to
+            seq_lengths values for the encoders with sub-word tokenization. This is again
+            useful in cases of token classifiers to flexibly choose between representations
+            of first sub-word or mean/max pool of sub-words' representations in order to
+            obtain the word-level representations. For lookup table based encoders where
+            words are not broken into sub-words, `split_lengths` is simply a sequence of
+            ones whose sum indicates the number of words w/o terminal & padding tokens.
+        - seq_ids (in case non-pretrained models that require training an embedding layer):
+            The encoded ids useful for embedding lookup, including terminal special tokens
+            if asked for, and with padding.
+        - attention_masks (only in case of huggingface trainable encoders): Boolean flags
+            corresponding to each id in seq_ids, set to 0 if padding token else 1.
+        - hgf_encodings (only in huggingface pretrained encoders): A dict of outputs from a
+            Pretrained Language Model encoder from Huggingface (shortly dubbed as hgf).
+        - char_seq_ids (only in dual tokenizers): Similar to seq_ids but from a char
+            tokenizer in case of dual tokenization
+        - char_seq_lengths (only in dual tokenizers): Similar to seq_lengths but from a char
+            tokenizer in case of dual tokenization. Like seq_lengths, this also includes
+            terminal special tokens from char vocab in the length count whenever added.
+
+     Following is the description of the different keys that serve as inputs to neural models:
+
+    Following is the description of the different keys that are outputted by neural models:
+        - seq_embs: The embeddings produced before final classification (dense) layers by
+            sequence-classification classes (generally of shape [batch_size, emd_dim]).
+        - token_embs: The embeddings produced before final classification (dense) layers by
+            token-classification classes (generally of shape [batch_size, seq_length, emd_dim]).
+        - logits: Classification scores (before SoftMax).
+        - loss: Classification loss object.
+    """
     pass
 
 
@@ -121,7 +165,8 @@ DEFAULT_FORWARD_PASS_PARAMS = {
         "tokenizer_type": TokenizerType.HUGGINGFACE_PRETRAINED_TOKENIZER.value,
         "embedder_output_keep_prob": 0.7,
         "embedder_output_pooling_type": "first",
-        "output_keep_prob": 1.0,  # unnecessary upon using `embedder_output_keep_prob`
+        "output_keep_prob": 1.0,  # this dropout unnecessary upon using `embedder_output_keep_prob`
+        "add_terminals": True,
     },
     "EmbedderForTokenClassification": {
         **DEFAULT_TOKEN_CLASSIFICATION_PARAMS,
@@ -140,23 +185,6 @@ DEFAULT_FORWARD_PASS_PARAMS = {
         "lstm_keep_prob": 0.7,
         "lstm_bidirectional": True,
     },
-    "CharLstmWithWordLstmForTokenClassification": {
-        **DEFAULT_TOKEN_CLASSIFICATION_PARAMS,
-        "tokenizer_type": TokenizerType.WHITESPACE_AND_CHAR_DUAL_TOKENIZER.value,
-        "padding_idx": None,
-        "update_embeddings": True,
-        "embedder_output_keep_prob": 0.7,
-        "lstm_hidden_dim": 128,
-        "lstm_num_layers": 2,
-        "lstm_keep_prob": 0.7,
-        "lstm_bidirectional": True,
-        "char_lstm_hidden_dim": 128,
-        "char_lstm_num_layers": 2,
-        "char_lstm_keep_prob": 0.7,
-        "char_lstm_bidirectional": True,
-        "char_lstm_output_pooling_type": "last",
-        "word_level_character_embedding_size": None,
-    },
     "CharCnnWithWordLstmForTokenClassification": {
         **DEFAULT_TOKEN_CLASSIFICATION_PARAMS,
         "tokenizer_type": TokenizerType.WHITESPACE_AND_CHAR_DUAL_TOKENIZER.value,
@@ -167,18 +195,37 @@ DEFAULT_FORWARD_PASS_PARAMS = {
         "lstm_num_layers": 2,
         "lstm_keep_prob": 0.7,
         "lstm_bidirectional": True,
+        "char_emb_dim": 50,
         "char_window_sizes": [3, 4, 5],
         "char_number_of_windows": [100, 100, 100],
         "char_cnn_output_keep_prob": 0.7,
         "word_level_character_embedding_size": None,
-
+    },
+    "CharLstmWithWordLstmForTokenClassification": {
+        **DEFAULT_TOKEN_CLASSIFICATION_PARAMS,
+        "tokenizer_type": TokenizerType.WHITESPACE_AND_CHAR_DUAL_TOKENIZER.value,
+        "padding_idx": None,
+        "update_embeddings": True,
+        "embedder_output_keep_prob": 0.7,
+        "lstm_hidden_dim": 128,
+        "lstm_num_layers": 2,
+        "lstm_keep_prob": 0.7,
+        "lstm_bidirectional": True,
+        "char_emb_dim": 50,
+        "char_lstm_hidden_dim": 128,
+        "char_lstm_num_layers": 2,
+        "char_lstm_keep_prob": 0.7,
+        "char_lstm_bidirectional": True,
+        "char_lstm_output_pooling_type": "last",
+        "word_level_character_embedding_size": None,
     },
     "BertForTokenClassification": {
         **DEFAULT_TOKEN_CLASSIFICATION_PARAMS,
         "tokenizer_type": TokenizerType.HUGGINGFACE_PRETRAINED_TOKENIZER.value,
         "embedder_output_keep_prob": 0.7,
-        "output_keep_prob": 1.0,  # unnecessary upon using `embedder_output_keep_prob`
+        "output_keep_prob": 1.0,  # this dropout unnecessary upon using `embedder_output_keep_prob`
         "use_crf_layer": False,  # Following BERT paper's best results,
+        "add_terminals": True,
     }
 }
 

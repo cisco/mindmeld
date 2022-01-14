@@ -540,7 +540,8 @@ class PytorchTextModel(PytorchModel):
             # domain- and intent-classifiers
             msg = f"{self.__class__.__name__}.fit() only accepts QueryIterator as the first " \
                   f"argument but found type: {type(examples)}. This might happen if trying to" \
-                  f"create a deep neural net based classifier for role classification."
+                  f"create a deep neural net based classifier for role classification which is " \
+                  f"currently not supported."
             raise NotImplementedError(msg)
 
         # Encode classes

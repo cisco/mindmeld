@@ -281,7 +281,7 @@ class PoolingLayer(nn_module):
             elif self.pooling_type == "mean_sqrt":
                 summed_padded_token_embs = torch.sum(padded_token_embs * mask, dim=1)
                 expanded_lengths = lengths.unsqueeze(dim=1).expand(summed_padded_token_embs.size())
-                outputs = torch.div(summed_padded_token_embs, torch.sqrt(expanded_lengths))
+                outputs = torch.div(summed_padded_token_embs, torch.sqrt(expanded_lengths.float()))
 
         return outputs
 
@@ -312,7 +312,7 @@ class SplittingAndPoolingLayer(nn_module):
     def _split_and_pool(
         self,
         tensor_2d: "Tensor2d[float]",
-        list_of_subgroup_lengths: List[int],
+        list_of_subgroup_lengths: "Tensor1d[int]",
         discard_terminals: bool
     ):
         # tensor_2d:                 dim: [SEQ_LEN, EMD_DIM]
@@ -323,26 +323,45 @@ class SplittingAndPoolingLayer(nn_module):
         if discard_terminals:
             # since list_of_subgroup_lengths consists of lengths of only non-terminal subgroups but
             # the inputted tensor_2d consists of terminals
-            n_representations = sum(list_of_subgroup_lengths) + 2
-            tensor_2d = tensor_2d[:n_representations]
-            tensor_2d = tensor_2d[1:-1]  # discard terminal representations
+            # TODO: Number of terminals can also be 1 (maybe just left or just right) in some models
+            n_terminals = 2 if discard_terminals else 0
+            seq_len_required = sum(list_of_subgroup_lengths) + n_terminals
+            tensor_2d_with_terminals = tensor_2d[:seq_len_required]
+            tensor_2d = tensor_2d_with_terminals[1:-1]  # discard terminal representations
         else:
-            n_representations = sum(list_of_subgroup_lengths)
-            tensor_2d = tensor_2d[:n_representations]
+            seq_len_required = sum(list_of_subgroup_lengths)
+            tensor_2d = tensor_2d[:seq_len_required]
 
-        splits = torch.split(tensor_2d, list_of_subgroup_lengths, dim=0)
+        try:
+            # argument 'split_sizes' (position 1) must be tuple of ints, not Tensor
+            splits = torch.split(tensor_2d, list_of_subgroup_lengths.tolist(), dim=0)
+        except RuntimeError as e:
+            if discard_terminals and len(tensor_2d) == sum(list_of_subgroup_lengths) + 1:
+                msg = f"Unable to combine sub-tokens' representations for each word into one in " \
+                      f"{self.__class__.__name__}. It is possible that your choice of tokenizer " \
+                      f"has only 1 terminal token instead of assumed 2 terminals."
+                raise NotImplementedError(msg) from e
+            else:
+                msg = f"Unable to combine sub-tokens' representations for each word into one in " \
+                      f"{self.__class__.__name__}. It is possible that your choice of tokenizer " \
+                      f"does not split input text at whitespace (eg. robert-base tokenizer), due " \
+                      f"to which one-representation-per-word cannot be obtained to do tagging at " \
+                      f"word-level for token classification."
+                raise ValueError(msg) from e
         padded_token_embs = pad_sequence(splits, batch_first=True)  # [BS', SEQ_LEN', EMD_DIM]
 
         # return dims: [len(list_of_subgroup_lengths), EMD_DIM]
-        return self.pooling_layer(
+        pooled_repr_for_each_subgroup = self.pooling_layer(
             padded_token_embs=padded_token_embs,
             lengths=list_of_subgroup_lengths
         )
 
+        return pooled_repr_for_each_subgroup
+
     def forward(
         self,
         padded_token_embs: "Tensor3d[float]",
-        span_lengths: List[List[int]],
+        span_lengths: "List[Tensor1d[int]]",
         discard_terminals: bool = None
     ):
         # padded_token_embs: dim: [BS, SEQ_LEN, EMD_DIM]

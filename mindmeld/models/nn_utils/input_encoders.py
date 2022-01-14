@@ -121,37 +121,9 @@ class AbstractEncoder(ABC):
                 to the tokenized examples or not.
 
         Returns:
-            BatchData: A dictionary consisting of tensor encodings, lengths of inputs and
-                special tokens used while encoding, etc. (useful for batching labels in case of
-                token classification). Typically, it includes the following keys
-                (description follows):
-                - seq_lengths: Number of tokens in each example before adding padding tokens. It
-                    also includes terminal tokens as well, if they are added. If using an encoder
-                    that splits words in sub-words, then seq_lengths implies number of words instead
-                    of number of sub-words, along with any added terminal tokens. This number is
-                    useful in case of token classifiers which require token-level (aka.
-                    word-level) outputs as well as in sequence classifiers models such as LSTM.
-                - split_lengths: The length of each subgroup (i.e. group of sub-words) in each
-                    example. Due to its definition, it obviously does not include any terminal
-                    tokens in its counts. This can be seen as a fine-grained information to
-                    seq_lengths values for the encoders with sub-word tokenization. This is again
-                    useful in cases of token classifiers to flexibly choose between representations
-                    of first sub-word or mean/max pool of sub-words' representations in order to
-                    obtain the word-level representations. For lookup table based encoders where
-                    words are not broken into sub-words, `split_lengths` is simply a sequence of
-                    ones whose sum indicates the number of words w/o terminal & padding tokens.
-                - seq_ids (in case non-pretrained models that require training an embedding layer):
-                    The encoded ids useful for embedding lookup, including terminal special tokens
-                    if asked for, and with padding.
-                - attention_masks (only in case of huggingface trainable encoders): Boolean flags
-                    corresponding to each id in seq_ids, set to 0 if padding token else 1.
-                - hgf_encodings (only in huggingface pretrained encoders): A dict of outputs from a
-                    Pretrained Language Model encoder from Huggingface (shortly dubbed as hgf).
-                - char_seq_ids (only in dual tokenizers): Similar to seq_ids but from a char
-                    tokenizer in case of dual tokenization
-                - char_seq_lengths (only in dual tokenizers): Similar to seq_lengths but from a char
-                    tokenizer in case of dual tokenization. Like seq_lengths, this also includes
-                    terminal special tokens from char vocab in the length count whenever added.
+            BatchData: A dictionary-like object for the supplied batch of data, consisting of
+                various tensor inputs to the neural computation graph as well as any other inputs
+                required during the forward computation.
 
         Special note on `add_terminals` when using for sequence classification:
             This flag can be True or False in general. Setting it to False will lead to errors in
@@ -182,6 +154,49 @@ class AbstractEncoder(ABC):
         if not hasattr(self, "pad_token_idx"):
             return None
         return getattr(self, "pad_token_idx")
+
+
+def _trim_a_list_of_sub_token_groups(
+    x: List[List[Any]],
+    max_len: int,
+    y: List[Any] = None
+) -> Union[Tuple[List[Any], List], List[Any]]:
+    """
+    Given a list of sub-tokens sequences (aka. groups) upon a tokenization step, this method
+    identifies the first N groups that can be consumed within the allowed max length max_len.
+
+    Args:
+        x: List of groups of sub-words, obtained upon whitespace pre-tokenization and word-level
+            tokenization using a huggingface tokenizer
+        max_len: The maximum length of ravelled output expected. If given a value greater than the
+            number of all sub-words inputted, it is clipped to number of all sub-words.
+        y: Labels accompanying each group in x
+    """
+    max_len = min(max_len, sum([len(_x) for _x in x]))
+    curr_len = 0
+    if y:
+        new_x, new_y = [], []
+        # iter through each sub-tokens group w/ respective
+        # group's label (eg. group: ["m", "##ug"])
+        for _x, _y in zip(x, y):
+            if curr_len + len(_x) > max_len:
+                return new_x, new_y
+            elif curr_len + len(_x) <= max_len:
+                new_x.append(_x)
+                new_y.append(_y)
+                curr_len += len(_x)
+        return new_x, new_y
+    else:
+        new_x = []
+        # iter through each sub-tokens group w/o respective
+        # group's label (eg. group: ["m", "##ug"])
+        for _x in x:
+            if curr_len + len(_x) > max_len:
+                return new_x
+            elif curr_len + len(_x) <= max_len:
+                new_x.append(_x)
+                curr_len += len(_x)
+        return new_x
 
 
 class AbstractVocabLookupEncoder(AbstractEncoder):
@@ -253,32 +268,52 @@ class AbstractVocabLookupEncoder(AbstractEncoder):
         raise NotImplementedError("Subclasses must implement this method")
 
     def batch_encode(
-        self, examples: List[str], padding_length: int = None,
-        add_terminals: bool = False, _return_tokenized_examples: bool = False, **kwargs
+        self, examples: List[str], padding_length: int = None, add_terminals: bool = False,
+        _return_tokenized_examples: bool = False, **kwargs
     ) -> BatchData:
 
-        # convert to tokens and obtain sequence lengths
-        tokenized_examples = [self._tokenize(text) for text in examples]
-        sequence_lengths = [len(seq) for seq in tokenized_examples]
+        n_terminals = 2 if add_terminals else 0
 
-        # obtain padding length
-        # if padding_length is None, it is computed as max(length of all seqs from inputted text)
-        # account for start and end tokens respectively if add_terminals is True
-        curr_max = max(sequence_lengths) + 2 if add_terminals else max(sequence_lengths)
-        padding_length = min(padding_length, curr_max) if padding_length else curr_max
+        # tokenize each word of each input separately
+        # get maximum length of each example, accounting for terminal tokens- cls, sep
+        # If padding_length is None, padding has to be done to the max length of the input batch
+        tokenized_examples = [
+            [self._tokenize(word) for word in example.split(" ")] for example in examples
+        ]
 
-        # batchify by truncating or padding for each example
-        seq_ids, sequence_lengths, list_of_list_of_tokens = zip(*[
-            self._encode_text(example, padding_length, add_terminals)
+        max_curr_len = max([len(sum(t_ex, [])) for t_ex in tokenized_examples]) + n_terminals
+        padding_length_including_terminals = min(max_curr_len, padding_length) \
+            if padding_length else max_curr_len
+        padding_length_excluding_terminals = padding_length_including_terminals - n_terminals
+
+        _trimmed_examples = [
+            _trim_a_list_of_sub_token_groups(tokenized_example, padding_length_excluding_terminals)
+            for tokenized_example in tokenized_examples
+        ]  # List[List[List[str]]], innermost List[str] is a list of sub-words for a given word
+
+        split_lengths = [[len(x) for x in ex] for ex in _trimmed_examples]
+
+        # convert (sub) words into their respective token ids
+        seq_ids = [
+            self._encode_text(sum(example, []), padding_length_including_terminals, add_terminals)
             for example in tokenized_examples
-        ])
+        ]
 
         return BatchData(**{
-            "seq_lengths": torch.as_tensor(sequence_lengths, dtype=torch.long),
-            "split_lengths": [[1] * len(list_of_t) for list_of_t in list_of_list_of_tokens],
+            # number of groups per example
+            "seq_lengths": torch.as_tensor(  # Tensor1d[int]
+                [len(_split_lengths) + n_terminals for _split_lengths in split_lengths],
+                dtype=torch.long
+            ),
+            # len of each subgroup; for each example, sum of its split_lengths will be equal to
+            # the sequence length minus terminals.
+            "split_lengths": [
+                torch.as_tensor(_split_lengths, dtype=torch.long)
+                for _split_lengths in split_lengths
+            ],  # List[Tensor1d[int]],
             "seq_ids": torch.as_tensor(seq_ids, dtype=torch.long),
             **(
-                {"_seq_tokens": [" ".join(list_of_t) for list_of_t in list_of_list_of_tokens]}
+                {"_examples": [sum(list_of_t, []) for list_of_t in _trimmed_examples]}
                 if _return_tokenized_examples else {}
             ),
         })
@@ -290,20 +325,14 @@ class AbstractVocabLookupEncoder(AbstractEncoder):
         Args:
             list_of_tokens (List[str]): List of words or sub-words that are to be encoded
             padding_length (int): Maximum length of the encoded sequence; sequences shorter than
-                this length are padded with a pad index while longer sequences are trimmed
+                this length are padded with a pad index while longer sequences are trimmed.
+                Upon encoding, the length of outputted list of ids will be this length.
             add_terminals (bool): Whether terminal start and end tokens are to be added or not to
                 the encoded sequence
 
         Returns:
             list_of_ids (List[int]): Sequence of ids corresponding to the input tokens
-            seq_length (int): The length of sequence upon encoding (and before any padding)
-            list_of_tokens (List[str]): Similar to inputted list_of_tokens but without adding
-                special tokens
         """
-        list_of_tokens = (
-            list_of_tokens[:padding_length - 2] if add_terminals else
-            list_of_tokens[:padding_length]
-        )
         list_of_tokens_with_terminals = (
             [getattr(self, "start_token")] +
             list_of_tokens +
@@ -317,7 +346,7 @@ class AbstractVocabLookupEncoder(AbstractEncoder):
             self.token2id.get(token, getattr(self, "unk_token_idx"))
             for token in list_of_tokens_with_terminals_and_padding
         ]
-        return list_of_ids, len(list_of_tokens_with_terminals), list_of_tokens
+        return list_of_ids
 
     def get_vocab(self) -> Dict:
         return self.token2id
@@ -419,7 +448,7 @@ class WhitespaceAndCharDualEncoder(WhitespaceEncoder):
     ) -> BatchData:
 
         if add_terminals:
-            msg = f"The argument 'add_terminals' must be False to encode a batch using " \
+            msg = f"The param 'add_terminals' must be False to encode a batch using " \
                   f"{self.__class__.__name__}."
             logger.error(msg)
             raise ValueError(msg)
@@ -429,9 +458,9 @@ class WhitespaceAndCharDualEncoder(WhitespaceEncoder):
         )
 
         # use tokenized examples to obtain tokens for char tokenization
-        seq_tokens = batch_data.pop("_seq_tokens")
+        _examples = batch_data.pop("_examples")
         char_seq_ids, char_seq_lengths = [], []
-        for _seq_tokens in seq_tokens:
+        for _seq_tokens in _examples:
             # compute padding length for character sequences
             _curr_max = max([len(word) for word in _seq_tokens])
             _curr_max = _curr_max + 2 if char_add_terminals else _curr_max
@@ -499,54 +528,6 @@ class WhitespaceAndCharDualEncoder(WhitespaceEncoder):
         return getattr(self, "char_pad_token_idx")
 
 
-def _trim_list_of_subtokens_groups(
-    x: List[List[Any]],
-    max_len: int,
-    y: List[Any] = None
-) -> Union[Tuple[List[Any], List], List[Any]]:
-    """
-    Given a sequence of sub-tokens groups upon tokenization step, this method identifies the
-    first N sub-groups to be used so that the max_len of the sequence is not violated. If a
-    sequence of labels are passed-in through the argument y, their list is also trimmed
-    corresponding to the list of sub-token groups.
-
-    Args:
-        x: List of groups of sub-words, obtained upon whitespace pre-tokenization and word-level
-            tokenization
-        max_len: The maximum length of ravelled output expected. If given a value greater than the
-            number of all sub-words inputted, it is clipped to number of all sub-words.
-        y: Labels accompanying each group in x
-    """
-    max_len = min(max_len, sum([len(_x) for _x in x]))
-    curr_len = 0
-    if y:
-        new_x, new_y = [], []
-        for _x, _y in zip(x, y):
-            if curr_len >= max_len:
-                return new_x, new_y
-            if curr_len + len(_x) > max_len:
-                new_x.append(_x[:max_len - curr_len])
-                new_y.append(_y)
-                curr_len = max_len
-            elif curr_len + len(_x) <= max_len:
-                new_x.append(_x)
-                new_y.append(_y)
-                curr_len += len(_x)
-        return new_x, new_y
-    else:
-        new_x = []
-        for _x in x:
-            if curr_len >= max_len:
-                return new_x
-            if curr_len + len(_x) > max_len:
-                new_x.append(_x[:max_len - curr_len])
-                curr_len = max_len
-            elif curr_len + len(_x) <= max_len:
-                new_x.append(_x)
-                curr_len += len(_x)
-        return new_x
-
-
 class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
     """
     Abstract class wrapped around AbstractEncoder that is based on Huggingface's tokenizers library
@@ -578,6 +559,7 @@ class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
         self._prepare_pipeline()
         trainer = self.trainer(
             # vocab_size=30000,
+            vocab_size=100,
             special_tokens=self.__class__.SPECIAL_TOKENS
         )
         self.tokenizer.train_from_iterator(examples, trainer=trainer, length=len(examples))
@@ -651,43 +633,55 @@ class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
         """
 
         if not add_terminals:
-            msg = f"The argument 'add_terminals' must be True to encode a batch using " \
+            msg = f"The param 'add_terminals' must be True to encode a batch using " \
                   f"{self.__class__.__name__}."
             logger.error(msg)
             raise ValueError(msg)
 
-        # tokenize each word of each input separately
-        # get maximum length of each example, accounting for terminal tokens- cls, sep
-        # If padding_length is None, padding has to be done to the max length of the input batch
-        tokenized_examples = [
-            [self._tokenize(word) for word in example.split(" ")] for example in examples
-        ]
-        max_curr_len = max([len(sum(t_ex, [])) for t_ex in tokenized_examples]) + 2
-        padding_length = min(max_curr_len, padding_length) if padding_length else max_curr_len
-        padding_length = padding_length - 2  # -2 to sum to padding_length after adding cls, sep
+        if padding_length is not None:
+            msg = f"{self.__class__.__name__} does not support setting padding length during" \
+                  f"batch_encode() method."
+            logger.warning(msg)
 
-        sub_grouped_examples = [
-            _trim_list_of_subtokens_groups(t_ex, padding_length) for t_ex in
-            tokenized_examples
-        ]  # List[List[List[str]]], innermost List[str] is a list of sub-words for a given word
-        tokenized_examples = [" ".join(sum(ex, [])) for ex in sub_grouped_examples]
-        split_lengths = [[len(x) for x in ex] for ex in sub_grouped_examples]
+        n_terminals = 2 if add_terminals else 0
 
-        output = self.tokenizer.encode_batch(
-            tokenized_examples, add_special_tokens=True
-        )
+        output = self.tokenizer.encode_batch(examples, add_special_tokens=True)
         seq_ids = [o.ids for o in output]
         attention_masks = [o.attention_mask for o in output]
+        words = [o.words for o in output]
+
+        split_lengths = []
+        for words_nums in words:  # an eg. sequence [None,0,1,2,3,3,3,3,4,4,...,16,None,...,None]
+            curr_len = 0
+            curr_num = 0
+            _split_lengths = []
+            for word_num in words_nums[1:]:  # the first corresponds to CLS token
+                if word_num == curr_num:
+                    curr_len += 1
+                elif word_num is None:
+                    _split_lengths.append(curr_len)
+                    break
+                else:
+                    assert word_num == curr_num + 1, print(word_num, curr_num)
+                    _split_lengths.append(curr_len)
+                    curr_len = 1
+                    curr_num = word_num
+            split_lengths.append(_split_lengths)
 
         return BatchData(**{
-            "seq_lengths": torch.as_tensor(  # List[int], number of groups per example
-                [len(_split_lengths) + 2 for _split_lengths in split_lengths], dtype=torch.long
+            # num of groups per example
+            "seq_lengths": torch.as_tensor(  # Tensor1d[int]
+                [len(_split_lengths) + n_terminals for _split_lengths in split_lengths],
+                dtype=torch.long
             ),
-            "split_lengths": split_lengths,  # List[List[int]], len of each subgroup; For each
-            # example, sum of its split_lengths will be equal to the sum of attention mask
-            # minus terminals.
-            "seq_ids": torch.as_tensor(seq_ids, dtype=torch.long),  # List[List[int]]
-            "attention_masks": torch.as_tensor(attention_masks, dtype=torch.long),  # List[Lst[int]]
+            # len of each subgroup; for each example, sum of its split_lengths will be equal to
+            # the sum of attention mask minus terminals.
+            "split_lengths": [
+                torch.as_tensor(_split_lengths, dtype=torch.long)
+                for _split_lengths in split_lengths
+            ],  # List[Tensor1d[int]],
+            "seq_ids": torch.as_tensor(seq_ids, dtype=torch.long),  # Tensor2d[int]
+            "attention_masks": torch.as_tensor(attention_masks, dtype=torch.long),  # Tensor2d[int]
         })
 
     def get_vocab(self) -> Dict:
@@ -766,41 +760,67 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
     ) -> BatchData:
 
         if not add_terminals:
-            msg = f"The argument 'add_terminals' must be True to encode a batch using " \
+            msg = f"The param 'add_terminals' must be True to encode a batch using " \
                   f"{self.__class__.__name__}."
             logger.error(msg)
             raise ValueError(msg)
 
-        # tokenize each word of each input seperately
+        # TODO: Do all huggingface transformer models have two terminals? If not, the choice of
+        #  embedder pooling other than "first" (eg. "mean") might raise size mismatch issues.
+        #  See a related to-do in layers.py in SplittingAndPoolingLayer class.
+        #  Possible soln.: Use `return_special_tokens_mask=True` while calling the self.tokenizer(.)
+        n_terminals = 2 if add_terminals else 0
+
+        # tokenize each word of each input separately
         # get maximum length of each example, accounting for terminal tokens- cls, sep
         # If padding_length is None, padding has to be done to the max length of the input batch
         tokenized_examples = [
-            [self._tokenize(word) for word in example.split(" ")]
-            for example in examples
+            [self._tokenize(word) for word in example.split(" ")] for example in examples
         ]
-        max_curr_len = max([len(sum(t_ex, [])) for t_ex in tokenized_examples]) + 2
-        padding_length = min(max_curr_len, padding_length) if padding_length else max_curr_len
-        padding_length = padding_length - 2  # -2 to sum to padding_length after adding cls, sep
 
-        sub_grouped_examples = [
-            _trim_list_of_subtokens_groups(t_ex, padding_length) for t_ex in
-            tokenized_examples
+        # TODO: padding_length cannot exceed the transformer model's maximum length
+        max_curr_len = max([len(sum(t_ex, [])) for t_ex in tokenized_examples]) + n_terminals
+        padding_length_including_terminals = min(max_curr_len, padding_length) \
+            if padding_length else max_curr_len
+        padding_length_excluding_terminals = padding_length_including_terminals - n_terminals
+
+        _trimmed_examples = [
+            _trim_a_list_of_sub_token_groups(tokenized_example, padding_length_excluding_terminals)
+            for tokenized_example in tokenized_examples
+        ]  # List[List[List[str]]], innermost List[str] is a list of sub-words for a given word
+
+        split_lengths = [[len(x) for x in ex] for ex in _trimmed_examples]
+
+        # Calling ```tokenized_examples = [" ".join(sum(ex, [])) for ex in _trimmed_examples]```
+        # & then passing it to ```self.tokenizer.__call__(tokenized_examples, ...)``` inadvertently
+        # re-tokenizes already tokenized strings. Eg: "ttyl" tokenized to ["t", "##ty", "#l"] and
+        # then modified to "t ##ty ##l" is incorrectly tokenized again in __call__ as ["t", "#",
+        # "#", "t", "y", "#", "#", "l"] and then encoded into ids.
+        # This is not the case with few children of AbstractHuggingfaceTrainableEncoder (e.g.
+        # BytePairEncodingEncoder) which has no prepending tokens such as '##' for sub-words.
+        _detokenized_examples = [
+            self.tokenizer.convert_tokens_to_string(sum(_trimmed_example, []))
+            for _trimmed_example in _trimmed_examples
         ]
-        tokenized_examples = [" ".join(sum(ex, [])) for ex in sub_grouped_examples]
-        split_lengths = [[len(x) for x in ex] for ex in sub_grouped_examples]
-
         hgf_encodings = self.tokenizer(
-            tokenized_examples, padding=True, truncation=True, max_length=None,
+            _detokenized_examples, padding=True, truncation=True, max_length=None,
             return_tensors="pt"
-        )  # Huggingface returns this as BatchEncodings and needs to be converted to a dictionary
+        )  # Huggingface returns this as BatchEncodings object;needs to be converted to a dictionary
 
         return BatchData(**{
-            "seq_lengths": torch.as_tensor(  # List[int], number of groups per example
-                [len(_split_lengths) + 2 for _split_lengths in split_lengths], dtype=torch.long
+            # number of groups per example
+            "seq_lengths": torch.as_tensor(  # Tensor1d[int]
+                [len(_split_lengths) + n_terminals for _split_lengths in split_lengths],
+                dtype=torch.long
             ),
-            "split_lengths": split_lengths,  # List[List[int]], len of each subgroup; For each
-            # example, sum of its split_lengths will be equal to the sum of attention mask
-            # minus terminals.
+            # len of each subgroup; for each example, sum of its split_lengths will be equal to
+            # the sum of attention mask minus terminals.
+            "split_lengths": [
+                torch.as_tensor(_split_lengths, dtype=torch.long)
+                for _split_lengths in split_lengths
+            ],  # List[Tensor1d[int]],
+            # all the different outputs produced by huggingface's pretrained tokenizer,
+            # consisting of inputs_ids, attention_masks, etc.
             "hgf_encodings": {**hgf_encodings},
         })
 

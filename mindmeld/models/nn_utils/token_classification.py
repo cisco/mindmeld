@@ -20,7 +20,8 @@ from abc import abstractmethod
 from typing import List
 
 from .classification import BaseClassification
-from .helpers import EmbedderType, TokenClassificationType
+from .helpers import TokenClassificationType
+from .helpers import TokenizerType, EmbedderType
 from .layers import (
     EmbeddingLayer,
     CnnLayer,
@@ -56,8 +57,8 @@ class BaseTokenClassification(BaseClassification):
 
     def _prepare_labels(self, labels: List[List[int]], max_length: int):
         # for token classification, the length of an example matters (i.e. the number of
-        # (sub-)words in it) as the labels are one-to-one mapped per example. hence, we need
-        # to do padding with a label_padding_idx
+        # (sub-)words in it) as the labels/targets are one-to-one mapped per (sub-)word.
+        # hence, we need to do padding with a label_padding_idx
 
         def _trim_or_pad(label_sequence):
             if len(label_sequence) > max_length:
@@ -88,10 +89,9 @@ class BaseTokenClassification(BaseClassification):
             raise ValueError(msg) from e
 
         # init the peripheral architecture params and architectural components
-        if self.params.add_terminals:
-            self.span_pooling_layer = SplittingAndPoolingLayer(
-                self.params.token_spans_pooling_type
-            )
+        self.span_pooling_layer = SplittingAndPoolingLayer(
+            self.params.token_spans_pooling_type
+        )
         if not self.params.num_labels:
             msg = f"Invalid number of labels ({self.params.num_labels}) inputted to '{self.name}'"
             raise ValueError(msg)
@@ -116,7 +116,8 @@ class BaseTokenClassification(BaseClassification):
                       f"A valid number is equal to or greater than 2"
                 raise ValueError(msg)
 
-        print(f"{self.name} is initialized")
+        msg = f"{self.name} is initialized"
+        logger.info(msg)
 
     def forward(self, batch_data):
 
@@ -125,19 +126,18 @@ class BaseTokenClassification(BaseClassification):
 
         token_embs = batch_data["token_embs"]
 
-        # strip the terminals if required; note they are not acccounted in the label padding process
-        if self.params.add_terminals:
-            token_embs = self.span_pooling_layer(
-                token_embs,
-                batch_data["split_lengths"],  # List[List[Int]],
-                discard_terminals=self.params.add_terminals
-            )  # [BS, SEQ_LEN`, EMD_DIM], and the SEQ_LEN` matches the width of labels upon padding
+        # strip the terminals if required; note they are not accounted in the label padding process
+        token_embs = self.span_pooling_layer(
+            token_embs,
+            batch_data["split_lengths"],  # List[Tensor1d[int]],
+            discard_terminals=self.params.add_terminals
+        )  # [BS, SEQ_LEN`, EMD_DIM], and the SEQ_LEN` matches the width of labels upon padding
 
         token_embs = self.dense_layer_dropout(token_embs)
         logits = self.classifier_head(token_embs)
         batch_data.update({"logits": logits})
 
-        targets = batch_data.get("labels")
+        targets = batch_data.pop("_labels", None)
         if targets is not None:
             if self.params.use_crf_layer:
                 # create a mask to ignore token positions that are padded
@@ -157,13 +157,18 @@ class BaseTokenClassification(BaseClassification):
         with torch.no_grad():
             for start_idx in range(0, len(examples), self.params.batch_size):
                 batch_examples = examples[start_idx:start_idx + self.params.batch_size]
-                batch_data = self.encoder.batch_encode(batch_examples)
+                batch_data = self.encoder.batch_encode(
+                    batch_examples,
+                    padding_length=self.params.padding_length,
+                    add_terminals=self.params.add_terminals,
+                )
                 batch_logits = self.forward(batch_data)["logits"]
                 # find predictions
                 if self.params.use_crf_layer:
                     # create a mask to ignore token positions that are padded
                     mask = pad_sequence(
-                        [torch.as_tensor([1] * length_) for length_ in batch_data["seq_lengths"]],
+                        [torch.as_tensor([1] * len(_split_lengths))
+                         for _split_lengths in batch_data["split_lengths"]],
                         batch_first=True
                     )
                     # [BS] -> [BS, SEQ_LEN]
@@ -188,7 +193,11 @@ class BaseTokenClassification(BaseClassification):
         with torch.no_grad():
             for start_idx in range(0, len(examples), self.params.batch_size):
                 batch_examples = examples[start_idx:start_idx + self.params.batch_size]
-                batch_data = self.encoder.batch_encode(batch_examples)
+                batch_data = self.encoder.batch_encode(
+                    batch_examples,
+                    padding_length=self.params.padding_length,
+                    add_terminals=self.params.add_terminals,
+                )
                 batch_logits = self.forward(batch_data)["logits"]
                 # find prediction probabilities
                 if self.params.use_crf_layer:
@@ -271,7 +280,12 @@ class LstmForTokenClassification(BaseTokenClassification):
 
     def _forward_core(self, batch_data):
         seq_ids = batch_data["seq_ids"]  # [BS, SEQ_LEN]
-        seq_lengths = batch_data["seq_lengths"]  # [BS]
+
+        seq_lengths = []
+        for seq_len, split_lengths in zip(batch_data["seq_lengths"], batch_data["split_lengths"]):
+            n_terminals = seq_len - len(split_lengths)
+            seq_lengths.append(sum(split_lengths) + n_terminals)
+        seq_lengths = torch.as_tensor(seq_lengths, dtype=torch.long)  # [BS]
 
         token_embs = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, EMD_DIM]
         token_embs = self.lstm_layer(token_embs, seq_lengths)  # [BS, SEQ_LEN, self.out_dim]
@@ -284,16 +298,26 @@ class LstmForTokenClassification(BaseTokenClassification):
 class CharLstmWithWordLstmForTokenClassification(BaseTokenClassification):
 
     def _prepare_input_encoder(self, examples, **params):
+        if (params.get("tokenizer_type") and
+            TokenizerType(params.get("tokenizer_type")) !=
+            TokenizerType.WHITESPACE_AND_CHAR_DUAL_TOKENIZER
+        ):
+            msg = f"Param 'tokenizer_type' must be " \
+                  f"{TokenizerType.WHITESPACE_AND_CHAR_DUAL_TOKENIZER.value} for " \
+                  f"{self.__class__.__name__}."
+            raise ValueError(msg)
+
         params = super()._prepare_input_encoder(examples, **params)
 
         # update params without which can become ambiguous when loading a model
         params.update({
-            "add_terminals": False,  # cannot add terminals as they cannot be broken down into chars
+            # "add_terminals" = False; cannot add terminals as they cannot be broken
+            # down into chars. If set to True, the encoder raises an error.
             "char_num_tokens": len(self.encoder.get_char_vocab()),
             "char_padding_idx": self.encoder.get_char_pad_token_idx(),
             "char_add_terminals": params.get("char_add_terminals"),
             "char_padding_length": params.get("char_padding_length"),
-            "char_emb_dim": params.get("char_emb_dim", 50),
+            "char_emb_dim": params.get("char_emb_dim"),
         })
 
         return params
@@ -369,8 +393,8 @@ class CharLstmWithWordLstmForTokenClassification(BaseTokenClassification):
 
         word_encs = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, self.emb_dim]
         char_plus_word_encs = torch.cat((char_encs, word_encs), dim=-1)  # [BS, SEQ_LEN, sum(both)]
-        token_embs = self.lstm_layer(char_plus_word_encs,
-                                     seq_lengths)  # [BS, SEQ_LEN, self.out_dim]
+        token_embs = self.lstm_layer(
+            char_plus_word_encs, seq_lengths)  # [BS, SEQ_LEN, self.out_dim]
 
         batch_data.update({"token_embs": token_embs})
 
@@ -380,16 +404,26 @@ class CharLstmWithWordLstmForTokenClassification(BaseTokenClassification):
 class CharCnnWithWordLstmForTokenClassification(BaseTokenClassification):
 
     def _prepare_input_encoder(self, examples, **params):
+        if (params.get("tokenizer_type") and
+            TokenizerType(params.get("tokenizer_type")) !=
+            TokenizerType.WHITESPACE_AND_CHAR_DUAL_TOKENIZER
+        ):
+            msg = f"Param 'tokenizer_type' must be " \
+                  f"{TokenizerType.WHITESPACE_AND_CHAR_DUAL_TOKENIZER.value} for " \
+                  f"{self.__class__.__name__}."
+            raise ValueError(msg)
+
         params = super()._prepare_input_encoder(examples, **params)
 
         # update params without which can become ambiguous when loading a model
         params.update({
-            "add_terminals": False,  # cannot add terminals as they cannot be broken down into chars
+            # "add_terminals" = False; cannot add terminals as they cannot be broken
+            # down into chars. If set to True, the encoder raises an error.
             "char_num_tokens": len(self.encoder.get_char_vocab()),
             "char_padding_idx": self.encoder.get_char_pad_token_idx(),
             "char_add_terminals": params.get("char_add_terminals"),
             "char_padding_length": params.get("char_padding_length"),
-            "char_emb_dim": params.get("char_emb_dim", 50),
+            "char_emb_dim": params.get("char_emb_dim"),
         })
 
         return params
@@ -455,8 +489,8 @@ class CharCnnWithWordLstmForTokenClassification(BaseTokenClassification):
 
         word_encs = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, self.emb_dim]
         char_plus_word_encs = torch.cat((char_encs, word_encs), dim=-1)  # [BS, SEQ_LEN, sum(both)]
-        token_embs = self.lstm_layer(char_plus_word_encs,
-                                     seq_lengths)  # [BS, SEQ_LEN, self.out_dim]
+        token_embs = self.lstm_layer(
+            char_plus_word_encs, seq_lengths)  # [BS, SEQ_LEN, self.out_dim]
 
         batch_data.update({"token_embs": token_embs})
 
@@ -564,7 +598,7 @@ class BertForTokenClassification(BaseTokenClassification):
         if last_hidden_state is None:
             msg = f"The choice of pretrained bert model " \
                   f"({self.params.pretrained_model_name_or_path}) " \
-                  f"has no key 'last_hidden_state' in its output dictionary"
+                  f"has no key 'last_hidden_state' in its output dictionary."
             raise ValueError(msg)
 
         last_hidden_state = self.dropout(last_hidden_state)
@@ -593,7 +627,7 @@ def get_token_classifier_cls(classifier_type: str, embedder_type: str = None):
         embedder_type == EmbedderType.BERT and
         classifier_type not in [TokenClassificationType.EMBEDDER]
     ):
-        msg = f"To use a embedder_type '{EmbedderType.BERT.value}', " \
+        msg = f"To use the embedder_type '{EmbedderType.BERT.value}', " \
               f"classifier_type must be '{TokenClassificationType.EMBEDDER.value}'."
         raise ValueError(msg)
 
