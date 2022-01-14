@@ -223,7 +223,7 @@ def test_splitting_and_pooling_layer():
     with torch.no_grad():
         batch_size, emb_dim = 4, 10
         span_lengths = [
-            torch.randint(1, 4, (n_sub_groups,)).numpy().tolist()
+            torch.randint(1, 4, (n_sub_groups,))
             for n_sub_groups in torch.randint(1, 4, (batch_size,))
         ]
         max_sum_lengths = max([sum(_x) for _x in span_lengths])
@@ -250,7 +250,7 @@ def test_splitting_and_pooling_layer():
 
         # check if splitting is done correctly
         for i, _span_lengths in enumerate(span_lengths):
-            select_indices = [0, ] + [_x.item() for _x in np.cumsum(_span_lengths)[:-1]]
+            select_indices = [0, ] + [_x.item() for _x in np.cumsum(_span_lengths.numpy())[:-1]]
             for j, select_index in enumerate(select_indices):
                 assert all(inputs[i][select_index] == outputs[i][j])
 
@@ -262,7 +262,7 @@ def test_splitting_and_pooling_layer():
     with torch.no_grad():
         batch_size, emb_dim = 4, 10
         span_lengths = [
-            torch.randint(1, 4, (n_sub_groups,)).numpy().tolist()
+            torch.randint(1, 4, (n_sub_groups,))
             for n_sub_groups in torch.randint(1, 4, (batch_size,))
         ]
         max_sum_lengths = max([sum(_x) for _x in span_lengths])
@@ -289,6 +289,6 @@ def test_splitting_and_pooling_layer():
 
         # check if splitting is done correctly
         for i, _span_lengths in enumerate(span_lengths):
-            select_indices = [_x.item() - 1 for _x in np.cumsum(_span_lengths)]
+            select_indices = [_x.item() - 1 for _x in np.cumsum(_span_lengths.numpy())]
             for j, select_index in enumerate(select_indices):
                 assert all(inputs[i][select_index] == outputs[i][j])
