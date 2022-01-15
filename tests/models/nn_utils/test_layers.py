@@ -217,6 +217,7 @@ def test_splitting_and_pooling_layer():
 
     kwargs = {
         "pooling_type": "first",
+        "number_of_terminal_tokens": 2,
     }
     splitting_and_pooling_layer = SplittingAndPoolingLayer(**kwargs)
     splitting_and_pooling_layer.eval()
@@ -256,6 +257,7 @@ def test_splitting_and_pooling_layer():
 
     kwargs = {
         "pooling_type": "last",
+        "number_of_terminal_tokens": 2,
     }
     splitting_and_pooling_layer = SplittingAndPoolingLayer(**kwargs)
     splitting_and_pooling_layer.eval()

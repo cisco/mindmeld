@@ -90,7 +90,8 @@ class BaseTokenClassification(BaseClassification):
 
         # init the peripheral architecture params and architectural components
         self.span_pooling_layer = SplittingAndPoolingLayer(
-            self.params.token_spans_pooling_type
+            self.params.token_spans_pooling_type,
+            self.encoder.number_of_terminal_tokens
         )
         if not self.params.num_labels:
             msg = f"Invalid number of labels ({self.params.num_labels}) inputted to '{self.name}'"

@@ -291,7 +291,7 @@ class SplittingAndPoolingLayer(nn_module):
     representations based on lengths of subgroups inputted, and pools each subgroup separately.
     """
 
-    def __init__(self, pooling_type: str):
+    def __init__(self, pooling_type: str, number_of_terminal_tokens: int):
         """
         Args:
             pooling_type (str): the choice of pooling; to be amongst following:
@@ -303,10 +303,22 @@ class SplittingAndPoolingLayer(nn_module):
                 mean: mean pool across subsequence will be the pooled output of that subgroup
                     (e.g. token classification using BERT models with sub-word tokenization)
                 mean_sqrt: similar to 'mean' but slashed by the square root of subsequence length
+            number_of_terminal_tokens (int): the number of terminal tokens that will be discarded
+                if discard terminals is set to True in the forward method.
         """
         super().__init__()
 
         self.pooling_type = pooling_type.lower()
+        self.number_of_terminal_tokens = number_of_terminal_tokens
+
+        # TODO: Number of terminals can also be 1 (maybe just left or just right) in some models
+        if self.number_of_terminal_tokens != 2:
+            msg = f"Unable to combine sub-tokens' representations for each word into one in " \
+                  f"{self.__class__.__name__}. It is possible that your choice of tokenizer " \
+                  f"has {self.number_of_terminal_tokens} terminal token instead of assumed " \
+                  f"2 terminals."  # (eg. t5-base tokenizer)
+            raise NotImplementedError(msg)
+
         self.pooling_layer = PoolingLayer(pooling_type=self.pooling_type)
 
     def _split_and_pool(
@@ -323,9 +335,7 @@ class SplittingAndPoolingLayer(nn_module):
         if discard_terminals:
             # since list_of_subgroup_lengths consists of lengths of only non-terminal subgroups but
             # the inputted tensor_2d consists of terminals
-            # TODO: Number of terminals can also be 1 (maybe just left or just right) in some models
-            n_terminals = 2 if discard_terminals else 0
-            seq_len_required = sum(list_of_subgroup_lengths) + n_terminals
+            seq_len_required = sum(list_of_subgroup_lengths) + self.number_of_terminal_tokens
             tensor_2d_with_terminals = tensor_2d[:seq_len_required]
             tensor_2d = tensor_2d_with_terminals[1:-1]  # discard terminal representations
         else:
@@ -336,18 +346,12 @@ class SplittingAndPoolingLayer(nn_module):
             # argument 'split_sizes' (position 1) must be tuple of ints, not Tensor
             splits = torch.split(tensor_2d, list_of_subgroup_lengths.tolist(), dim=0)
         except RuntimeError as e:
-            if discard_terminals and len(tensor_2d) == sum(list_of_subgroup_lengths) + 1:
-                msg = f"Unable to combine sub-tokens' representations for each word into one in " \
-                      f"{self.__class__.__name__}. It is possible that your choice of tokenizer " \
-                      f"has only 1 terminal token instead of assumed 2 terminals."
-                raise NotImplementedError(msg) from e
-            else:
-                msg = f"Unable to combine sub-tokens' representations for each word into one in " \
-                      f"{self.__class__.__name__}. It is possible that your choice of tokenizer " \
-                      f"does not split input text at whitespace (eg. robert-base tokenizer), due " \
-                      f"to which one-representation-per-word cannot be obtained to do tagging at " \
-                      f"word-level for token classification."
-                raise ValueError(msg) from e
+            msg = f"Unable to combine sub-tokens' representations for each word into one in " \
+                  f"{self.__class__.__name__}. It is possible that your choice of tokenizer " \
+                  f"does not split input text at whitespace (eg. robert-base tokenizer), due " \
+                  f"to which one-representation-per-word cannot be obtained to do tagging at " \
+                  f"word-level for token classification."
+            raise ValueError(msg) from e
         padded_token_embs = pad_sequence(splits, batch_first=True)  # [BS', SEQ_LEN', EMD_DIM]
 
         # return dims: [len(list_of_subgroup_lengths), EMD_DIM]

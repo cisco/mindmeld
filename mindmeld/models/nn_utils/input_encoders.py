@@ -155,6 +155,14 @@ class AbstractEncoder(ABC):
             return None
         return getattr(self, "pad_token_idx")
 
+    @property
+    def number_of_terminal_tokens(self) -> int:
+        """
+        Returns the number of terminal tokens used by the encoder during batch encoding when
+        add_terminals is set to True.
+        """
+        return 2
+
 
 def _trim_a_list_of_sub_token_groups(
     x: List[List[Any]],
@@ -272,7 +280,7 @@ class AbstractVocabLookupEncoder(AbstractEncoder):
         _return_tokenized_examples: bool = False, **kwargs
     ) -> BatchData:
 
-        n_terminals = 2 if add_terminals else 0
+        n_terminals = self.number_of_terminal_tokens if add_terminals else 0
 
         # tokenize each word of each input separately
         # get maximum length of each example, accounting for terminal tokens- cls, sep
@@ -442,6 +450,14 @@ class WhitespaceAndCharDualEncoder(WhitespaceEncoder):
         filename = os.path.join(path, "char_vocab.txt")
         return filename
 
+    @property
+    def number_of_char_terminal_tokens(self) -> int:
+        """
+        Returns the number of char terminal tokens used by the encoder during batch encoding when
+        add_terminals is set to True
+        """
+        return 2
+
     def batch_encode(
         self, examples: List[str], char_padding_length: int = None, char_add_terminals=True,
         add_terminals=False, _return_tokenized_examples: bool = False, **kwargs
@@ -463,7 +479,8 @@ class WhitespaceAndCharDualEncoder(WhitespaceEncoder):
         for _seq_tokens in _examples:
             # compute padding length for character sequences
             _curr_max = max([len(word) for word in _seq_tokens])
-            _curr_max = _curr_max + 2 if char_add_terminals else _curr_max
+            _curr_max = _curr_max + self.number_of_char_terminal_tokens \
+                if char_add_terminals else _curr_max
             char_padding_length = (
                 min(char_padding_length, _curr_max) if char_padding_length else _curr_max
             )
@@ -496,8 +513,8 @@ class WhitespaceAndCharDualEncoder(WhitespaceEncoder):
             seq_length (int): The length of sequence upon encoding (before padding)
         """
         list_of_chars = (
-            list_of_tokens[:padding_length - 2] if add_terminals else
-            list_of_tokens[:padding_length]
+            list_of_tokens[:padding_length - self.number_of_char_terminal_tokens]
+            if add_terminals else list_of_tokens[:padding_length]
         )
         list_of_chars_with_terminals = (
             [getattr(self, "char_start_token")] +
@@ -643,7 +660,7 @@ class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
                   f"batch_encode() method."
             logger.warning(msg)
 
-        n_terminals = 2 if add_terminals else 0
+        n_terminals = self.number_of_terminal_tokens if add_terminals else 0
 
         output = self.tokenizer.encode_batch(examples, add_special_tokens=True)
         seq_ids = [o.ids for o in output]
@@ -720,6 +737,9 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
         self.pretrained_model_name_or_path = pretrained_model_name_or_path
         self.config, self.tokenizer = None, None
 
+        self._number_of_terminal_tokens = None
+        self.__model_max_length = -1
+
     def prepare(self, examples: List[str]):
         del examples
 
@@ -755,6 +775,25 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
     def _tokenize(self, text: str) -> List[str]:
         return self.tokenizer.tokenize(text)
 
+    @property
+    def number_of_terminal_tokens(self) -> int:
+        """Overwrite parent class' definition of number of terminal tokens"""
+        if not self._number_of_terminal_tokens:
+            self._number_of_terminal_tokens = len(self.tokenizer.encode(""))
+        return self._number_of_terminal_tokens
+
+    @property
+    def _model_max_length(self) -> int:
+        """Returns the maximum length of tokens per example allowed for the pretrained tokenizer"""
+        if self.__model_max_length == -1:
+            try:
+                self.__model_max_length = self.tokenizer._model_max_length
+            except AttributeError as e:
+                # case in which the huggingface tokenizer doesn't have this attribute
+                logger.info(e)
+                self.__model_max_length = None
+        return self.__model_max_length
+
     def batch_encode(
         self, examples: List[str], padding_length: int = None, add_terminals=True, **kwargs
     ) -> BatchData:
@@ -765,11 +804,7 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
             logger.error(msg)
             raise ValueError(msg)
 
-        # TODO: Do all huggingface transformer models have two terminals? If not, the choice of
-        #  embedder pooling other than "first" (eg. "mean") might raise size mismatch issues.
-        #  See a related to-do in layers.py in SplittingAndPoolingLayer class.
-        #  Possible soln.: Use `return_special_tokens_mask=True` while calling the self.tokenizer(.)
-        n_terminals = 2 if add_terminals else 0
+        n_terminals = self.number_of_terminal_tokens if add_terminals else 0
 
         # tokenize each word of each input separately
         # get maximum length of each example, accounting for terminal tokens- cls, sep
@@ -778,10 +813,13 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
             [self._tokenize(word) for word in example.split(" ")] for example in examples
         ]
 
-        # TODO: padding_length cannot exceed the transformer model's maximum length
         max_curr_len = max([len(sum(t_ex, [])) for t_ex in tokenized_examples]) + n_terminals
         padding_length_including_terminals = min(max_curr_len, padding_length) \
             if padding_length else max_curr_len
+        if self._model_max_length:
+            # padding_length cannot exceed the transformer model's maximum length
+            padding_length_including_terminals = min(
+                padding_length_including_terminals, self._model_max_length)
         padding_length_excluding_terminals = padding_length_including_terminals - n_terminals
 
         _trimmed_examples = [
