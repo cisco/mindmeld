@@ -173,7 +173,8 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
     def select_queries(self):
         """Selects the next batch of queries to label from a set of log queries."""
         logger.info("Loading queries for active-learning selection.")
-        self.data_bucket = DataBucketFactory.get_data_bucket_for_query_selection(  # pylint: disable=E501
+
+        self.data_bucket = DataBucketFactory.get_data_bucket_for_query_selection(  # pylint: disable=E501, E1121
             self.app_path,
             self.entity_tuning,
             self.tuning_level,

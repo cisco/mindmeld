@@ -201,8 +201,8 @@ class MindMeldALClassifier(ALClassifier):
 
         domain = classifier.domain
         intent = classifier.intent
-        # default is set to 1 so that if there are no entities, this token/query will not get preference
-        # setting it to 0 would have caused active learning to select these tokens/queries first.
+        # default is set to 1. If there are no entities, this token/query will not get preference
+        # setting it to 0 would cause active learning to select these tokens/queries first.
         default_prob = 1.0
         default_tag = "O|"
         default_key = f"{domain}.{intent}.{default_tag}"
@@ -245,7 +245,7 @@ class MindMeldALClassifier(ALClassifier):
     def _get_classifier_probs(
         classifier: Classifier,
         queries: ProcessedQueryList,
-        nlp_component_type=None,
+        nlp_component_to_id: Dict,
     ):
         """Get the probability distribution for a query across domains or intents
 
@@ -452,7 +452,7 @@ class MindMeldALClassifier(ALClassifier):
 
         return confidences_2d, entity_confidences, eval_stats
 
-    def train_multi(self, data_bucket: DataBucket, heuristic: Heuristic):
+    def train_multi(self, data_bucket: DataBucket):
         """Trains multiple models to get a 3D probability array for multi-model selection strategies.
         Args:
             data_bucket (DataBucket): Databucket for current iteration

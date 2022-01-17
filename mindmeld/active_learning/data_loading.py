@@ -119,6 +119,17 @@ class LabelMap:
     def _get_entity_mappings(
         entity_tuning: bool, query_list: ProcessedQueryList
     ) -> Dict:
+        """
+        Generates index mapping for entity labels in an application.
+        Supports both BIO  and BIOES tag schemes.
+
+        Args:
+            entity_tuning (bool): Only populate entity labels if entity tuning enabled.
+            query_list (ProcessedQueryList): Data structure containing a list of processed queries.
+
+        Returns:
+            Dictionary mapping entity tags to index in entity vector.
+        """
         entity_labels = set()
         if entity_tuning:
             logger.info("Generating Entity Labels...")
@@ -337,7 +348,7 @@ class DataBucket:
         if entity_tuning:
             try:
                 ranked_entity_indices = heuristic.rank_entities(entity_confidences)
-            except:
+            except: # pylint: disable=W0702
                 # if heuristic does not have entity AL support default to entropy
                 heuristic = EntropySampling
                 ranked_entity_indices = heuristic.rank_entities(entity_confidences)
