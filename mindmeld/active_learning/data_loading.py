@@ -130,6 +130,8 @@ class LabelMap:
                         e = str(entity.entity.type)
                         entity_labels.add(f"{d}.{i}.B|{e}")
                         entity_labels.add(f"{d}.{i}.I|{e}")
+                        entity_labels.add(f"{d}.{i}.S|{e}")
+                        entity_labels.add(f"{d}.{i}.E|{e}")
 
                 e = "O|"
                 entity_labels.add(f"{d}.{i}.{e}")
