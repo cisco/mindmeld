@@ -35,6 +35,7 @@ from nltk.corpus import stopwords as nltk_stopwords
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize as nltk_word_tokenize
 
+from mindmeld.query_factory import QueryFactory
 from ._config import (
     get_app_namespace,
     get_classifier_config,
@@ -372,13 +373,35 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
     """
 
     # a common resource loaded generally used across all resolvers during loading process
-    RESOURCE_LOADER = ResourceLoader.create_resource_loader(
-        app_path=None,
-        text_preparation_pipeline=TextPreparationPipelineFactory.create_text_preparation_pipeline(
-            language="en",
-            tokenizer=WhiteSpaceTokenizer()
-        )
-    )
+    # a class var because it is also used in the underlying `Indices` class
+    RESOURCE_LOADER = None
+
+    def __init__(self, *args, **kwargs):
+        """
+        Args:
+            resource_loader (ResourceLoader, optional): A resource loader object used by the
+                underlying entity resolver models
+        """
+        super().__init__(*args, **kwargs)
+
+        # update class' resource loader; use one if already passed-in
+        resource_loader = kwargs.get("resource_loader")
+        if not resource_loader:
+            text_preparation_pipeline = \
+                TextPreparationPipelineFactory.create_text_preparation_pipeline(
+                    language="en",
+                    tokenizer=WhiteSpaceTokenizer()
+                )
+            query_factory = QueryFactory.create_query_factory(
+                app_path=None,
+                text_preparation_pipeline=text_preparation_pipeline,
+                duckling=True
+            )
+            resource_loader = ResourceLoader.create_resource_loader(
+                app_path=None,
+                query_factory=query_factory
+            )
+        NativeQuestionAnswerer.RESOURCE_LOADER = resource_loader
 
     def _load_kb(self,
                  index_name,
@@ -3211,15 +3234,13 @@ class QuestionAnswerer:
         of QuestionAnswerer class in 'question_answerer.py'.
         """
 
-        # can be deprecated in future
-        del resource_loader
-
         warnings.warn(QuestionAnswerer.DEPRECATION_MESSAGE, DeprecationWarning)
 
         kwargs.update({
             "app_path": app_path,
             "es_host": es_host,
             "config": config,
+            "resource_loader": resource_loader,
         })
         return QuestionAnswererFactory.create_question_answerer(**kwargs)
 
