@@ -233,7 +233,6 @@ class TextPreparationPipeline:
             )
         # Single-shot tokenization for Spacy-Based Tokenizers (Performance Optimization)
         if isinstance(self.tokenizer, SpacyTokenizer):
-            print("Is Spacy Tokenizer", SpacyTokenizer)
             unann_spans = TextPreparationPipeline.calc_unann_spans(text)
             unannotated_text = "".join([text[i[0]:i[1]] for i in unann_spans])
             unann_to_ann_idx_mapping = TextPreparationPipeline.unann_to_ann_idx_map(
@@ -245,7 +244,6 @@ class TextPreparationPipeline:
             )
             return tokens
         # Non-Spacy Tokenizer Handling
-        # print("Non-Spacy tokenizer", self.tokenizer)
         return self.tokenize_around_mindmeld_annotations(text)
 
     def tokenize_and_normalize(self, text):
@@ -468,7 +466,6 @@ class TextPreparationPipeline:
             # Adds the remainder of the text after the last end brace } "function(post_entity_text)"
             modified_text.append(function(text[prev_entity_end: len(text)]))
 
-        #print("Modified Text", modified_text)
         return "".join(modified_text)
 
     def tokenize_around_mindmeld_annotations(self, text):
