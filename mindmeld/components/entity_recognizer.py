@@ -118,13 +118,6 @@ class EntityRecognizer(Classifier):
         # model. This is not an issue in domain and intent classifiers as the .fit() method is not
         # called when there are less than 2 domains/intents.
 
-        if incremental_timestamp and cached_model_path:
-            logger.info("No need to fit.  Previous model is cached.")
-            if load_cached:
-                self.load(cached_model_path)
-                return True
-            return False
-
         # Load labeled data
         examples, labels = self._get_examples_and_labels(queries)
 
@@ -132,12 +125,19 @@ class EntityRecognizer(Classifier):
             # Build entity types set
             self.entity_types = {entity.entity.type for label in labels for entity in label}
 
-            if self.entity_types:
-                model = create_model(self._model_config)
-                model.initialize_resources(self._resource_loader, examples, labels)
-                model.fit(examples, labels)
-                self._model = model
-                self.config = ClassifierConfig.from_model_config(self._model.config)
+        if incremental_timestamp and cached_model_path:
+            logger.info("No need to fit.  Previous model is cached.")
+            if load_cached:
+                self.load(cached_model_path)
+                return True
+            return False
+
+        if self.entity_types:
+            model = create_model(self._model_config)
+            model.initialize_resources(self._resource_loader, examples, labels)
+            model.fit(examples, labels)
+            self._model = model
+            self.config = ClassifierConfig.from_model_config(self._model.config)
 
         self.hash = new_hash
 
