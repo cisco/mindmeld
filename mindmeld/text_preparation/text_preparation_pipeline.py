@@ -369,6 +369,9 @@ class TextPreparationPipeline:
         matches = TextPreparationPipeline.find_mindmeld_annotation_re_matches(text)
         unann_spans = []
         prev_entity_end = 0
+        # MindMeld Entities are not present in text
+        if len(matches) == 0:
+            return [(0, len(text))]
         for match in matches:
             entity_start, entity_end = match.span()
             entity_text = match.group(1)
@@ -419,7 +422,7 @@ class TextPreparationPipeline:
                 indices referring to the unannotated text.
         """
         for i in range(len(tokens)):
-            tokens[i]["start"] = unann_to_ann_idx_mapping[tokens[i]["start"]]
+            tokens[i]["start"] = unann_to_ann_idx_map[tokens[i]["start"]]
 
     @staticmethod
     def modify_around_annotations(text, function):
