@@ -35,7 +35,6 @@ from nltk.corpus import stopwords as nltk_stopwords
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize as nltk_word_tokenize
 
-from mindmeld.query_factory import QueryFactory
 from ._config import (
     get_app_namespace,
     get_classifier_config,
@@ -53,7 +52,9 @@ from ..path import (
     get_question_answerer_index_cache_file_path,
     NATIVE_QUESTION_ANSWERER_INDICES_CACHE_DEFAULT_FOLDER as DEFAULT_APP_PATH
 )
+from ..query_factory import QueryFactory
 from ..resource_loader import Hasher, ResourceLoader
+from ..system_entity_recognizer import NoOpSystemEntityRecognizer
 from ..text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
 from ..text_preparation.tokenizers import WhiteSpaceTokenizer
 
@@ -395,7 +396,7 @@ class NativeQuestionAnswerer(BaseQuestionAnswerer):
             query_factory = QueryFactory.create_query_factory(
                 app_path=None,
                 text_preparation_pipeline=text_preparation_pipeline,
-                duckling=True
+                system_entity_recognizer=NoOpSystemEntityRecognizer.get_instance()
             )
             resource_loader = ResourceLoader.create_resource_loader(
                 app_path=None,
