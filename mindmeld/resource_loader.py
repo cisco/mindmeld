@@ -698,15 +698,10 @@ class ResourceLoader:
 
     def _update_query_file_dates(self, query_tree):
         # We can just use this if it this is the first check
-        new_query_files = {}
-        for domain in query_tree:
-            for intent in query_tree[domain]:
-                for filename in query_tree[domain][intent]:
-                    # filename needs to be full path
-                    new_query_files[filename] = {
-                        "modified": query_tree[domain][intent][filename],
-                        "loaded": None,
-                    }
+        new_query_files = {filename: {'modified': query_tree[domain][intent][filename], 'loaded': None} 
+                            for domain in query_tree 
+                                for intent in query_tree[domain] 
+                                    for filename in query_tree[domain][intent]}
 
         all_filenames = set(new_query_files.keys())
         all_filenames.update(self.file_to_query_info.keys())
