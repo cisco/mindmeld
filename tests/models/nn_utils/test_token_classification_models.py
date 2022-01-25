@@ -5,13 +5,22 @@
 Tests for `token_classification` submodule of nn_utils
 """
 
+import os
+import shutil
+
 import pytest
 
 from mindmeld import markup
 from mindmeld.models import ENTITY_EXAMPLE_TYPE, ENTITIES_LABEL_TYPE, ModelFactory, ModelConfig
+from mindmeld.models.nn_utils.helpers import get_num_weights_of_model
 from mindmeld.query_factory import QueryFactory
 from mindmeld.resource_loader import ResourceLoader, ProcessedQueryList
 
+APP_NAME = "kwik_e_mart"
+APP_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), APP_NAME
+)
+GENERATED_TMP_FOLDER = os.path.join(APP_PATH, ".generated/pytorch_module")
 QUERY_FACTORY = QueryFactory.create_query_factory(app_path=None, duckling=True)
 
 
@@ -548,11 +557,6 @@ class TestSequenceClassification:
         examples = self.labeled_data.queries()
         labels = self.labeled_data.entities()
 
-        with pytest.raises(ValueError):
-            model = ModelFactory.create_model_from_config(ModelConfig(**config))
-            model.initialize_resources(resource_loader, examples, labels)
-            model.fit(examples, labels)
-
         config = {
             **config,
             "params": {
@@ -622,3 +626,43 @@ class TestSequenceClassification:
             model.initialize_resources(resource_loader, examples, labels)
             model.fit(examples, labels)
             model_predictions_assertions(model)
+
+    @pytest.mark.skip(reason="dumping of torch module state dict occupies disk space")
+    @pytest.mark.xfail(strict=False)
+    @pytest.mark.transformers
+    @pytest.mark.bert
+    def test_bert_embedder_frozen_params(self, resource_loader):
+        """Tests that a fit succeeds"""
+        config = {
+            "model_type": "tagger",
+            "example_type": ENTITY_EXAMPLE_TYPE,
+            "label_type": ENTITIES_LABEL_TYPE,
+            "model_settings": {"classifier_type": "embedder"},
+            "params": {  # default embedder_output_pooling_type for bert is "first"
+                "embedder_type": "bert",
+                "pretrained_model_name_or_path": "distilbert-base-uncased",
+                "update_embeddings": False
+            },
+        }
+        examples = self.labeled_data.queries()
+        labels = self.labeled_data.entities()
+
+        # fit the model
+        model = ModelFactory.create_model_from_config(ModelConfig(**config))
+        model.initialize_resources(resource_loader, examples, labels)
+        model.fit(examples, labels)
+
+        # assert only some weights are trainable
+        clf = model._clf
+        n_requires_grad, n_total = get_num_weights_of_model(clf)
+        assert n_requires_grad < n_total, print(n_requires_grad, n_total)
+
+        # check if dumping and loading partial state dict logs required messages & throws no errors
+        os.makedirs(GENERATED_TMP_FOLDER, exist_ok=True)
+        clf.dump(GENERATED_TMP_FOLDER)
+        new_clf = clf.load(GENERATED_TMP_FOLDER)
+        shutil.rmtree(GENERATED_TMP_FOLDER)
+
+        # do predictions with loaded model
+        model._clf = new_clf
+        model_predictions_assertions(model)

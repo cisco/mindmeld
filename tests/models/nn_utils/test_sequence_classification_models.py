@@ -6,17 +6,20 @@ Tests for `sequence_classification` submodule of nn_utils
 """
 
 import os
+import shutil
 
 import pytest
 
 from mindmeld import markup
 from mindmeld.models import QUERY_EXAMPLE_TYPE, CLASS_LABEL_TYPE, ModelFactory, ModelConfig
+from mindmeld.models.nn_utils.helpers import get_num_weights_of_model
 from mindmeld.resource_loader import ResourceLoader, ProcessedQueryList
 
 APP_NAME = "kwik_e_mart"
 APP_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), APP_NAME
 )
+GENERATED_TMP_FOLDER = os.path.join(APP_PATH, ".generated/pytorch_module")
 
 
 @pytest.fixture
@@ -436,13 +439,6 @@ class TestSequenceClassification:
         examples = self.labeled_data.queries()
         labels = self.labeled_data.intents()
 
-        """ test scenarios when fit fails """
-
-        with pytest.raises(ValueError):
-            model = ModelFactory.create_model_from_config(ModelConfig(**config))
-            model.initialize_resources(resource_loader, examples, labels)
-            model.fit(examples, labels)
-
         """ test different configurations for bert-base-cased model"""
 
         config = {**config, "params": {
@@ -521,6 +517,47 @@ class TestSequenceClassification:
         model = ModelFactory.create_model_from_config(ModelConfig(**config))
         model.initialize_resources(resource_loader, examples, labels)
         model.fit(examples, labels)
+        assert model.predict([markup.load_query("hi").query])[0] in ["greet", "exit"]
+
+    @pytest.mark.skip(reason="dumping of torch module state dict occupies disk space")
+    @pytest.mark.xfail(strict=False)
+    @pytest.mark.transformers
+    @pytest.mark.bert
+    def test_bert_embedder_frozen_params(self, resource_loader):
+        """Tests that a fit succeeds"""
+        config = {
+            "model_type": "text",
+            "example_type": QUERY_EXAMPLE_TYPE,
+            "label_type": CLASS_LABEL_TYPE,
+            "model_settings": {"classifier_type": "embedder"},
+            "params": {  # default embedder_output_pooling_type for bert is "first"
+                "embedder_type": "bert",
+                "pretrained_model_name_or_path": "distilbert-base-uncased",
+                "embedder_output_pooling_type": "mean",
+                "update_embeddings": False
+            },
+        }
+        examples = self.labeled_data.queries()
+        labels = self.labeled_data.intents()
+
+        # fit the model
+        model = ModelFactory.create_model_from_config(ModelConfig(**config))
+        model.initialize_resources(resource_loader, examples, labels)
+        model.fit(examples, labels)
+
+        # assert only some weights are trainable
+        clf = model._clf
+        n_requires_grad, n_total = get_num_weights_of_model(clf)
+        assert n_requires_grad < n_total, print(n_requires_grad, n_total)
+
+        # check if dumping and loading partial state dict logs required messages & throws no errors
+        os.makedirs(GENERATED_TMP_FOLDER, exist_ok=True)
+        clf.dump(GENERATED_TMP_FOLDER)
+        new_clf = clf.load(GENERATED_TMP_FOLDER)
+        shutil.rmtree(GENERATED_TMP_FOLDER)
+
+        # do predictions with loaded model
+        model._clf = new_clf
         assert model.predict([markup.load_query("hi").query])[0] in ["greet", "exit"]
 
     def test_bert_cnn(self, resource_loader):
