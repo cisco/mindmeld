@@ -335,7 +335,7 @@ class Classifier(ABC):
         class_proba_tuples = list(predict_proba_result[0][1].items())
         return sorted(class_proba_tuples, key=lambda x: x[1], reverse=True)
 
-    def evaluate(self, queries=None, label_set=None, active_learning=False):
+    def evaluate(self, queries=None, label_set=None, fetch_distribution=False):
         """Evaluates the trained classification model on the given test data
 
         Args:
@@ -364,7 +364,7 @@ class Classifier(ABC):
             )
             return None
 
-        evaluation = self._model.evaluate(examples, labels, active_learning)
+        evaluation = self._model.evaluate(examples, labels)
         return evaluation
 
     def inspect(self, query, gold_label=None, dynamic_resource=None):

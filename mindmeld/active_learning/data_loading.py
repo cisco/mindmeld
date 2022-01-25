@@ -116,43 +116,39 @@ class LabelMap:
         return reversed_dict
 
     @staticmethod
-    def _get_entity_mappings(
-        entity_tuning: bool, query_list: ProcessedQueryList
-    ) -> Dict:
+    def _get_entity_mappings(query_list: ProcessedQueryList) -> Dict:
         """
         Generates index mapping for entity labels in an application.
         Supports both BIO  and BIOES tag schemes.
 
         Args:
-            entity_tuning (bool): Only populate entity labels if entity tuning enabled.
             query_list (ProcessedQueryList): Data structure containing a list of processed queries.
 
         Returns:
             Dictionary mapping entity tags to index in entity vector.
         """
         entity_labels = set()
-        if entity_tuning:
-            logger.info("Generating Entity Labels...")
-            for d, i, entities in zip(
-                query_list.domains(), query_list.intents(), query_list.entities()
-            ):
-                if len(entities):
-                    for entity in entities:
-                        e = str(entity.entity.type)
-                        entity_labels.add(f"{d}.{i}.B|{e}")
-                        entity_labels.add(f"{d}.{i}.I|{e}")
-                        entity_labels.add(f"{d}.{i}.S|{e}")
-                        entity_labels.add(f"{d}.{i}.E|{e}")
+        logger.info("Generating Entity Labels...")
+        for d, i, entities in zip(
+            query_list.domains(), query_list.intents(), query_list.entities()
+        ):
+            if len(entities):
+                for entity in entities:
+                    e = str(entity.entity.type)
+                    entity_labels.add(f"{d}.{i}.B|{e}")
+                    entity_labels.add(f"{d}.{i}.I|{e}")
+                    entity_labels.add(f"{d}.{i}.S|{e}")
+                    entity_labels.add(f"{d}.{i}.E|{e}")
 
-                e = "O|"
-                entity_labels.add(f"{d}.{i}.{e}")
+            e = "O|"
+            entity_labels.add(f"{d}.{i}.{e}")
 
         entity_labels = sorted(list(entity_labels))
         return dict(zip(entity_labels, range(len(entity_labels))))
 
     @staticmethod
     def get_class_labels(
-        tuning_level: str, query_list: ProcessedQueryList
+        tuning_level: list, query_list: ProcessedQueryList
     ) -> List[str]:
         """Creates a class label for a set of queries. These labels are used to split
             queries by type. Labels follow the format of "domain" or "domain|intent".
@@ -164,17 +160,12 @@ class LabelMap:
         Returns:
             class_labels (List[str]): list of labels for classification task.
         """
-        if tuning_level == TUNE_LEVEL_DOMAIN:
-            return [f"{d}" for d in query_list.domains()]
-        elif tuning_level == TUNE_LEVEL_INTENT:
+        if TUNE_LEVEL_INTENT in tuning_level:
             return [
                 f"{d}.{i}" for d, i in zip(query_list.domains(), query_list.intents())
             ]
         else:
-            raise ValueError(
-                f"Invalid label_type {tuning_level}. Must be '{TUNE_LEVEL_DOMAIN}'"
-                f" or '{TUNE_LEVEL_INTENT}'"
-            )
+            return [f"{d}" for d in query_list.domains()]
 
     @staticmethod
     def create_label_map(app_path, file_pattern):
@@ -313,10 +304,9 @@ class DataBucket:
         sampling_size: int,
         confidences_2d: List[List[float]],
         confidences_3d: List[List[List[float]]],
-        entity_confidences: List[List[List[float]]],
         heuristic: Heuristic,
         confidence_segments: Dict = None,
-        entity_tuning: bool = False,
+        tuning_type: str = "classifier",
     ):
         """Method to sample a DataBucket's unsampled_queries and update its sampled_queries
         and newly_sampled_queries.
@@ -332,37 +322,38 @@ class DataBucket:
                 queries in the QueryCache.
         """
 
-        params_rank_3d = {"confidences_3d": confidences_3d}
-        if confidence_segments:
-            params_rank_3d["confidence_segments"] = confidence_segments
+        if tuning_type == "classifier":
+            params_rank_3d = {"confidences_3d": confidences_3d}
+            if confidence_segments:
+                params_rank_3d["confidence_segments"] = confidence_segments
 
-        ranked_indices_2d = (
-            heuristic.rank_3d(**params_rank_3d)
-            if confidences_3d
-            else heuristic.rank_2d(confidences_2d)
-        )
+            ranked_indices_2d = (
+                heuristic.rank_3d(**params_rank_3d)
+                if confidences_3d
+                else heuristic.rank_2d(confidences_2d)
+            )
 
-        newly_sampled_indices = ranked_indices_2d[:sampling_size]
-        remaining_indices = ranked_indices_2d[sampling_size:]
+            newly_sampled_indices = ranked_indices_2d[:sampling_size]
+            remaining_indices = ranked_indices_2d[sampling_size:]
 
-        if entity_tuning:
+        else:
             try:
-                ranked_entity_indices = heuristic.rank_entities(entity_confidences)
-            except: # pylint: disable=W0702
+                ranked_entity_indices = heuristic.rank_entities(confidences_2d)
+            except:  # pylint: disable=W0702
                 # if heuristic does not have entity AL support default to entropy
                 heuristic = EntropySampling
-                ranked_entity_indices = heuristic.rank_entities(entity_confidences)
+                ranked_entity_indices = heuristic.rank_entities(confidences_2d)
 
-            newly_sampled_indices_entity = ranked_entity_indices[:sampling_size]
-            remaining_indices_entity = ranked_entity_indices[sampling_size:]
+            newly_sampled_indices = ranked_entity_indices[:sampling_size]
+            remaining_indices = ranked_entity_indices[sampling_size:]
 
             # to-do: random select and restrict to batch size
-            newly_sampled_indices = list(
-                set(newly_sampled_indices).union(newly_sampled_indices_entity)
-            )
-            remaining_indices = list(
-                set(remaining_indices).intersection(remaining_indices_entity)
-            )
+            # newly_sampled_indices = list(
+            #     set(newly_sampled_indices).union(newly_sampled_indices_entity)
+            # )
+            # remaining_indices = list(
+            #     set(remaining_indices).intersection(remaining_indices_entity)
+            # )
 
         newly_sampled_queries_ids = [
             self.unsampled_queries.elements[i] for i in newly_sampled_indices
@@ -404,8 +395,7 @@ class DataBucketFactory:
     @staticmethod
     def get_data_bucket_for_strategy_tuning(
         app_path: str,
-        entity_tuning: bool,
-        tuning_level: str,
+        tuning_level: list,
         train_pattern: str,
         test_pattern: str,
         train_seed_pct: float,
@@ -414,7 +404,7 @@ class DataBucketFactory:
 
         Args:
             app_path (str): Path to MindMeld application
-            tuning_level (str): The hierarchy level to tune ("domain" or "intent")
+            tuning_level (list): The hierarchy level to tune ("domain" or "intent")
             train_pattern (str): Regex pattern to match train files. (".*train.*.txt")
             test_pattern (str): Regex pattern to match test files. (".*test.*.txt")
             train_seed_pct (float): Percentage of training data to use as the initial seed
@@ -429,9 +419,9 @@ class DataBucketFactory:
             label_set=train_pattern
         )
 
-        if entity_tuning:
+        if "entity" in tuning_level:
             label_map.entity2id = LabelMap._get_entity_mappings(
-                entity_tuning, train_query_list
+                train_query_list
             )
             label_map.id2entity = LabelMap._reverse_dict(label_map.entity2id)
 

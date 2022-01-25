@@ -490,9 +490,9 @@ DEFAULT_ACTIVE_LEARNING_CONFIG = {
         "n_classifiers": 3,
         "n_epochs": 5,
         "batch_size": 100,
-        "tuning_level": "domain",
+        "tuning_level": ["domain"],
         "entity_tuning": False,
-        "tuning_strategies": [
+        "classifier_tuning_strategies": [
             "LeastConfidenceSampling",
             "MarginSampling",
             "EntropySampling",
@@ -501,6 +501,11 @@ DEFAULT_ACTIVE_LEARNING_CONFIG = {
             "EnsembleSampling",
             "KLDivergenceSampling",
         ],
+        "tagger_tuning_strategies": [
+            "LeastConfidenceSampling",
+            "MarginSampling",
+            "EntropySampling",
+        ],
     },
     "tuning_output": {
         "save_sampled_queries": True,
@@ -508,7 +513,8 @@ DEFAULT_ACTIVE_LEARNING_CONFIG = {
         "class_level_statistic": "f_beta",
     },
     "query_selection": {
-        "selection_strategy": "EntropySampling",
+        "classifier_selection_strategy": "EntropySampling",
+        "tagger_selection_strategy": "EntropySampling",
         "log_usage_pct": 1.00,
         "labeled_logs_pattern": None,
         "unlabeled_logs_path": "logs.txt",

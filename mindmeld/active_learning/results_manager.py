@@ -26,8 +26,10 @@ from ..path import (
     AL_PARAMS_PATH,
     AL_RESULTS_FOLDER,
     AL_PLOTS_FOLDER,
-    AL_ACCURACIES_PATH,
-    AL_SELECTED_QUERIES_PATH,
+    AL_CLASSIFIER_ACCURACIES_PATH,
+    AL_TAGGER_ACCURACIES_PATH,
+    AL_CLASSIFIER_SELECTED_QUERIES_PATH,
+    AL_TAGGER_SELECTED_QUERIES_PATH,
 )
 from ..constants import STRATEGY_ABRIDGED
 
@@ -49,7 +51,7 @@ class ResultsManager:
         self.output_folder = output_folder
         self.experiment_folder_name = None
 
-    def set_experiment_folder_name(self, selection_strategies) -> str:
+    def set_experiment_folder_name(self, classifier_tuning_strategies, tagger_tuning_strategies) -> str:
         """
         Args:
             selection_strategies (list): List of strategies used for the experiment.
@@ -57,12 +59,15 @@ class ResultsManager:
             experiment_folder_name (str): Creates the name of the current experiment folder
                 based on the current timestamp.
         """
-        strategies = "_".join(
-            STRATEGY_ABRIDGED[s] for s in selection_strategies if s in STRATEGY_ABRIDGED
+        classifier_strategies = "_".join(
+            STRATEGY_ABRIDGED[s] for s in classifier_tuning_strategies if s in STRATEGY_ABRIDGED
+        )
+        tagger_strategies = "_".join(
+            STRATEGY_ABRIDGED[s] for s in tagger_tuning_strategies if s in STRATEGY_ABRIDGED
         )
         now = datetime.datetime.now()
         self.experiment_folder_name = (
-            f"{now.year}-{now.month}-{now.day}_{now.hour}:{now.minute}_{strategies}"
+            f"{now.year}-{now.month}-{now.day}_{now.hour}:{now.minute}_{'classifier'}-{classifier_strategies}_{'tagger'}-{tagger_strategies}"
         )
 
     @property
@@ -74,14 +79,20 @@ class ResultsManager:
         return os.path.join(self.output_folder, self.experiment_folder_name)
 
     def create_experiment_folder(
-        self, active_learning_params: Dict, tuning_strategies: List
+        self,
+        active_learning_params: Dict,
+        classifier_tuning_strategies: List,
+        tagger_tuning_strategies: List,
     ):
         """Creates the active learning experiment folder.
         Args:
             active_learning_params (Dict): Dictionary representation of the params to store.
             tuning_strategies (list): List of strategies used for the experiment.
         """
-        self.set_experiment_folder_name(tuning_strategies)
+        self.set_experiment_folder_name(
+            classifier_tuning_strategies,
+            tagger_tuning_strategies,
+        )
         os.makedirs(self.experiment_folder, exist_ok=True)
         self.dump_json(AL_PARAMS_PATH, active_learning_params)
         self.create_folder(AL_RESULTS_FOLDER)
@@ -149,16 +160,19 @@ class ResultsManager:
         self.dump_json(unformatted_path, json_data)
 
     def update_accuracies_json(
-        self, strategy: str, epoch: int, iteration: int, eval_stats
+        self, tuning_type: str, strategy: str, epoch: int, iteration: int, eval_stats
     ):
         """Update accuracies.json with iteration metrics"""
+
+        AL_ACCURACIES_PATH = AL_CLASSIFIER_ACCURACIES_PATH if tuning_type == "classifier" else AL_TAGGER_ACCURACIES_PATH
         self.update_json(AL_ACCURACIES_PATH, strategy, epoch, iteration, eval_stats)
 
     def update_selected_queries_json(
-        self, strategy: str, epoch: int, iteration: int, queries
+        self, tuning_type: str, strategy: str, epoch: int, iteration: int, queries
     ):
         """Update accuracies.json with iteration metrics"""
         query_dicts = ResultsManager.queries_to_dict(queries)
+        AL_SELECTED_QUERIES_PATH = AL_CLASSIFIER_SELECTED_QUERIES_PATH if tuning_type == "classifier" else AL_TAGGER_SELECTED_QUERIES_PATH
         self.update_json(
             AL_SELECTED_QUERIES_PATH, strategy, epoch, iteration, query_dicts
         )
