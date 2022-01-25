@@ -59,6 +59,9 @@ from ..text_preparation.text_preparation_pipeline import (
     TextPreparationPipeline
 )
 
+# for backwards compatability for sklearn models serialized and dumped in previous version
+from .labels import LabelEncoder, EntityLabelEncoder  # pylint: disable=unused-import
+
 logger = logging.getLogger(__name__)
 
 Examples = Union[PQL.QueryIterator, PQL.ListIterator]
