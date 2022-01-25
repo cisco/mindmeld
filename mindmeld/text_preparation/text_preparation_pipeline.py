@@ -242,7 +242,9 @@ class TextPreparationPipeline:
             TextPreparationPipeline.convert_token_idx_unann_to_ann(
                 tokens, unann_to_ann_idx_mapping
             )
+            tokens = TextPreparationPipeline.filter_out_space_text_tokens(tokens)
             return tokens
+
         # Non-Spacy Tokenizer Handling
         return self.tokenize_around_mindmeld_annotations(text)
 
@@ -371,7 +373,8 @@ class TextPreparationPipeline:
         prev_entity_end = 0
         # MindMeld Entities are not present in text
         if len(matches) == 0:
-            return [(0, len(text))]
+            unann_spans = [(0, len(text))]
+            return unann_spans
         for match in matches:
             entity_start, entity_end = match.span()
             entity_text = match.group(1)
