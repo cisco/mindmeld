@@ -271,7 +271,7 @@ class PoolingLayer(nn_module):
                 [torch.as_tensor([1] * length_) for length_ in lengths],
                 batch_first=True,
                 padding_value=0.0,
-            ).unsqueeze(-1).expand(padded_token_embs.size()).float()
+            ).unsqueeze(-1).expand(padded_token_embs.size()).float().to(padded_token_embs.device)
             if self.pooling_type == "max":
                 padded_token_embs[mask == 0] = -1e9  # set to a large negative value
                 outputs, _ = torch.max(padded_token_embs, dim=1)

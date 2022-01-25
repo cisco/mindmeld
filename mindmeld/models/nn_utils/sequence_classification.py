@@ -17,6 +17,7 @@ Custom modules built on top of nn layers that can do sequence classification
 
 import logging
 from abc import abstractmethod
+from collections import OrderedDict
 from typing import List
 
 from .classification import BaseClassification
@@ -170,10 +171,10 @@ class EmbedderForSequenceClassification(BaseSequenceClassification):
 
     def _init_core(self):
         self.emb_layer = EmbeddingLayer(
-            self.params.num_tokens,
+            self.params._num_tokens,
             self.params.emb_dim,
-            self.params.padding_idx,
-            self.params.pop("embedding_weights", None),
+            self.params._padding_idx,
+            self.params.pop("_embedding_weights", None),
             self.params.update_embeddings,
             1 - self.params.embedder_output_keep_prob
         )
@@ -209,10 +210,10 @@ class CnnForSequenceClassification(BaseSequenceClassification):
 
     def _init_core(self):
         self.emb_layer = EmbeddingLayer(
-            self.params.num_tokens,
+            self.params._num_tokens,
             self.params.emb_dim,
-            self.params.padding_idx,
-            self.params.pop("embedding_weights", None),
+            self.params._padding_idx,
+            self.params.pop("_embedding_weights", None),
             self.params.update_embeddings,
             1 - self.params.embedder_output_keep_prob
         )
@@ -245,10 +246,10 @@ class LstmForSequenceClassification(BaseSequenceClassification):
 
     def _init_core(self):
         self.emb_layer = EmbeddingLayer(
-            self.params.num_tokens,
+            self.params._num_tokens,
             self.params.emb_dim,
-            self.params.padding_idx,
-            self.params.pop("embedding_weights", None),
+            self.params._padding_idx,
+            self.params.pop("_embedding_weights", None),
             self.params.update_embeddings,
             1 - self.params.embedder_output_keep_prob
         )
@@ -301,26 +302,24 @@ class BertForSequenceClassification(BaseSequenceClassification):
             "num_warmup_steps": 50,
             "learning_rate": 2e-5,
             "optimizer": "AdamW",
-            "number_of_epochs": 20,
-            "patience": 4,
-            "batch_size": 16,
-            "gradient_accumulation_steps": 2,
             "max_grad_norm": 1.0,
-            # special tokens might be added differently for different transformer models
-            "embedder_output_pooling_type": "first",
         }
 
         for k, v in safe_values.items():
             v_inputted = params.get(k, v)
             if v != v_inputted:
-                msg = f"{self.name} can be best used with '{k}' equal to '{v}'. Other values " \
-                      f"passed through config params might sometimes lead to unexpected results."
+                msg = f"{self.name} can be best used with '{k}' equal to '{v}' but found " \
+                      f"the value '{v_inputted}'. Use the non-default value with caution as it " \
+                      f"may lead to unexpected results and longer training times depending on " \
+                      f"the choice of pretrained model."
                 logger.warning(msg)
             else:
                 params.update({k: v})
 
         params.update({
-            "embedder_type": embedder_type
+            "embedder_type": embedder_type,
+            "save_frozen_bert_weights": params.get("save_frozen_bert_weights", False)  # if True,
+            # frozen set of bert weights are also dumped
         })
 
         super().fit(examples, labels, **params)
@@ -364,12 +363,24 @@ class BertForSequenceClassification(BaseSequenceClassification):
         )
         return optimizer
 
+    def _get_dumpable_state_dict(self):
+        if not self.params.update_embeddings and not self.params.save_frozen_bert_weights:
+            state_dict = OrderedDict(
+                {k: v for k, v in self.state_dict().items() if not k.startswith("bert_model")}
+            )
+            return state_dict
+        return self.state_dict()
+
     def _init_core(self):
 
         self.bert_model = HuggingfaceTransformersContainer(
             self.params.pretrained_model_name_or_path,
             cache_lookup=False
         ).get_transformer_model()
+        if not self.params.update_embeddings:
+            for param in self.bert_model.parameters():
+                param.requires_grad = False
+
         self.dropout = nn.Dropout(
             p=1 - self.params.embedder_output_keep_prob
         )

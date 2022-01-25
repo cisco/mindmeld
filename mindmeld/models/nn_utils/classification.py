@@ -37,7 +37,11 @@ from .helpers import (
     get_default_params,
     TokenizerType,
     EmbedderType,
-    ValidationMetricType
+    ValidationMetricType,
+    TRAIN_DEV_SPLIT_SEED,
+    LABEL_PAD_TOKEN_IDX,
+    DEFAULT_EMB_DIM,
+    DEFAULT_TOKENIZER
 )
 from .input_encoders import InputEncoderFactory
 from .._util import _get_module_or_attr
@@ -53,9 +57,6 @@ try:
 except ImportError:
     nn_module = object
     pass
-
-SEED = 6174
-LABEL_PAD_TOKEN_IDX = -1  # value set based on default label padding idx in pytorch
 
 logger = logging.getLogger(__name__)
 
@@ -154,12 +155,9 @@ class BaseClassification(nn_module):
         }
         params = self._validate_and_update_params(**params)
 
-        # update params upon preparing encoder and embedder (eg. num_tokens, emb_dim, etc.)
+        # update params upon preparing encoder and embedder
         params = self._prepare_input_encoder(examples, **params)
         params = self._prepare_embedder(**params)
-
-        # update params with label pad idx
-        params["label_padding_idx"] = params.get("label_padding_idx", LABEL_PAD_TOKEN_IDX)
 
         # update number of labels in params upon identifying the unique labels
         try:
@@ -188,7 +186,8 @@ class BaseClassification(nn_module):
 
         # split input data into train & dev splits, and get data loaders
         train_examples, dev_examples, train_labels, dev_labels = train_test_split(
-            examples, labels, test_size=self.params.dev_split_ratio, random_state=SEED
+            examples, labels, test_size=self.params.dev_split_ratio,
+            random_state=TRAIN_DEV_SPLIT_SEED
         )
 
         # create an optimizer and attach all model params to it
@@ -282,10 +281,10 @@ class BaseClassification(nn_module):
                 except TypeError:
                     # raised in case of sequence classification; implies already flattened
                     pass
-                # discard unwanted predictions using label_padding_idx
+                # discard unwanted predictions using _label_padding_idx
                 batch_labels_predicted, batch_labels_targetted = zip(*[
                     (x, y) for x, y in zip(batch_labels_predicted, batch_labels_targetted)
-                    if y != self.params.label_padding_idx
+                    if y != self.params._label_padding_idx
                 ])
                 predictions.extend(batch_labels_predicted)
                 targets.extend(batch_labels_targetted)
@@ -340,13 +339,14 @@ class BaseClassification(nn_module):
 
         # populate few required key-values (ensures the key-values are populated if not inputted)
         params.update({
-            "add_terminals": params.get("add_terminals"),
-            "padding_length": params.get("padding_length"),
-            "tokenizer_type": params.get(
-                "tokenizer_type",
-                TokenizerType.WHITESPACE_TOKENIZER.value
-            ),
-            "label_padding_idx": LABEL_PAD_TOKEN_IDX,
+            "add_terminals": params.get("add_terminals"),  # some encoders need this to be True
+            # (e.g. pretrained huggingface encoder) while some others don't; better not to set a
+            # boolean value as default to avoid raising errors unexpectedly
+            "padding_length": params.get("padding_length"),  # explicitly obtained for more
+            # transparent param dictionary
+            "tokenizer_type": params.get("tokenizer_type", DEFAULT_TOKENIZER),
+            "_label_padding_idx": LABEL_PAD_TOKEN_IDX,  # used to discard unwanted i.e. label
+            # padding indices in the batch predictions in the fit() method
         })
 
         # validate tokenizer_type param
@@ -386,8 +386,8 @@ class BaseClassification(nn_module):
         self.encoder = InputEncoderFactory.get_encoder_cls(params.get("tokenizer_type"))(**params)
         self.encoder.prepare(examples=examples)
         params.update({
-            "num_tokens": len(self.encoder.get_vocab()),
-            "padding_idx": self.encoder.get_pad_token_idx(),
+            "_num_tokens": len(self.encoder.get_vocab()),
+            "_padding_idx": self.encoder.get_pad_token_idx(),
         })
         return params
 
@@ -402,7 +402,12 @@ class BaseClassification(nn_module):
         embedder_type = params.get("embedder_type")
         if EmbedderType(embedder_type) == EmbedderType.GLOVE:
             # load glove embs
-            glove_container = GloVeEmbeddingsContainer()
+            token_dimension = params.get("embedder_type", 300)
+            token_pretrained_embedding_filepath = params.get("token_pretrained_embedding_filepath")
+            glove_container = GloVeEmbeddingsContainer(
+                token_dimension=token_dimension,
+                token_pretrained_embedding_filepath=token_pretrained_embedding_filepath
+            )
             token2emb = glove_container.get_pretrained_word_to_embeddings_dict()
             glove_emb_dim = glove_container.token_dimension
             # validate emb_dim
@@ -414,8 +419,8 @@ class BaseClassification(nn_module):
                 raise ValueError(msg)
             params.update({
                 "embedder_type": embedder_type,
-                "emb_dim": emb_dim,
-                "embedding_weights": {
+                "emb_dim": emb_dim,  # overwrite the default value
+                "_embedding_weights": {
                     i: token2emb[t] for t, i in self.encoder.get_vocab().items() if t in token2emb
                 },
             })
@@ -423,15 +428,16 @@ class BaseClassification(nn_module):
             # the bert model is directly loaded in _init_core() itself
             params.update({
                 "embedder_type": embedder_type,
-                "emb_dim": self.encoder.config.hidden_size,
+                "emb_dim": self.encoder.config.hidden_size,  # overwrite the default value
                 "pretrained_model_name_or_path": params.get("pretrained_model_name_or_path"),
             })
 
         if not params.get("emb_dim"):
-            msg = "Need a valid 'emb_dim' to initialize embedding layers. To specify a " \
-                  "particular dimension, either pass-in the 'emb_dim' param or provide a " \
-                  "valid 'embedder_type' param."
-            raise ValueError(msg)
+            msg = f"Need a valid 'emb_dim' to initialize embedding layers. To specify a " \
+                  f"particular dimension, either pass-in the 'emb_dim' param or provide a  valid " \
+                  f"'embedder_type' param. Continuing with a default value:{DEFAULT_EMB_DIM}."
+            logger.error(msg)
+            params.update({"emb_dim": DEFAULT_EMB_DIM})
 
         return params
 
@@ -447,46 +453,19 @@ class BaseClassification(nn_module):
         scheduler = getattr(torch.optim.lr_scheduler, "LambdaLR")(optimizer, lambda _: 1)
         return optimizer, scheduler
 
-    @abstractmethod
-    def _prepare_labels(self, labels: Union[List[int], List[List[int]]], max_length: int):
-        raise NotImplementedError
-
-    @abstractmethod
-    def _init_graph(self):
-        raise NotImplementedError
-
-    @abstractmethod
-    def forward(self, batch_data: BatchData) -> BatchData:
-        raise NotImplementedError
-
-    @abstractmethod
-    def predict(self, examples: List[str]) -> Union[List[int], List[List[int]]]:
+    def _get_dumpable_state_dict(self):
         """
-        Returns predicted class labels
-
-        Args:
-            examples (List[str]): The list of examples for which predictions are computed and
-                returned.
+        Returns a state dict of the Pytorch module that can be dumped. Overwriting definitions can
+        select a subset of full state dict to be dumped (e.g. like the BERT based ones)
         """
-        raise NotImplementedError
-
-    @abstractmethod
-    def predict_proba(self, examples: List[str]) -> Union[List[List[int]], List[List[List[int]]]]:
-        """
-        Returns predicted class probabilities
-
-        Args:
-            examples (List[str]): The list of examples for which class prediction probabilities
-                are computed and returned.
-        """
-        raise NotImplementedError
+        return self.state_dict()
 
     def dump(self, path: str):
         """
         Dumps underlying torch.nn model, encoder state and params
 
         Args:
-            path (str): The path header where the files are dumped.
+            path (str): The path header for where the files are dumped.
 
         The following states are dumped into different files:
             - Pytorch model weights
@@ -499,7 +478,7 @@ class BaseClassification(nn_module):
         os.makedirs(path, exist_ok=True)
 
         # save weights
-        torch.save(self.state_dict(), os.path.join(path, "model.bin"))
+        torch.save(self._get_dumpable_state_dict(), os.path.join(path, "model.bin"))
 
         # save encoder's state
         self.encoder.dump(path)
@@ -550,13 +529,57 @@ class BaseClassification(nn_module):
                   f"but is not being loaded on device:{device}"
             logger.warning(msg)
             module.params.device = device
-        module.load_state_dict(  # load model weights from checkpoint
-            torch.load(os.path.join(path, "model.bin"), map_location=torch.device(device))
-        )
+        bin_path = os.path.join(path, "model.bin")
+        trained_state_dict = torch.load(bin_path, map_location=torch.device(device))
+        module_state_dict = module.state_dict()
+        keys_diff = module_state_dict.keys() - trained_state_dict.keys()
+        if keys_diff:
+            msg = f"While loading {module.__class__.__name__}, {len(keys_diff)} keys of the " \
+                  f"total {len(module_state_dict.keys())} of the torch module are not found in " \
+                  f"the file loaded from {bin_path} "
+            msg += "\n- This IS fine if loading a model for which only some parameters were " \
+                   "trained and others frozen. \n- This IS NOT fine if you expect all parameters " \
+                   "were trained."
+            logger.warning(msg)
+        module.load_state_dict(trained_state_dict, strict=False)
         module.to(device)
-        msg = f"{module.name} model weights are loaded successfully on device:{device}"
+        msg = f"{module.name} model weights are loaded successfully on to the device:{device}"
         logger.info(msg)
 
         module.ready = True
         module.dirty = False
         return module
+
+    @abstractmethod
+    def _prepare_labels(self, labels: Union[List[int], List[List[int]]], max_length: int):
+        raise NotImplementedError
+
+    @abstractmethod
+    def _init_graph(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def forward(self, batch_data: BatchData) -> BatchData:
+        raise NotImplementedError
+
+    @abstractmethod
+    def predict(self, examples: List[str]) -> Union[List[int], List[List[int]]]:
+        """
+        Returns predicted class labels
+
+        Args:
+            examples (List[str]): The list of examples for which predictions are computed and
+                returned.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def predict_proba(self, examples: List[str]) -> Union[List[List[int]], List[List[List[int]]]]:
+        """
+        Returns predicted class probabilities
+
+        Args:
+            examples (List[str]): The list of examples for which class prediction probabilities
+                are computed and returned.
+        """
+        raise NotImplementedError

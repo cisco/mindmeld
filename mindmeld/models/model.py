@@ -759,7 +759,7 @@ class Model(AbstractModel):
 
 
 class PytorchModel(AbstractModel):
-    ALLOWED_CLASSIFIER_TYPES: List[str] = NotImplemented
+    ALLOWED_CLASSIFIER_TYPES: List[str] = NotImplemented  # to be implemented in child classes
 
     def __init__(self, config):
         if not _is_module_available('torch'):

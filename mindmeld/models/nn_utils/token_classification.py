@@ -17,6 +17,7 @@ Custom modules built on top of nn layers that can do token classification
 
 import logging
 from abc import abstractmethod
+from collections import OrderedDict
 from typing import List
 
 from .classification import BaseClassification
@@ -58,14 +59,14 @@ class BaseTokenClassification(BaseClassification):
     def _prepare_labels(self, labels: List[List[int]], max_length: int):
         # for token classification, the length of an example matters (i.e. the number of
         # (sub-)words in it) as the labels/targets are one-to-one mapped per (sub-)word.
-        # hence, we need to do padding with a label_padding_idx
+        # hence, we need to do padding with a _label_padding_idx
 
         def _trim_or_pad(label_sequence):
             if len(label_sequence) > max_length:
                 return label_sequence[:max_length]
             else:
                 return (
-                    label_sequence + [self.params.label_padding_idx] *
+                    label_sequence + [self.params._label_padding_idx] *
                     (max_length - len(label_sequence))
                 )
 
@@ -111,7 +112,7 @@ class BaseTokenClassification(BaseClassification):
                 # cross-entropy criterion
                 self.classifier_head = nn.Linear(self.out_dim, self.params.num_labels)
                 self.criterion = nn.CrossEntropyLoss(
-                    reduction='mean', ignore_index=self.params.label_padding_idx)
+                    reduction='mean', ignore_index=self.params._label_padding_idx)
             else:
                 msg = f"Invalid number of labels specified: {self.params.num_labels}. " \
                       f"A valid number is equal to or greater than 2"
@@ -142,7 +143,7 @@ class BaseTokenClassification(BaseClassification):
         if targets is not None:
             if self.params.use_crf_layer:
                 # create a mask to ignore token positions that are padded
-                mask = torch.as_tensor(targets != self.params.label_padding_idx,
+                mask = torch.as_tensor(targets != self.params._label_padding_idx,
                                        dtype=torch.uint8).to(self.params.device)
                 loss = - self.crf_layer(logits, targets, mask=mask)  # negative log likelihood
             else:
@@ -230,10 +231,10 @@ class EmbedderForTokenClassification(BaseTokenClassification):
 
     def _init_core(self):
         self.emb_layer = EmbeddingLayer(
-            self.params.num_tokens,
+            self.params._num_tokens,
             self.params.emb_dim,
-            self.params.padding_idx,
-            self.params.pop("embedding_weights", None),
+            self.params._padding_idx,
+            self.params.pop("_embedding_weights", None),
             self.params.update_embeddings,
             1 - self.params.embedder_output_keep_prob
         )
@@ -260,10 +261,10 @@ class LstmForTokenClassification(BaseTokenClassification):
 
     def _init_core(self):
         self.emb_layer = EmbeddingLayer(
-            self.params.num_tokens,
+            self.params._num_tokens,
             self.params.emb_dim,
-            self.params.padding_idx,
-            self.params.pop("embedding_weights", None),
+            self.params._padding_idx,
+            self.params.pop("_embedding_weights", None),
             self.params.update_embeddings,
             1 - self.params.embedder_output_keep_prob
         )
@@ -312,10 +313,8 @@ class CharLstmWithWordLstmForTokenClassification(BaseTokenClassification):
 
         # update params without which can become ambiguous when loading a model
         params.update({
-            # "add_terminals" = False; cannot add terminals as they cannot be broken
-            # down into chars. If set to True, the encoder raises an error.
-            "char_num_tokens": len(self.encoder.get_char_vocab()),
-            "char_padding_idx": self.encoder.get_char_pad_token_idx(),
+            "_char_num_tokens": len(self.encoder.get_char_vocab()),
+            "_char_padding_idx": self.encoder.get_char_pad_token_idx(),
             "char_add_terminals": params.get("char_add_terminals"),
             "char_padding_length": params.get("char_padding_length"),
             "char_emb_dim": params.get("char_emb_dim"),
@@ -324,16 +323,14 @@ class CharLstmWithWordLstmForTokenClassification(BaseTokenClassification):
         return params
 
     def _init_core(self):
-        self.word_level_character_embedding_size = self.params.get(
-            "word_level_character_embedding_size") or self.params.emb_dim  # former can be None
-        self.params.update({
-            "word_level_character_embedding_size": self.word_level_character_embedding_size})
+        self.char_proj_dim = self.params.get("char_proj_dim") or self.params.emb_dim
+        self.params.update({"char_proj_dim": self.char_proj_dim})
 
         self.char_emb_layer = EmbeddingLayer(
-            self.params.char_num_tokens,
+            self.params._char_num_tokens,
             self.params.char_emb_dim,
-            self.params.char_padding_idx,
-            self.params.pop("char_embedding_weights", None),
+            self.params._char_padding_idx,
+            self.params.pop("_char_embedding_weights", None),
             self.params.update_embeddings
         )
         self.char_lstm_layer = LstmLayer(
@@ -353,19 +350,17 @@ class CharLstmWithWordLstmForTokenClassification(BaseTokenClassification):
             self.params.char_lstm_hidden_dim * 2 if self.params.char_lstm_bidirectional
             else self.params.char_lstm_hidden_dim
         )
-        self.char_lstm_output_transform = nn.Linear(
-            char_out_dim, self.params.word_level_character_embedding_size
-        )
+        self.char_lstm_output_transform = nn.Linear(char_out_dim, self.params.char_proj_dim)
         self.emb_layer = EmbeddingLayer(
-            self.params.num_tokens,
+            self.params._num_tokens,
             self.params.emb_dim,
-            self.params.padding_idx,
-            self.params.pop("embedding_weights", None),
+            self.params._padding_idx,
+            self.params.pop("_embedding_weights", None),
             self.params.update_embeddings,
             1 - self.params.embedder_output_keep_prob
         )
         self.lstm_layer = LstmLayer(
-            self.params.emb_dim + self.params.word_level_character_embedding_size,
+            self.params.emb_dim + self.params.char_proj_dim,
             self.params.lstm_hidden_dim,
             self.params.lstm_num_layers,
             1 - self.params.lstm_keep_prob,
@@ -386,8 +381,7 @@ class CharLstmWithWordLstmForTokenClassification(BaseTokenClassification):
         encs = [self.char_lstm_output_pooling(enc, seq_len)
                 for enc, seq_len in zip(encs, char_seq_lengths)]
         encs = pad_sequence(encs, batch_first=True)  # [BS, SEQ_LEN, char_out_dim]
-        char_encs = self.char_lstm_output_transform(
-            encs)  # [BS, SEQ_LEN, self.word_level_character_embedding_size]
+        char_encs = self.char_lstm_output_transform(encs)  # [BS, SEQ_LEN, self.char_proj_dim]
 
         seq_ids = batch_data["seq_ids"]  # [BS, SEQ_LEN]
         seq_lengths = batch_data["seq_lengths"]  # [BS]
@@ -418,10 +412,8 @@ class CharCnnWithWordLstmForTokenClassification(BaseTokenClassification):
 
         # update params without which can become ambiguous when loading a model
         params.update({
-            # "add_terminals" = False; cannot add terminals as they cannot be broken
-            # down into chars. If set to True, the encoder raises an error.
-            "char_num_tokens": len(self.encoder.get_char_vocab()),
-            "char_padding_idx": self.encoder.get_char_pad_token_idx(),
+            "_char_num_tokens": len(self.encoder.get_char_vocab()),
+            "_char_padding_idx": self.encoder.get_char_pad_token_idx(),
             "char_add_terminals": params.get("char_add_terminals"),
             "char_padding_length": params.get("char_padding_length"),
             "char_emb_dim": params.get("char_emb_dim"),
@@ -430,16 +422,14 @@ class CharCnnWithWordLstmForTokenClassification(BaseTokenClassification):
         return params
 
     def _init_core(self):
-        self.word_level_character_embedding_size = self.params.get(
-            "word_level_character_embedding_size") or self.params.emb_dim
-        self.params.update({
-            "word_level_character_embedding_size": self.word_level_character_embedding_size})
+        self.char_proj_dim = self.params.get("char_proj_dim") or self.params.emb_dim
+        self.params.update({"char_proj_dim": self.char_proj_dim})
 
         self.char_emb_layer = EmbeddingLayer(
-            self.params.char_num_tokens,
+            self.params._char_num_tokens,
             self.params.char_emb_dim,
-            self.params.char_padding_idx,
-            self.params.pop("char_embedding_weights", None),
+            self.params._char_padding_idx,
+            self.params.pop("_char_embedding_weights", None),
             self.params.update_embeddings
         )
         self.char_conv_layer = CnnLayer(
@@ -451,19 +441,17 @@ class CharCnnWithWordLstmForTokenClassification(BaseTokenClassification):
             p=1 - self.params.char_cnn_output_keep_prob
         )
         char_out_dim = sum(self.params.char_number_of_windows)
-        self.char_cnn_output_transform = nn.Linear(
-            char_out_dim, self.params.word_level_character_embedding_size
-        )
+        self.char_cnn_output_transform = nn.Linear(char_out_dim, self.params.char_proj_dim)
         self.emb_layer = EmbeddingLayer(
-            self.params.num_tokens,
+            self.params._num_tokens,
             self.params.emb_dim,
-            self.params.padding_idx,
-            self.params.pop("embedding_weights", None),
+            self.params._padding_idx,
+            self.params.pop("_embedding_weights", None),
             self.params.update_embeddings,
             1 - self.params.embedder_output_keep_prob
         )
         self.lstm_layer = LstmLayer(
-            self.params.emb_dim + self.params.word_level_character_embedding_size,
+            self.params.emb_dim + self.params.char_proj_dim,
             self.params.lstm_hidden_dim,
             self.params.lstm_num_layers,
             1 - self.params.lstm_keep_prob,
@@ -482,8 +470,7 @@ class CharCnnWithWordLstmForTokenClassification(BaseTokenClassification):
         encs = [self.char_conv_layer(enc) for enc in encs]
         encs = [self.char_dropout(enc) for enc in encs]
         encs = pad_sequence(encs, batch_first=True)  # [BS, SEQ_LEN, sum(self.number_of_windows)]
-        char_encs = self.char_cnn_output_transform(
-            encs)  # [BS, SEQ_LEN, self.word_level_character_embedding_size]
+        char_encs = self.char_cnn_output_transform(encs)  # [BS, SEQ_LEN, self.char_proj_dim]
 
         seq_ids = batch_data["seq_ids"]  # [BS, SEQ_LEN]
         seq_lengths = batch_data["seq_lengths"]  # [BS]
@@ -514,18 +501,16 @@ class BertForTokenClassification(BaseTokenClassification):
             "num_warmup_steps": 50,
             "learning_rate": 2e-5,
             "optimizer": "AdamW",
-            "number_of_epochs": 20,
-            "patience": 4,
-            "batch_size": 16,
-            "gradient_accumulation_steps": 2,
             "max_grad_norm": 1.0
         }
 
         for k, v in safe_values.items():
             v_inputted = params.get(k, v)
             if v != v_inputted:
-                msg = f"{self.name} can be best used with '{k}' equal to '{v}'. Other " \
-                      f"values passed through config params might lead to unexpected results."
+                msg = f"{self.name} can be best used with '{k}' equal to '{v}' but found " \
+                      f"the value '{v_inputted}'. Use the non-default value with caution as it " \
+                      f"may lead to unexpected results and longer training times depending on " \
+                      f"the choice of pretrained model."
                 logger.warning(msg)
             else:
                 params.update({k: v})
@@ -575,12 +560,24 @@ class BertForTokenClassification(BaseTokenClassification):
         scheduler = getattr(torch.optim.lr_scheduler, "LambdaLR")(optimizer, lr_lambda)
         return optimizer, scheduler
 
+    def _get_dumpable_state_dict(self):
+        if not self.params.update_embeddings and not self.params.save_frozen_bert_weights:
+            state_dict = OrderedDict(
+                {k: v for k, v in self.state_dict().items() if not k.startswith("bert_model")}
+            )
+            return state_dict
+        return self.state_dict()
+
     def _init_core(self):
 
         self.bert_model = HuggingfaceTransformersContainer(
             self.params.pretrained_model_name_or_path,
             cache_lookup=False
         ).get_transformer_model()
+        if not self.params.update_embeddings:
+            for param in self.bert_model.parameters():
+                param.requires_grad = False
+
         self.dropout = nn.Dropout(
             p=1 - self.params.embedder_output_keep_prob
         )

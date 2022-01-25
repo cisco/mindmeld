@@ -787,7 +787,7 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
         """Returns the maximum length of tokens per example allowed for the pretrained tokenizer"""
         if self.__model_max_length == -1:
             try:
-                self.__model_max_length = self.tokenizer._model_max_length
+                self.__model_max_length = self.tokenizer.model_max_length
             except AttributeError as e:
                 # case in which the huggingface tokenizer doesn't have this attribute
                 logger.info(e)
@@ -804,13 +804,15 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
             logger.error(msg)
             raise ValueError(msg)
 
+        split_at = " "
+
         n_terminals = self.number_of_terminal_tokens if add_terminals else 0
 
         # tokenize each word of each input separately
         # get maximum length of each example, accounting for terminal tokens- cls, sep
         # If padding_length is None, padding has to be done to the max length of the input batch
         tokenized_examples = [
-            [self._tokenize(word) for word in example.split(" ")] for example in examples
+            [self._tokenize(word) for word in example.split(split_at)] for example in examples
         ]
 
         max_curr_len = max([len(sum(t_ex, [])) for t_ex in tokenized_examples]) + n_terminals
@@ -837,7 +839,9 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
         # This is not the case with few children of AbstractHuggingfaceTrainableEncoder (e.g.
         # BytePairEncodingEncoder) which has no prepending tokens such as '##' for sub-words.
         _detokenized_examples = [
-            self.tokenizer.convert_tokens_to_string(sum(_trimmed_example, []))
+            split_at.join(
+                [self.tokenizer.convert_tokens_to_string(group) for group in _trimmed_example]
+            )
             for _trimmed_example in _trimmed_examples
         ]
         hgf_encodings = self.tokenizer(

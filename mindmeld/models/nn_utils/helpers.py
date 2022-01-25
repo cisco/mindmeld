@@ -112,6 +112,9 @@ class TokenClassificationType(enum.Enum):
     LSTM_LSTM = "lstm-lstm"
 
 
+TRAIN_DEV_SPLIT_SEED = 6174
+LABEL_PAD_TOKEN_IDX = -1  # value set based on default label padding idx in pytorch
+
 DEFAULT_TRAINING_INFERENCE_PARAMS = {
     "device": "cuda" if is_cuda_available else "cpu",
     "number_of_epochs": 100,
@@ -125,7 +128,15 @@ DEFAULT_TRAINING_INFERENCE_PARAMS = {
     "dev_split_ratio": 0.2
 }
 
-DEFAULT_TOKEN_CLASSIFICATION_PARAMS = {
+DEFAULT_VANILLA_BERT_MODEL_PARAMS = {
+    "batch_size": 16,
+    "gradient_accumulation_steps": 2,
+    "number_of_epochs": 20,
+    "patience": 5,
+    "embedder_output_pooling_type": "first",
+}
+
+DEFAULT_COMMON_TOKEN_CLASSIFICATION_PARAMS = {
     "output_keep_prob": 0.7,
     "use_crf_layer": True,
     "patience": 10,  # observed in benchmarking that more patience is better when using crf
@@ -134,50 +145,63 @@ DEFAULT_TOKEN_CLASSIFICATION_PARAMS = {
     "validation_metric": "f1",
 }
 
+DEFAULT_EMB_DIM = 256
+DEFAULT_TOKENIZER = TokenizerType.WHITESPACE_TOKENIZER.value
+
 DEFAULT_FORWARD_PASS_PARAMS = {
     "EmbedderForSequenceClassification": {
-        "padding_idx": None,
+        "embedder_type": EmbedderType.NONE.value,
+        "add_terminals": False,
         "update_embeddings": True,
         "embedder_output_keep_prob": 0.7,
         "embedder_output_pooling_type": "mean",
         "output_keep_prob": 1.0,  # set to 1.0 due to the shallowness of the architecture
     },
     "CnnForSequenceClassification": {
-        "padding_idx": None,
+        "embedder_type": EmbedderType.NONE.value,
+        "add_terminals": False,
         "update_embeddings": True,
         "embedder_output_keep_prob": 0.7,
+        "output_keep_prob": 0.7,
         "window_sizes": [3, 4, 5],
         "number_of_windows": [100, 100, 100],
-        "output_keep_prob": 0.7
     },
     "LstmForSequenceClassification": {
-        "padding_idx": None,
+        "embedder_type": EmbedderType.NONE.value,
+        "add_terminals": False,
         "update_embeddings": True,
         "embedder_output_keep_prob": 0.7,
+        "output_keep_prob": 0.7,
         "lstm_hidden_dim": 128,
         "lstm_num_layers": 2,
         "lstm_keep_prob": 0.7,
         "lstm_bidirectional": True,
         "lstm_output_pooling_type": "last",
-        "output_keep_prob": 0.7
     },
     "BertForSequenceClassification": {
-        "tokenizer_type": TokenizerType.HUGGINGFACE_PRETRAINED_TOKENIZER.value,
+        **DEFAULT_VANILLA_BERT_MODEL_PARAMS,
+        "pretrained_model_name_or_path": "bert-base-uncased",
+        "update_embeddings": True,
         "embedder_output_keep_prob": 0.7,
         "embedder_output_pooling_type": "first",
         "output_keep_prob": 1.0,  # this dropout unnecessary upon using `embedder_output_keep_prob`
+        # other values for following keys will possibly throw errors
+        "embedder_type": "bert",
         "add_terminals": True,
+        "tokenizer_type": TokenizerType.HUGGINGFACE_PRETRAINED_TOKENIZER.value,
+        # keys that are not mutually exclusive and are valid when some of the above keys are set
+        "save_frozen_bert_weights": False,  # the key is valid only when update_embeddings=True
     },
     "EmbedderForTokenClassification": {
-        **DEFAULT_TOKEN_CLASSIFICATION_PARAMS,
-        "padding_idx": None,
+        **DEFAULT_COMMON_TOKEN_CLASSIFICATION_PARAMS,
+        "embedder_type": EmbedderType.NONE.value,
         "update_embeddings": True,
         "embedder_output_keep_prob": 0.7,
         "output_keep_prob": 1.0,  # set to 1.0 due to the shallowness of the architecture,
     },
     "LstmForTokenClassification": {
-        **DEFAULT_TOKEN_CLASSIFICATION_PARAMS,
-        "padding_idx": None,
+        **DEFAULT_COMMON_TOKEN_CLASSIFICATION_PARAMS,
+        "embedder_type": EmbedderType.NONE.value,
         "update_embeddings": True,
         "embedder_output_keep_prob": 0.7,
         "lstm_hidden_dim": 128,
@@ -186,9 +210,9 @@ DEFAULT_FORWARD_PASS_PARAMS = {
         "lstm_bidirectional": True,
     },
     "CharCnnWithWordLstmForTokenClassification": {
-        **DEFAULT_TOKEN_CLASSIFICATION_PARAMS,
+        **DEFAULT_COMMON_TOKEN_CLASSIFICATION_PARAMS,
+        "embedder_type": EmbedderType.NONE.value,
         "tokenizer_type": TokenizerType.WHITESPACE_AND_CHAR_DUAL_TOKENIZER.value,
-        "padding_idx": None,
         "update_embeddings": True,
         "embedder_output_keep_prob": 0.7,
         "lstm_hidden_dim": 128,
@@ -199,12 +223,11 @@ DEFAULT_FORWARD_PASS_PARAMS = {
         "char_window_sizes": [3, 4, 5],
         "char_number_of_windows": [100, 100, 100],
         "char_cnn_output_keep_prob": 0.7,
-        "word_level_character_embedding_size": None,
+        "char_proj_dim": None,
     },
     "CharLstmWithWordLstmForTokenClassification": {
-        **DEFAULT_TOKEN_CLASSIFICATION_PARAMS,
+        **DEFAULT_COMMON_TOKEN_CLASSIFICATION_PARAMS,
         "tokenizer_type": TokenizerType.WHITESPACE_AND_CHAR_DUAL_TOKENIZER.value,
-        "padding_idx": None,
         "update_embeddings": True,
         "embedder_output_keep_prob": 0.7,
         "lstm_hidden_dim": 128,
@@ -217,15 +240,22 @@ DEFAULT_FORWARD_PASS_PARAMS = {
         "char_lstm_keep_prob": 0.7,
         "char_lstm_bidirectional": True,
         "char_lstm_output_pooling_type": "last",
-        "word_level_character_embedding_size": None,
+        "char_proj_dim": None,
     },
     "BertForTokenClassification": {
-        **DEFAULT_TOKEN_CLASSIFICATION_PARAMS,
-        "tokenizer_type": TokenizerType.HUGGINGFACE_PRETRAINED_TOKENIZER.value,
+        **DEFAULT_VANILLA_BERT_MODEL_PARAMS,
+        **DEFAULT_COMMON_TOKEN_CLASSIFICATION_PARAMS,
+        "pretrained_model_name_or_path": "bert-base-uncased",
+        "update_embeddings": True,
         "embedder_output_keep_prob": 0.7,
         "output_keep_prob": 1.0,  # this dropout unnecessary upon using `embedder_output_keep_prob`
         "use_crf_layer": False,  # Following BERT paper's best results,
+        # other values for following keys will possibly throw errors
+        "embedder_type": "bert",
         "add_terminals": True,
+        "tokenizer_type": TokenizerType.HUGGINGFACE_PRETRAINED_TOKENIZER.value,
+        # keys that are not mutually exclusive and are valid when some of the above keys are set
+        "save_frozen_bert_weights": False,  # the key is valid only when update_embeddings=True
     }
 }
 
@@ -251,7 +281,8 @@ def get_default_params(class_name: str):
 
 def get_disk_space_of_model(pytorch_module):
     """
-    Returns the disk space of a pytorch module in MB units
+    Returns the disk space of a pytorch module in MB units. This includes all weights
+    (trainable and non-trainable) of the module.
 
     Args:
         pytorch_module: a pytorch neural network module derived from torch.nn.Module
