@@ -244,6 +244,9 @@ class SpacyTokenizer(Tokenizer):
         self.spacy_model = SpacyModelFactory.get_spacy_language_model(
             language, spacy_model_size
         )
+        # Remove Pipeline Components to Speed Up Tokenization
+        # Todo: Switch to using this param - disable=['tagger', 'parser', 'ner']
+        self.spacy_model.pipeline = []
 
     def tokenize(self, text):
         """
