@@ -103,15 +103,7 @@ class RoleClassifier(Classifier):
         queries = self._resolve_queries(queries, label_set)
 
         new_hash = self._get_model_hash(model_config, queries)
-        cached_model = self._resource_loader.hash_to_model_path.get(new_hash)
-
-        if incremental_timestamp and cached_model:
-            logger.info("No need to fit. Previous model is cached.")
-            if load_cached:
-                # load() sets self.ready = True
-                self.load(cached_model)
-                return True
-            return False
+        cached_model_path = self._resource_loader.hash_to_model_path.get(new_hash)
 
         # These examples and labels are flat lists, not
         # a ProcessedQueryList.Iterator
@@ -119,10 +111,17 @@ class RoleClassifier(Classifier):
 
         if examples:
             # Build roles set
-            self.roles = set()
-            for label in labels:
-                self.roles.add(label)
+            self.roles.update(labels)
 
+        if incremental_timestamp and cached_model_path:
+            logger.info("No need to fit. Previous model is cached.")
+            if load_cached:
+                # load() sets self.ready = True
+                self.load(cached_model_path)
+                return True
+            return False
+
+        if self.roles:
             model = create_model(model_config)
             model.initialize_resources(self._resource_loader, examples, labels)
             model.fit(examples, labels)

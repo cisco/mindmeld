@@ -68,15 +68,9 @@ class ClassifierConfig:
         param_selection=None,
     ):
         """Initializes a classifier configuration"""
-        for arg, val in {"model_type": model_type, "features": features}.items():
+        for arg, val in {"model_type": model_type}.items():
             if val is None:
                 raise TypeError("__init__() missing required argument {!r}".format(arg))
-        if params is None and (
-            param_selection is None or param_selection.get("grid") is None
-        ):
-            raise ValueError(
-                "__init__() One of 'params' and 'param_selection' is required"
-            )
         self.model_type = model_type
         self.features = features
         self.model_settings = model_settings
@@ -226,12 +220,12 @@ class Classifier(ABC):
         queries = self._resolve_queries(queries, label_set)
 
         new_hash = self._get_model_hash(model_config, queries)
-        cached_model = self._resource_loader.hash_to_model_path.get(new_hash)
+        cached_model_path = self._resource_loader.hash_to_model_path.get(new_hash)
 
-        if incremental_timestamp and cached_model:
+        if incremental_timestamp and cached_model_path:
             logger.info("No need to fit.  Previous model is cached.")
             if load_cached:
-                self.load(cached_model)
+                self.load(cached_model_path)
                 return True
             return False
 

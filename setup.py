@@ -54,7 +54,7 @@ test_requirements = [
 
 setup(
     name="mindmeld",
-    version="4.3.5rc12",
+    version="4.4.1",
     description="A Conversational AI platform.",
     long_description=readme,
     long_description_content_type="text/markdown",
@@ -90,9 +90,9 @@ setup(
             'tensorflow~=1.2; python_version < "3.7"',
             'tensorflow>=1.13.1,<2.0; python_version >= "3.7"',
         ],
-        "bert": [
+        "bert": [  # sentence-transformers
             'torch~=1.7.0; python_version>="3.6"',
-            'transformers~=3.5.1; python_version>="3.6"',
+            'transformers~=4.15.0; python_version>="3.6"',
             'sentence-transformers~=0.3; python_version>="3.6"',
             # elasticsearch-py 7.14 breaks backwards compatibility with servers prior to 7.11
             'elasticsearch>=7.0,<7.14',
@@ -100,9 +100,9 @@ setup(
         "examples": [
             'connexion>=2.7.0; python_version>="3.6"',
         ],
-        "augment":[
+        "augment": [
             'torch~=1.7.0; python_version>="3.6"',
-            'transformers~=3.5.1; python_version>="3.6"',
+            'transformers~=4.15.0; python_version>="3.6"',
             'sentencepiece==0.1.91'
         ],
         "language_annotator": [
@@ -118,6 +118,13 @@ setup(
         "dvc": [
             'pygit2>=1.5.0,<1.7; python_version < "3.7"',
             "dvc>=1.8.1"
-        ]
+        ],
+        "torch": [
+            'torch~=1.7.0; python_version>="3.6"',
+            'pytorch-crf~=0.7.2'
+        ],
+        "transformers": [  # huggingface-transformers
+            'transformers~=4.15.0; python_version>="3.6"',
+        ],
     },
 )
