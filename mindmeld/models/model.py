@@ -247,7 +247,7 @@ class AbstractModel(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def evaluate(self, examples, labels, active_learning=False):
+    def evaluate(self, examples, labels):
         raise NotImplementedError
 
     @classmethod
