@@ -264,6 +264,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         """Helper function to train a single strategy.
 
         Args:
+            tuning_type (str): Component to be tuned ("classifier" or "tagger")
             strategy (str): Single strategy to train
             select_mode (bool): If True, accuracies will not be recorded and run will
                 terminate after first iteration. If False, accuracies will be recorded.
