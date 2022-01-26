@@ -926,7 +926,7 @@ def augment(app_path, language):
 @click.option(
     "--tuning_level",
     type=str,
-    help="The hierarchy level to run strategy tuning ('domain' or 'intent').",
+    help="The hierarchy level to run strategy tuning ('domain', 'intent' or 'entity').",
 )
 @click.option(
     "--output_folder",
@@ -957,12 +957,12 @@ def augment(app_path, language):
 @click.option(
     "--classifier_strategy",
     type=str,
-    help="Select a single strategy instead of the strategies listed in the config.",
+    help="Select a single classifier strategy instead of the strategies listed in the config.",
 )
 @click.option(
     "--tagger_strategy",
     type=str,
-    help="Select a single strategy instead of the strategies listed in the config.",
+    help="Select a single tagger strategy instead of the strategies listed in the config.",
 )
 @click.option(
     "--unlabeled_logs_path",

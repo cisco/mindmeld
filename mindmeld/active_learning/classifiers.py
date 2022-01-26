@@ -56,7 +56,7 @@ class ALClassifier(ABC):
         """
         Args:
             app_path (str): Path to MindMeld application
-            tuning_level (str): The hierarchy level to tune ("domain", "intent" or "entity")
+            tuning_level (list): The hierarchy levels to tune ("domain", "intent" or "entity")
         """
         self.app_path = app_path
         self.tuning_level = tuning_level
@@ -108,7 +108,7 @@ class MindMeldALClassifier(ALClassifier):
         """
         Args:
             app_path (str): Path to MindMeld application
-            tuning_level (list): The hierarchy level to tune ("domain", "intent" or "entity")
+            tuning_level (list): The hierarchy levels to tune ("domain", "intent" or "entity")
             n_classifiers (int): Number of classifiers to be used by multi-model strategies.
         """
         super().__init__(app_path=app_path, tuning_level=tuning_level)
@@ -330,10 +330,12 @@ class MindMeldALClassifier(ALClassifier):
         Args:
             data_bucket (DataBucket): DataBucket for current iteration
             heuristic (Heuristic): Current Heuristic.
+            tuning_type (str): Component to be tuned ("classifier" or "tagger")
 
         Returns:
             eval_stats (defaultdict): Evaluation metrics to be included in accuracies.json
             confidences_2d (List[List]): 2D array with probability vectors for unsampled queries
+                (returns a 3d output for tagger tuning).
             confidences_3d (List[List[List]]]): 3D array with probability vectors for unsampled
                 queries from multiple classifiers
             domain_indices (Dict): Maps domains to a tuple containing the start and
@@ -370,6 +372,7 @@ class MindMeldALClassifier(ALClassifier):
             eval_stats (defaultdict): Evaluation metrics to be included in accuracies.json
         Returns:
             confidences_2d (List): 2D array with probability vectors for unsampled queries
+                (returns a 3d output for tagger tuning).
         """
         return self._train_single(
             sampled_queries=data_bucket.sampled_queries,
@@ -397,6 +400,7 @@ class MindMeldALClassifier(ALClassifier):
             eval_stats (Dict): Evaluation metrics to be included in accuracies.json
         Returns:
             confidences_2d (List): 2D array with probability vectors for unsampled queries
+                (returns a 3d output for tagger tuning).
         """
         if self.tuning_type == "classifier":
             # Domain Level

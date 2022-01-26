@@ -65,9 +65,14 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             n_classifiers (int): Number of classifiers to be used by multi-model heuristics
             n_epochs (int): Number of epochs to run tuning
             batch_size (int): Number of queries to select at each iteration
-            tuning_level (list): The hierarchy level to tune ("domain" or "intent" or "entity")
-            tuning_strategies (List[str]): List of strategies to use for tuning
-            selection_strategy (str): Single strategy to use for log selection
+            tuning_level (list): The hierarchy levels to tune ("domain" or "intent" or "entity")
+            classifier_tuning_strategies (List[str]): List of strategies to use for classifier tuning
+                (Options: "LeastConfidenceSampling", "EntropySampling", "MarginSampling", "RandomSampling",
+                "KLDivergenceSampling", "DisagreementSampling", "EnsembleSampling")
+            tagger_tuning_strategies (List[str]): List of strategies to use for tagger tuning
+                (Options: "LeastConfidenceSampling", "EntropySampling", "MarginSampling")
+            classifier_selection_strategy (str): Single strategy to use for log selection
+            tagger_selection_strategy (str): Single strategy to use for log selection
             save_sampled_queries (bool): Whether to save the queries sampled at each iteration
             aggregate_statistic (str): Aggregate statistic to record.
                 (Options: "accuracy", "f1_weighted", "f1_macro", "f1_micro".)

@@ -88,10 +88,10 @@ class PlotManager:
         self.plt = _get_module_or_attr("matplotlib.pyplot")
 
     # Get JSON Data
-    def get_accuracies_json_data(self) -> Dict:
+    def get_accuracies_json_data(self) -> List[Dict]:
         """Loads accuracies.json from the experiment directory path.
         Returns:
-            data (dict): Data loaded from accuracies.json.
+            data (List[dict]): Data loaded from accuracies.json.
         """
         classifier_accuracies_json_path = AL_CLASSIFIER_ACCURACIES_PATH.format(
             experiment_folder=self.experiment_dir_path
@@ -110,12 +110,12 @@ class PlotManager:
 
         return cls_data, tag_data
 
-    def get_queries_json_data(self) -> Dict:
+    def get_queries_json_data(self) -> List[Dict]:
         """Loads selected_queries.json from the experiment directory path.
         selected_queries.json stores the queries selected by active learning
         at each iteration.
         Returns:
-            data (dict): Data loaded from selected_queries.json.
+            data (List[dict]): Data loaded from selected_queries.json.
         """
         classifier_selected_queries_json_path = (
             AL_CLASSIFIER_SELECTED_QUERIES_PATH.format(

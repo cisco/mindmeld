@@ -155,7 +155,7 @@ class LabelMap:
             For example, "date|get_date".
 
         Args:
-            tuning_level (str): The hierarchy level to tune ("domain" or "intent")
+            tuning_level (list): The hierarchy levels to tune ("domain", "intent" or "entity")
             query_list (ProcessedQueryList): Data structure containing a list of processed queries.
         Returns:
             class_labels (List[str]): list of labels for classification task.
@@ -184,11 +184,11 @@ class LabelMap:
 
 
 class LogQueriesLoader:
-    def __init__(self, app_path: str, tuning_level: str, log_file_path: str):
+    def __init__(self, app_path: str, tuning_level: list, log_file_path: str):
         """This class loads data as processed queries from a specified log file.
         Args:
             app_path (str): Path to the MindMeld application.
-            tuning_level (str): The hierarchy level to tune ("domain" or "intent")
+            tuning_level (list): The hierarchy levels to tune ("domain", "intent" or "entity")
             log_file_path (str): Path to the log file with log queries.
         """
         self.app_path = app_path
@@ -313,10 +313,12 @@ class DataBucket:
         Args:
             sampling_size (int): Number of elements to sample in the next iteration.
             confidences_2d (List[List[float]]): Confidence probabilities per element.
+                (3d for tagger tuning)
             confidences_3d (List[List[List[float]]]): Confidence probabilities per element.
             heuristic (Heuristic): Selection strategy.
             confidence_segments (Dict[(str, Tuple(int,int))]): A dictionary mapping
                 segments to run KL Divergence.
+            tuning_type (str): Component to be tuned ("classifier" or "tagger")
         Returns:
             newly_sampled_queries_ids (List[int]): List of ids corresponding the newly sampled
                 queries in the QueryCache.
@@ -347,6 +349,7 @@ class DataBucket:
             newly_sampled_indices = ranked_entity_indices[:sampling_size]
             remaining_indices = ranked_entity_indices[sampling_size:]
 
+            # PLACEHOLDER CODE for joint tuning (deprecated for now).
             # to-do: random select and restrict to batch size
             # newly_sampled_indices = list(
             #     set(newly_sampled_indices).union(newly_sampled_indices_entity)
@@ -404,7 +407,7 @@ class DataBucketFactory:
 
         Args:
             app_path (str): Path to MindMeld application
-            tuning_level (list): The hierarchy level to tune ("domain" or "intent")
+            tuning_level (list): The hierarchy levels to tune ("domain", "intent" or "entity")
             train_pattern (str): Regex pattern to match train files. (".*train.*.txt")
             test_pattern (str): Regex pattern to match test files. (".*test.*.txt")
             train_seed_pct (float): Percentage of training data to use as the initial seed
@@ -449,7 +452,7 @@ class DataBucketFactory:
     @staticmethod
     def get_data_bucket_for_query_selection(
         app_path: str,
-        tuning_level: str,
+        tuning_level: list,
         train_pattern: str,
         test_pattern: str,
         unlabeled_logs_path: str,
@@ -460,7 +463,7 @@ class DataBucketFactory:
 
         Args:
             app_path (str): Path to MindMeld application
-            tuning_level (str): The hierarchy level to train ("domain" or "intent")
+            tuning_level (list): The hierarchy levels to tune ("domain", "intent" or "entity")
             train_pattern (str): Regex pattern to match train files. For example, ".*train.*.txt"
             test_pattern (str): Regex pattern to match test files. For example, ".*test.*.txt"
             unlabeled_logs_path (str): Path a logs text file with unlabeled queries
