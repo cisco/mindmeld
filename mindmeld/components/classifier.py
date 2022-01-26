@@ -68,15 +68,9 @@ class ClassifierConfig:
         param_selection=None,
     ):
         """Initializes a classifier configuration"""
-        for arg, val in {"model_type": model_type, "features": features}.items():
+        for arg, val in {"model_type": model_type}.items():
             if val is None:
                 raise TypeError("__init__() missing required argument {!r}".format(arg))
-        if params is None and (
-            param_selection is None or param_selection.get("grid") is None
-        ):
-            raise ValueError(
-                "__init__() One of 'params' and 'param_selection' is required"
-            )
         self.model_type = model_type
         self.features = features
         self.model_settings = model_settings
