@@ -65,9 +65,13 @@ class ResultsManager:
         tagger_strategies = "_".join(
             STRATEGY_ABRIDGED[s] for s in tagger_tuning_strategies if s in STRATEGY_ABRIDGED
         )
+
+        classifier_strategies = "classifier-none" if not classifier_strategies else "classifier-" + classifier_strategies
+        tagger_strategies = "tagger-none" if not tagger_strategies else "tagger-" + tagger_strategies
+
         now = datetime.datetime.now()
         self.experiment_folder_name = (
-            f"{now.year}-{now.month}-{now.day}_{now.hour}:{now.minute}_{'classifier'}-{classifier_strategies}_{'tagger'}-{tagger_strategies}"
+            f"{now.year}-{now.month}-{now.day}_{now.hour}:{now.minute}_{classifier_strategies}_{tagger_strategies}"
         )
 
     @property

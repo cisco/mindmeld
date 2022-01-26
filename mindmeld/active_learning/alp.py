@@ -224,8 +224,8 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             experiment_dir_path=self.results_manager.experiment_folder,
             aggregate_statistic=self.aggregate_statistic,
             class_level_statistic=self.class_level_statistic,
-            plot_entities=(TUNE_LEVEL_ENTITY in self.tuning_level),
-            plot_intents=(TUNE_LEVEL_INTENT in self.tuning_level),
+            plot_entities=(TUNE_LEVEL_ENTITY in self.tuning_level and self.tagger_tuning_strategies),
+            plot_intents=(TUNE_LEVEL_INTENT in self.tuning_level and self.classifier_tuning_strategies),
         )
         plot_manager.generate_plots()
 

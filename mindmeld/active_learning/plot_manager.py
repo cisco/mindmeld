@@ -170,7 +170,6 @@ class PlotManager:
             plot_intents (bool): Whether to generate plots at the intent level.
             plot_entities (bool): Whether to generate plots at the entity level.
         """
-        print(self.get_domain_list(), self.plot_entities)
         self._check_first_epoch_and_iter_exist()
         if not plot_domain:
             return
@@ -243,7 +242,8 @@ class PlotManager:
         Raises:
             MissingDataError: Throws an error if the anticipated data is not found.
         """
-        key = 0 if self.strategies[0] else 1
+        # key = 0 if self.strategies[0] else 1
+        key = 1 if self.plot_entities else 0
         first_strategy = self.strategies[key][0]
         if FIRST_EPOCH not in self.accuracies_data[key][first_strategy]:
             raise MissingDataError("Did not find data for the first epoch.")
@@ -257,7 +257,9 @@ class PlotManager:
         Returns:
             domain_list (list): List of domains for the current experiment.
         """
-        key = 0 if self.strategies[0] else 1
+        # key = 0 if self.strategies[0] else 1
+
+        key = 1 if self.plot_entities else 0
         first_strategy = self.strategies[key][0]
         domain_list = list(
             self.accuracies_data[key][first_strategy][FIRST_EPOCH][FIRST_ITERATION][
@@ -265,7 +267,8 @@ class PlotManager:
             ].keys()
         )
         # The 'overall' score across domains is removed as it is not a domain
-        domain_list.remove("overall")
+        if "overall" in domain_list:
+            domain_list.remove("overall")
         return domain_list
 
     def get_intent_list(self, domain: str) -> List:
@@ -275,7 +278,8 @@ class PlotManager:
         Returns:
             intent_list (list): List of intent for a given domain in the current experiment.
         """
-        key = 0 if self.strategies[0] else 1
+        # key = 0 if self.strategies[0] else 1
+        key = 1 if self.plot_entities else 0
         first_strategy = self.strategies[key][0]
         intent_list = list(
             self.accuracies_data[key][first_strategy][FIRST_EPOCH][FIRST_ITERATION][
@@ -343,34 +347,35 @@ class PlotManager:
                 label for the y_axis. If False, the class_level_statistic will be used.
         """
         self.create_plot_dir(y_keys)
-        for idx, strategies in enumerate(self.strategies):
-            if strategies:
-                for strategy in strategies:
-                    epoch_dict = self.accuracies_data[idx][strategy][str(epoch)]
-                    x_values = PlotManager.get_across_iterations(epoch_dict, ["num_sampled"])
-                    y_values = PlotManager.get_across_iterations(
-                        epoch_dict, ["accuracies"] + y_keys
-                    )
-                    self.plt.plot(x_values, y_values)
-
-                self.plt.xlabel("Number of selected queries")
-                y_label = (
-                    self.aggregate_statistic
-                    if use_aggregate_statistic
-                    else self.class_level_statistic
+        key = 1 if "entities" in y_keys else 0
+        strategies = self.strategies[key]
+        if strategies:
+            for strategy in strategies:
+                epoch_dict = self.accuracies_data[key][strategy][str(epoch)]
+                x_values = PlotManager.get_across_iterations(epoch_dict, ["num_sampled"])
+                y_values = PlotManager.get_across_iterations(
+                    epoch_dict, ["accuracies"] + y_keys
                 )
-                self.plt.ylabel(y_label.capitalize())
-                title = f"Epoch_{epoch}_Results_({'-'.join(y_keys)})"
-                self.plt.title(title)
-                self.plt.legend(self.strategies, loc="lower right")
-                self.plt.grid()
-                self.plt.tight_layout()
-                fig = self.plt.gcf()
-                if display:
-                    self.plt.show()
-                if save:
-                    fig.savefig(self.get_img_path(y_keys, title))
-                    self.plt.clf()
+                self.plt.plot(x_values, y_values)
+
+            self.plt.xlabel("Number of selected queries")
+            y_label = (
+                self.aggregate_statistic
+                if use_aggregate_statistic
+                else self.class_level_statistic
+            )
+            self.plt.ylabel(y_label.capitalize())
+            title = f"Epoch_{epoch}_Results_({'-'.join(y_keys)})"
+            self.plt.title(title)
+            self.plt.legend(self.strategies, loc="lower right")
+            self.plt.grid()
+            self.plt.tight_layout()
+            fig = self.plt.gcf()
+            if display:
+                self.plt.show()
+            if save:
+                fig.savefig(self.get_img_path(y_keys, title))
+                self.plt.clf()
 
     def plot_avg_across_epochs(
         self,
@@ -388,42 +393,43 @@ class PlotManager:
                 label for the y_axis. If False, the class_level_statistic will be used.
         """
         self.create_plot_dir(y_keys)
-        for idx, strategies in enumerate(self.strategies):
-            if strategies:
-                for strategy in strategies:
-                    n_epochs = len(self.accuracies_data[idx][strategy])
-                    all_y_values = []
-                    for epoch in range(n_epochs):
-                        epoch_dict = self.accuracies_data[idx][strategy][str(epoch)]
-                        x_values = PlotManager.get_across_iterations(
-                            epoch_dict, ["num_sampled"]
-                        )
-                        y_values = PlotManager.get_across_iterations(
-                            epoch_dict, ["accuracies"] + y_keys
-                        )
-                        all_y_values.append(y_values)
-                    all_y_values = np.array(all_y_values)
-                    y_avg_values = all_y_values.mean(axis=0)
-                    self.plt.plot(x_values, y_avg_values)
+        key = 1 if "entities" in y_keys else 0
+        strategies = self.strategies[key]
+        if strategies:
+            for strategy in strategies:
+                n_epochs = len(self.accuracies_data[key][strategy])
+                all_y_values = []
+                for epoch in range(n_epochs):
+                    epoch_dict = self.accuracies_data[key][strategy][str(epoch)]
+                    x_values = PlotManager.get_across_iterations(
+                        epoch_dict, ["num_sampled"]
+                    )
+                    y_values = PlotManager.get_across_iterations(
+                        epoch_dict, ["accuracies"] + y_keys
+                    )
+                    all_y_values.append(y_values)
+                all_y_values = np.array(all_y_values)
+                y_avg_values = all_y_values.mean(axis=0)
+                self.plt.plot(x_values, y_avg_values)
 
-                self.plt.xlabel("Number of selected queries")
-                y_label = (
-                    self.aggregate_statistic
-                    if use_aggregate_statistic
-                    else self.class_level_statistic
-                )
-                self.plt.ylabel(y_label.capitalize())
-                title = f"Avg_Across_Epochs_({'-'.join(y_keys)})"
-                self.plt.title(title)
-                self.plt.legend(self.strategies, loc="lower right")
-                self.plt.grid()
-                self.plt.tight_layout()
-                fig = self.plt.gcf()
-                if display:
-                    self.plt.show()
-                if save:
-                    fig.savefig(self.get_img_path(y_keys, title))
-                    self.plt.clf()
+            self.plt.xlabel("Number of selected queries")
+            y_label = (
+                self.aggregate_statistic
+                if use_aggregate_statistic
+                else self.class_level_statistic
+            )
+            self.plt.ylabel(y_label.capitalize())
+            title = f"Avg_Across_Epochs_({'-'.join(y_keys)})"
+            self.plt.title(title)
+            self.plt.legend(self.strategies, loc="lower right")
+            self.plt.grid()
+            self.plt.tight_layout()
+            fig = self.plt.gcf()
+            if display:
+                self.plt.show()
+            if save:
+                fig.savefig(self.get_img_path(y_keys, title))
+                self.plt.clf()
 
     def plot_all_epochs(
         self,
@@ -441,53 +447,54 @@ class PlotManager:
                 label for the y_axis. If False, the class_level_statistic will be used.
         """
         self.create_plot_dir(y_keys)
-        for idx, strategies in enumerate(self.strategies):
-            if strategies:
-                for strategy in strategies:
-                    n_epochs = len(self.accuracies_data[idx][strategy].keys())
-                    all_y_values = []
-                    for epoch in range(n_epochs):
-                        epoch_dict = self.accuracies_data[idx][strategy][str(epoch)]
-                        x_values = PlotManager.get_across_iterations(
-                            epoch_dict, ["num_sampled"]
-                        )
-                        y_values = PlotManager.get_across_iterations(
-                            epoch_dict, ["accuracies"] + y_keys
-                        )
-                        self.plt.plot(x_values, y_values)
-                        all_y_values.append(y_values)
-                    max_len = max([len(i) for i in all_y_values])
-                    for y_values in all_y_values:
-                        y_values = np.pad(
-                            y_values,
-                            (0, max_len - len(y_values)),
-                            "constant",
-                            constant_values=(0, y_values[-1]),
-                        )
-                    y_avg_values = np.array(all_y_values).mean(axis=0)
-                    self.plt.plot(x_values, y_avg_values)
-
-                    self.plt.xlabel("Number of selected queries")
-                    y_label = (
-                        self.aggregate_statistic
-                        if use_aggregate_statistic
-                        else self.class_level_statistic
+        key = 1 if "entities" in y_keys else 0
+        strategies = self.strategies[key]
+        if strategies:
+            for strategy in strategies:
+                n_epochs = len(self.accuracies_data[key][strategy].keys())
+                all_y_values = []
+                for epoch in range(n_epochs):
+                    epoch_dict = self.accuracies_data[key][strategy][str(epoch)]
+                    x_values = PlotManager.get_across_iterations(
+                        epoch_dict, ["num_sampled"]
                     )
-                    self.plt.ylabel(y_label.capitalize())
-                    title = f"{strategy}_All_Epochs_({'-'.join(y_keys)})"
-                    self.plt.title(title)
-                    self.plt.legend(
-                        ["epoch " + str(epoch) for epoch in range(n_epochs)] + ["avg"],
-                        loc="lower right",
-                        )
-                    self.plt.grid()
-                    self.plt.tight_layout()
-                    fig = self.plt.gcf()
-                    if display:
-                        self.plt.show()
-                    if save:
-                        fig.savefig(self.get_img_path(y_keys, title))
-                        self.plt.clf()
+                    y_values = PlotManager.get_across_iterations(
+                        epoch_dict, ["accuracies"] + y_keys
+                    )
+                    self.plt.plot(x_values, y_values)
+                    all_y_values.append(y_values)
+                max_len = max([len(i) for i in all_y_values])
+                for y_values in all_y_values:
+                    y_values = np.pad(
+                        y_values,
+                        (0, max_len - len(y_values)),
+                        "constant",
+                        constant_values=(0, y_values[-1]),
+                    )
+                y_avg_values = np.array(all_y_values).mean(axis=0)
+                self.plt.plot(x_values, y_avg_values)
+
+                self.plt.xlabel("Number of selected queries")
+                y_label = (
+                    self.aggregate_statistic
+                    if use_aggregate_statistic
+                    else self.class_level_statistic
+                )
+                self.plt.ylabel(y_label.capitalize())
+                title = f"{strategy}_All_Epochs_({'-'.join(y_keys)})"
+                self.plt.title(title)
+                self.plt.legend(
+                    ["epoch " + str(epoch) for epoch in range(n_epochs)] + ["avg"],
+                    loc="lower right",
+                    )
+                self.plt.grid()
+                self.plt.tight_layout()
+                fig = self.plt.gcf()
+                if display:
+                    self.plt.show()
+                if save:
+                    fig.savefig(self.get_img_path(y_keys, title))
+                    self.plt.clf()
 
     @staticmethod
     def get_unique_labels(all_counters: List) -> List:
@@ -534,34 +541,32 @@ class PlotManager:
             plot_domain (bool): Whether to generate plots at the domain level.
             plot_intents (bool): Whether to generate plots at the intent level.
         """
-        for idx, strategies in enumerate(self.queries_data):
-            if strategies:
-                for strategy in strategies:
-                    epoch_dict = self.queries_data[idx][strategy][str(epoch)]
-                    domain_counters, intent_counters = [], []
-                    for iteration in epoch_dict:
-                        query_list = epoch_dict[iteration]
-                        if plot_domains:
-                            domains = [q["domain"] for q in query_list]
-                            domain_counters.append(Counter(domains))
-                        if plot_intents:
-                            intents = [f"{q['intent']}|{q['domain']}" for q in query_list]
-                            intent_counters.append(Counter(intents))
+        for strategy in self.strategies[0]:
+            epoch_dict = self.queries_data[0][strategy][str(epoch)]
+            domain_counters, intent_counters = [], []
+            for iteration in epoch_dict:
+                query_list = epoch_dict[iteration]
+                if plot_domains:
+                    domains = [q["domain"] for q in query_list]
+                    domain_counters.append(Counter(domains))
+                if plot_intents:
+                    intents = [f"{q['intent']}|{q['domain']}" for q in query_list]
+                    intent_counters.append(Counter(intents))
 
-                    for level, all_counters in zip(
-                        ["domain", "intent"], [domain_counters, intent_counters]
-                    ):
-                        if all_counters:
-                            unique_labels = PlotManager.get_unique_labels(all_counters)
-                            label_set_counter = PlotManager.get_label_set_counter(
-                                all_counters, unique_labels
-                            )
-                            self._plot_stacked_bar(
-                                num_iters=len(all_counters),
-                                label_set_counter=label_set_counter,
-                                strategy=strategy,
-                                intent_level=(level == "intent"),
-                            )
+            for level, all_counters in zip(
+                ["domain", "intent"], [domain_counters, intent_counters]
+            ):
+                if all_counters:
+                    unique_labels = PlotManager.get_unique_labels(all_counters)
+                    label_set_counter = PlotManager.get_label_set_counter(
+                        all_counters, unique_labels
+                    )
+                    self._plot_stacked_bar(
+                        num_iters=len(all_counters),
+                        label_set_counter=label_set_counter,
+                        strategy=strategy,
+                        intent_level=(level == "intent"),
+                    )
 
     def _plot_stacked_bar(
         self,
