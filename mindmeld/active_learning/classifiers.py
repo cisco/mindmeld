@@ -35,6 +35,7 @@ from ..components.classifier import Classifier
 from ..components.nlp import NaturalLanguageProcessor
 from ..constants import (
     TUNE_LEVEL_INTENT,
+    TUNE_LEVEL_ENTITY,
     ACTIVE_LEARNING_RANDOM_SEED,
     AL_DEFAULT_AGGREGATE_STATISTIC,
     AL_DEFAULT_CLASS_LEVEL_STATISTIC,
@@ -55,7 +56,7 @@ class ALClassifier(ABC):
         """
         Args:
             app_path (str): Path to MindMeld application
-            tuning_level (str): The hierarchy level to tune ("domain" or "intent")
+            tuning_level (str): The hierarchy level to tune ("domain", "intent" or "entity")
         """
         self.app_path = app_path
         self.tuning_level = tuning_level
@@ -107,7 +108,7 @@ class MindMeldALClassifier(ALClassifier):
         """
         Args:
             app_path (str): Path to MindMeld application
-            tuning_level (list): The hierarchy level to tune ("domain" or "intent")
+            tuning_level (list): The hierarchy level to tune ("domain", "intent" or "entity")
             n_classifiers (int): Number of classifiers to be used by multi-model strategies.
         """
         super().__init__(app_path=app_path, tuning_level=tuning_level)
@@ -285,7 +286,7 @@ class MindMeldALClassifier(ALClassifier):
             prob_vector (List[List]]): Probability distribution vectors for given queries.
         """
         # If type is entity, get recognizer probabilities
-        if nlp_component_type == "entity":
+        if nlp_component_type == TUNE_LEVEL_ENTITY:
             return MindMeldALClassifier._get_entity_probs(
                 classifier=classifier,
                 queries=queries,
@@ -341,9 +342,7 @@ class MindMeldALClassifier(ALClassifier):
         self.tuning_type = tuning_type
         eval_stats = defaultdict(dict)
         eval_stats["num_sampled"] = len(data_bucket.sampled_queries)
-        confidences_2d, eval_stats = self.train_single(
-            data_bucket, eval_stats
-        )
+        confidences_2d, eval_stats = self.train_single(data_bucket, eval_stats)
         return_confidences_3d = isinstance(heuristic, MULTI_MODEL_HEURISTICS)
 
         confidences_3d = (
@@ -412,7 +411,7 @@ class MindMeldALClassifier(ALClassifier):
             confidences_2d = dc_queries_prob_vectors
 
             # Intent Level
-            if "intent" in self.tuning_level:
+            if TUNE_LEVEL_INTENT in self.tuning_level:
                 (
                     ic_queries_prob_vectors,
                     ic_eval_test_dict,
@@ -429,7 +428,7 @@ class MindMeldALClassifier(ALClassifier):
 
         else:
             # Entity Level
-            if "entity" in self.tuning_level:
+            if TUNE_LEVEL_ENTITY in self.tuning_level:
                 (
                     er_queries_prob_vectors,
                     er_eval_test_dict,
@@ -441,9 +440,7 @@ class MindMeldALClassifier(ALClassifier):
                     entity2id=label_map.entity2id,
                 )
                 if eval_stats:
-                    self._update_eval_stats_entity_level(
-                        eval_stats, er_eval_test_dict
-                    )
+                    self._update_eval_stats_entity_level(eval_stats, er_eval_test_dict)
                 confidences_2d = er_queries_prob_vectors
 
         return confidences_2d, eval_stats
@@ -711,7 +708,7 @@ class MindMeldALClassifier(ALClassifier):
                     filtered_sampled_queries,
                 ) = DataBucket.filter_queries_by_nlp_component(
                     query_list=sampled_queries,
-                    component_type="intent",
+                    component_type=TUNE_LEVEL_INTENT,
                     component_name=intent,
                 )
                 (
@@ -719,12 +716,12 @@ class MindMeldALClassifier(ALClassifier):
                     filtered_unsampled_queries,
                 ) = DataBucket.filter_queries_by_nlp_component(
                     query_list=unsampled_queries,
-                    component_type="intent",
+                    component_type=TUNE_LEVEL_INTENT,
                     component_name=intent,
                 )
                 _, filtered_test_queries = DataBucket.filter_queries_by_nlp_component(
                     query_list=test_queries,
-                    component_type="intent",
+                    component_type=TUNE_LEVEL_INTENT,
                     component_name=intent,
                 )
                 # Train
@@ -744,7 +741,7 @@ class MindMeldALClassifier(ALClassifier):
                     classifier=er,
                     queries=filtered_unsampled_queries,
                     nlp_component_to_id=entity2id,
-                    nlp_component_type="entity",
+                    nlp_component_type=TUNE_LEVEL_ENTITY,
                 )
 
                 for i, index in enumerate(filtered_unsampled_queries_indices):
@@ -795,4 +792,6 @@ class MindMeldALClassifier(ALClassifier):
                             entity
                         ] = er_eval_test.get_stats()["class_stats"][
                             self.class_level_statistic
-                        ][e]
+                        ][
+                            e
+                        ]

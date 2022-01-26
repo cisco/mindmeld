@@ -113,8 +113,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             raise ValueError("No tuning strategy provided.")
 
         for level in self.tuning_level:
-            if level not in [
-                TUNE_LEVEL_DOMAIN, TUNE_LEVEL_INTENT, TUNE_LEVEL_ENTITY]:
+            if level not in [TUNE_LEVEL_DOMAIN, TUNE_LEVEL_INTENT, TUNE_LEVEL_ENTITY]:
                 raise ValueError("Invalid tuning level: %s", level)
 
     def _get_mindmeld_al_classifier(self):
@@ -201,7 +200,8 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         if self.classifier_selection_strategy:
             newly_sampled_queries = self._run_strategy(
                 tuning_type="classifier",
-                strategy=self.selection_strategy, select_mode=True
+                strategy=self.classifier_selection_strategy,
+                select_mode=True,
             )
             self.results_manager.write_log_selected_queries_json(
                 strategy=self.classifier_selection_strategy,
@@ -210,8 +210,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
 
         if self.tagger_selection_strategy:
             newly_sampled_queries = self._run_strategy(
-                tuning_type="tagger",
-                strategy=self.selection_strategy, select_mode=True
+                tuning_type="tagger", strategy=self.tagger_selection_strategy, select_mode=True
             )
             self.results_manager.write_log_selected_queries_json(
                 strategy=self.tagger_selection_strategy,
@@ -224,8 +223,13 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             experiment_dir_path=self.results_manager.experiment_folder,
             aggregate_statistic=self.aggregate_statistic,
             class_level_statistic=self.class_level_statistic,
-            plot_entities=(TUNE_LEVEL_ENTITY in self.tuning_level and self.tagger_tuning_strategies),
-            plot_intents=(TUNE_LEVEL_INTENT in self.tuning_level and self.classifier_tuning_strategies),
+            plot_entities=(
+                TUNE_LEVEL_ENTITY in self.tuning_level and self.tagger_tuning_strategies
+            ),
+            plot_intents=(
+                TUNE_LEVEL_INTENT in self.tuning_level
+                and self.classifier_tuning_strategies
+            ),
         )
         plot_manager.generate_plots()
 
@@ -264,7 +268,9 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                     confidences_2d,
                     confidences_3d,
                     confidence_segments,
-                ) = self.mindmeld_al_classifier.train(self.data_bucket, heuristic, tuning_type)
+                ) = self.mindmeld_al_classifier.train(
+                    self.data_bucket, heuristic, tuning_type
+                )
 
                 if not select_mode:
                     self._save_training_data(
@@ -307,12 +313,24 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         )
 
     def _log_tuning_status(self, tuning_type, strategy, epoch, iteration):
-        logger.info("Strategy: %s(%s). Epoch: %s. Iter: %s.", strategy, tuning_type, epoch, iteration)
+        logger.info(
+            "Strategy: %s(%s). Epoch: %s. Iter: %s.",
+            strategy,
+            tuning_type,
+            epoch,
+            iteration,
+        )
         logger.info("Sampled Elements: %s", len(self.data_bucket.sampled_queries))
         logger.info("Remaining Elements: %s", len(self.data_bucket.unsampled_queries))
 
     def _save_training_data(
-        self, tuning_type, strategy, epoch, iteration, newly_sampled_queries_ids, eval_stats
+        self,
+        tuning_type,
+        strategy,
+        epoch,
+        iteration,
+        newly_sampled_queries_ids,
+        eval_stats,
     ):
         """ Save training data if in tuning mode. """
         self.results_manager.update_accuracies_json(
@@ -358,8 +376,12 @@ class ActiveLearningPipelineFactory:
             n_classifiers=config.get("tuning", {}).get("n_classifiers"),
             n_epochs=config.get("tuning", {}).get("n_epochs"),
             batch_size=config.get("tuning", {}).get("batch_size"),
-            classifier_tuning_strategies=config.get("tuning", {}).get("classifier_tuning_strategies", []),
-            tagger_tuning_strategies=config.get("tuning", {}).get("tagger_tuning_strategies", []),
+            classifier_tuning_strategies=config.get("tuning", {}).get(
+                "classifier_tuning_strategies", []
+            ),
+            tagger_tuning_strategies=config.get("tuning", {}).get(
+                "tagger_tuning_strategies", []
+            ),
             tuning_level=config.get("tuning", {}).get("tuning_level", None),
             classifier_selection_strategy=config.get("query_selection", {}).get(
                 "classifier_selection_strategy"

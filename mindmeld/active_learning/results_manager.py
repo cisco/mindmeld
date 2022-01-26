@@ -51,7 +51,9 @@ class ResultsManager:
         self.output_folder = output_folder
         self.experiment_folder_name = None
 
-    def set_experiment_folder_name(self, classifier_tuning_strategies, tagger_tuning_strategies) -> str:
+    def set_experiment_folder_name(
+        self, classifier_tuning_strategies, tagger_tuning_strategies
+    ) -> str:
         """
         Args:
             selection_strategies (list): List of strategies used for the experiment.
@@ -60,19 +62,28 @@ class ResultsManager:
                 based on the current timestamp.
         """
         classifier_strategies = "_".join(
-            STRATEGY_ABRIDGED[s] for s in classifier_tuning_strategies if s in STRATEGY_ABRIDGED
+            STRATEGY_ABRIDGED[s]
+            for s in classifier_tuning_strategies
+            if s in STRATEGY_ABRIDGED
         )
         tagger_strategies = "_".join(
-            STRATEGY_ABRIDGED[s] for s in tagger_tuning_strategies if s in STRATEGY_ABRIDGED
+            STRATEGY_ABRIDGED[s]
+            for s in tagger_tuning_strategies
+            if s in STRATEGY_ABRIDGED
         )
 
-        classifier_strategies = "classifier-none" if not classifier_strategies else "classifier-" + classifier_strategies
-        tagger_strategies = "tagger-none" if not tagger_strategies else "tagger-" + tagger_strategies
+        classifier_strategies = (
+            "classifier-none"
+            if not classifier_strategies
+            else "classifier-" + classifier_strategies
+        )
+        tagger_strategies = (
+            "tagger-none" if not tagger_strategies else "tagger-" + tagger_strategies
+        )
 
         now = datetime.datetime.now()
-        self.experiment_folder_name = (
-            f"{now.year}-{now.month}-{now.day}_{now.hour}:{now.minute}_{classifier_strategies}_{tagger_strategies}"
-        )
+        self.experiment_folder_name = f"{now.year}-{now.month}-{now.day}_{now.hour}:{now.minute}_" \
+                                      f"{classifier_strategies}_{tagger_strategies}"
 
     @property
     def experiment_folder(self):
@@ -168,7 +179,11 @@ class ResultsManager:
     ):
         """Update accuracies.json with iteration metrics"""
 
-        AL_ACCURACIES_PATH = AL_CLASSIFIER_ACCURACIES_PATH if tuning_type == "classifier" else AL_TAGGER_ACCURACIES_PATH
+        AL_ACCURACIES_PATH = (
+            AL_CLASSIFIER_ACCURACIES_PATH
+            if tuning_type == "classifier"
+            else AL_TAGGER_ACCURACIES_PATH
+        )
         self.update_json(AL_ACCURACIES_PATH, strategy, epoch, iteration, eval_stats)
 
     def update_selected_queries_json(
@@ -176,7 +191,11 @@ class ResultsManager:
     ):
         """Update accuracies.json with iteration metrics"""
         query_dicts = ResultsManager.queries_to_dict(queries)
-        AL_SELECTED_QUERIES_PATH = AL_CLASSIFIER_SELECTED_QUERIES_PATH if tuning_type == "classifier" else AL_TAGGER_SELECTED_QUERIES_PATH
+        AL_SELECTED_QUERIES_PATH = (
+            AL_CLASSIFIER_SELECTED_QUERIES_PATH
+            if tuning_type == "classifier"
+            else AL_TAGGER_SELECTED_QUERIES_PATH
+        )
         self.update_json(
             AL_SELECTED_QUERIES_PATH, strategy, epoch, iteration, query_dicts
         )

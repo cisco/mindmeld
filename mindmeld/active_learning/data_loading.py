@@ -22,7 +22,7 @@ from .heuristics import Heuristic, stratified_random_sample, EntropySampling
 
 from ..auto_annotator import BootstrapAnnotator
 from ..components._config import DEFAULT_AUTO_ANNOTATOR_CONFIG
-from ..constants import TUNE_LEVEL_DOMAIN, TUNE_LEVEL_INTENT, AL_MAX_LOG_USAGE_PCT
+from ..constants import TUNE_LEVEL_INTENT, TUNE_LEVEL_ENTITY, AL_MAX_LOG_USAGE_PCT
 from ..core import ProcessedQuery
 from ..markup import read_query_file
 from ..resource_loader import ResourceLoader, ProcessedQueryList
@@ -339,7 +339,7 @@ class DataBucket:
         else:
             try:
                 ranked_entity_indices = heuristic.rank_entities(confidences_2d)
-            except:  # pylint: disable=W0702
+            except (TypeError, ValueError):
                 # if heuristic does not have entity AL support default to entropy
                 heuristic = EntropySampling
                 ranked_entity_indices = heuristic.rank_entities(confidences_2d)
@@ -419,10 +419,8 @@ class DataBucketFactory:
             label_set=train_pattern
         )
 
-        if "entity" in tuning_level:
-            label_map.entity2id = LabelMap._get_entity_mappings(
-                train_query_list
-            )
+        if TUNE_LEVEL_ENTITY in tuning_level:
+            label_map.entity2id = LabelMap._get_entity_mappings(train_query_list)
             label_map.id2entity = LabelMap._reverse_dict(label_map.entity2id)
 
         train_class_labels = LabelMap.get_class_labels(tuning_level, train_query_list)

@@ -117,8 +117,10 @@ class PlotManager:
         Returns:
             data (dict): Data loaded from selected_queries.json.
         """
-        classifier_selected_queries_json_path = AL_CLASSIFIER_SELECTED_QUERIES_PATH.format(
-            experiment_folder=self.experiment_dir_path
+        classifier_selected_queries_json_path = (
+            AL_CLASSIFIER_SELECTED_QUERIES_PATH.format(
+                experiment_folder=self.experiment_dir_path
+            )
         )
         tagger_selected_queries_json_path = AL_TAGGER_SELECTED_QUERIES_PATH.format(
             experiment_folder=self.experiment_dir_path
@@ -231,7 +233,7 @@ class PlotManager:
         cls_data, tag_data = self.accuracies_data
         cls_strategies = list(cls_data)
         tag_strategies = list(tag_data)
-        if not(cls_strategies or tag_strategies):
+        if not (cls_strategies or tag_strategies):
             raise MissingDataError("Did not find data in accuracies.json.")
         return [cls_strategies, tag_strategies]
 
@@ -242,12 +244,14 @@ class PlotManager:
         Raises:
             MissingDataError: Throws an error if the anticipated data is not found.
         """
-        # key = 0 if self.strategies[0] else 1
         key = 1 if self.plot_entities else 0
         first_strategy = self.strategies[key][0]
         if FIRST_EPOCH not in self.accuracies_data[key][first_strategy]:
             raise MissingDataError("Did not find data for the first epoch.")
-        if FIRST_ITERATION not in self.accuracies_data[key][first_strategy][FIRST_EPOCH]:
+        if (
+            FIRST_ITERATION
+            not in self.accuracies_data[key][first_strategy][FIRST_EPOCH]
+        ):
             raise MissingDataError(
                 "Did not find data for the first iteration in the first epoch."
             )
@@ -257,8 +261,6 @@ class PlotManager:
         Returns:
             domain_list (list): List of domains for the current experiment.
         """
-        # key = 0 if self.strategies[0] else 1
-
         key = 1 if self.plot_entities else 0
         first_strategy = self.strategies[key][0]
         domain_list = list(
@@ -278,7 +280,6 @@ class PlotManager:
         Returns:
             intent_list (list): List of intent for a given domain in the current experiment.
         """
-        # key = 0 if self.strategies[0] else 1
         key = 1 if self.plot_entities else 0
         first_strategy = self.strategies[key][0]
         intent_list = list(
@@ -352,7 +353,9 @@ class PlotManager:
         if strategies:
             for strategy in strategies:
                 epoch_dict = self.accuracies_data[key][strategy][str(epoch)]
-                x_values = PlotManager.get_across_iterations(epoch_dict, ["num_sampled"])
+                x_values = PlotManager.get_across_iterations(
+                    epoch_dict, ["num_sampled"]
+                )
                 y_values = PlotManager.get_across_iterations(
                     epoch_dict, ["accuracies"] + y_keys
                 )
@@ -486,7 +489,7 @@ class PlotManager:
                 self.plt.legend(
                     ["epoch " + str(epoch) for epoch in range(n_epochs)] + ["avg"],
                     loc="lower right",
-                    )
+                )
                 self.plt.grid()
                 self.plt.tight_layout()
                 fig = self.plt.gcf()
