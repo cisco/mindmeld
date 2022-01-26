@@ -114,7 +114,11 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
 
         for level in self.tuning_level:
             if level not in [TUNE_LEVEL_DOMAIN, TUNE_LEVEL_INTENT, TUNE_LEVEL_ENTITY]:
-                raise ValueError("Invalid tuning level: %s", level)
+                raise ValueError(f"Invalid tuning level: {level}")
+
+        if TUNE_LEVEL_DOMAIN in self.tuning_level and TUNE_LEVEL_INTENT in self.tuning_level:
+            logger.info("Both 'domain' and 'intent' provided as tuning levels. "
+                        "Only one can be selected for classifier tuning. Selecting 'intent'.")
 
     def _get_mindmeld_al_classifier(self):
         """ Creates an instance of a MindMeld Active Learning Classifier. """
