@@ -324,7 +324,7 @@ class MindMeldALClassifier(ALClassifier):
             padded_ic_queries_prob_vectors.append(ordered_ic_query_prob_vector)
         return padded_ic_queries_prob_vectors
 
-    def train(self, data_bucket: DataBucket, heuristic: Heuristic, tuning_type: str):
+    def train(self, data_bucket: DataBucket, heuristic: Heuristic, tuning_type: str = "classifier"):
         """Main training function.
 
         Args:
@@ -501,7 +501,7 @@ class MindMeldALClassifier(ALClassifier):
         ]
         confidences_3d = []
         for fold_sample_queries in fold_sampled_queries_lists:
-            confidences_2d, _, _ = self._train_single(
+            confidences_2d, _ = self._train_single(
                 fold_sample_queries,
                 unsampled_queries,
                 test_queries,

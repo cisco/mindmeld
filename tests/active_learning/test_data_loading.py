@@ -34,8 +34,7 @@ def all_train_queries(kwik_e_mart_nlp):
 def tuning_data_bucket(kwik_e_mart_app_path):
     return DataBucketFactory.get_data_bucket_for_strategy_tuning(
         app_path=kwik_e_mart_app_path,
-        tuning_level=TUNE_LEVEL_INTENT,
-        entity_tuning=False,
+        tuning_level=[TUNE_LEVEL_INTENT],
         train_pattern=DEFAULT_TRAIN_SET_REGEX,
         test_pattern=DEFAULT_TEST_SET_REGEX,
         train_seed_pct=0.2,

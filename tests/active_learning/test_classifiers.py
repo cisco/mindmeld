@@ -27,8 +27,7 @@ from mindmeld.constants import (
 def mindmeld_al_classifier(kwik_e_mart_app_path):
     return MindMeldALClassifier(
         app_path=kwik_e_mart_app_path,
-        tuning_level=TUNE_LEVEL_INTENT,
-        entity_tuning=False,
+        tuning_level=[TUNE_LEVEL_INTENT],
         n_classifiers=3,
     )
 
@@ -37,8 +36,7 @@ def mindmeld_al_classifier(kwik_e_mart_app_path):
 def mindmeld_al_classifier_domain(kwik_e_mart_app_path):
     return MindMeldALClassifier(
         app_path=kwik_e_mart_app_path,
-        tuning_level=TUNE_LEVEL_DOMAIN,
-        entity_tuning=False,
+        tuning_level=[TUNE_LEVEL_DOMAIN],
         n_classifiers=3,
     )
 
@@ -47,8 +45,7 @@ def mindmeld_al_classifier_domain(kwik_e_mart_app_path):
 def tuning_data_bucket(kwik_e_mart_app_path):
     return DataBucketFactory.get_data_bucket_for_strategy_tuning(
         app_path=kwik_e_mart_app_path,
-        tuning_level=TUNE_LEVEL_INTENT,
-        entity_tuning=False,
+        tuning_level=[TUNE_LEVEL_INTENT],
         train_pattern=DEFAULT_TRAIN_SET_REGEX,
         test_pattern=DEFAULT_TEST_SET_REGEX,
         train_seed_pct=0.2,
@@ -59,8 +56,7 @@ def tuning_data_bucket(kwik_e_mart_app_path):
 def tuning_data_bucket_domain(kwik_e_mart_app_path):
     return DataBucketFactory.get_data_bucket_for_strategy_tuning(
         app_path=kwik_e_mart_app_path,
-        tuning_level=TUNE_LEVEL_DOMAIN,
-        entity_tuning=False,
+        tuning_level=[TUNE_LEVEL_DOMAIN],
         train_pattern=DEFAULT_TRAIN_SET_REGEX,
         test_pattern=DEFAULT_TEST_SET_REGEX,
         train_seed_pct=0.2,
@@ -99,7 +95,6 @@ def test_single_model_classification(
         _,
         confidences_2d,
         confidences_3d,
-        entity_confidences,
         domain_indices,
     ) = mindmeld_al_classifier_domain.train(
         tuning_data_bucket_domain, LeastConfidenceSampling()
@@ -118,7 +113,6 @@ def test_multi_model_classification(
         _,
         confidences_2d,
         confidences_3d,
-        entity_confidences,
         domain_indices,
     ) = mindmeld_al_classifier_domain.train(
         tuning_data_bucket_domain, KLDivergenceSampling()
