@@ -458,6 +458,14 @@ class WhitespaceAndCharDualEncoder(WhitespaceEncoder):
         """
         return 2
 
+    @property
+    def number_of_terminal_tokens(self) -> int:
+        """
+        Returns the number of terminal tokens used by the encoder during batch encoding when
+        add_terminals is set to True.
+        """
+        return 0
+
     def batch_encode(
         self, examples: List[str], char_padding_length: int = None, char_add_terminals=True,
         add_terminals=False, _return_tokenized_examples: bool = False, **kwargs

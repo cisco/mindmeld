@@ -311,14 +311,6 @@ class SplittingAndPoolingLayer(nn_module):
         self.pooling_type = pooling_type.lower()
         self.number_of_terminal_tokens = number_of_terminal_tokens
 
-        # TODO: Number of terminals can also be 1 (maybe just left or just right) in some models
-        if self.number_of_terminal_tokens != 2:
-            msg = f"Unable to combine sub-tokens' representations for each word into one in " \
-                  f"{self.__class__.__name__}. It is possible that your choice of tokenizer " \
-                  f"has {self.number_of_terminal_tokens} terminal token instead of assumed " \
-                  f"2 terminals."  # (eg. t5-base tokenizer)
-            raise NotImplementedError(msg)
-
         self.pooling_layer = PoolingLayer(pooling_type=self.pooling_type)
 
     def _split_and_pool(
@@ -333,6 +325,14 @@ class SplittingAndPoolingLayer(nn_module):
         # returns:                   dim: [SEQ_LEN``, EMD_DIM]
 
         if discard_terminals:
+            # TODO: Number of terminals can also be 1 (maybe just left or just right) in some models
+            if self.number_of_terminal_tokens != 2:
+                msg = f"Unable to combine sub-tokens' representations for each word into one in " \
+                      f"{self.__class__.__name__}. It is possible that your choice of tokenizer " \
+                      f"has {self.number_of_terminal_tokens} terminal token instead of assumed " \
+                      f"2 terminals."  # (eg. t5-base tokenizer)
+                raise NotImplementedError(msg)
+
             # since list_of_subgroup_lengths consists of lengths of only non-terminal subgroups but
             # the inputted tensor_2d consists of terminals
             seq_len_required = sum(list_of_subgroup_lengths) + self.number_of_terminal_tokens

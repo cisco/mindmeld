@@ -186,14 +186,15 @@ class EmbedderForSequenceClassification(BaseSequenceClassification):
     def _forward_core(self, batch_data):
         seq_ids = batch_data["seq_ids"]  # [BS, SEQ_LEN]
 
-        seq_lengths = []
-        for seq_len, split_lengths in zip(batch_data["seq_lengths"], batch_data["split_lengths"]):
-            n_terminals = seq_len - len(split_lengths)
-            seq_lengths.append(sum(split_lengths) + n_terminals)
-        seq_lengths = torch.as_tensor(seq_lengths, dtype=torch.long)
+        flattened_split_lengths = [
+            sum(_split_lengths) +
+            (self.encoder.number_of_terminal_tokens if self.params.add_terminals else 0)
+            for _split_lengths in batch_data["split_lengths"]
+        ]
+        flattened_split_lengths = torch.as_tensor(flattened_split_lengths, dtype=torch.long)  # [BS]
 
         encodings = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, EMD_DIM]
-        encodings = self.emb_layer_pooling(encodings, seq_lengths)  # [BS, self.out_dim]
+        encodings = self.emb_layer_pooling(encodings, flattened_split_lengths)  # [BS, self.out_dim]
 
         batch_data.update({"seq_embs": encodings})
 
@@ -271,15 +272,16 @@ class LstmForSequenceClassification(BaseSequenceClassification):
     def _forward_core(self, batch_data):
         seq_ids = batch_data["seq_ids"]  # [BS, SEQ_LEN]
 
-        seq_lengths = []
-        for seq_len, split_lengths in zip(batch_data["seq_lengths"], batch_data["split_lengths"]):
-            n_terminals = seq_len - len(split_lengths)
-            seq_lengths.append(sum(split_lengths) + n_terminals)
-        seq_lengths = torch.as_tensor(seq_lengths, dtype=torch.long)  # [BS]
+        flattened_split_lengths = [
+            sum(_split_lengths) +
+            (self.encoder.number_of_terminal_tokens if self.params.add_terminals else 0)
+            for _split_lengths in batch_data["split_lengths"]
+        ]
+        flattened_split_lengths = torch.as_tensor(flattened_split_lengths, dtype=torch.long)  # [BS]
 
         encodings = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, EMD_DIM]
-        encodings = self.lstm_layer(encodings, seq_lengths)  # [BS, SEQ_LEN, self.out_dim]
-        encodings = self.lstm_layer_pooling(encodings, seq_lengths)  # [BS, self.out_dim]
+        encodings = self.lstm_layer(encodings, flattened_split_lengths)  # [BS,SEQ_LEN,self.out_dim]
+        encodings = self.lstm_layer_pooling(encodings, flattened_split_lengths)  # [BS,self.out_dim]
 
         batch_data.update({"seq_embs": encodings})
 
@@ -409,14 +411,14 @@ class BertForSequenceClassification(BaseSequenceClassification):
                       f"has no key 'last_hidden_state' in its output dictionary."
                 raise ValueError(msg)
             last_hidden_state = self.dropout(last_hidden_state)
-            seq_lengths = []
-            for seq_len, split_lengths in zip(
-                batch_data["seq_lengths"], batch_data["split_lengths"]
-            ):
-                n_terminals = seq_len - len(split_lengths)
-                seq_lengths.append(sum(split_lengths) + n_terminals)
-            seq_lengths = torch.as_tensor(seq_lengths, dtype=torch.long)
-            encodings = self.emb_layer_pooling(last_hidden_state, seq_lengths)  # [BS, self.out_dim]
+            flattened_split_lengths = [
+                sum(_split_lengths) +
+                (self.encoder.number_of_terminal_tokens if self.params.add_terminals else 0)
+                for _split_lengths in batch_data["split_lengths"]
+            ]
+            flattened_split_lengths = torch.as_tensor(flattened_split_lengths, dtype=torch.long)
+            encodings = self.emb_layer_pooling(
+                last_hidden_state, flattened_split_lengths)  # [BS, self.out_dim]
         else:
             # 'pooler_output' refers to the first token's (aka. CLS) representation obtained form
             # the last hidden layer, and hence its dimension [BS, self.out_dim]

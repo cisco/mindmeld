@@ -1718,9 +1718,19 @@ class EntityProcessor(Processor):
             self.type,
             timestamp=incremental_timestamp,
         )
-        self.entity_resolver.load(
-            incremental_model_path if incremental_timestamp else model_path
-        )
+        try:
+            self.entity_resolver.load(
+                incremental_model_path if incremental_timestamp else model_path
+            )
+        except FileNotFoundError as e:
+            logger.error(e)
+            msg = "No cached hash (pkl) file found. This can happen if you are trying to load " \
+                  "entity resolvers that were built using mindmeld version <=4.4.0 but trying to " \
+                  "load them using version >4.4.0"
+            msg += "\nConsider doing an incremental build of your nlp hierarchy to not see this " \
+                   "error message again."
+            logger.error(msg)
+            self.entity_resolver.load_deprecated()
 
     def _evaluate(self, print_stats, label_set="test"):
         # evaluation can be done only for role classifier and not for entity resolver
