@@ -373,8 +373,8 @@ class DataBucket:
 
         Args:
             query_list (list): List of queries to filter
-            component_type (str): Component type of desired queries
-            component_name (str): Component name of desired queries
+            component_type (str): Component type of desired queries (e.g. "domain")
+            component_name (str): Component name of desired queries (e.g. "smart_home")
 
         Returns:
             filtered_queries_indices (list): List of indices of filtered queries.

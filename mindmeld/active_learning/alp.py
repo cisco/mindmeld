@@ -121,9 +121,14 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             if level not in [TUNE_LEVEL_DOMAIN, TUNE_LEVEL_INTENT, TUNE_LEVEL_ENTITY]:
                 raise ValueError(f"Invalid tuning level: {level}")
 
-        if TUNE_LEVEL_DOMAIN in self.tuning_level and TUNE_LEVEL_INTENT in self.tuning_level:
-            logger.info("Both 'domain' and 'intent' provided as tuning levels. "
-                        "Only one can be selected for classifier tuning. Selecting 'intent'.")
+        if (
+            TUNE_LEVEL_DOMAIN in self.tuning_level
+            and TUNE_LEVEL_INTENT in self.tuning_level
+        ):
+            logger.info(
+                "Both 'domain' and 'intent' provided as tuning levels. "
+                "Only one can be selected for classifier tuning. Selecting 'intent'."
+            )
 
     def _get_mindmeld_al_classifier(self):
         """ Creates an instance of a MindMeld Active Learning Classifier. """
@@ -219,7 +224,9 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
 
         if self.tagger_selection_strategy:
             newly_sampled_queries = self._run_strategy(
-                tuning_type="tagger", strategy=self.tagger_selection_strategy, select_mode=True
+                tuning_type="tagger",
+                strategy=self.tagger_selection_strategy,
+                select_mode=True,
             )
             self.results_manager.write_log_selected_queries_json(
                 strategy=self.tagger_selection_strategy,

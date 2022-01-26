@@ -170,7 +170,7 @@ class MindMeldALClassifier(ALClassifier):
         return class_level_statistic
 
     @staticmethod
-    def _get_entity_probs(
+    def _get_tagger_probs(
         classifier: Classifier,
         queries: ProcessedQueryList,
         entity_tag_to_id: Dict,
@@ -193,7 +193,6 @@ class MindMeldALClassifier(ALClassifier):
         if not queries:
             return queries_prob_vectors
 
-        # to-do: change flag
         classifier_eval = classifier.evaluate(queries=queries, fetch_distribution=True)
 
         domain = classifier.domain
@@ -203,7 +202,7 @@ class MindMeldALClassifier(ALClassifier):
         default_prob = 1.0
         default_tag = "O|"
         default_key = f"{domain}.{intent}.{default_tag}"
-        default_idx = entity_tag_to_id[f"{default_key}"]
+        default_idx = entity_tag_to_id[default_key]
 
         if not classifier_eval:
             # if no classifier is fit, then the evaluation object cannot be created.
@@ -287,7 +286,7 @@ class MindMeldALClassifier(ALClassifier):
         """
         # If type is entity, get recognizer probabilities
         if nlp_component_type == TUNE_LEVEL_ENTITY:
-            return MindMeldALClassifier._get_entity_probs(
+            return MindMeldALClassifier._get_tagger_probs(
                 classifier=classifier,
                 queries=queries,
                 entity_tag_to_id=nlp_component_to_id,
@@ -788,14 +787,11 @@ class MindMeldALClassifier(ALClassifier):
                 }
 
                 if verbose:
-                    # To generate plots at a sub-entity level (B, I, O tags)
+                    # To generate plots at a sub-entity level (B, I, O, E, S tags)
                     for e, entity in enumerate(
                         er_eval_test.get_stats()["class_labels"]
                     ):
                         eval_stats["accuracies"][domain][intent]["entities"][
                             entity
                         ] = er_eval_test.get_stats()["class_stats"][
-                            self.class_level_statistic
-                        ][
-                            e
-                        ]
+                            self.class_level_statistic][e]
