@@ -500,4 +500,5 @@ intersphinx_mapping = {"https://docs.python.org/": None}
 extlinks = {
     "sk_guide": ("http://scikit-learn.org/stable/modules/%s", None),
     "sk_api": ("http://scikit-learn.org/stable/modules/generated/%s", None),
+    "wiki_api": ("https://en.wikipedia.org/wiki/%s", None),
 }

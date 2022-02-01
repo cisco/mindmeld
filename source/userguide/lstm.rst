@@ -56,7 +56,7 @@ Parameter tuning for an LSTM is more complex than for traditional machine learni
 | ``padding_length``                      | The sequence model treats this as the maximum number of words in a query.                      |
 |                                         | If a query has more words than ``padding_length``, the surplus words are discarded.            |
 |                                         |                                                                                                |
-|                                         | Typically set to the maximum word length of query expected both at train and predict time.     |
+|                                          | Typically set to the maximum word length of query expected both at train and predict time.     |
 |                                         |                                                                                                |
 |                                         | Default: ``20``                                                                                |
 |                                         |                                                                                                |
