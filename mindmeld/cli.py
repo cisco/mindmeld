@@ -1018,7 +1018,7 @@ def active_learning(  # pylint: disable=R0913
             config["query_selection"]["classifier_selection_strategy"] = classifier_strategy
     if tagger_strategy:
         if tune:
-            config["tuning"]["classifier_tagger_strategies"] = [tagger_strategy]
+            config["tuning"]["tagger_tuning_strategies"] = [tagger_strategy]
         elif select:
             config["query_selection"]["tagger_selection_strategy"] = tagger_strategy
     if unlabeled_logs_path:

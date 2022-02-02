@@ -22,7 +22,7 @@ from .heuristics import Heuristic, stratified_random_sample, EntropySampling
 
 from ..auto_annotator import BootstrapAnnotator
 from ..components._config import DEFAULT_AUTO_ANNOTATOR_CONFIG
-from ..constants import TUNE_LEVEL_INTENT, TUNE_LEVEL_ENTITY, AL_MAX_LOG_USAGE_PCT
+from ..constants import TuneLevel, TuningType, AL_MAX_LOG_USAGE_PCT
 from ..core import ProcessedQuery
 from ..markup import read_query_file
 from ..resource_loader import ResourceLoader, ProcessedQueryList
@@ -160,7 +160,7 @@ class LabelMap:
         Returns:
             class_labels (List[str]): list of labels for classification task.
         """
-        if TUNE_LEVEL_INTENT in tuning_level:
+        if TuneLevel.INTENT.value in tuning_level:
             return [
                 f"{d}.{i}" for d, i in zip(query_list.domains(), query_list.intents())
             ]
@@ -306,7 +306,7 @@ class DataBucket:
         confidences_3d: List[List[List[float]]],
         heuristic: Heuristic,
         confidence_segments: Dict = None,
-        tuning_type: str = "classifier",
+        tuning_type: TuningType = TuningType.CLASSIFIER,
     ):
         """Method to sample a DataBucket's unsampled_queries and update its sampled_queries
         and newly_sampled_queries.
@@ -318,13 +318,13 @@ class DataBucket:
             heuristic (Heuristic): Selection strategy.
             confidence_segments (Dict[(str, Tuple(int,int))]): A dictionary mapping
                 segments to run KL Divergence.
-            tuning_type (str): Component to be tuned ("classifier" or "tagger")
+            tuning_type (TuningType): Component to be tuned ("classifier" or "tagger")
         Returns:
             newly_sampled_queries_ids (List[int]): List of ids corresponding the newly sampled
                 queries in the QueryCache.
         """
 
-        if tuning_type == "classifier":
+        if tuning_type == TuningType.CLASSIFIER:
             params_rank_3d = {"confidences_3d": confidences_3d}
             if confidence_segments:
                 params_rank_3d["confidence_segments"] = confidence_segments
@@ -422,7 +422,7 @@ class DataBucketFactory:
             label_set=train_pattern
         )
 
-        if TUNE_LEVEL_ENTITY in tuning_level:
+        if TuneLevel.ENTITY.value in tuning_level:
             label_map.entity2id = LabelMap._get_entity_mappings(train_query_list)
             label_map.id2entity = LabelMap._reverse_dict(label_map.entity2id)
 

@@ -24,7 +24,7 @@ from .plot_manager import PlotManager
 from .classifiers import MindMeldALClassifier
 from .heuristics import HeuristicsFactory
 
-from ..constants import TUNE_LEVEL_DOMAIN, TUNE_LEVEL_INTENT, TUNE_LEVEL_ENTITY
+from ..constants import TuneLevel, TuningType
 from ..resource_loader import ProcessedQueryList
 
 logger = logging.getLogger(__name__)
@@ -118,14 +118,14 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             raise ValueError("No tuning strategy provided.")
 
         for level in self.tuning_level:
-            if level not in [TUNE_LEVEL_DOMAIN, TUNE_LEVEL_INTENT, TUNE_LEVEL_ENTITY]:
+            if level not in [allowed_level.value for allowed_level in TuneLevel]:
                 raise ValueError(f"Invalid tuning level: {level}")
 
         if (
-            TUNE_LEVEL_DOMAIN in self.tuning_level
-            and TUNE_LEVEL_INTENT in self.tuning_level
+            TuneLevel.DOMAIN.value in self.tuning_level
+            and TuneLevel.INTENT.value in self.tuning_level
         ):
-            logger.info(
+            logger.warning(
                 "Both 'domain' and 'intent' provided as tuning levels. "
                 "Only one can be selected for classifier tuning. Selecting 'intent'."
             )
@@ -213,7 +213,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
 
         if self.classifier_selection_strategy:
             newly_sampled_queries = self._run_strategy(
-                tuning_type="classifier",
+                tuning_type=TuningType.CLASSIFIER,
                 strategy=self.classifier_selection_strategy,
                 select_mode=True,
             )
@@ -224,7 +224,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
 
         if self.tagger_selection_strategy:
             newly_sampled_queries = self._run_strategy(
-                tuning_type="tagger",
+                tuning_type=TuningType.TAGGER,
                 strategy=self.tagger_selection_strategy,
                 select_mode=True,
             )
@@ -240,10 +240,11 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             aggregate_statistic=self.aggregate_statistic,
             class_level_statistic=self.class_level_statistic,
             plot_entities=(
-                TUNE_LEVEL_ENTITY in self.tuning_level and self.tagger_tuning_strategies
+                TuneLevel.ENTITY.value in self.tuning_level
+                and self.tagger_tuning_strategies
             ),
             plot_intents=(
-                TUNE_LEVEL_INTENT in self.tuning_level
+                TuneLevel.INTENT.value in self.tuning_level
                 and self.classifier_tuning_strategies
             ),
         )
@@ -254,17 +255,19 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
 
         if self.classifier_tuning_strategies:
             for strategy in self.classifier_tuning_strategies:
-                self._run_strategy(tuning_type="classifier", strategy=strategy)
+                self._run_strategy(tuning_type=TuningType.CLASSIFIER, strategy=strategy)
 
         if self.tagger_tuning_strategies:
             for strategy in self.tagger_tuning_strategies:
-                self._run_strategy(tuning_type="tagger", strategy=strategy)
+                self._run_strategy(tuning_type=TuningType.TAGGER, strategy=strategy)
 
-    def _run_strategy(self, tuning_type: str, strategy: str, select_mode: bool = False):
+    def _run_strategy(
+        self, tuning_type: TuningType, strategy: str, select_mode: bool = False
+    ):
         """Helper function to train a single strategy.
 
         Args:
-            tuning_type (str): Component to be tuned ("classifier" or "tagger")
+            tuning_type (TuningType): Component to be tuned ("classifier" or "tagger")
             strategy (str): Single strategy to train
             select_mode (bool): If True, accuracies will not be recorded and run will
                 terminate after first iteration. If False, accuracies will be recorded.
@@ -333,7 +336,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         logger.info(
             "Strategy: %s(%s). Epoch: %s. Iter: %s.",
             strategy,
-            tuning_type,
+            tuning_type.value,
             epoch,
             iteration,
         )

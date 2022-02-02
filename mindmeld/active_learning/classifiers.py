@@ -34,8 +34,8 @@ from .heuristics import (
 from ..components.classifier import Classifier
 from ..components.nlp import NaturalLanguageProcessor
 from ..constants import (
-    TUNE_LEVEL_INTENT,
-    TUNE_LEVEL_ENTITY,
+    TuneLevel,
+    TuningType,
     ACTIVE_LEARNING_RANDOM_SEED,
     AL_DEFAULT_AGGREGATE_STATISTIC,
     AL_DEFAULT_CLASS_LEVEL_STATISTIC,
@@ -285,7 +285,7 @@ class MindMeldALClassifier(ALClassifier):
             prob_vector (List[List]]): Probability distribution vectors for given queries.
         """
         # If type is entity, get recognizer probabilities
-        if nlp_component_type == TUNE_LEVEL_ENTITY:
+        if nlp_component_type == TuneLevel.ENTITY.value:
             return MindMeldALClassifier._get_tagger_probs(
                 classifier=classifier,
                 queries=queries,
@@ -323,13 +323,18 @@ class MindMeldALClassifier(ALClassifier):
             padded_ic_queries_prob_vectors.append(ordered_ic_query_prob_vector)
         return padded_ic_queries_prob_vectors
 
-    def train(self, data_bucket: DataBucket, heuristic: Heuristic, tuning_type: str = "classifier"):
+    def train(
+        self,
+        data_bucket: DataBucket,
+        heuristic: Heuristic,
+        tuning_type: TuningType = TuningType.CLASSIFIER,
+    ):
         """Main training function.
 
         Args:
             data_bucket (DataBucket): DataBucket for current iteration
             heuristic (Heuristic): Current Heuristic.
-            tuning_type (str): Component to be tuned ("classifier" or "tagger")
+            tuning_type (TuningType): Component to be tuned ("classifier" or "tagger")
 
         Returns:
             eval_stats (defaultdict): Evaluation metrics to be included in accuracies.json
@@ -401,7 +406,7 @@ class MindMeldALClassifier(ALClassifier):
             confidences_2d (List): 2D array with probability vectors for unsampled queries
                 (returns a 3d output for tagger tuning).
         """
-        if self.tuning_type == "classifier":
+        if self.tuning_type == TuningType.CLASSIFIER:
             # Domain Level
             dc_queries_prob_vectors, dc_eval_test = self.domain_classifier_fit_eval(
                 sampled_queries=sampled_queries,
@@ -414,7 +419,7 @@ class MindMeldALClassifier(ALClassifier):
             confidences_2d = dc_queries_prob_vectors
 
             # Intent Level
-            if TUNE_LEVEL_INTENT in self.tuning_level:
+            if TuneLevel.INTENT.value in self.tuning_level:
                 (
                     ic_queries_prob_vectors,
                     ic_eval_test_dict,
@@ -431,7 +436,7 @@ class MindMeldALClassifier(ALClassifier):
 
         else:
             # Entity Level
-            if TUNE_LEVEL_ENTITY in self.tuning_level:
+            if TuneLevel.ENTITY.value in self.tuning_level:
                 (
                     er_queries_prob_vectors,
                     er_eval_test_dict,
@@ -711,7 +716,7 @@ class MindMeldALClassifier(ALClassifier):
                     filtered_sampled_queries,
                 ) = DataBucket.filter_queries_by_nlp_component(
                     query_list=sampled_queries,
-                    component_type=TUNE_LEVEL_INTENT,
+                    component_type=TuneLevel.INTENT.value,
                     component_name=intent,
                 )
                 (
@@ -719,12 +724,12 @@ class MindMeldALClassifier(ALClassifier):
                     filtered_unsampled_queries,
                 ) = DataBucket.filter_queries_by_nlp_component(
                     query_list=unsampled_queries,
-                    component_type=TUNE_LEVEL_INTENT,
+                    component_type=TuneLevel.INTENT.value,
                     component_name=intent,
                 )
                 _, filtered_test_queries = DataBucket.filter_queries_by_nlp_component(
                     query_list=test_queries,
-                    component_type=TUNE_LEVEL_INTENT,
+                    component_type=TuneLevel.INTENT.value,
                     component_name=intent,
                 )
                 # Train
@@ -733,7 +738,12 @@ class MindMeldALClassifier(ALClassifier):
                     er.fit(queries=filtered_sampled_queries)
                 except ValueError:
                     # single class, cannot fit with solver
-                    pass
+                    logger.info(
+                        "Skipped fitting entity recognizer for domain `%s` and intent `%s`."
+                        "Cannot fit with solver.",
+                        domain,
+                        intent,
+                    )
 
                 # Evaluate Test Queries
                 er_eval_test = er.evaluate(queries=filtered_test_queries)
@@ -744,7 +754,7 @@ class MindMeldALClassifier(ALClassifier):
                     classifier=er,
                     queries=filtered_unsampled_queries,
                     nlp_component_to_id=entity2id,
-                    nlp_component_type=TUNE_LEVEL_ENTITY,
+                    nlp_component_type=TuneLevel.ENTITY.value,
                 )
 
                 for i, index in enumerate(filtered_unsampled_queries_indices):
@@ -794,4 +804,7 @@ class MindMeldALClassifier(ALClassifier):
                         eval_stats["accuracies"][domain][intent]["entities"][
                             entity
                         ] = er_eval_test.get_stats()["class_stats"][
-                            self.class_level_statistic][e]
+                            self.class_level_statistic
+                        ][
+                            e
+                        ]

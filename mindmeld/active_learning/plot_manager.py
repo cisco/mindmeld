@@ -467,6 +467,7 @@ class PlotManager:
                     self.plt.plot(x_values, y_values)
                     all_y_values.append(y_values)
                 max_len = max([len(i) for i in all_y_values])
+                # padding by extending the last value to cover difference between max_len and y_values
                 for y_values in all_y_values:
                     y_values = np.pad(
                         y_values,

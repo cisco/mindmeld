@@ -31,7 +31,7 @@ from ..path import (
     AL_CLASSIFIER_SELECTED_QUERIES_PATH,
     AL_TAGGER_SELECTED_QUERIES_PATH,
 )
-from ..constants import STRATEGY_ABRIDGED
+from ..constants import STRATEGY_ABRIDGED, TuningType
 
 logger = logging.getLogger(__name__)
 
@@ -82,8 +82,10 @@ class ResultsManager:
         )
 
         now = datetime.datetime.now()
-        self.experiment_folder_name = f"{now.year}-{now.month}-{now.day}_{now.hour}:{now.minute}_" \
-                                      f"{classifier_strategies}_{tagger_strategies}"
+        self.experiment_folder_name = (
+            f"{now.year}-{now.month}-{now.day}_{now.hour}:{now.minute}_"
+            f"{classifier_strategies}_{tagger_strategies}"
+        )
 
     @property
     def experiment_folder(self):
@@ -175,25 +177,35 @@ class ResultsManager:
         self.dump_json(unformatted_path, json_data)
 
     def update_accuracies_json(
-        self, tuning_type: str, strategy: str, epoch: int, iteration: int, eval_stats
+        self,
+        tuning_type: TuningType,
+        strategy: str,
+        epoch: int,
+        iteration: int,
+        eval_stats,
     ):
         """Update accuracies.json with iteration metrics"""
 
         AL_ACCURACIES_PATH = (
             AL_CLASSIFIER_ACCURACIES_PATH
-            if tuning_type == "classifier"
+            if tuning_type == TuningType.CLASSIFIER
             else AL_TAGGER_ACCURACIES_PATH
         )
         self.update_json(AL_ACCURACIES_PATH, strategy, epoch, iteration, eval_stats)
 
     def update_selected_queries_json(
-        self, tuning_type: str, strategy: str, epoch: int, iteration: int, queries
+        self,
+        tuning_type: TuningType,
+        strategy: str,
+        epoch: int,
+        iteration: int,
+        queries,
     ):
         """Update accuracies.json with iteration metrics"""
         query_dicts = ResultsManager.queries_to_dict(queries)
         AL_SELECTED_QUERIES_PATH = (
             AL_CLASSIFIER_SELECTED_QUERIES_PATH
-            if tuning_type == "classifier"
+            if tuning_type == TuningType.CLASSIFIER
             else AL_TAGGER_SELECTED_QUERIES_PATH
         )
         self.update_json(

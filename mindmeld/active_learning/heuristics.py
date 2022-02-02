@@ -290,6 +290,11 @@ class MarginSampling(ABC):
 
     @staticmethod
     def rank_entities(entity_confidences: List[List[List[float]]]) -> List[int]:
+        """
+        Queries are ranked on the basis of Margin Sampling for tag sequences. This approach uses beam search to
+        obtain the top 2 queries/sequences in terms of the over query confidence for entities. The margin is calculated
+        between these top two sequences.
+        """
         query_margin_list = []
 
         for sequence in entity_confidences:
