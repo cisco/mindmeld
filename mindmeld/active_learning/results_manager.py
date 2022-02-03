@@ -31,7 +31,7 @@ from ..path import (
     AL_CLASSIFIER_SELECTED_QUERIES_PATH,
     AL_TAGGER_SELECTED_QUERIES_PATH,
 )
-from ..constants import STRATEGY_ABRIDGED, TuningType
+from ..constants import STRATEGY_ABRIDGED, TuneLevel, TuningType
 
 logger = logging.getLogger(__name__)
 
@@ -52,11 +52,13 @@ class ResultsManager:
         self.experiment_folder_name = None
 
     def set_experiment_folder_name(
-        self, classifier_tuning_strategies, tagger_tuning_strategies
+        self, tuning_level, classifier_tuning_strategies, tagger_tuning_strategies
     ) -> str:
         """
         Args:
-            selection_strategies (list): List of strategies used for the experiment.
+            tuning_level (list): The hierarchy levels to tune ("domain" or "intent" and/or "entity")
+            classifier_tuning_strategies (List[str]): List of strategies to use for classifier tuning
+            tagger_tuning_strategies (List[str]): List of strategies to use for tagger tuning
         Returns:
             experiment_folder_name (str): Creates the name of the current experiment folder
                 based on the current timestamp.
@@ -75,10 +77,16 @@ class ResultsManager:
         classifier_strategies = (
             "classifier-none"
             if not classifier_strategies
+            or not (
+                TuneLevel.DOMAIN.value in tuning_level
+                or TuneLevel.INTENT.value in tuning_level
+            )
             else "classifier-" + classifier_strategies
         )
         tagger_strategies = (
-            "tagger-none" if not tagger_strategies else "tagger-" + tagger_strategies
+            "tagger-none"
+            if not tagger_strategies or not TuneLevel.ENTITY.value in tuning_level
+            else "tagger-" + tagger_strategies
         )
 
         now = datetime.datetime.now()
@@ -98,15 +106,19 @@ class ResultsManager:
     def create_experiment_folder(
         self,
         active_learning_params: Dict,
+        tuning_level: List,
         classifier_tuning_strategies: List,
         tagger_tuning_strategies: List,
     ):
         """Creates the active learning experiment folder.
         Args:
             active_learning_params (Dict): Dictionary representation of the params to store.
-            tuning_strategies (list): List of strategies used for the experiment.
+            tuning_level (list): The hierarchy levels to tune ("domain" or "intent" and/or "entity")
+            classifier_tuning_strategies (List[str]): List of strategies to use for classifier tuning
+            tagger_tuning_strategies (List[str]): List of strategies to use for tagger tuning
         """
         self.set_experiment_folder_name(
+            tuning_level,
             classifier_tuning_strategies,
             tagger_tuning_strategies,
         )

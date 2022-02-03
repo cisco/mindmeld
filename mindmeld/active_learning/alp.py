@@ -65,7 +65,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             n_classifiers (int): Number of classifiers to be used by multi-model heuristics
             n_epochs (int): Number of epochs to run tuning
             batch_size (int): Number of queries to select at each iteration
-            tuning_level (list): The hierarchy levels to tune ("domain" or "intent" or "entity")
+            tuning_level (list): The hierarchy levels to tune ("domain" or "intent" and/or "entity")
             classifier_tuning_strategies (List[str]): List of strategies to use for classifier tuning
                 (Options: "LeastConfidenceSampling", "EntropySampling", "MarginSampling", "RandomSampling",
                 "KLDivergenceSampling", "DisagreementSampling", "EnsembleSampling")
@@ -177,6 +177,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         logger.info("Creating output folder and saving params.")
         self.results_manager.create_experiment_folder(
             active_learning_params=self.__dict__,
+            tuning_level=self.tuning_level,
             classifier_tuning_strategies=self.classifier_tuning_strategies,
             tagger_tuning_strategies=self.tagger_tuning_strategies,
         )
