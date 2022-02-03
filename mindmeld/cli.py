@@ -926,7 +926,7 @@ def augment(app_path, language):
 @click.option(
     "--tuning_level",
     type=str,
-    help="The hierarchy level to run strategy tuning ('domain', 'intent' or 'entity').",
+    help="The hierarchy level to run strategy tuning ('domain', 'intent' and/or 'entity').",
 )
 @click.option(
     "--output_folder",

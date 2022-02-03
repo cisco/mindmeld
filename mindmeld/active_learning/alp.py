@@ -253,11 +253,18 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
     def _train_all_strategies(self):
         """ Train with all active learning strategies."""
 
-        if self.classifier_tuning_strategies:
+        # Checks to ensure classifier/tagger tuning is only run when specified in tuning levels.
+        if self.classifier_tuning_strategies and (
+            TuneLevel.DOMAIN.value in self.tuning_level
+            or TuneLevel.INTENT.value in self.tuning_level
+        ):
             for strategy in self.classifier_tuning_strategies:
                 self._run_strategy(tuning_type=TuningType.CLASSIFIER, strategy=strategy)
 
-        if self.tagger_tuning_strategies:
+        if (
+            self.tagger_tuning_strategies
+            and TuneLevel.ENTITY.value in self.tuning_level
+        ):
             for strategy in self.tagger_tuning_strategies:
                 self._run_strategy(tuning_type=TuningType.TAGGER, strategy=strategy)
 

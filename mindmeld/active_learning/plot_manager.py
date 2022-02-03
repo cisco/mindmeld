@@ -370,7 +370,7 @@ class PlotManager:
             self.plt.ylabel(y_label.capitalize())
             title = f"Epoch_{epoch}_Results_({'-'.join(y_keys)})"
             self.plt.title(title)
-            self.plt.legend(self.strategies, loc="lower right")
+            self.plt.legend(strategies, loc="lower right")
             self.plt.grid()
             self.plt.tight_layout()
             fig = self.plt.gcf()
@@ -424,7 +424,7 @@ class PlotManager:
             self.plt.ylabel(y_label.capitalize())
             title = f"Avg_Across_Epochs_({'-'.join(y_keys)})"
             self.plt.title(title)
-            self.plt.legend(self.strategies, loc="lower right")
+            self.plt.legend(strategies, loc="lower right")
             self.plt.grid()
             self.plt.tight_layout()
             fig = self.plt.gcf()
@@ -545,6 +545,8 @@ class PlotManager:
             plot_domain (bool): Whether to generate plots at the domain level.
             plot_intents (bool): Whether to generate plots at the intent level.
         """
+        # Plots stacked bar for only classifier tuning (hence strategies key = 0).
+        # If no classifier tuning strategy is provided, skips stacked bar plotting.
         for strategy in self.strategies[0]:
             epoch_dict = self.queries_data[0][strategy][str(epoch)]
             domain_counters, intent_counters = [], []
