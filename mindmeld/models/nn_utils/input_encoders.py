@@ -748,6 +748,11 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
         self._number_of_terminal_tokens = None
         self.__model_max_length = -1
 
+        # consider not splitting words at whitespace if this param is set
+        # use for roberta-base like tokenizers where the words are not split at whitespace
+        # also, this param is only relevant for sequence_classification
+        self.avoid_whitespace_splitting = kwargs.get("avoid_whitespace_splitting", None)
+
     def prepare(self, examples: List[str]):
         del examples
 
@@ -816,46 +821,59 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
 
         n_terminals = self.number_of_terminal_tokens if add_terminals else 0
 
-        # tokenize each word of each input separately
-        # get maximum length of each example, accounting for terminal tokens- cls, sep
-        # If padding_length is None, padding has to be done to the max length of the input batch
-        tokenized_examples = [
-            [self._tokenize(word) for word in example.split(split_at)] for example in examples
-        ]
+        if self.avoid_whitespace_splitting:
 
-        max_curr_len = max([len(sum(t_ex, [])) for t_ex in tokenized_examples]) + n_terminals
-        padding_length_including_terminals = min(max_curr_len, padding_length) \
-            if padding_length else max_curr_len
-        if self._model_max_length:
-            # padding_length cannot exceed the transformer model's maximum length
-            padding_length_including_terminals = min(
-                padding_length_including_terminals, self._model_max_length)
-        padding_length_excluding_terminals = padding_length_including_terminals - n_terminals
-
-        _trimmed_examples = [
-            _trim_a_list_of_sub_token_groups(tokenized_example, padding_length_excluding_terminals)
-            for tokenized_example in tokenized_examples
-        ]  # List[List[List[str]]], innermost List[str] is a list of sub-words for a given word
-
-        split_lengths = [[len(x) for x in ex] for ex in _trimmed_examples]
-
-        # Calling ```tokenized_examples = [" ".join(sum(ex, [])) for ex in _trimmed_examples]```
-        # & then passing it to ```self.tokenizer.__call__(tokenized_examples, ...)``` inadvertently
-        # re-tokenizes already tokenized strings. Eg: "ttyl" tokenized to ["t", "##ty", "#l"] and
-        # then modified to "t ##ty ##l" is incorrectly tokenized again in __call__ as ["t", "#",
-        # "#", "t", "y", "#", "#", "l"] and then encoded into ids.
-        # This is not the case with few children of AbstractHuggingfaceTrainableEncoder (e.g.
-        # BytePairEncodingEncoder) which has no prepending tokens such as '##' for sub-words.
-        _detokenized_examples = [
-            split_at.join(
-                [self.tokenizer.convert_tokens_to_string(group) for group in _trimmed_example]
+            hgf_encodings = self.tokenizer(
+                examples, padding=True, truncation=True, max_length=None,
+                return_tensors="pt"
             )
-            for _trimmed_example in _trimmed_examples
-        ]
-        hgf_encodings = self.tokenizer(
-            _detokenized_examples, padding=True, truncation=True, max_length=None,
-            return_tensors="pt"
-        )  # Huggingface returns this as BatchEncodings object;needs to be converted to a dictionary
+            split_lengths = [
+                [1] * (sum(msk) - n_terminals) for msk in hgf_encodings["attention_mask"]
+            ]
+
+        else:
+
+            # tokenize each word of each input separately
+            # get maximum length of each example, accounting for terminal tokens- cls, sep
+            # If padding_length is None, padding has to be done to the max length of the input batch
+            tokenized_examples = [
+                [self._tokenize(word) for word in example.split(split_at)] for example in examples
+            ]
+
+            max_curr_len = max([len(sum(t_ex, [])) for t_ex in tokenized_examples]) + n_terminals
+            padding_length_including_terminals = min(max_curr_len, padding_length) \
+                if padding_length else max_curr_len
+            if self._model_max_length:
+                # padding_length cannot exceed the transformer model's maximum length
+                padding_length_including_terminals = min(
+                    padding_length_including_terminals, self._model_max_length)
+            padding_length_excluding_terminals = padding_length_including_terminals - n_terminals
+
+            _trimmed_examples = [
+                _trim_a_list_of_sub_token_groups(tokenized_example,
+                                                 padding_length_excluding_terminals)
+                for tokenized_example in tokenized_examples
+            ]  # List[List[List[str]]], innermost List[str] is a list of sub-words for a given word
+
+            split_lengths = [[len(x) for x in ex] for ex in _trimmed_examples]
+
+            # Calling ```tokenized_examples = [" ".join(sum(ex, [])) for ex in _trimmed_examples]```
+            # & then passing it to ```self.tokenizer.__call__(tokenized_examples, ...)``` inadvertently
+            # re-tokenizes already tokenized strings. Eg: "ttyl" tokenized to ["t", "##ty", "#l"] and
+            # then modified to "t ##ty ##l" is incorrectly tokenized again in __call__ as ["t", "#",
+            # "#", "t", "y", "#", "#", "l"] and then encoded into ids.
+            # This is not the case with few children of AbstractHuggingfaceTrainableEncoder (e.g.
+            # BytePairEncodingEncoder) which has no prepending tokens such as '##' for sub-words.
+            _detokenized_examples = [
+                split_at.join(
+                    [self.tokenizer.convert_tokens_to_string(group) for group in _trimmed_example]
+                )
+                for _trimmed_example in _trimmed_examples
+            ]
+            hgf_encodings = self.tokenizer(
+                _detokenized_examples, padding=True, truncation=True, max_length=None,
+                return_tensors="pt"
+            )  # Huggingface returns this as BatchEncodings object;needs to be converted to a dictionary
 
         return BatchData(**{
             # number of groups per example

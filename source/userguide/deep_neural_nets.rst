@@ -31,25 +31,35 @@ Some disadvantages are:
 
 - Training time on CPU-only machines is a lot slower than for traditional machine learning models.
 - No automated hyperparameter tuning methods like :sk_api:`sklearn.model_selection.GridSearchCV <sklearn.model_selection.GridSearchCV.html>` are available for deep neural models.
-- The deep neural models generally occupy more disk storage space compared to their counterparts.
+- The deep neural models generally occupy similar or more disk storage space compared to their traditional counterparts.
 
-In the following sections, different model architectures and their configurable parameters are outlined.
+Parameter tuning for deep neural models is more involved than for traditional machine learning models.
+A good starting point for understanding this subject is Andrej Karpathy's `course notes <https://cs231n.github.io/neural-networks-3/#baby>`_ from the Convolutional Neural Networks for Visual Recognition course at Stanford University.
 
 .. note::
 
-   To use deep neural networks instead of traditional machine learning models, simply make few modifications to the classifier configuration dictionaries for all or selected classifiers in MindMeld's NLP hierarchy.
+   To use deep neural networks instead of traditional machine learning models, simply make few modifications to the classifier configuration dictionaries for all or selected classifiers in your app's ``config.py``.
 
-Domain and Intent classification (aka. Sequence Classification)
----------------------------------------------------------------
+In the following sections, different model architectures and their configurable parameters are outlined.
+
+Domain and Intent classification
+--------------------------------
 
 .. _dnns_sequence_classification:
 
-Recall from :ref:`Working with the Domain Classifier <domain_classification>` and :ref:`Working with the Intent Classifier <intent_classification>` sections that a :ref:`Domain <domain_classifier_configuration>`/:ref:`Intent <intent_classifier_configuration>` classifier configuration consists of the keys ``'features'``, ``'param_selection'``, ``'model_settings'``, and ``'params'``, amongst other keys that do not have distinction between traditional models or deep neural models.
-When working with deep neural models, the ``'features'`` and ``'param_selection'`` keys in classifier configuration are redundant as we neither have to handcraft any feature sets for modeling nor there is an automated hyperparameter tuning.
-Thus, the only relevant keys to be configured are ``'model_settings'`` and ``'params'``.
+Recall from :ref:`Working with the Domain Classifier <domain_classifier_configuration>` and :ref:`Working with the Intent Classifier <intent_classifier_configuration>` sections that a text classifier configuration consists of the keys
+
+- ``'features'``,
+- ``'param_selection'``,
+- ``'model_settings'``, and
+- ``'params'``
+
+amongst other keys that do not have distinction between traditional models or deep neural models.
+When working with deep neural models, the ``'features'`` and ``'param_selection'`` keys in the classifier configuration are redundant as we neither have to handcraft any feature sets for modeling nor there is an automated hyperparameter tuning.
+Thus, the only relevant keys to be configured when using deep neural models are ``'model_settings'`` and ``'params'``.
 
 The ``'model_settings'`` is a :class:`dict` with the single key ``'classifier_type'``, whose value specifies the machine learning model to use.
-The allowed values that are backed by deep neural nets and are meant for sequence classification are:
+The allowed values of ``'classifier_type'`` that are backed by deep neural nets and are meant for sequence classification are:
 
 +----------------+----------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------+
 | Value          | Classifier                                                                                                                 | Reference for configurable parameters                                     |
@@ -62,7 +72,7 @@ The allowed values that are backed by deep neural nets and are meant for sequenc
 +----------------+----------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------+
 
 The ``'params'`` is also a :class:`dict` with several configurable keys, some of which are specific to the choice of classifier type and others common across all the above classifier types.
-In the following section, list of allowed parameters related to each choice of classifier type are outlined.
+In the following section, the list of allowed parameters related to each choice of classifier type are outlined.
 See :ref:`Common Configurable Params <common_configurable_params>` section for list of configurable params that are not just specific to any classifier type but are common across all the classifier types.
 
 1. ``'embedder'`` classifier type
@@ -70,17 +80,18 @@ See :ref:`Common Configurable Params <common_configurable_params>` section for l
 
 .. _dnns_sequence_classification_models_embedder:
 
-This classifier type includes neural models that are based on either an embedding lookup table or a deep contextualized embedder, along with a pooling operation on top of those embeddings before applying a classification layer.
-For the former type of embeddings, embedding lookup table is created depending upon the individual tokens found in the training data, with tokens derived based on a chosen tokenization strategy-- word, sub-word, or character tokenization (see :ref:`Tokenization Choices <tokenization_choices>` section below for more details).
-The lookup table by default is randomly initialized but can instead be initialized to a pretrained checkpoint (such as `GloVe <https://nlp.stanford.edu/projects/glove/>`_) when using the word tokenization strategy.
+This classifier type includes neural models that are based on either an embedding lookup table or a deep contextualized embedder, along with a pooling operation on top of those embeddings before passing through a classification layer.
+For the former type of embeddings, an embedding lookup table is created depending upon the set of tokens found in training data, with tokens being derived based on a chosen tokenization strategy-- word-level, sub-word-level, or character-level tokenization (see :ref:`Tokenization Choices <tokenization_choices>` section below for more details).
+The lookup table by default is randomly initialized but can instead be initialized to a pretrained checkpoint (such as `GloVe <https://nlp.stanford.edu/projects/glove/>`_) when using the word-level tokenization strategy.
 On the other hand, a deep contextualized embedder is a pretrained embedder such as :wiki_api:`BERT <BERT_(language_model)>`, which consists of its own tokenization strategy and neural embedding process.
-In any case, all the underlying weights can be tuned to the training data provided, or can be skipped when using pretrained ones.
+In any case, all the underlying weights can be tuned to the training data provided, or can be kept frozen during the training process.
+Dropout layers are used as regularizers to avoid over-fitting, which is a more common phenomenon when working with small sized datasets.
 
 .. note::
 
    Specify the embedding choice using the param ``embedder_type``. Set it to ``None``, ``'glove'`` or ``'bert'`` to use with desired embeddings-- based on randomly initialized embedding lookup table, based on lookup table initialized with GloVe pretrained embeddings or a BERT-like transformers architecture based deep contextualized embedder, respectively.
 
-Following are the different optional params that are configurable along with the chosen choice of ``embedder_type`` param.
+Following are the different optional params that are configurable along with the chosen choice of ``embedder_type`` param used with the ``'embedder'`` classifier type.
 See :ref:`Common Configurable Params <common_configurable_params>` section for list of additional configurable params that are common across classifiers.
 
 1.1 Based on Embedding Lookup Table (``embedder_type``: ``None``)
@@ -105,7 +116,7 @@ See :ref:`Common Configurable Params <common_configurable_params>` section for l
 |                                         |                                                                                                                                                                                                                                                  |
 |                                         | Choices: See `<tokenization_choices>`_                                                                                                                                                                                                           |
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``add_terminals``                       | If set to ``True``, terminal tokens-- START_TEXT and END_TEXT -- are added at the beginning and ending for each input before applying any padding.                                                                                               |
+| ``add_terminals``                       | If set to ``True``, terminal tokens (a start and an end token) are added at the beginning and ending for each input before applying any padding.                                                                                                 |
 |                                         |                                                                                                                                                                                                                                                  |
 |                                         | Type: bool                                                                                                                                                                                                                                       |
 |                                         |                                                                                                                                                                                                                                                  |
@@ -141,12 +152,12 @@ See :ref:`Common Configurable Params <common_configurable_params>` section for l
 |                                         |                                                                                                                                                                                                                                                  |
 |                                         | Type: float                                                                                                                                                                                                                                      |
 |                                         |                                                                                                                                                                                                                                                  |
-|                                         | Default: ``0.7``                                                                                                                                                                                                                                 |
+|                                         | Default: ``1.0``                                                                                                                                                                                                                                 |
 |                                         |                                                                                                                                                                                                                                                  |
 |                                         | Choices: A float between 0 and 1                                                                                                                                                                                                                 |
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-Below is a minimalistic example of a classifier configuration for classifier based on embedding lookup table:
+Below is a minimalistic example of a sequence classifier configuration for classifier based on embedding lookup table:
 
 .. code-block:: python
 
@@ -184,7 +195,7 @@ Below is a minimalistic example of a classifier configuration for classifier bas
 |                                         |                                                                                                                                                                                                                                                  |
 |                                         | Choices: File path to a valid GloVe-style embeddings file                                                                                                                                                                                        |
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``add_terminals``                       | If set to ``True``, terminal tokens-- START_TEXT and END_TEXT -- are added at the beginning and ending for each input before applying any padding.                                                                                               |
+| ``add_terminals``                       | If set to ``True``, terminal tokens (a start and an end token) are added at the beginning and ending for each input before applying any padding.                                                                                                 |
 |                                         |                                                                                                                                                                                                                                                  |
 |                                         | Type: bool                                                                                                                                                                                                                                       |
 |                                         |                                                                                                                                                                                                                                                  |
@@ -220,12 +231,12 @@ Below is a minimalistic example of a classifier configuration for classifier bas
 |                                         |                                                                                                                                                                                                                                                  |
 |                                         | Type: float                                                                                                                                                                                                                                      |
 |                                         |                                                                                                                                                                                                                                                  |
-|                                         | Default: ``0.7``                                                                                                                                                                                                                                 |
+|                                         | Default: ``1.0``                                                                                                                                                                                                                                 |
 |                                         |                                                                                                                                                                                                                                                  |
 |                                         | Choices: A float between 0 and 1                                                                                                                                                                                                                 |
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-Below is a minimalistic example of a classifier configuration for classifier based on pretrained-initialized embedding lookup table:
+Below is a minimalistic example of a sequence classifier configuration for classifier based on pretrained-initialized embedding lookup table:
 
 .. code-block:: python
 
@@ -282,12 +293,28 @@ Below is a minimalistic example of a classifier configuration for classifier bas
 |                                         |                                                                                                                                                                                                                                                  |
 |                                         | Type: float                                                                                                                                                                                                                                      |
 |                                         |                                                                                                                                                                                                                                                  |
-|                                         | Default: ``0.7``                                                                                                                                                                                                                                 |
+|                                         | Default: ``1.0``                                                                                                                                                                                                                                 |
 |                                         |                                                                                                                                                                                                                                                  |
 |                                         | Choices: A float between 0 and 1                                                                                                                                                                                                                 |
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``save_frozen_bert_weights``            | If set to ``False``, the weights of the underlying bert-like embedder that are not being tuned are not dumped to disk upon calling a classifier's .dump() method. This boolean key is only valid when ``update_embeddings`` is set to ``False``. |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: bool                                                                                                                                                                                                                                       |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``False``                                                                                                                                                                                                                               |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: ``True``, ``False``                                                                                                                                                                                                                     |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``add_terminals``                       | If set to ``True``, terminal tokens (a start and an end token) are added at the beginning and ending for each input before applying any padding.                                                                                                 |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: bool                                                                                                                                                                                                                                       |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``True``                                                                                                                                                                                                                                |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: ``True``, ``False``                                                                                                                                                                                                                     |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-Below is a minimalistic example of a classifier configuration for classifier based on BERT embedder:
+Below is a minimalistic example of a sequence classifier configuration for classifier based on BERT embedder:
 
 .. code-block:: python
 
@@ -308,7 +335,13 @@ Below is a minimalistic example of a classifier configuration for classifier bas
 
 .. _dnns_sequence_classification_models_cnn:
 
-This is CNN classifier. Add content here!
+:wiki_api:`Convolutional neural networks (CNN) <Convolutional_neural_network#Natural_language_processing>` based text classifiers are light-weight neural classifiers that have achieved remarkably strong performance on the practically important task of sentence classification.
+In its typical architecture for text classification, the first layer embeds the sequence of textual tokens obtained from input text into low-dimensional vectors using an embedding lookup table.
+The subsequent layer performs convolutions over the embedded word vectors using kernels (aka. filters); kernels of different length capture different patterns from the input text.
+For each chosen length, several kernels are used to capture different patterns at the same receptive range leading to several feature maps- one per kernel.
+Each feature map is reduced to the maximum value observed in that map and maximum values from all maps are combined to form a long feature vector.
+This vector is analogous to a an ``'embedder'`` classifier's pooled output, which is then passed through a classification layer.
+Dropout layers are used as regularizers to avoid over-fitting, which is a more common phenomenon when working with small sized datasets.
 
 Following are the different optional params that are configurable with the ``'cnn'`` classifier type.
 See :ref:`Common Configurable Params <common_configurable_params>` section for list of additional configurable params that are common across classifiers.
@@ -340,7 +373,7 @@ See :ref:`Common Configurable Params <common_configurable_params>` section for l
 |                                         |                                                                                                                                                                                                                                                  |
 |                                         | Choices: See `<tokenization_choices>`_                                                                                                                                                                                                           |
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``add_terminals``                       | If set to ``True``, terminal tokens-- START_TEXT and END_TEXT -- are added at the beginning and ending for each input before applying any padding.                                                                                               |
+| ``add_terminals``                       | If set to ``True``, terminal tokens (a start and an end token) are added at the beginning and ending for each input before applying any padding.                                                                                                 |
 |                                         |                                                                                                                                                                                                                                                  |
 |                                         | Type: bool                                                                                                                                                                                                                                       |
 |                                         |                                                                                                                                                                                                                                                  |
@@ -389,7 +422,7 @@ See :ref:`Common Configurable Params <common_configurable_params>` section for l
 |                                         | Choices: A list of positive integers; same length as ``window_sizes``                                                                                                                                                                            |
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-Below is a minimalistic example of a classifier configuration for classifier based on CNNs:
+Below is a minimalistic example of a sequence classifier configuration for classifier based on CNNs:
 
 .. code-block:: python
 
@@ -410,9 +443,16 @@ Below is a minimalistic example of a classifier configuration for classifier bas
 
 .. _dnns_sequence_classification_models_lstm:
 
-This is LSTM classifier. Add content here!
+:wiki_api:`Long short-term memory networks (LSTM) <Long_short-term_memory>` based text classifiers are classifiers that utilize recurrent feedback connections to be able to learn temporal dependencies in sequential data.
+In its typical architecture for text classification, the first layer embeds the sequence of textual tokens obtained from input text into low-dimensional vectors using an embedding lookup table.
+The capacity of an LSTM in maintaining the temporal information is generally dependant on its *hidden* dimension.
+Further, several LSTM layers can be stacked one-after-another and each layer can process the text from just beginning-to-end or both ways.
+The first layer's output embedding sequence is passed through the stacked LSTMs, which finally produces one vector per token of the input text.
+To obtain a single vector per input text, the vectors for each token can be pooled or the last vector in the sequence can simply be used as representative vector.
+This vector is analogous to a an ``'embedder'`` classifier's pooled output, which is then passed through a classification layer.
+Dropout layers are used as regularizers to avoid over-fitting, which is a more common phenomenon when working with small sized datasets.
 
-Following are the different optional params that are configurable with the ``'cnn'`` classifier type.
+Following are the different optional params that are configurable with the ``'lstm'`` classifier type.
 See :ref:`Common Configurable Params <common_configurable_params>` section for list of additional configurable params that are common across classifiers.
 
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -442,7 +482,7 @@ See :ref:`Common Configurable Params <common_configurable_params>` section for l
 |                                         |                                                                                                                                                                                                                                                  |
 |                                         | Choices: See `<tokenization_choices>`_                                                                                                                                                                                                           |
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``add_terminals``                       | If set to ``True``, terminal tokens-- START_TEXT and END_TEXT -- are added at the beginning and ending for each input before applying any padding.                                                                                               |
+| ``add_terminals``                       | If set to ``True``, terminal tokens (a start and an end token) are added at the beginning and ending for each input before applying any padding.                                                                                                 |
 |                                         |                                                                                                                                                                                                                                                  |
 |                                         | Type: bool                                                                                                                                                                                                                                       |
 |                                         |                                                                                                                                                                                                                                                  |
@@ -515,7 +555,7 @@ See :ref:`Common Configurable Params <common_configurable_params>` section for l
 |                                         | Choices: ``'first'``, ``'last'``, ``'max'``, ``'mean'``, ``'mean_sqrt'``                                                                                                                                                                         |
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-Below is a minimalistic example of a classifier configuration for classifier based on LSTMs:
+Below is a minimalistic example of a sequence classifier configuration for classifier based on LSTMs:
 
 .. code-block:: python
 
@@ -531,11 +571,571 @@ Below is a minimalistic example of a classifier configuration for classifier bas
     },
    }
 
-Entity recognition (Token Classification)
------------------------------------------
+Entity recognition
+------------------
 
 .. _dnns_token_classification:
 
+Recall from :ref:`Working with the Entity Recognizer <entity_recognizer_configuration>` section that a recognizer's configuration consists of the keys
+
+- ``'features'``,
+- ``'param_selection'``,
+- ``'model_settings'``, and
+- ``'params'``
+
+amongst other keys that do not have distinction between traditional models or deep neural models.
+When working with deep neural models, the ``'features'`` and ``'param_selection'`` keys in the classifier configuration are redundant as we neither have to handcraft any feature sets for modeling nor there is an automated hyperparameter tuning.
+Thus, the only relevant keys to be configured when using deep neural models are ``'model_settings'`` and ``'params'``.
+
+The ``'model_settings'`` is a :class:`dict` with the single key ``'classifier_type'``, whose value specifies the machine learning model to use.
+The allowed values of ``'classifier_type'`` that are backed by deep neural nets and are meant for token classification are:
+
++---------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------+
+| Value               | Classifier                                                                                                                                                                                                                                            | Reference for configurable parameters                                            |
++=====================+=======================================================================================================================================================================================================================================================+==================================================================================+
+| ``'embedder'``      | Pooled :wiki_api:`Token Embeddings <Word_embedding>` or :wiki_api:`Deep Contextualized Embeddings <BERT_(language_model)>`                                                                                                                            | :ref:`Embedder parameters <dnns_tokens_classification_models_embedder>`          |
++---------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------+
+| ``'lstm-pytorch'``  | :wiki_api:`Long short-term memory networks (LSTM) <Long_short-term_memory>`                                                                                                                                                                           | :ref:`LSTM-PYTORCH parameters <dnns_token_classification_models_lstm_pytorch>`   |
++---------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------+
+| ``'cnn-lstm'``      | Character-level :wiki_api:`Convolutional neural networks (CNN) <Convolutional_neural_network#Natural_language_processing>` followed by word-level :wiki_api:`Long short-term memory networks (LSTM) <Long_short-term_memory>`                         | :ref:`CNN-LSTM parameters <dnns_token_classification_models_cnn_lstm>`           |
++---------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------+
+| ``'lstm-lstm'``     | Character-level :wiki_api:`Long short-term memory networks (LSTM) <Long_short-term_memory>` followed by word-level :wiki_api:`Long short-term memory networks (LSTM) <Long_short-term_memory>`                                                        | :ref:`LSTM-LSTM parameters <dnns_token_classification_models_lstm_lstm>`         |
++---------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------+
+| ``'lstm'``          | :wiki_api:`Long short-term memory networks (LSTM) <Long_short-term_memory>` coupled with gazetteer encodings and backed by `Tensorflow <https://www.tensorflow.org/>`_                                                                                | :ref:`LSTM parameters <dnns_token_classification_models_lstm_tensorflow>`        |
++---------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------+
+
+The ``'params'`` is also a :class:`dict` with several configurable keys, some of which are specific to the choice of classifier type and others common across all the above classifier types.
+In the following section, the list of allowed parameters related to each choice of classifier type are outlined.
+See :ref:`Common Configurable Params <common_configurable_params>` section for list of configurable params that are not just specific to any classifier type but are common across all the classifier types.
+
+1. ``'embedder'`` classifier type
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. _dnns_tokens_classification_models_embedder:
+
+This classifier type includes neural models that are based on either an embedding lookup table or a deep contextualized embedder, the outputs of which are then passed through a `Conditional Random Field (CRF) <https://en.wikipedia.org/wiki/Conditional_random_field>`_ or a `Softmax layer <https://en.wikipedia.org/wiki/Softmax_function>`_  which labels the target word as a particular entity.
+For the former type of embeddings, an embedding lookup table is created depending upon the set of tokens found in training data, with tokens being derived based on a chosen tokenization strategy-- word-level, sub-word-level, or character-level tokenization (see :ref:`Tokenization Choices <tokenization_choices>` section below for more details).
+The lookup table by default is randomly initialized but can instead be initialized to a pretrained checkpoint (such as `GloVe <https://nlp.stanford.edu/projects/glove/>`_) when using the word-level tokenization strategy.
+On the other hand, a deep contextualized embedder is a pretrained embedder such as :wiki_api:`BERT <BERT_(language_model)>`, which consists of its own tokenization strategy and neural embedding process.
+In any case, all the underlying weights can be tuned to the training data provided, or can be kept frozen during the training process.
+Dropout layers are used as regularizers to avoid over-fitting, which is a more common phenomenon when working with small sized datasets.
+
+.. note::
+
+   Specify the embedding choice using the param ``embedder_type``. Set it to ``None``, ``'glove'`` or ``'bert'`` to use with desired embeddings-- based on randomly initialized embedding lookup table, based on lookup table initialized with GloVe pretrained embeddings or a BERT-like transformers architecture based deep contextualized embedder, respectively.
+
+Following are the different optional params that are configurable along with the chosen choice of ``embedder_type`` param used with the ``'embedder'`` classifier type.
+See :ref:`Common Configurable Params <common_configurable_params>` section for list of additional configurable params that are common across classifiers.
+
+1.1 Based on Embedding Lookup Table (``embedder_type``: ``None``)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Configuration Key                       | Description                                                                                                                                                                                                                                      |
++=========================================+==================================================================================================================================================================================================================================================+
+| ``emb_dim``                             | Number of dimensions for each token's embedding.                                                                                                                                                                                                 |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: int                                                                                                                                                                                                                                        |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``256``                                                                                                                                                                                                                                 |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: Any positive integer                                                                                                                                                                                                                    |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``tokenizer_type``                      | The choice of tokenization strategy to extract tokens from the training data. See :ref:`Tokenization Choices <tokenization_choices>` section below for more details.                                                                             |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: str                                                                                                                                                                                                                                        |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``'whitespace-tokenizer'``                                                                                                                                                                                                              |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: See `<tokenization_choices>`_                                                                                                                                                                                                           |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``add_terminals``                       | If set to ``True``, terminal tokens (a start and an end token) are added at the beginning and ending for each input before applying any padding.                                                                                                 |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: bool                                                                                                                                                                                                                                       |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``True``                                                                                                                                                                                                                                |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: ``True``, ``False``                                                                                                                                                                                                                     |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``update_embeddings``                   | If set to ``False``, the weights of embedding table or the deep contextualized embedder will not be updated during back-propogation of gradients. This boolean key is only valid when using a pretrained embedder type.                          |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: bool                                                                                                                                                                                                                                       |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``True``                                                                                                                                                                                                                                |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: ``True``, ``False``                                                                                                                                                                                                                     |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``embedder_output_keep_prob``           | Keep probability for the dropout layer placed on top of embeddings. Dropout helps in regularization and reduces over-fitting.                                                                                                                    |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: float                                                                                                                                                                                                                                      |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``0.7``                                                                                                                                                                                                                                 |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: A float between 0 and 1                                                                                                                                                                                                                 |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``output_keep_prob``                    | Keep probability for the dropout layer placed on top of classifier's penultimate layer (i.e the layer before logits are computed). Dropout helps in regularization and reduces over-fitting.                                                     |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: float                                                                                                                                                                                                                                      |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``1.0``                                                                                                                                                                                                                                 |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: A float between 0 and 1                                                                                                                                                                                                                 |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``token_spans_pooling_type``            | Specifies the manner in which a word's token-wise embeddings are to be collated into a single embedding before passing through entity classification layer.                                                                                      |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: str                                                                                                                                                                                                                                        |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``'first'``                                                                                                                                                                                                                             |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: ``'first'``, ``'last'``, ``'max'``, ``'mean'``, ``'mean_sqrt'``                                                                                                                                                                         |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``use_crf_layer``                       | If set to ``True``, a CRF layer is used for entity classification instead of a softmax layer.                                                                                                                                                    |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: bool                                                                                                                                                                                                                                       |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``True``                                                                                                                                                                                                                                |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: ``True``, ``False``                                                                                                                                                                                                                     |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+Below is a minimalistic example of a token classifier configuration for classifier based on embedding lookup table:
+
+.. code-block:: python
+
+   {
+    'model_type': 'tagger',
+    'train_label_set': 'train.*\.txt',
+    'test_label_set': 'test.*\.txt',
+    'model_settings': {'classifier_type': 'embedder'},
+    'params': {
+        'embedder_type': None,
+        'emb_dim': 256,
+    },
+   }
+
+1.2 Based on Pretrained Embedding Lookup Table (``embedder_type``: ``glove``)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Configuration Key                       | Description                                                                                                                                                                                                                                      |
++=========================================+==================================================================================================================================================================================================================================================+
+| ``token_dimension``                     | Specifies the dimension of the `GloVe-6B <https://nlp.stanford.edu/projects/glove/>`_ pretrained word vectors. This key is only valid when using ``embedder_type`` as ``'glove'``.                                                               |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: int                                                                                                                                                                                                                                        |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``300``                                                                                                                                                                                                                                 |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: ``50``, ``100``, ``200``, ``300``                                                                                                                                                                                                       |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``token_pretrained_embedding_filepath`` | Specifies a local file path for pretrained embedding file. This key is only valid when using ``embedder_type`` as ``'glove'``.                                                                                                                   |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: Union[str, None]                                                                                                                                                                                                                           |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``None``                                                                                                                                                                                                                                |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: File path to a valid GloVe-style embeddings file                                                                                                                                                                                        |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``add_terminals``                       | If set to ``True``, terminal tokens-- START_TEXT and END_TEXT -- are added at the beginning and ending for each input before applying any padding.                                                                                               |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: bool                                                                                                                                                                                                                                       |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``True``                                                                                                                                                                                                                                |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: ``True``, ``False``                                                                                                                                                                                                                     |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``update_embeddings``                   | If set to ``False``, the weights of embedding table or the deep contextualized embedder will not be updated during back-propogation of gradients. This boolean key is only valid when using a pretrained embedder type.                          |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: bool                                                                                                                                                                                                                                       |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``True``                                                                                                                                                                                                                                |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: ``True``, ``False``                                                                                                                                                                                                                     |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``embedder_output_keep_prob``           | Keep probability for the dropout layer placed on top of embeddings. Dropout helps in regularization and reduces over-fitting.                                                                                                                    |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: float                                                                                                                                                                                                                                      |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``0.7``                                                                                                                                                                                                                                 |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: A float between 0 and 1                                                                                                                                                                                                                 |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``output_keep_prob``                    | Keep probability for the dropout layer placed on top of classifier's penultimate layer (i.e the layer before logits are computed). Dropout helps in regularization and reduces over-fitting.                                                     |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: float                                                                                                                                                                                                                                      |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``1.0``                                                                                                                                                                                                                                 |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: A float between 0 and 1                                                                                                                                                                                                                 |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``token_spans_pooling_type``            | Specifies the manner in which a word's token-wise embeddings are to be collated into a single embedding before passing through entity classification layer.                                                                                      |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: str                                                                                                                                                                                                                                        |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``'first'``                                                                                                                                                                                                                             |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: ``'first'``, ``'last'``, ``'max'``, ``'mean'``, ``'mean_sqrt'``                                                                                                                                                                         |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``use_crf_layer``                       | If set to ``True``, a CRF layer is used for entity classification instead of a softmax layer.                                                                                                                                                    |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: bool                                                                                                                                                                                                                                       |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``True``                                                                                                                                                                                                                                |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: ``True``, ``False``                                                                                                                                                                                                                     |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+Below is a minimalistic example of a sequence classifier configuration for classifier based on pretrained-initialized embedding lookup table:
+
+.. code-block:: python
+
+   {
+    'model_type': 'tagger',
+    'train_label_set': 'train.*\.txt',
+    'test_label_set': 'test.*\.txt',
+    'model_settings': {'classifier_type': 'embedder'},
+    'params': {
+        'embedder_type': 'glove',
+        'update_embeddings': True,
+    },
+   }
+
+1.3 Based on Deep Contextualized Embeddings (``embedder_type``: ``bert``)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Configuration Key                       | Description                                                                                                                                                                                                                                      |
++=========================================+==================================================================================================================================================================================================================================================+
+| ``pretrained_model_name_or_path``       | Specifies a pretrained checkpoint's name or a valid file path to load a bert-like embedder. This key is only valid when using ``embedder_type`` as ``'bert'``.                                                                                   |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: str                                                                                                                                                                                                                                        |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``'bert-base-uncased'``                                                                                                                                                                                                                 |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: Any valid name from `Huggingface Models Hub <https://huggingface.co/models>`_ or a valid folder path where the model's weights as well as its tokenizer's resources are present.                                                        |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``update_embeddings``                   | If set to ``False``, the weights of embedding table or the deep contextualized embedder will not be updated during back-propogation of gradients. This boolean key is only valid when using a pretrained embedder type.                          |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: bool                                                                                                                                                                                                                                       |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``True``                                                                                                                                                                                                                                |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: ``True``, ``False``                                                                                                                                                                                                                     |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``embedder_output_keep_prob``           | Keep probability for the dropout layer placed on top of embeddings. Dropout helps in regularization and reduces over-fitting.                                                                                                                    |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: float                                                                                                                                                                                                                                      |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``0.7``                                                                                                                                                                                                                                 |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: A float between 0 and 1                                                                                                                                                                                                                 |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``output_keep_prob``                    | Keep probability for the dropout layer placed on top of classifier's penultimate layer (i.e the layer before logits are computed). Dropout helps in regularization and reduces over-fitting.                                                     |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: float                                                                                                                                                                                                                                      |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``1.0``                                                                                                                                                                                                                                 |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: A float between 0 and 1                                                                                                                                                                                                                 |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``save_frozen_bert_weights``            | If set to ``False``, the weights of the underlying bert-like embedder that are not being tuned are not dumped to disk upon calling a classifier's .dump() method. This boolean key is only valid when ``update_embeddings`` is set to ``False``. |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: bool                                                                                                                                                                                                                                       |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``False``                                                                                                                                                                                                                               |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: ``True``, ``False``                                                                                                                                                                                                                     |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``token_spans_pooling_type``            | Specifies the manner in which a word's token-wise embeddings are to be collated into a single embedding before passing through entity classification layer.                                                                                      |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: str                                                                                                                                                                                                                                        |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``'first'``                                                                                                                                                                                                                             |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: ``'first'``, ``'last'``, ``'max'``, ``'mean'``, ``'mean_sqrt'``                                                                                                                                                                         |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``use_crf_layer``                       | If set to ``True``, a CRF layer is used for entity classification instead of a softmax layer.                                                                                                                                                    |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: bool                                                                                                                                                                                                                                       |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``False``                                                                                                                                                                                                                               |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: ``True``, ``False``                                                                                                                                                                                                                     |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``add_terminals``                       | If set to ``True``, terminal tokens (a start and an end token) are added at the beginning and ending for each input before applying any padding.                                                                                                 |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Type: bool                                                                                                                                                                                                                                       |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Default: ``True``                                                                                                                                                                                                                                |
+|                                         |                                                                                                                                                                                                                                                  |
+|                                         | Choices: ``True``, ``False``                                                                                                                                                                                                                     |
++-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+Below is a minimalistic example of a sequence classifier configuration for classifier based on BERT embedder:
+
+.. code-block:: python
+
+   {
+    'model_type': 'tagger',
+    'train_label_set': 'train.*\.txt',
+    'test_label_set': 'test.*\.txt',
+    'model_settings': {'classifier_type': 'embedder'},
+    'params': {
+        'embedder_type': 'bert',
+        'pretrained_model_name_or_path': 'distilbert-base-uncased',
+        'update_embeddings': True,
+    },
+   }
+
+2. ``'lstm-pytorch'`` classifier type
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. _dnns_token_classification_models_lstm_pytorch:
+
+When using sub-word- or character-level tokenization, the vectors of tokens corresponding to each word (for which an entity tag is to be ascertained) are pooled.
+This is unlike sequence classification models where the tokens of all words are pooled together.
+
+
+3. ``'cnn-lstm'`` classifier type
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. _dnns_token_classification_models_cnn_lstm:
+
+
+4. ``'lstm-lstm'`` classifier type
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. _dnns_token_classification_models_lstm_lstm:
+
+5. ``'lstm'`` classifier type
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. _dnns_token_classification_models_lstm_tensorflow:
+
+A `Tensorflow <https://www.tensorflow.org/>`_ backed implementation of `Bi-Directional Long Short-Term Memory (LSTM) Network <https://en.wikipedia.org/wiki/Bidirectional_recurrent_neural_networks>`_.
+
+.. note::
+
+   To use this classifier type, please make sure to install the Tensorflow requirement by running in the shell: :code:`pip install mindmeld[tensorflow]`.
+
+The MindMeld Bi-Directional LSTM network
+
+ - encodes words as pre-trained word embeddings using Stanford's `GloVe representation <https://nlp.stanford.edu/projects/glove/>`_
+ - encodes characters using a convolutional network trained on the training data
+ - concatenates the word and character embeddings together and feeds them into the bi-directional LSTM
+ - couples the forget and input gates of the LSTM using a peephole connection, to improve overall accuracies on downstream NLP tasks
+ - feeds the output of the LSTM into a `linear chain Conditional Random Field <https://en.wikipedia.org/wiki/Conditional_random_field>`_ (CRF) or `Softmax layer <https://en.wikipedia.org/wiki/Softmax_function>`_  which labels the target word as a particular entity
+
+Following are the different optional params that are configurable with the ``'lstm'`` classifier type.
+Unlike other classifier types, this classifier type **does not** share any common additional configurable params.
+
++-----------------------------------------+------------------------------------------------------------------------------------------------+
+| Parameter name                          | Description                                                                                    |
++=========================================+================================================================================================+
+| ``padding_length``                      | The sequence model treats this as the maximum number of words in a query.                      |
+|                                         | If a query has more words than ``padding_length``, the surplus words are discarded.            |
+|                                         |                                                                                                |
+|                                         | Typically set to the maximum word length of query expected both at train and predict time.     |
+|                                         |                                                                                                |
+|                                         | Default: ``20``                                                                                |
+|                                         |                                                                                                |
+|                                         | Example:                                                                                       |
+|                                         |                                                                                                |
+|                                         | ``{'padding_length': 20}``                                                                     |
+|                                         |  - a query can have a maximum of twenty words                                                  |
++-----------------------------------------+------------------------------------------------------------------------------------------------+
+| ``batch_size``                          | Size of each batch of training data to feed into the network (which uses mini-batch learning). |
+|                                         |                                                                                                |
+|                                         | Default: ``20``                                                                                |
+|                                         |                                                                                                |
+|                                         | Example:                                                                                       |
+|                                         |                                                                                                |
+|                                         | ``{'batch_size': 20}``                                                                         |
+|                                         |  - feed twenty training queries to the network for each learning step                          |
++-----------------------------------------+------------------------------------------------------------------------------------------------+
+| ``display_epoch``                       | The network displays training accuracy statistics at this interval, measured in epochs.        |
+|                                         |                                                                                                |
+|                                         | Default: ``5``                                                                                 |
+|                                         |                                                                                                |
+|                                         | Example:                                                                                       |
+|                                         |                                                                                                |
+|                                         | ``{'display_epoch': 5}``                                                                       |
+|                                         |  - display accuracy statistics every five epochs                                               |
++-----------------------------------------+------------------------------------------------------------------------------------------------+
+| ``number_of_epochs``                    | Total number of complete iterations of the training data to feed into the network.             |
+|                                         | In each iteration, the data is shuffled to break any prior sequence patterns.                  |
+|                                         |                                                                                                |
+|                                         | Default: ``20``                                                                                |
+|                                         |                                                                                                |
+|                                         | Example:                                                                                       |
+|                                         |                                                                                                |
+|                                         | ``{'number_of_epochs': 20}``                                                                   |
+|                                         |  - iterate through the training data twenty times                                              |
++-----------------------------------------+------------------------------------------------------------------------------------------------+
+| ``optimizer``                           | Optimizer to use to minimize the network's stochastic objective function.                      |
+|                                         |                                                                                                |
+|                                         | Default: ``'adam'``                                                                            |
+|                                         |                                                                                                |
+|                                         | Example:                                                                                       |
+|                                         |                                                                                                |
+|                                         | ``{'optimizer': 'adam'}``                                                                      |
+|                                         |  - use the Adam optimizer to minimize the objective function                                   |
++-----------------------------------------+------------------------------------------------------------------------------------------------+
+| ``learning_rate``                       | Parameter to control the size of weight and bias changes                                       |
+|                                         | of the training algorithm as it learns.                                                        |
+|                                         |                                                                                                |
+|                                         | `This <https://en.wikibooks.org/wiki/Artificial_Neural_Networks/Error-Correction_Learning>`_   |
+|                                         | article explains Learning Rate in technical terms.                                             |
+|                                         |                                                                                                |
+|                                         | Default: ``0.005``                                                                             |
+|                                         |                                                                                                |
+|                                         | Example:                                                                                       |
+|                                         |                                                                                                |
+|                                         | ``{'learning_rate': 0.005}``                                                                   |
+|                                         |  - set learning rate to 0.005                                                                  |
++-----------------------------------------+------------------------------------------------------------------------------------------------+
+| ``dense_keep_prob``                     | In the context of the ''dropout'' technique (a regularization method to prevent overfitting),  |
+|                                         | keep probability specifies the proportion of nodes to "keep"—that is, to exempt from dropout   |
+|                                         | during the network's learning phase.                                                           |
+|                                         |                                                                                                |
+|                                         | The ``dense_keep_prob`` parameter sets the keep probability of the nodes                       |
+|                                         | in the dense network layer that connects the output of the LSTM layer                          |
+|                                         | to the nodes that predict the named entities.                                                  |
+|                                         |                                                                                                |
+|                                         | Default: ``0.5``                                                                               |
+|                                         |                                                                                                |
+|                                         | Example:                                                                                       |
+|                                         |                                                                                                |
+|                                         | ``{'dense_keep_prob': 0.5}``                                                                   |
+|                                         |  - 50% of the nodes in the dense layer will not be turned off by dropout                       |
++-----------------------------------------+------------------------------------------------------------------------------------------------+
+| ``lstm_input_keep_prob``                | Keep probability for the nodes that constitute the inputs to the LSTM cell.                    |
+|                                         |                                                                                                |
+|                                         | Default: ``0.5``                                                                               |
+|                                         |                                                                                                |
+|                                         | Example:                                                                                       |
+|                                         |                                                                                                |
+|                                         | ``{'lstm_input_keep_prob': 0.5}``                                                              |
+|                                         |  - 50% of the nodes that are inputs to the LSTM cell will not be turned off by dropout         |
++-----------------------------------------+------------------------------------------------------------------------------------------------+
+| ``lstm_output_keep_prob``               | Keep probability for the nodes that constitute the outputs of the LSTM cell.                   |
+|                                         |                                                                                                |
+|                                         | Default: ``0.5``                                                                               |
+|                                         |                                                                                                |
+|                                         |                                                                                                |
+|                                         | Example:                                                                                       |
+|                                         |                                                                                                |
+|                                         | ``{'lstm_output_keep_prob': 0.5}``                                                             |
+|                                         |  - 50% of the nodes that are outputs of the LSTM cell will not be turned off by dropout        |
++-----------------------------------------+------------------------------------------------------------------------------------------------+
+| ``token_lstm_hidden_state_dimension``   | Number of states per LSTM cell.                                                                |
+|                                         |                                                                                                |
+|                                         | Default: ``300``                                                                               |
+|                                         |                                                                                                |
+|                                         | Example:                                                                                       |
+|                                         |                                                                                                |
+|                                         | ``{'token_lstm_hidden_state_dimension': 300}``                                                 |
+|                                         |  - an LSTM cell will have 300 states                                                           |
++-----------------------------------------+------------------------------------------------------------------------------------------------+
+| ``token_embedding_dimension``           | Number of dimensions for word embeddings.                                                      |
+|                                         |                                                                                                |
+|                                         | Allowed values: [50, 100, 200, 300].                                                           |
+|                                         |                                                                                                |
+|                                         | Default: ``300``                                                                               |
+|                                         |                                                                                                |
+|                                         | Example:                                                                                       |
+|                                         |                                                                                                |
+|                                         | ``{'token_embedding_dimension': 300}``                                                         |
+|                                         |  - each word embedding will have 300 dimensions                                                |
++-----------------------------------------+------------------------------------------------------------------------------------------------+
+| ``gaz_encoding_dimension``              | Number of nodes to connect to the gazetteer encodings in a fully-connected network.            |
+|                                         |                                                                                                |
+|                                         | Default: ``100``                                                                               |
+|                                         |                                                                                                |
+|                                         |                                                                                                |
+|                                         | Example:                                                                                       |
+|                                         |                                                                                                |
+|                                         | ``{'gaz_encoding_dimension': 100}``                                                            |
+|                                         |  - 100 nodes will be connected to the gazetteer encodings in a fully-connected network         |
++-----------------------------------------+------------------------------------------------------------------------------------------------+
+| ``max_char_per_word``                   | The sequence model treats this as the maximum number of characters in a word.                  |
+|                                         | If a word has more characters than ``max_char_per_word``, the surplus characters are discarded.|
+|                                         |                                                                                                |
+|                                         | Usually set to the size of the longest word in the training and test sets.                     |
+|                                         |                                                                                                |
+|                                         | Default: ``20``                                                                                |
+|                                         |                                                                                                |
+|                                         | Example:                                                                                       |
+|                                         |                                                                                                |
+|                                         | ``{'max_char_per_word': 20}``                                                                  |
+|                                         |  - a word can have a maximum of twenty characters                                              |
++-----------------------------------------+------------------------------------------------------------------------------------------------+
+| ``use_crf_layer``                       | If set to ``True``, use a linear chain Conditional Random Field layer for the final layer,     |
+|                                         | which predicts sequence tags.                                                                  |
+|                                         |                                                                                                |
+|                                         | If set to ``False``, use a softmax layer to predict sequence tags.                             |
+|                                         |                                                                                                |
+|                                         | Default: ``False``                                                                             |
+|                                         |                                                                                                |
+|                                         | Example:                                                                                       |
+|                                         |                                                                                                |
+|                                         | ``{'use_crf_layer': True}``                                                                    |
+|                                         |  - use the CRF layer                                                                           |
++-----------------------------------------+------------------------------------------------------------------------------------------------+
+| ``use_character_embeddings``            | If set to ``True``, use the character embedding trained on the training data                   |
+|                                         | using a convolutional network.                                                                 |
+|                                         |                                                                                                |
+|                                         | If set to ``False``, do not use character embeddings.                                          |
+|                                         |                                                                                                |
+|                                         | Note: Using character embedding significantly increases training time                          |
+|                                         | compared to vanilla word embeddings only.                                                      |
+|                                         |                                                                                                |
+|                                         | Default: ``False``                                                                             |
+|                                         |                                                                                                |
+|                                         | Example:                                                                                       |
+|                                         |                                                                                                |
+|                                         | ``{'use_character_embeddings': True}``                                                         |
+|                                         |  - use character embeddings                                                                    |
++-----------------------------------------+------------------------------------------------------------------------------------------------+
+| ``char_window_sizes``                   | List of window sizes for convolutions that the network should use                              |
+|                                         | to build the character embeddings.                                                             |
+|                                         | Usually in decreasing numerical order.                                                         |
+|                                         |                                                                                                |
+|                                         | Note: This parameter is needed only if ``use_character_embeddings`` is set to ``True``.        |
+|                                         |                                                                                                |
+|                                         | Default: ``[5]``                                                                               |
+|                                         |                                                                                                |
+|                                         | Example:                                                                                       |
+|                                         |                                                                                                |
+|                                         | ``{'char_window_sizes': [5, 3]}``                                                              |
+|                                         |  - first, use a convolution of size 5                                                          |
+|                                         |  - next, feed the output of that convolution through a convolution of size 3                   |
++-----------------------------------------+------------------------------------------------------------------------------------------------+
+| ``character_embedding_dimension``       | Initial dimension of each character before it is fed into the convolutional network.           |
+|                                         |                                                                                                |
+|                                         | Note: This parameter is needed only if ``use_character_embeddings`` is set to ``True``.        |
+|                                         |                                                                                                |
+|                                         | Default: ``10``                                                                                |
+|                                         |                                                                                                |
+|                                         | Example:                                                                                       |
+|                                         |                                                                                                |
+|                                         | ``{'character_embedding_dimension': 10}``                                                      |
+|                                         |  - initialize the dimension of each character to ten                                           |
++-----------------------------------------+------------------------------------------------------------------------------------------------+
+| ``word_level_character_embedding_size`` | The final dimension of each character after it is transformed                                  |
+|                                         | by the convolutional network.                                                                  |
+|                                         |                                                                                                |
+|                                         | Usually greater than ``character_embedding_dimension`` since it encodes                        |
+|                                         | more information about orthography and semantics.                                              |
+|                                         |                                                                                                |
+|                                         | Note: This parameter is needed only if ``use_character_embeddings`` is set to ``True``.        |
+|                                         |                                                                                                |
+|                                         | Default: ``40``                                                                                |
+|                                         |                                                                                                |
+|                                         | Example:                                                                                       |
+|                                         |                                                                                                |
+|                                         | ``{'word_level_character_embedding_size': 40}``                                                |
+|                                         |  - each character should have dimension of forty, after convolutional network training         |
++-----------------------------------------+------------------------------------------------------------------------------------------------+
 
 
 Common Configurable Params
@@ -560,7 +1160,7 @@ Common Configurable Params
 |                                 |                                                                                                                  |
 |                                 | Type: int                                                                                                        |
 |                                 |                                                                                                                  |
-|                                 | Default: ``100``                                                                                                 |
+|                                 | Default: ``100`` unless specified otherwise for the selected classifier type.                                    |
 |                                 |                                                                                                                  |
 |                                 | Choices: Any positive integer                                                                                    |
 +---------------------------------+------------------------------------------------------------------------------------------------------------------+
@@ -568,16 +1168,15 @@ Common Configurable Params
 |                                 |                                                                                                                  |
 |                                 | Type: int                                                                                                        |
 |                                 |                                                                                                                  |
-|                                 | Default: ``7``                                                                                                   |
+|                                 | Default: ``10`` if token classification else ``7``, unless specified otherwise for the selected classifier type. |
 |                                 |                                                                                                                  |
 |                                 | Choices: Any positive integer                                                                                    |
 +---------------------------------+------------------------------------------------------------------------------------------------------------------+
 | ``batch_size``                  | Size of each batch of training data to feed into the network (which uses mini-batch learning).                   |
 |                                 |                                                                                                                  |
-|                                 |                                                                                                                  |
 |                                 | Type: int                                                                                                        |
 |                                 |                                                                                                                  |
-|                                 | Default: ``32``                                                                                                  |
+|                                 | Default: ``32`` unless specified otherwise for the selected classifier type.                                     |
 |                                 |                                                                                                                  |
 |                                 | Choices: Any positive integer                                                                                    |
 +---------------------------------+------------------------------------------------------------------------------------------------------------------+
@@ -586,7 +1185,7 @@ Common Configurable Params
 |                                 |                                                                                                                  |
 |                                 | Type: int                                                                                                        |
 |                                 |                                                                                                                  |
-|                                 | Default: ``1``                                                                                                   |
+|                                 | Default: ``1`` unless specified otherwise for the selected classifier type.                                      |
 |                                 |                                                                                                                  |
 |                                 | Choices: Any positive integer                                                                                    |
 +---------------------------------+------------------------------------------------------------------------------------------------------------------+
@@ -620,7 +1219,7 @@ Common Configurable Params
 |                                 |                                                                                                                  |
 |                                 | Type: str                                                                                                        |
 |                                 |                                                                                                                  |
-|                                 | Default: ``'accuracy'``                                                                                          |
+|                                 | Default: ``'accuracy'`` for sequence classification and ``'f1'`` for token classification                        |
 |                                 |                                                                                                                  |
 |                                 | Choices: ``'accuracy'``, ``'f1'``                                                                                |
 +---------------------------------+------------------------------------------------------------------------------------------------------------------+

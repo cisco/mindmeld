@@ -113,6 +113,7 @@ class TokenClassificationType(enum.Enum):
 
 
 TRAIN_DEV_SPLIT_SEED = 6174
+SHUFFLE_TRAINING_SEED = 8128
 LABEL_PAD_TOKEN_IDX = -1  # value set based on default label padding idx in pytorch
 
 DEFAULT_TRAINING_INFERENCE_PARAMS = {
@@ -190,7 +191,7 @@ DEFAULT_FORWARD_PASS_PARAMS = {
         "add_terminals": True,
         "tokenizer_type": TokenizerType.HUGGINGFACE_PRETRAINED_TOKENIZER.value,
         # keys that are not mutually exclusive and are valid when some of the above keys are set
-        "save_frozen_bert_weights": False,  # the key is valid only when update_embeddings=True
+        "save_frozen_bert_weights": False,  # the key is valid only when update_embeddings=False
     },
     "EmbedderForTokenClassification": {
         **DEFAULT_COMMON_TOKEN_CLASSIFICATION_PARAMS,
@@ -255,7 +256,7 @@ DEFAULT_FORWARD_PASS_PARAMS = {
         "add_terminals": True,
         "tokenizer_type": TokenizerType.HUGGINGFACE_PRETRAINED_TOKENIZER.value,
         # keys that are not mutually exclusive and are valid when some of the above keys are set
-        "save_frozen_bert_weights": False,  # the key is valid only when update_embeddings=True
+        "save_frozen_bert_weights": False,  # the key is valid only when update_embeddings=False
     }
 }
 

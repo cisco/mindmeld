@@ -19,6 +19,7 @@ sequence or token classification
 import json
 import logging
 import os
+import random
 import shutil
 import uuid
 from abc import abstractmethod
@@ -39,6 +40,7 @@ from .helpers import (
     EmbedderType,
     ValidationMetricType,
     TRAIN_DEV_SPLIT_SEED,
+    SHUFFLE_TRAINING_SEED,
     LABEL_PAD_TOKEN_IDX,
     DEFAULT_EMB_DIM,
     DEFAULT_TOKENIZER
@@ -205,6 +207,7 @@ class BaseClassification(nn_module):
         self.log_and_return_model_info(_verbose)
 
         # training w/ validation
+        random.seed(SHUFFLE_TRAINING_SEED)
         best_dev_score, best_dev_epoch = -np.inf, -1
         msg = f"Beginning to train for {self.params.number_of_epochs} number of epochs"
         logger.info(msg)
@@ -221,6 +224,10 @@ class BaseClassification(nn_module):
             self.train()
             optimizer.zero_grad()
             train_loss, train_batches = 0.0, 0.0
+            indices = [ii for ii in range(len(train_examples))]
+            random.shuffle(indices)
+            train_examples = [train_examples[ii] for ii in indices]
+            train_labels = [train_labels[ii] for ii in indices]
             t = tqdm(range(0, len(train_examples), self.params.batch_size), disable=not _verbose)
             for start_idx in t:
                 batch_examples = train_examples[start_idx:start_idx + self.params.batch_size]
@@ -239,6 +246,7 @@ class BaseClassification(nn_module):
                 })
                 batch_data = self.forward(batch_data)
                 loss = batch_data["loss"]
+                # .cpu() returns copy of tensor in CPU memory; also see https://tinyurl.com/3b4uvkj2
                 train_loss += loss.cpu().detach().numpy()
                 train_batches += 1
                 # find gradients
