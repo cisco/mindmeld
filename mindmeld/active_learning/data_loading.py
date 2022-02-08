@@ -349,15 +349,6 @@ class DataBucket:
             newly_sampled_indices = ranked_entity_indices[:sampling_size]
             remaining_indices = ranked_entity_indices[sampling_size:]
 
-            # PLACEHOLDER CODE for joint tuning (deprecated for now).
-            # to-do: random select and restrict to batch size
-            # newly_sampled_indices = list(
-            #     set(newly_sampled_indices).union(newly_sampled_indices_entity)
-            # )
-            # remaining_indices = list(
-            #     set(remaining_indices).intersection(remaining_indices_entity)
-            # )
-
         newly_sampled_queries_ids = [
             self.unsampled_queries.elements[i] for i in newly_sampled_indices
         ]
