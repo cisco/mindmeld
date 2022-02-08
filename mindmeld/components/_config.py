@@ -491,7 +491,6 @@ DEFAULT_ACTIVE_LEARNING_CONFIG = {
         "n_epochs": 5,
         "batch_size": 100,
         "tuning_level": ["domain"],
-        "entity_tuning": False,
         "classifier_tuning_strategies": [
             "LeastConfidenceSampling",
             "MarginSampling",
