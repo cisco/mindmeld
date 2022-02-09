@@ -17,8 +17,7 @@ from mindmeld.active_learning.data_loading import (
 from mindmeld.constants import (
     DEFAULT_TRAIN_SET_REGEX,
     DEFAULT_TEST_SET_REGEX,
-    TUNE_LEVEL_DOMAIN,
-    TUNE_LEVEL_INTENT,
+    TuneLevel,
 )
 from mindmeld.core import ProcessedQuery
 
@@ -34,7 +33,7 @@ def all_train_queries(kwik_e_mart_nlp):
 def tuning_data_bucket(kwik_e_mart_app_path):
     return DataBucketFactory.get_data_bucket_for_strategy_tuning(
         app_path=kwik_e_mart_app_path,
-        tuning_level=TUNE_LEVEL_INTENT,
+        tuning_level=[TuneLevel.INTENT.value],
         train_pattern=DEFAULT_TRAIN_SET_REGEX,
         test_pattern=DEFAULT_TEST_SET_REGEX,
         train_seed_pct=0.2,
@@ -63,7 +62,7 @@ def test_label_map_intents(kwik_e_mart_nlp):
 def test_get_class_labels_domains(kwik_e_mart_nlp, all_train_queries):
     app_domains = list(kwik_e_mart_nlp.domains.keys())
     unique_domain_labels = list(
-        set(LabelMap.get_class_labels(TUNE_LEVEL_DOMAIN, all_train_queries))
+        set(LabelMap.get_class_labels(TuneLevel.DOMAIN.value, all_train_queries))
     )
     assert all(domain in app_domains for domain in unique_domain_labels)
 
@@ -76,7 +75,7 @@ def test_get_class_labels_domains_intents(kwik_e_mart_nlp, all_train_queries):
             label = f"{domain}.{intent}"
             nlp_domain_intent_labels.append(label)
     unique_domain_intent_labels = list(
-        set(LabelMap.get_class_labels(TUNE_LEVEL_INTENT, all_train_queries))
+        set(LabelMap.get_class_labels(TuneLevel.INTENT.value, all_train_queries))
     )
     assert all(
         label in nlp_domain_intent_labels for label in unique_domain_intent_labels
@@ -91,7 +90,7 @@ def test_log_queries_loader(kwik_e_mart_nlp, kwik_e_mart_app_path):
     first_ten_queries_raw = [q.query.text for q in first_ten_queries]
     log_queries_loader = LogQueriesLoader(
         app_path=kwik_e_mart_app_path,
-        tuning_level=TUNE_LEVEL_INTENT,
+        tuning_level=TuneLevel.INTENT.value,
         log_file_path="",
     )
     text_to_processed_queries = log_queries_loader.convert_text_queries_to_processed(
@@ -126,10 +125,10 @@ def test_data_bucket_factory(kwik_e_mart_app_path, tuning_data_bucket):
 
 
 # Test Filter Queries
-def test_filter_queries_by_domain(all_train_queries):
+def test_filter_queries_by_nlp_component(all_train_queries):
     domain_to_filter_by = "banking"
-    filtered_ids, filtered_queries = DataBucket.filter_queries_by_domain(
-        query_list=all_train_queries, domain=domain_to_filter_by
+    filtered_ids, filtered_queries = DataBucket.filter_queries_by_nlp_component(
+        query_list=all_train_queries, component_type="domain", component_name=domain_to_filter_by
     )
     assert len(filtered_ids) == len(filtered_queries)
     assert all(q.domain == domain_to_filter_by for q in filtered_queries)

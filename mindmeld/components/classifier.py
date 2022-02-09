@@ -329,7 +329,7 @@ class Classifier(ABC):
         class_proba_tuples = list(predict_proba_result[0][1].items())
         return sorted(class_proba_tuples, key=lambda x: x[1], reverse=True)
 
-    def evaluate(self, queries=None, label_set=None):
+    def evaluate(self, queries=None, label_set=None, fetch_distribution=False):
         """Evaluates the trained classification model on the given test data
 
         Args:
@@ -358,7 +358,12 @@ class Classifier(ABC):
             )
             return None
 
-        evaluation = self._model.evaluate(examples, labels)
+        # enables fetching probability distribution for entity recognizer
+        kwargs = {}
+        if self.config.model_type == 'tagger':
+            kwargs["fetch_distribution"] = fetch_distribution
+
+        evaluation = self._model.evaluate(examples, labels, **kwargs)
         return evaluation
 
     def inspect(self, query, gold_label=None, dynamic_resource=None):
