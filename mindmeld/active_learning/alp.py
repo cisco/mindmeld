@@ -212,7 +212,10 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
         self.init_unsampled_queries_ids = self.data_bucket.unsampled_queries.elements
         logger.info("Starting selection of log queries.")
 
-        if self.classifier_selection_strategy:
+        if self.classifier_selection_strategy and (
+            TuneLevel.DOMAIN.value in self.tuning_level
+            or TuneLevel.INTENT.value in self.tuning_level
+        ):
             newly_sampled_queries = self._run_strategy(
                 tuning_type=TuningType.CLASSIFIER,
                 strategy=self.classifier_selection_strategy,
@@ -223,7 +226,10 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
                 queries=newly_sampled_queries,
             )
 
-        if self.tagger_selection_strategy:
+        if (
+            self.tagger_selection_strategy
+            and TuneLevel.ENTITY.value in self.tuning_level
+        ):
             newly_sampled_queries = self._run_strategy(
                 tuning_type=TuningType.TAGGER,
                 strategy=self.tagger_selection_strategy,
