@@ -111,7 +111,6 @@ Contents
    userguide/domain_classifier
    userguide/intent_classifier
    userguide/entity_recognizer
-   userguide/lstm
    userguide/role_classifier
    userguide/entity_resolver
    userguide/parser

@@ -223,6 +223,15 @@ class AbstractVocabLookupEncoder(AbstractEncoder):
         super().__init__(**kwargs)
         self.token2id = {}
 
+        # Considers not splitting query text at whitespace if this param is set to True; useful for
+        # languages with non-whitespace script e.g. Japanese, Chinese, etc.
+        # Cautions:
+        #   - when this param is set to True, any truncation of very long inputs due to the
+        #   tokenizer's max length is not checked for and can raise errors in token classification
+        #   - when this param is set to True within token classification, ensure that number of
+        #   tokens (without any distinction of whitespace) matches the number of entity tags/labels
+        self.avoid_whitespace_splitting = kwargs.get("avoid_whitespace_splitting")
+
     @property
     def id2token(self):
         return {i: t for t, i in self.token2id.items()}
@@ -280,32 +289,75 @@ class AbstractVocabLookupEncoder(AbstractEncoder):
         _return_tokenized_examples: bool = False, **kwargs
     ) -> BatchData:
 
+        split_at = " "
         n_terminals = self.number_of_terminal_tokens if add_terminals else 0
 
-        # tokenize each word of each input separately
-        # get maximum length of each example, accounting for terminal tokens- cls, sep
-        # If padding_length is None, padding has to be done to the max length of the input batch
-        tokenized_examples = [
-            [self._tokenize(word) for word in example.split(" ")] for example in examples
-        ]
+        if self.avoid_whitespace_splitting:
+            tokenized_examples = [self._tokenize(example) for example in examples]
 
-        max_curr_len = max([len(sum(t_ex, [])) for t_ex in tokenized_examples]) + n_terminals
-        padding_length_including_terminals = min(max_curr_len, padding_length) \
-            if padding_length else max_curr_len
-        padding_length_excluding_terminals = padding_length_including_terminals - n_terminals
+            max_curr_len = max([len(ex) for ex in tokenized_examples]) + n_terminals
+            padding_length_including_terminals = min(max_curr_len, padding_length) \
+                if padding_length else max_curr_len
+            padding_length_excluding_terminals = padding_length_including_terminals - n_terminals
 
-        _trimmed_examples = [
-            _trim_a_list_of_sub_token_groups(tokenized_example, padding_length_excluding_terminals)
-            for tokenized_example in tokenized_examples
-        ]  # List[List[List[str]]], innermost List[str] is a list of sub-words for a given word
+            _trimmed_examples = [
+                ex[:padding_length_excluding_terminals] for ex in tokenized_examples
+            ]
 
-        split_lengths = [[len(x) for x in ex] for ex in _trimmed_examples]
+            split_lengths = [[1] * len(ex) for ex in _trimmed_examples]
 
-        # convert (sub) words into their respective token ids
-        seq_ids = [
-            self._encode_text(sum(example, []), padding_length_including_terminals, add_terminals)
-            for example in tokenized_examples
-        ]
+            # convert (sub) words into their respective token ids
+            seq_ids = [
+                self._encode_text(
+                    example,
+                    padding_length_including_terminals,
+                    add_terminals
+                )
+                for example in _trimmed_examples
+            ]
+
+            if _return_tokenized_examples:
+                _examples = _trimmed_examples
+            else:
+                _examples = None
+
+        else:
+
+            # tokenize each word of each input separately
+            # get maximum length of each example, accounting for terminal tokens- cls, sep
+            # If padding_length is None, padding has to be done to the max length of the input batch
+            tokenized_examples = [
+                [self._tokenize(word) for word in example.split(split_at)] for example in examples
+            ]
+
+            max_curr_len = max([len(sum(t_ex, [])) for t_ex in tokenized_examples]) + n_terminals
+            padding_length_including_terminals = min(max_curr_len, padding_length) \
+                if padding_length else max_curr_len
+            padding_length_excluding_terminals = padding_length_including_terminals - n_terminals
+
+            _trimmed_examples = [
+                _trim_a_list_of_sub_token_groups(
+                    tokenized_example, padding_length_excluding_terminals
+                )
+                for tokenized_example in tokenized_examples
+            ]  # List[List[List[str]]], innermost List[str] is a list of sub-words for a given word
+
+            split_lengths = [[len(x) for x in ex] for ex in _trimmed_examples]
+
+            # convert (sub) words into their respective token ids
+            seq_ids = [
+                self._encode_text(
+                    sum(example, []),
+                    padding_length_including_terminals,
+                    add_terminals
+                )
+                for example in _trimmed_examples
+            ]
+
+            if _return_tokenized_examples:
+                _examples = [sum(list_of_t, []) for list_of_t in _trimmed_examples]
+            else:
+                _examples = None
 
         return BatchData(**{
             # number of groups per example
@@ -320,10 +372,7 @@ class AbstractVocabLookupEncoder(AbstractEncoder):
                 for _split_lengths in split_lengths
             ],  # List[Tensor1d[int]],
             "seq_ids": torch.as_tensor(seq_ids, dtype=torch.long),
-            **(
-                {"_examples": [sum(list_of_t, []) for list_of_t in _trimmed_examples]}
-                if _return_tokenized_examples else {}
-            ),
+            **({"_examples": _examples} if _return_tokenized_examples else {}),
         })
 
     def _encode_text(self, list_of_tokens: List[str], padding_length: int, add_terminals: bool):
@@ -365,6 +414,14 @@ class WhitespaceEncoder(AbstractVocabLookupEncoder):
     Encoder that tokenizes at whitespace. Not useful for languages such as Chinese.
     """
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        if self.avoid_whitespace_splitting:
+            msg = f"The param 'avoid_whitespace_splitting' cannot be used with " \
+                  f"{self.__class__.__name__}."
+            raise ValueError(msg)
+
     def _tokenize(self, text: str) -> List[str]:
         return text.strip("\n").split(" ")
 
@@ -382,6 +439,11 @@ class WhitespaceAndCharDualEncoder(WhitespaceEncoder):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.char_token2id = {}
+
+        if self.avoid_whitespace_splitting:
+            msg = f"The param 'avoid_whitespace_splitting' cannot be used with " \
+                  f"{self.__class__.__name__}."
+            raise ValueError(msg)
 
     SPECIAL_CHAR_TOKENS_DICT = {
         "char_pad_token": "<CHAR_PAD>",
@@ -574,6 +636,23 @@ class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
                   "'pip install mindmeld[transformers]'"
             raise ImportError(msg)
 
+        # Considers not splitting query text at whitespace if this param is set to True; useful for
+        # languages with non-whitespace script e.g. Japanese, Chinese, etc.
+        # Cautions:
+        #   - when this param is set to True, any truncation of very long inputs due to the
+        #   tokenizer's max length is not checked for and can raise errors in token classification
+        #   - when this param is set to True within token classification, ensure that number of
+        #   tokens (without any distinction of whitespace) matches the number of entity tags/labels
+        self.avoid_whitespace_splitting = kwargs.get("avoid_whitespace_splitting")
+
+        if self.avoid_whitespace_splitting is False:
+            # The underlying self.tokenizer.encode_batch() only takes whole query as input and there
+            # is no way to pass a list of tokens instead. Because of this, we cannot distinctly
+            # process the scenarios when avoid_whitespace_splitting is set to True or False.
+            msg = f"The param 'avoid_whitespace_splitting' must not be False to encode a batch " \
+                  f"using {self.__class__.__name__}."
+            raise ValueError(msg)
+
     def prepare(self, examples: List[str]):
         """
         references:
@@ -658,9 +737,8 @@ class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
         """
 
         if not add_terminals:
-            msg = f"The param 'add_terminals' must be True to encode a batch using " \
+            msg = f"The param 'add_terminals' must not be False to encode a batch using " \
                   f"{self.__class__.__name__}."
-            logger.error(msg)
             raise ValueError(msg)
 
         if padding_length is not None:
@@ -748,10 +826,12 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
         self._number_of_terminal_tokens = None
         self.__model_max_length = -1
 
-        # consider not splitting words at whitespace if this param is set
-        # use for roberta-base like tokenizers where the words are not split at whitespace
-        # also, this param is only relevant for sequence_classification
-        self.avoid_whitespace_splitting = kwargs.get("avoid_whitespace_splitting", None)
+        # Considers not splitting query text at whitespace if this param is set to True;
+        #   use for roberta-base like tokenizers where the words are not split at whitespace
+        #   or for languages with non-whitespace script e.g. Japanese, Chinese, etc.
+        # Caution: when this param is set, any truncation of very long inputs due to the
+        #   tokenizer's max length is not checked for and can raise errors in token classification
+        self.avoid_whitespace_splitting = kwargs.get("avoid_whitespace_splitting")
 
     def prepare(self, examples: List[str]):
         del examples
@@ -818,15 +898,15 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
             raise ValueError(msg)
 
         split_at = " "
-
         n_terminals = self.number_of_terminal_tokens if add_terminals else 0
 
         if self.avoid_whitespace_splitting:
 
+            # https://huggingface.co/docs/transformers/v4.16.2/en/preprocessing
             hgf_encodings = self.tokenizer(
                 examples, padding=True, truncation=True, max_length=None,
                 return_tensors="pt"
-            )
+            )  # Huggingface returns a BatchEncodings object; needs to be converted to a dictionary
             split_lengths = [
                 [1] * (sum(msk) - n_terminals) for msk in hgf_encodings["attention_mask"]
             ]
@@ -857,23 +937,26 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
 
             split_lengths = [[len(x) for x in ex] for ex in _trimmed_examples]
 
-            # Calling ```tokenized_examples = [" ".join(sum(ex, [])) for ex in _trimmed_examples]```
-            # & then passing it to ```self.tokenizer.__call__(tokenized_examples, ...)``` inadvertently
-            # re-tokenizes already tokenized strings. Eg: "ttyl" tokenized to ["t", "##ty", "#l"] and
-            # then modified to "t ##ty ##l" is incorrectly tokenized again in __call__ as ["t", "#",
-            # "#", "t", "y", "#", "#", "l"] and then encoded into ids.
-            # This is not the case with few children of AbstractHuggingfaceTrainableEncoder (e.g.
-            # BytePairEncodingEncoder) which has no prepending tokens such as '##' for sub-words.
+            # Problem if trimmed examples are not detokenized before __call__ method:
+            #  Calling ```tokenized_examples=[" ".join(sum(ex, [])) for ex in _trimmed_examples]```
+            #  & then passing it to ```self.tokenizer.__call__(tokenized_examples, ...)```
+            #  inadvertently re-tokenizes already tokenized strings. Eg: "ttyl" tokenized
+            #  to ["t", "##ty", "#l"] upon trimming operations and then reverted to "t ##ty ##l" is
+            #  incorrectly tokenized later in __call__ as ["t", "#", "#", "t", "y", "#", "#", "l"]
+            #  and then encoded into ids. This is not the case with some subclasses of
+            #  AbstractHuggingfaceTrainableEncoder (e.g. BytePairEncodingEncoder) which has no
+            #  prepending tokens such as '##' for sub-words.
             _detokenized_examples = [
                 split_at.join(
                     [self.tokenizer.convert_tokens_to_string(group) for group in _trimmed_example]
                 )
                 for _trimmed_example in _trimmed_examples
             ]
+            # https://huggingface.co/docs/transformers/v4.16.2/en/preprocessing
             hgf_encodings = self.tokenizer(
                 _detokenized_examples, padding=True, truncation=True, max_length=None,
                 return_tensors="pt"
-            )  # Huggingface returns this as BatchEncodings object;needs to be converted to a dictionary
+            )  # Huggingface returns a BatchEncodings object; needs to be converted to a dictionary
 
         return BatchData(**{
             # number of groups per example
