@@ -224,7 +224,7 @@ class BaseClassification(nn_module):
             self.train()
             optimizer.zero_grad()
             train_loss, train_batches = 0.0, 0.0
-            indices = [ii for ii in range(len(train_examples))]
+            indices = list(range(len(train_examples)))
             random.shuffle(indices)
             train_examples = [train_examples[ii] for ii in indices]
             train_labels = [train_labels[ii] for ii in indices]
