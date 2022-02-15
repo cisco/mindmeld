@@ -304,7 +304,6 @@ class TokenizerFactory:
         Returns:
             (Tokenizer): Tokenizer Class
         """
-        if language in SPACY_SUPPORTED_LANGUAGES:
+        if language != ENGLISH_LANGUAGE_CODE and language in SPACY_SUPPORTED_LANGUAGES:
             return SpacyTokenizer(language, spacy_model_size="sm")
-        else:
-            return WhiteSpaceTokenizer()
+        return WhiteSpaceTokenizer()
