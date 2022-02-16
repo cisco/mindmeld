@@ -13,6 +13,8 @@
 import os
 import unicodedata
 
+from enum import Enum
+
 DEFAULT_TRAIN_SET_REGEX = r"train.*\.txt"
 DEFAULT_TEST_SET_REGEX = r"test.*\.txt"
 BLUEPRINTS_URL = "https://blueprints.mindmeld.com"
@@ -21,8 +23,16 @@ DUCKLING_VERSION = "20211005"
 
 
 # ACTIVE LEARNING CONSTANTS
-TUNE_LEVEL_DOMAIN = "domain"
-TUNE_LEVEL_INTENT = "intent"
+class TuneLevel(Enum):
+    DOMAIN = "domain"
+    INTENT = "intent"
+    ENTITY = "entity"
+
+class TuningType(Enum):
+    CLASSIFIER = "classifier"
+    TAGGER = "tagger"
+
+
 ENTROPY_LOG_BASE = 2
 ACTIVE_LEARNING_RANDOM_SEED = os.environ.get("ACTIVE_LEARNING_RANDOM_SEED") or 2020
 AL_MAX_LOG_USAGE_PCT = 1.0

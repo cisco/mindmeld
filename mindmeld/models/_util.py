@@ -44,7 +44,7 @@ def torch_op(op, *args, sub="", **kwargs):
     """
     A safe function caller for torch module
     Usage:
-        call ```_torch("normalize", arg1, arg2, sub="nn.functional", p=2, dim=1)```
+        call ```torch_op("normalize", arg1, arg2, sub="nn.functional", p=2, dim=1)```
         instead of ```torch.nn.functional.normalize(arg1, arg2, p=2, dim=1)```
     """
 

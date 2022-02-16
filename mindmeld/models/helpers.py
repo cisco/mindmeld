@@ -12,6 +12,7 @@
 # limitations under the License.
 
 """This module contains some helper functions for the models package"""
+import enum
 import json
 import logging
 import os
@@ -20,8 +21,9 @@ from tempfile import mkstemp
 
 import nltk
 from sklearn.metrics import make_scorer
-from ..text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
+
 from ..gazetteer import Gazetteer
+from ..text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +68,11 @@ DEFAULT_SYS_ENTITIES = [
 ]
 
 
+class ModelType(enum.Enum):
+    TEXT_MODEL = "text"
+    TAGGER_MODEL = "tagger"
+
+
 def create_model(config):
     """Creates a model instance using the provided configuration
 
@@ -79,7 +86,8 @@ def create_model(config):
         ValueError: When model configuration is invalid
     """
     try:
-        return MODEL_MAP["auto"].from_config(config)
+        # TODO: deprecate MODEL_MAP and use ModelFactory instead (be aware of cyclic imports)
+        return MODEL_MAP["auto"].create_model_from_config(config)
     except KeyError as e:
         msg = "Invalid model configuration: Unknown model type {!r}"
         raise ValueError(msg.format(config.model_type)) from e
@@ -98,7 +106,8 @@ def load_model(path):
     Raises:
         ValueError: When model configuration is invalid
     """
-    return MODEL_MAP["auto"].from_path(path)
+    # TODO: deprecate MODEL_MAP and use ModelFactory instead (be aware of cyclic imports)
+    return MODEL_MAP["auto"].create_model_from_path(path)
 
 
 def create_annotator(config):
@@ -191,6 +200,7 @@ def register_model(model_type, model_class):
         model_type (str): The model type as specified in model configs
         model_class (class): The model to register
     """
+    # TODO: deprecate MODEL_MAP var in in lieu of ModelFactory
     MODEL_MAP[model_type] = model_class
 
 
