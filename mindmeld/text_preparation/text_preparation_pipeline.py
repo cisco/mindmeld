@@ -388,6 +388,8 @@ class TextPreparationPipeline:
 
         if len(unann_spans) > 0:
             unann_spans.append((prev_entity_end,len(text)))
+
+        unann_spans = [span for span in unann_spans if span[1] - span[0] > 0]
         return unann_spans
 
     @staticmethod
