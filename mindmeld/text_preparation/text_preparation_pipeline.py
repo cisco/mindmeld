@@ -233,17 +233,7 @@ class TextPreparationPipeline:
             )
         # Single-shot tokenization for Spacy-Based Tokenizers (Performance Optimization)
         if isinstance(self.tokenizer, SpacyTokenizer):
-            unann_spans = TextPreparationPipeline.calc_unann_spans(text)
-            unannotated_text = "".join([text[i[0]:i[1]] for i in unann_spans])
-            unann_to_ann_idx_mapping = TextPreparationPipeline.unann_to_ann_idx_map(
-                unann_spans
-            )
-            tokens = self.tokenizer.tokenize(unannotated_text)
-            TextPreparationPipeline.convert_token_idx_unann_to_ann(
-                tokens, unann_to_ann_idx_mapping
-            )
-            tokens = TextPreparationPipeline.filter_out_space_text_tokens(tokens)
-            return tokens
+            return self.tokenize_using_spacy(self, text)
 
         # Non-Spacy Tokenizer Handling
         return self.tokenize_around_mindmeld_annotations(text)
@@ -389,6 +379,7 @@ class TextPreparationPipeline:
         if len(unann_spans) > 0:
             unann_spans.append((prev_entity_end,len(text)))
 
+        # Filter out spans that have a length of 0
         unann_spans = [span for span in unann_spans if span[1] - span[0] > 0]
         return unann_spans
 
@@ -428,6 +419,29 @@ class TextPreparationPipeline:
         """
         for i in range(len(tokens)):
             tokens[i]["start"] = unann_to_ann_idx_map[tokens[i]["start"]]
+
+    def tokenize_using_spacy(self, text):
+        """ Wrapper function used before tokenizing with Spacy. Combines all unannoted text spans
+        into a single string to pass to spacy for tokenization. Applies the correct offset to
+        the resulting tokens to align with the annotated text. This optimization reduces the overall
+        time needed for tokenization.
+
+        Args:
+            text (str): Input text.
+        Returns:
+            tokens (List[dict]): List of tokens represented as dictionaries.
+        """
+        unann_spans = TextPreparationPipeline.calc_unann_spans(text)
+        unannotated_text = "".join([text[i[0]:i[1]] for i in unann_spans])
+        unann_to_ann_idx_mapping = TextPreparationPipeline.unann_to_ann_idx_map(
+            unann_spans
+        )
+        tokens = self.tokenizer.tokenize(unannotated_text)
+        TextPreparationPipeline.convert_token_idx_unann_to_ann(
+            tokens, unann_to_ann_idx_mapping
+        )
+        tokens = TextPreparationPipeline.filter_out_space_text_tokens(tokens)
+        return tokens
 
     @staticmethod
     def modify_around_annotations(text, function):
