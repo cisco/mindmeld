@@ -36,8 +36,8 @@ class SpacyModelFactory:
         Args:
             language (str, optional): Language as specified using a 639-1/2 code.
             spacy_model_name (str): Name of the Spacy NER model (Ex: "en_core_web_sm")
-            disable (List[str]): List of pipeline elements to disable. ('ner', 'tagger', 
-                'parser', etc.) 
+            disable (List[str]): List of pipeline elements to disable. ('ner', 'tagger',
+                'parser', etc.)
 
         Returns:
             nlp: Spacy language model. (Ex: "spacy.lang.es.Spanish")
@@ -79,7 +79,7 @@ class SpacyModelFactory:
 
         Args:
             spacy_model_name (str): Name of the Spacy NER model (Ex: "en_core_web_sm")
-            disable (List[str]): List of pipeline elements to disable. ('ner', 'tagger', 
+            disable (List[str]): List of pipeline elements to disable. ('ner', 'tagger',
                 'parser', etc.)
 
         Returns:
@@ -118,7 +118,15 @@ class SpacyModelFactory:
             spacy_model_name (str): Name of the Spacy NER model (Ex: "en_core_web_sm")
         """
         subprocess.run(
-            ["python", "-m", "spacy", "download", spacy_model_name, "--default-timeout=1000"], check=True
+            [
+                "python",
+                "-m",
+                "spacy",
+                "download",
+                spacy_model_name,
+                "--default-timeout=1000",
+            ],
+            check=True,
         )
 
     @staticmethod
