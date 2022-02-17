@@ -236,7 +236,7 @@ class TextPreparationPipeline:
             )
         # Single-shot tokenization for Spacy-Based Tokenizers (Performance Optimization)
         if isinstance(self.tokenizer, SpacyTokenizer):
-            return self.tokenize_using_spacy(self, text)
+            return self.tokenize_using_spacy(text)
 
         # Non-Spacy Tokenizer Handling
         return self.tokenize_around_mindmeld_annotations(text)
