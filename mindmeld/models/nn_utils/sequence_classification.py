@@ -320,7 +320,7 @@ class BertForSequenceClassification(BaseSequenceClassification):
 
         params.update({
             "embedder_type": embedder_type,
-            "save_frozen_bert_weights": params.get("save_frozen_bert_weights", False)  # if True,
+            "save_frozen_embedder": params.get("save_frozen_embedder", False)  # if True,
             # frozen set of bert weights are also dumped, else they are skipped as they are not
             # tuned and anyway frozen during training.
         })
@@ -367,7 +367,7 @@ class BertForSequenceClassification(BaseSequenceClassification):
         return optimizer
 
     def _get_dumpable_state_dict(self):
-        if not self.params.update_embeddings and not self.params.save_frozen_bert_weights:
+        if not self.params.update_embeddings and not self.params.save_frozen_embedder:
             state_dict = OrderedDict(
                 {k: v for k, v in self.state_dict().items() if not k.startswith("bert_model")}
             )
