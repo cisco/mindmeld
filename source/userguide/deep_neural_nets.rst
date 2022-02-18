@@ -1756,14 +1756,11 @@ The following are some params that are commonly configurable across all the clas
 |                                 | Choices: Any positive integer, ``None``                                                                                         |
 +---------------------------------+---------------------------------------------------------------------------------------------------------------------------------+
 | ``avoid_whitespace_splitting``  | If specified ``True``, the classifier's input encoder does not distinguish whitespace with other characters.                    |
-|                                 | Setting this to ``True`` is useful in the following two scenarios:                                                              |
-|                                 |                                                                                                                                 |
-|                                 | - When working with a language that has a non-whitespace script, e.g. Japanese, Chinese, etc.                                   |
-|                                 |                                                                                                                                 |
-|                                 | - When using a Huggingface pretrained model whose underlying pretrained tokenizer does not delimit words using                  |
-|                                 | whitespace e.g.                                                                                                                 |
+|                                 | Setting this to ``True`` is useful when using a Huggingface pretrained model whose underlying pretrained tokenizer does not     |
+|                                 | delimit words using whitespace e.g.                                                                                             |
 |                                 | `Byte-level BPE, SentencePiece, etc. <https://huggingface.co/docs/transformers/tokenizer_summary#summary-of-the-tokenizers>`_.  |
 |                                 | Examples of such models are *distilroberta-base*, etc.                                                                          |
+|                                 | Also when setting this to ``True``, the param ``query_text_type`` must be set to either ``'text'`` or ``'processed_text'``.     |
 |                                 |                                                                                                                                 |
 |                                 | Leaving this value as ``None`` assumes any value necessitated by the input encoder.                                             |
 |                                 |                                                                                                                                 |
@@ -1772,6 +1769,27 @@ The following are some params that are commonly configurable across all the clas
 |                                 | Default: ``None``                                                                                                               |
 |                                 |                                                                                                                                 |
 |                                 | Choices: ``None``, ``True``, ``False``                                                                                          |
++---------------------------------+---------------------------------------------------------------------------------------------------------------------------------+
+| ``query_text_type``             | Determines the choice of text that is fed into the neural model. This param is coupled with the                                 |
+|                                 | *Text Preparation Pipeline* when using a choice other than ``'text'``. The following are the                                    |
+|                                 | three available choices:                                                                                                        |
+|                                 |                                                                                                                                 |
+|                                 | ``'text'``: Specifies that the raw text of the queries be used without any processing. This is an                               |
+|                                 | appropriate choice if using a Huggingface pretrained model as the pretrained model's tokenizer takes                            |
+|                                 | care of any processing, tokenization, and normalizations on top of the raw text. This choice is oblivious                       |
+|                                 | to the app's :attr:`TEXT_PREPARATION_CONFIG`.                                                                                   |
+|                                 |                                                                                                                                 |
+|                                 | ``'processed_text'``: Specifies that processed text of the Text Preparation Pipeline be used as input to the                    |
+|                                 | neural model.                                                                                                                   |
+|                                 |                                                                                                                                 |
+|                                 | ``'normalized_text'``: Specifies that the text upon processing, tokenization, and normalization steps of the                    |
+|                                 | Text Preparation Pipeline be used as input to the neural model.                                                                 |
+|                                 |                                                                                                                                 |
+|                                 | Type: str                                                                                                                       |
+|                                 |                                                                                                                                 |
+|                                 | Default: ``'processed_text'`` for sequence classification and ``'normalized_text'`` for token classification                    |
+|                                 |                                                                                                                                 |
+|                                 | Choices: ``'text'``, ``'processed_text'``, ``'normalized_text'``                                                                |
 +---------------------------------+---------------------------------------------------------------------------------------------------------------------------------+
 
 Tokenization Choices
@@ -1793,7 +1811,7 @@ The neural suite has the following choices of tokenizations to prepare inputs fo
 
 .. warning::
 
-   The choices of tokenization presented here shouldn't be confused with the :ref:`Tokenizers in text preparation pipeline <tokenization_text_preparation_pipeline>`. The latter are used to preprocess the text while the former are used to prepare sequence of tokens for the neural models.
+   The choices of tokenization presented here shouldn't be confused with the :ref:`Tokenizers in text preparation pipeline <tokenization_text_preparation_pipeline>`. The tokenizers in text preparation pipeline are used to develop text that is inputted to the neural models while the following are used to prepare sequence of tokens for the underlying embedders.
 
 1. ``'whitespace-tokenizer'``
 """""""""""""""""""""""""""""

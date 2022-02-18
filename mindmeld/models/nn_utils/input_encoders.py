@@ -225,11 +225,6 @@ class AbstractVocabLookupEncoder(AbstractEncoder):
 
         # Considers not splitting query text at whitespace if this param is set to True; useful for
         # languages with non-whitespace script e.g. Japanese, Chinese, etc.
-        # Cautions:
-        #   - when this param is set to True, any truncation of very long inputs due to the
-        #   tokenizer's max length is not checked for and can raise errors in token classification
-        #   - when this param is set to True within token classification, ensure that number of
-        #   tokens (without any distinction of whitespace) matches the number of entity tags/labels
         self.avoid_whitespace_splitting = kwargs.get("avoid_whitespace_splitting")
 
     @property
@@ -638,18 +633,13 @@ class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
 
         # Considers not splitting query text at whitespace if this param is set to True; useful for
         # languages with non-whitespace script e.g. Japanese, Chinese, etc.
-        # Cautions:
-        #   - when this param is set to True, any truncation of very long inputs due to the
-        #   tokenizer's max length is not checked for and can raise errors in token classification
-        #   - when this param is set to True within token classification, ensure that number of
-        #   tokens (without any distinction of whitespace) matches the number of entity tags/labels
         self.avoid_whitespace_splitting = kwargs.get("avoid_whitespace_splitting")
 
-        if self.avoid_whitespace_splitting is False:
+        if self.avoid_whitespace_splitting is not None:
             # The underlying self.tokenizer.encode_batch() only takes whole query as input and there
             # is no way to pass a list of tokens instead. Because of this, we cannot distinctly
             # process the scenarios when avoid_whitespace_splitting is set to True or False.
-            msg = f"The param 'avoid_whitespace_splitting' must not be False to encode a batch " \
+            msg = f"The param 'avoid_whitespace_splitting' must not be set to encode a batch " \
                   f"using {self.__class__.__name__}."
             raise ValueError(msg)
 
@@ -938,14 +928,17 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
             split_lengths = [[len(x) for x in ex] for ex in _trimmed_examples]
 
             # Problem if trimmed examples are not detokenized before __call__ method:
+            #  Huggingface does not provide a method where-in the tokenizer's encode method(__call__
+            #  method in the latest versions) can be called with a list of already tokenized text.
             #  Calling ```tokenized_examples=[" ".join(sum(ex, [])) for ex in _trimmed_examples]```
             #  & then passing it to ```self.tokenizer.__call__(tokenized_examples, ...)```
             #  inadvertently re-tokenizes already tokenized strings. Eg: "ttyl" tokenized
             #  to ["t", "##ty", "#l"] upon trimming operations and then reverted to "t ##ty ##l" is
             #  incorrectly tokenized later in __call__ as ["t", "#", "#", "t", "y", "#", "#", "l"]
-            #  and then encoded into ids. This is not the case with some subclasses of
-            #  AbstractHuggingfaceTrainableEncoder (e.g. BytePairEncodingEncoder) which has no
-            #  prepending tokens such as '##' for sub-words.
+            #  and then encoded into ids.
+            #  Note that this is not the case with some subclasses of
+            #  AbstractHuggingfaceTrainableEncoder (e.g. BytePairEncodingEncoder)
+            #  which might not have prepending tokens such as '##' for sub-words.
             _detokenized_examples = [
                 split_at.join(
                     [self.tokenizer.convert_tokens_to_string(group) for group in _trimmed_example]
