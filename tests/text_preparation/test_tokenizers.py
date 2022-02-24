@@ -263,7 +263,7 @@ def test_tokenize(text_preparation_pipeline):
 
 
 @pytest.mark.parametrize(
-    "raw_text, expected_spans, expected_unann_text",
+    "raw_text, expected_spans, expected_unannotated_text",
     [
         (
             EN_SENTENCE_ONE,
@@ -284,28 +284,34 @@ def test_tokenize(text_preparation_pipeline):
         (EN_SENTENCE_FIVE, [(0, 8), (9, 18)], "I found Andy Neff"),
     ],
 )
-def test_calc_unann_spans(raw_text, expected_spans, expected_unann_text):
-    unann_spans = TextPreparationPipeline.calc_unann_spans(raw_text)
-    assert unann_spans == expected_spans
-    unann_text = "".join([raw_text[span[0] : span[1]] for span in unann_spans])
-    assert unann_text == expected_unann_text
+def test_calc_unannotated_spans(raw_text, expected_spans, expected_unannotated_text):
+    unannotated_spans = TextPreparationPipeline.calc_unannotated_spans(raw_text)
+    assert unannotated_spans == expected_spans
+    unannotated_text = "".join(
+        [raw_text[span[0] : span[1]] for span in unannotated_spans]
+    )
+    assert unannotated_text == expected_unannotated_text
 
 
 @pytest.mark.parametrize(
-    "unann_spans, expected_unann_ann_idx_map",
+    "unannotated_spans, expected_unannotated_annotated_idx_map",
     [
         ([(0, 8)], [0, 1, 2, 3, 4, 5, 6, 7]),
         ([(0, 3), (4, 7), (9, 10)], [0, 1, 2, 4, 5, 6, 9]),
         ([(1, 3), (5, 10)], [1, 2, 5, 6, 7, 8, 9]),
     ],
 )
-def test_unann_to_ann_idx_map(unann_spans, expected_unann_ann_idx_map):
-    unann_ann_idx_map = TextPreparationPipeline.unann_to_ann_idx_map(unann_spans)
-    assert unann_ann_idx_map == expected_unann_ann_idx_map
+def test_unannotated_to_annotated_idx_map(
+    unannotated_spans, expected_unannotated_annotated_idx_map
+):
+    unannotated_annotated_idx_map = (
+        TextPreparationPipeline.unannotated_to_annotated_idx_map(unannotated_spans)
+    )
+    assert unannotated_annotated_idx_map == expected_unannotated_annotated_idx_map
 
 
 @pytest.mark.parametrize(
-    "raw_text, unann_to_ann_idx_mapping, expected_tokens",
+    "raw_text, unannotated_to_annotated_idx_mapping, expected_tokens",
     [
         (EN_SENTENCE_FOUR, [1, 2, 3, 4, 5], [{"start": 1, "text": "Spero"}]),
         (
@@ -320,13 +326,16 @@ def test_unann_to_ann_idx_map(unann_spans, expected_unann_ann_idx_map):
         ),
     ],
 )
-def test_convert_token_idx_unann_to_ann(
-    text_preparation_pipeline, raw_text, unann_to_ann_idx_mapping, expected_tokens
+def test_convert_token_idx_unannotated_to_annotated(
+    text_preparation_pipeline,
+    raw_text,
+    unannotated_to_annotated_idx_mapping,
+    expected_tokens,
 ):
-    unann_spans = TextPreparationPipeline.calc_unann_spans(raw_text)
-    unannotated_text = "".join([raw_text[i[0] : i[1]] for i in unann_spans])
+    unannotated_spans = TextPreparationPipeline.calc_unannotated_spans(raw_text)
+    unannotated_text = "".join([raw_text[i[0] : i[1]] for i in unannotated_spans])
     tokens = text_preparation_pipeline.tokenize(unannotated_text)
-    TextPreparationPipeline.convert_token_idx_unann_to_ann(
-        tokens, unann_to_ann_idx_mapping
+    TextPreparationPipeline.convert_token_idx_unannotated_to_annotated(
+        tokens, unannotated_to_annotated_idx_mapping
     )
     assert tokens == expected_tokens

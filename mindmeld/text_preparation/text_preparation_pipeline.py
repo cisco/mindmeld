@@ -350,7 +350,7 @@ class TextPreparationPipeline:
         return list(MINDMELD_ANNOTATION_PATTERN.finditer(text))
 
     @staticmethod
-    def calc_unann_spans(text):
+    def calc_unannotated_spans(text):
         """Calculates the spans of text that exclude mindmeld entity annotations.
         For example, "{Lucien|person_name}" would return [(1,7)] since "Lucien" is
         the only text that is not the annotation.
@@ -358,72 +358,72 @@ class TextPreparationPipeline:
         Args:
             text (str): Original sentence with markup to modify.
         Returns:
-            unann_spans (List[Tuple(int, int)]): The list of spans where each span
+            unannotated_spans (List[Tuple(int, int)]): The list of spans where each span
                 is a section of the original text excluding annotation markup. The
                 first element of the tuple is the start index and the second is the
                 ending index + 1.
         """
         matches = TextPreparationPipeline.find_mindmeld_annotation_re_matches(text)
-        unann_spans = []
+        unannotated_spans = []
         prev_entity_end = 0
         # MindMeld Entities are not present in text
         if len(matches) == 0:
-            unann_spans = [(0, len(text))]
-            return unann_spans
+            unannotated_spans = [(0, len(text))]
+            return unannotated_spans
         for match in matches:
             entity_start, entity_end = match.span()
             entity_text = match.group(1)
 
-            unann_spans.append((prev_entity_end, entity_start))
+            unannotated_spans.append((prev_entity_end, entity_start))
             entity_text_start = entity_start + 1
-            unann_spans.append(
+            unannotated_spans.append(
                 (entity_text_start, entity_text_start + len(entity_text))
             )
             prev_entity_end = entity_end
 
-        if len(unann_spans) > 0:
-            unann_spans.append((prev_entity_end, len(text)))
+        if len(unannotated_spans) > 0:
+            unannotated_spans.append((prev_entity_end, len(text)))
 
         # Filter out spans that have a length of 0
-        unann_spans = [span for span in unann_spans if span[1] - span[0] > 0]
-        return unann_spans
+        unannotated_spans = [span for span in unannotated_spans if span[1] - span[0] > 0]
+        return unannotated_spans
 
     @staticmethod
-    def unann_to_ann_idx_map(unann_spans):
+    def unannotated_to_annotated_idx_map(unannotated_spans):
         """Create a vector mapping indexes from the unannotated text to the original
         text.
 
         Args:
-            unann_spans (List[Tuple(int, int)]): The list of spans where each span
+            unannotated_spans (List[Tuple(int, int)]): The list of spans where each span
                 is a section of the original text excluding annotation markup. The
                 first element of the tuple is the start index and the second is the
                 ending index + 1.
         Returns:
-            unann_to_ann_idx_map (List[Tuple(int, int)]): A vector where the value at
+            unannotated_to_annotated_idx_map (List[Tuple(int, int)]): A vector where the value at
                 each index represents the mapping of the position of a single character
                 in the unannotated text to the position in the original text.
         """
-        unann_to_ann_idx_map = []
-        for unann_span in unann_spans:
-            start, end = unann_span
+        unannotated_to_annotated_idx_map = []
+        for unannotated_span in unannotated_spans:
+            start, end = unannotated_span
             for i in range(start, end):
-                unann_to_ann_idx_map.append(i)
-        return unann_to_ann_idx_map
+                unannotated_to_annotated_idx_map.append(i)
+        return unannotated_to_annotated_idx_map
 
     @staticmethod
-    def convert_token_idx_unann_to_ann(tokens, unann_to_ann_idx_map):
+    def convert_token_idx_unannotated_to_annotated(tokens, unannotated_to_annotated_idx_map):
         """In-place function that reverts the token start indices to the
         index of the character in the orginal text with annotations.
 
         Args:
-            unann_to_ann_idx_map (List[Tuple(int, int)]): A vector where the value at
+            unannotated_to_annotated_idx_map (List[Tuple(int, int)]): A vector where the value at
                 each index represents the mapping of the position of a single character
                 in the unannotated text to the position in the original text.
             tokens (List[dict]): List of tokens represented as dictionaries. With "start"
                 indices referring to the unannotated text.
         """
         for i in range(len(tokens)):
-            tokens[i]["start"] = unann_to_ann_idx_map[tokens[i]["start"]]
+            tokens[i]["start"] = unannotated_to_annotated_idx_map[tokens[i]["start"]]
 
     def tokenize_using_spacy(self, text):
         """Wrapper function used before tokenizing with Spacy. Combines all unannoted text spans
@@ -436,14 +436,14 @@ class TextPreparationPipeline:
         Returns:
             tokens (List[dict]): List of tokens represented as dictionaries.
         """
-        unann_spans = TextPreparationPipeline.calc_unann_spans(text)
-        unannotated_text = "".join([text[i[0] : i[1]] for i in unann_spans])
-        unann_to_ann_idx_mapping = TextPreparationPipeline.unann_to_ann_idx_map(
-            unann_spans
+        unannotated_spans = TextPreparationPipeline.calc_unannotated_spans(text)
+        unannotated_text = "".join([text[i[0] : i[1]] for i in unannotated_spans])
+        unannotated_to_annotated_idx_mapping = TextPreparationPipeline.unannotated_to_annotated_idx_map(
+            unannotated_spans
         )
         tokens = self.tokenizer.tokenize(unannotated_text)
-        TextPreparationPipeline.convert_token_idx_unann_to_ann(
-            tokens, unann_to_ann_idx_mapping
+        TextPreparationPipeline.convert_token_idx_unannotated_to_annotated(
+            tokens, unannotated_to_annotated_idx_mapping
         )
         tokens = TextPreparationPipeline.filter_out_space_text_tokens(tokens)
         return tokens
