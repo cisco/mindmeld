@@ -385,7 +385,9 @@ class TextPreparationPipeline:
             unannotated_spans.append((prev_entity_end, len(text)))
 
         # Filter out spans that have a length of 0
-        unannotated_spans = [span for span in unannotated_spans if span[1] - span[0] > 0]
+        unannotated_spans = [
+            span for span in unannotated_spans if span[1] - span[0] > 0
+        ]
         return unannotated_spans
 
     @staticmethod
@@ -411,7 +413,9 @@ class TextPreparationPipeline:
         return unannotated_to_annotated_idx_map
 
     @staticmethod
-    def convert_token_idx_unannotated_to_annotated(tokens, unannotated_to_annotated_idx_map):
+    def convert_token_idx_unannotated_to_annotated(
+        tokens, unannotated_to_annotated_idx_map
+    ):
         """In-place function that reverts the token start indices to the
         index of the character in the orginal text with annotations.
 
@@ -438,8 +442,8 @@ class TextPreparationPipeline:
         """
         unannotated_spans = TextPreparationPipeline.calc_unannotated_spans(text)
         unannotated_text = "".join([text[i[0] : i[1]] for i in unannotated_spans])
-        unannotated_to_annotated_idx_mapping = TextPreparationPipeline.unannotated_to_annotated_idx_map(
-            unannotated_spans
+        unannotated_to_annotated_idx_mapping = (
+            TextPreparationPipeline.unannotated_to_annotated_idx_map(unannotated_spans)
         )
         tokens = self.tokenizer.tokenize(unannotated_text)
         TextPreparationPipeline.convert_token_idx_unannotated_to_annotated(
