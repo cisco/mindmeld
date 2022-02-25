@@ -177,8 +177,7 @@ class TextPreparationPipeline:
             has_custom_preprocessors (bool): Whether atleast one custom preprocessor exists.
         """
         return (
-            self.preprocessors is not None
-            and len(self.preprocessors) >= 1
+            self.preprocessors
             and not any(
                 [isinstance(elem, NoOpPreprocessor) for elem in self.preprocessors]
             )
