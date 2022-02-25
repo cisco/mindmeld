@@ -731,6 +731,13 @@ class TextPreparationPipelineFactory:
                 "default normalizers. To omit default normalizers set 'normalizers' to []."
             )
 
+        stemmer = (
+            "NoOpStemmer"
+            if "stemmer" in text_preparation_config
+               and not text_preparation_config["stemmer"]
+            else text_preparation_config.get("stemmer")
+        )
+
         return TextPreparationPipelineFactory.create_text_preparation_pipeline(
             language=language,
             preprocessors=text_preparation_config.get("preprocessors"),
@@ -738,7 +745,7 @@ class TextPreparationPipelineFactory:
             keep_special_chars=text_preparation_config.get("keep_special_chars"),
             normalizers=text_preparation_config.get("normalizers", DEFAULT_NORMALIZERS),
             tokenizer=text_preparation_config.get("tokenizer"),
-            stemmer=text_preparation_config.get('stemmer', 'NoOpStemmer'),
+            stemmer=stemmer,
         )
 
     @staticmethod
