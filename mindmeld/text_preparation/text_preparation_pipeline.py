@@ -363,10 +363,7 @@ class TextPreparationPipeline:
         matches = TextPreparationPipeline.find_mindmeld_annotation_re_matches(text)
         unannotated_spans = []
         prev_entity_end = 0
-        # MindMeld Entities are not present in text
-        if len(matches) == 0:
-            unannotated_spans = [(0, len(text))]
-            return unannotated_spans
+
         for match in matches:
             entity_start, entity_end = match.span()
             entity_text = match.group(1)
@@ -378,7 +375,8 @@ class TextPreparationPipeline:
             )
             prev_entity_end = entity_end
 
-        if len(unannotated_spans) > 0:
+        # Append a span from the end of last entity to the end of the text (if it exists) 
+        if prev_entity_end < len(text):
             unannotated_spans.append((prev_entity_end, len(text)))
 
         # Filter out spans that have a length of 0
