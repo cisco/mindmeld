@@ -39,6 +39,11 @@ requirements = [
     "spacy~=2.3,!=2.3.6",  # avoid 2.3.6 because it was yanked from PyPI
     "mypy>=0.782",
     "marshmallow~=3.7.1",
+    # We currently depend on an older flask, which requires an older version of jinja, which doesn't pin its version of
+    # markupsafe, and markupsafe 2.1.0 removed a deprecated function that the older jinja version depends on.
+    # As a stop gap, we'll pin our version of markupsafe to that last 2.0 version. Longer term we need to update
+    # our flask dependency, and likely move it to an extra
+    "markupsafe==2.0.1",
 ]
 
 setup_requirements = ["pytest-runner~=2.11", "setuptools>=36"]
@@ -54,7 +59,7 @@ test_requirements = [
 
 setup(
     name="mindmeld",
-    version="4.4.1",
+    version="4.4.2",
     description="A Conversational AI platform.",
     long_description=readme,
     long_description_content_type="text/markdown",
