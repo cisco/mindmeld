@@ -736,25 +736,15 @@ class TextPreparationPipelineFactory:
                 "have not been specified. Will apply specified 'regex_norm_rules' in addition to "
                 "default normalizers. To omit default normalizers set 'normalizers' to []."
             )
-        normalizers = (
-            DEFAULT_NORMALIZERS
-            if "normalizers" not in text_preparation_config
-            else text_preparation_config.get("normalizers")
-        )
-        stemmer = (
-            "NoOpStemmer"
-            if "stemmer" in text_preparation_config
-            and not text_preparation_config["stemmer"]
-            else text_preparation_config.get("stemmer")
-        )
+
         return TextPreparationPipelineFactory.create_text_preparation_pipeline(
             language=language,
             preprocessors=text_preparation_config.get("preprocessors"),
             regex_norm_rules=text_preparation_config.get("regex_norm_rules"),
             keep_special_chars=text_preparation_config.get("keep_special_chars"),
-            normalizers=normalizers,
+            normalizers=text_preparation_config.get("normalizers", DEFAULT_NORMALIZERS),
             tokenizer=text_preparation_config.get("tokenizer"),
-            stemmer=stemmer,
+            stemmer=text_preparation_config.get('stemmer', 'NoOpStemmer'),
         )
 
     @staticmethod
