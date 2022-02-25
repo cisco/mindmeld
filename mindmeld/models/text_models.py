@@ -38,7 +38,9 @@ from .helpers import (
     WORD_FREQ_RSC,
     WORD_NGRAM_FREQ_RSC,
 )
-from .model import ModelConfig, Model, PytorchModel
+from .model import ModelConfig, Model, PytorchModel, AbstractModelFactory
+from .nn_utils import get_sequence_classifier_cls, SequenceClassificationType
+from ..resource_loader import ProcessedQueryList as PQL
 
 logger = logging.getLogger(__name__)
 
@@ -491,14 +493,136 @@ class TextModel(Model):
 
 
 class PytorchTextModel(PytorchModel):
-    ALLOWED_CLASSIFIER_TYPES = ["embedder", "cnn", "lstm"]
-    pass
+    ALLOWED_CLASSIFIER_TYPES = [v.value for v in SequenceClassificationType.__members__.values()]
+
+    def _get_model_constructor(self):
+        """Returns the class of the actual underlying model"""
+        classifier_type = self.config.model_settings["classifier_type"]
+        embedder_type = self.config.params.get("embedder_type") \
+            if self.config.params is not None else None
+
+        return get_sequence_classifier_cls(
+            classifier_type=classifier_type,
+            embedder_type=embedder_type
+        )
+
+    def evaluate(self, examples, labels):
+        """Evaluates a model against the given examples and labels
+
+        Args:
+            examples: A list of examples to predict
+            labels: A list of expected labels
+
+        Returns:
+            ModelEvaluation: an object containing information about the \
+                evaluation
+        """
+        predictions = self.predict_proba(examples)
+
+        evaluations = [
+            EvaluatedExample(
+                e, labels[i], predictions[i][0], predictions[i][1], self.config.label_type
+            )
+            for i, e in enumerate(examples)
+        ]
+
+        model_eval = StandardModelEvaluation(self.config, evaluations)
+        return model_eval
+
+    def fit(self, examples, labels, params=None):
+
+        if len(set(labels)) <= 1 or not examples:
+            return self
+
+        if not isinstance(examples, PQL.QueryIterator):
+            # pytorch text models are not implemented for role-classifiers, which pass-in an
+            # instance of ListIterator to this fit() method as opposed to QueryIterator in case of
+            # domain- and intent-classifiers
+            msg = f"{self.__class__.__name__}.fit() only accepts QueryIterator as the first " \
+                  f"argument but found type: {type(examples)}. This might happen if trying to" \
+                  f"create a deep neural net based classifier for role classification which is " \
+                  f"currently not supported."
+            raise NotImplementedError(msg)
+
+        # Encode classes
+        y = self._label_encoder.encode(labels)
+        encoded_y = self._class_encoder.fit_transform(y)
+        y = list(encoded_y)
+
+        params = params or self.config.params
+        self._set_query_text_type(params)
+        examples_texts = self._get_texts_from_examples(examples)
+        self._validate_training_data(examples_texts, y)
+
+        self._clf = self._get_model_constructor()()  # gets the class name and then initializes
+        self._clf.fit(examples_texts, y, **(params if params is not None else {}))
+
+        return self
+
+    def predict(self, examples, dynamic_resource=None):
+        del dynamic_resource
+
+        examples_texts = self._get_texts_from_examples(examples)
+        y = self._clf.predict(examples_texts)
+        predictions = self._class_encoder.inverse_transform(y)
+        return self._label_encoder.decode(predictions)
+
+    def predict_proba(self, examples, dynamic_resource=None):
+        del dynamic_resource
+
+        examples_texts = self._get_texts_from_examples(examples)
+
+        # snippet re-used from ./text_model.py/TextModel._predict_proba()
+        predictions = []
+        for row in self._clf.predict_proba(examples_texts):
+            probabilities = {}
+            top_class = None
+            for class_index, proba in enumerate(row):
+                raw_class = self._class_encoder.inverse_transform([class_index])[0]
+                decoded_class = self._label_encoder.decode([raw_class])[0]
+                probabilities[decoded_class] = proba
+                if proba > probabilities.get(top_class, -1.0):
+                    top_class = decoded_class
+            predictions.append((top_class, probabilities))
+
+        return predictions
+
+    def _dump(self, path):
+
+        self._clf.dump(path)
+
+        # dump model metadata
+        metadata = {
+            "label_encoder": self._label_encoder,
+            "class_encoder": self._class_encoder,
+            "query_text_type": self._query_text_type,
+            "model_config": self.config
+        }
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        joblib.dump(metadata, path)
+
+    @classmethod
+    def load(cls, path):
+
+        # load model metadata
+        metadata = joblib.load(path)
+
+        model = cls(metadata["model_config"])
+
+        model._label_encoder = metadata["label_encoder"]
+        model._class_encoder = metadata["class_encoder"]
+        model._query_text_type = metadata["query_text_type"]
+
+        # underneath tagger load
+        model._clf = model._get_model_constructor().load(path)  # .load() is a classmethod
+
+        return model
 
 
-class AutoTextModel:
+class TextModelFactory(AbstractModelFactory):
 
     @staticmethod
-    def get_model_class(config: ModelConfig):
+    def get_model_cls(config: ModelConfig):
 
         CLASSES = [TextModel, PytorchTextModel]
         classifier_type = config.model_settings["classifier_type"]

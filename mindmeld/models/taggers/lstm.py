@@ -998,6 +998,8 @@ class LstmModel(Tagger):  # pylint: disable=too-many-instance-attributes
 
         joblib.dump(variables_to_dump, os.path.join(path, ".feature_extraction_vars"))
 
+        return path
+
     def unload(self):
         self.graph = None
         self.session = None
