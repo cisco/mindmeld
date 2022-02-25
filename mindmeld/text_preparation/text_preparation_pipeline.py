@@ -333,9 +333,7 @@ class TextPreparationPipeline:
         Returns:
             256 character hash representation of current TextPreparationPipeline config (str) .
         """
-        string = json.dumps(
-            self, cls=TextPreparationPipelineJSONEncoder, sort_keys=True
-        )
+        string = json.dumps(self, cls=TextPreparationPipelineJSONEncoder, sort_keys=True)
         return sha256(string.encode()).hexdigest()
 
     @staticmethod
@@ -401,7 +399,7 @@ class TextPreparationPipeline:
                 first element of the tuple is the start index and the second is the
                 ending index + 1.
         Returns:
-            unannotated_to_annotated_idx_map (List[Tuple(int, int)]): A vector where the value at
+            unannotated_to_annotated_idx_map (List[int]): A vector where the value at
                 each index represents the mapping of the position of a single character
                 in the unannotated text to the position in the original text.
         """
