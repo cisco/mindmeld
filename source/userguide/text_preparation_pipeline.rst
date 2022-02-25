@@ -56,7 +56,7 @@ The :attr:`normalizers` component includes 12 default MindMeld regex normalizati
         "keep_special_chars": r"\@\[\]'"
     }
 
-In general, the :attr:`Tokenizer`is the :attr:`WhiteSpaceTokenizer` by default and the :attr:`Stemmer` is dynamically selected based
+In general, the :attr:`Tokenizer` is the :attr:`WhiteSpaceTokenizer` by default and the :attr:`Stemmer` is dynamically selected based
 on the language of the application, if they are not explicitly defined in the config. The table below explains these defaults:
 
 +--------------------+---------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
