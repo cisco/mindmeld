@@ -700,10 +700,7 @@ class TextPreparationPipelineFactory:
             # Check if a custom TextPreparationPipeline has been created in app.py
             try:
                 app = get_app(app_path)
-                if (
-                    hasattr(app, "text_preparation_pipeline")
-                    and app.text_preparation_pipeline
-                ):
+                if getattr(app, 'text_preparation_pipeline', None):
                     logger.info(
                         "Using custom text_preparation_pipeline from %s/__init__.py.",
                         app_path,
