@@ -36,7 +36,7 @@ class SpacyModelFactory:
         Args:
             language (str, optional): Language as specified using a 639-1/2 code.
             spacy_model_name (str): Name of the Spacy NER model (Ex: "en_core_web_sm")
-            disable (Iterable[str]): List of pipeline elements to disable. ('ner', 'tagger',
+            disable (Iterable[str]): Tuple of pipeline elements to disable. ('ner', 'tagger',
                 'parser', etc.)
 
         Returns:
@@ -74,12 +74,12 @@ class SpacyModelFactory:
             )
 
     @staticmethod
-    def _load_model(spacy_model_name, disable=[]):
+    def _load_model(spacy_model_name, disable=()):
         """Load Spacy English model. Download if needed.
 
         Args:
             spacy_model_name (str): Name of the Spacy NER model (Ex: "en_core_web_sm")
-            disable (List[str]): List of pipeline elements to disable. ('ner', 'tagger',
+            disable (Iterable[str]): Tuple of pipeline elements to disable. ('ner', 'tagger',
                 'parser', etc.)
 
         Returns:
