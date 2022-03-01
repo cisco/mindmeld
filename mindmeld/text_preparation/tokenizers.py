@@ -22,7 +22,6 @@ from ..components._config import ENGLISH_LANGUAGE_CODE
 from ..constants import (
     UNICODE_NON_LATIN_CATEGORY,
     UNICODE_SPACE_CATEGORY,
-    SPACY_SUPPORTED_LANGUAGES,
 )
 
 logger = logging.getLogger(__name__)
@@ -295,9 +294,8 @@ class TokenizerFactory:
         return tokenizer_class()
 
     @staticmethod
-    def get_tokenizer_by_language(language):
-        """Creates a tokenizer based on the language. If the language is supported by Spacy a SpacyTokenizer
-        will be initialized, otherwise a WhiteSpaceTokenizer will be initialized.
+    def get_default_tokenizer():
+        """Creates the default tokenizer (WhiteSpaceTokenizer) irrespective of the language of the current application.
 
         Args:
             language (str, optional): Language as specified using a 639-1/2 code.
@@ -305,7 +303,4 @@ class TokenizerFactory:
         Returns:
             (Tokenizer): Tokenizer Class
         """
-        if language in SPACY_SUPPORTED_LANGUAGES:
-            return SpacyTokenizer(language, spacy_model_size="sm")
-        else:
-            return WhiteSpaceTokenizer()
+        return WhiteSpaceTokenizer()

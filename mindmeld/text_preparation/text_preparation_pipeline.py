@@ -808,7 +808,7 @@ class TextPreparationPipelineFactory:
                 Tokenizer, tokenizer, language
             )
             if tokenizer
-            else TokenizerFactory.get_tokenizer_by_language(language)
+            else TokenizerFactory.get_default_tokenizer()
         )
 
         # Instantiate Stemmer
