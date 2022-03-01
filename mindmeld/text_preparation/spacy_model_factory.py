@@ -30,13 +30,13 @@ class SpacyModelFactory:
     """Spacy (Language) Model Factory Class"""
 
     @staticmethod
-    def get_spacy_language_model(language, spacy_model_size="lg", disable=[]):
+    def get_spacy_language_model(language, spacy_model_size="lg", disable=()):
         """Get a Spacy Language model.
 
         Args:
             language (str, optional): Language as specified using a 639-1/2 code.
             spacy_model_name (str): Name of the Spacy NER model (Ex: "en_core_web_sm")
-            disable (List[str]): List of pipeline elements to disable. ('ner', 'tagger',
+            disable (Iterable[str]): List of pipeline elements to disable. ('ner', 'tagger',
                 'parser', etc.)
 
         Returns:

@@ -52,7 +52,7 @@ class TextPreparationPipelineError(Exception):
     pass
 
 
-class TextPreparationPipeline:
+class TextPreparationPipeline:  # pylint: disable=R0902
     """Pipeline Class for MindMeld's text processing."""
 
     def __init__(
@@ -170,7 +170,7 @@ class TextPreparationPipeline:
         return preprocessed_text
 
     def custom_preprocessors_exist(self):
-        """Checks if the current TextPreparationPipeline has preprocessors that is not
+        """Checks if the current TextPreparationPipeline has preprocessors that are not
         simply the NoOpPreprocessor or None.
 
         Returns:
@@ -421,8 +421,8 @@ class TextPreparationPipeline:
             tokens (List[dict]): List of tokens represented as dictionaries. With "start"
                 indices referring to the unannotated text.
         """
-        for i in range(len(tokens)):
-            tokens[i]["start"] = unannotated_to_annotated_idx_map[tokens[i]["start"]]
+        for token in tokens:
+            token["start"] = unannotated_to_annotated_idx_map[token["start"]]
 
     def tokenize_using_spacy(self, text):
         """Wrapper function used before tokenizing with Spacy. Combines all unannoted text spans
