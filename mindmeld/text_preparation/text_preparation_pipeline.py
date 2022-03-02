@@ -356,9 +356,9 @@ class TextPreparationPipeline:  # pylint: disable=R0904
             text (str): Original sentence with markup to modify.
         Returns:
             unannotated_spans (List[Tuple(int, int)]): The list of spans where each span
-                is a section of the original text excluding annotation markup. The
-                first element of the tuple is the start index and the second is the
-                ending index + 1.
+                is a section of the original text excluding mindmeld entity annotations of
+                class type and markup symbols ("{", "|", "}"). The first element of the
+                tuple is the start index and the second is the ending index + 1.
         """
         matches = TextPreparationPipeline.find_mindmeld_annotation_re_matches(text)
         unannotated_spans = []
@@ -392,9 +392,9 @@ class TextPreparationPipeline:  # pylint: disable=R0904
 
         Args:
             unannotated_spans (List[Tuple(int, int)]): The list of spans where each span
-                is a section of the original text excluding annotation markup. The
-                first element of the tuple is the start index and the second is the
-                ending index + 1.
+                is a section of the original text excluding mindmeld entity annotations of
+                class type and markup symbols ("{", "|", "}"). The first element of the
+                tuple is the start index and the second is the ending index + 1.
         Returns:
             unannotated_to_annotated_idx_map (List[int]): A vector where the value at
                 each index represents the mapping of the position of a single character
