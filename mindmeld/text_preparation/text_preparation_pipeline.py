@@ -52,7 +52,7 @@ class TextPreparationPipelineError(Exception):
     pass
 
 
-class TextPreparationPipeline:  # pylint: disable=R0902
+class TextPreparationPipeline:  # pylint: disable=R0904
     """Pipeline Class for MindMeld's text processing."""
 
     def __init__(
