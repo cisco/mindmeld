@@ -241,7 +241,7 @@ class SpacyTokenizer(Tokenizer):
             spacy_model_size (str, optional): Size of the Spacy model to use. ("sm", "md", or "lg")
         """
         self.spacy_model = SpacyModelFactory.get_spacy_language_model(
-            language, spacy_model_size, disable=["tagger", "parser", "ner"]
+            language, spacy_model_size, disable=["tagger", "parser", "ner", "attribute_ruler", "lemmatizer"]
         )
         assert self.spacy_model.pipeline == []
 
