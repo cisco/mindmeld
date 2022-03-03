@@ -30,12 +30,14 @@ class SpacyModelFactory:
     """Spacy (Language) Model Factory Class"""
 
     @staticmethod
-    def get_spacy_language_model(language, spacy_model_size="lg"):
+    def get_spacy_language_model(language, spacy_model_size="lg", disable=()):
         """Get a Spacy Language model.
 
         Args:
             language (str, optional): Language as specified using a 639-1/2 code.
             spacy_model_name (str): Name of the Spacy NER model (Ex: "en_core_web_sm")
+            disable (Iterable[str]): Tuple of pipeline elements to disable. ('ner', 'tagger',
+                'parser', etc.)
 
         Returns:
             nlp: Spacy language model. (Ex: "spacy.lang.es.Spanish")
@@ -45,7 +47,7 @@ class SpacyModelFactory:
         spacy_model_name = SpacyModelFactory._get_spacy_model_name(
             language, spacy_model_size
         )
-        return SpacyModelFactory._load_model(spacy_model_name)
+        return SpacyModelFactory._load_model(spacy_model_name, disable)
 
     @staticmethod
     def validate_spacy_language(language):
@@ -72,25 +74,27 @@ class SpacyModelFactory:
             )
 
     @staticmethod
-    def _load_model(spacy_model_name):
+    def _load_model(spacy_model_name, disable=()):
         """Load Spacy English model. Download if needed.
 
         Args:
             spacy_model_name (str): Name of the Spacy NER model (Ex: "en_core_web_sm")
+            disable (Iterable[str]): Tuple of pipeline elements to disable. ('ner', 'tagger',
+                'parser', etc.)
 
         Returns:
             nlp: Spacy language model. (Ex: "spacy.lang.es.Spanish")
         """
         logger.info("Loading Spacy model %s.", spacy_model_name)
         try:
-            return spacy.load(spacy_model_name)
+            return spacy.load(spacy_model_name, disable=disable)
         except OSError:
             logger.warning(
                 "%s not found on disk. Downloading the model.", spacy_model_name
             )
             SpacyModelFactory._download_spacy_model(spacy_model_name)
             language_module = SpacyModelFactory._import_spacy_model(spacy_model_name)
-            return language_module.load()
+            return language_module.load(disable=disable)
 
     @staticmethod
     def _get_spacy_model_name(language, spacy_model_size):
@@ -114,7 +118,15 @@ class SpacyModelFactory:
             spacy_model_name (str): Name of the Spacy NER model (Ex: "en_core_web_sm")
         """
         subprocess.run(
-            ["python", "-m", "spacy", "download", spacy_model_name, "--default-timeout=1000"], check=True
+            [
+                "python",
+                "-m",
+                "spacy",
+                "download",
+                spacy_model_name,
+                "--default-timeout=1000",
+            ],
+            check=True,
         )
 
     @staticmethod
