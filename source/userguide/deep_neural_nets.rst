@@ -1,40 +1,42 @@
 Deep Neural Networks in MindMeld
 ================================
 
-The advent of `Deep learning <https://en.wikipedia.org/wiki/Deep_learning>`_ has led to substantial developments in the area of Conversational AI as well as Natural Langauge Processing (NLP) in general.
-Specifically, the proliferation of deep neural models based on :wiki_api:`Convolutional neural networks (CNN) <Convolutional_neural_network#Natural_language_processing>`, :wiki_api:`Long short-term memory networks (LSTM) <Long_short-term_memory>` and :wiki_api:`Transformers <Transformer_(machine_learning_model)>`, and their rapid adaptation to wide range of NLP tasks has been a great success.
-Thus extending the suite of traditional machine learning models (e.g. :sk_guide:`Logistic regression <linear_model.html#logistic-regression>`, :sk_guide:`Decision tree <tree.html#tree>`, etc.), MindMeld provides the option for users to train and use a variety of deep neural models with an array of configurable parameters.
+Conversational AI and Natural Language Processing more generally have seen a boost in performance at a variety of tasks through the use of `Deep learning <https://en.wikipedia.org/wiki/Deep_learning>`_. In particular, deep neural models based on :wiki_api:`Convolutional neural networks (CNNs) <Convolutional_neural_network#Natural_language_processing>`, :wiki_api:`Long short-term memory networks (LSTM) <Long_short-term_memory>` and :wiki_api:`Transformers <Transformer_(machine_learning_model)>` architectures have been widely adopted over more traditional approaches to NLP to great success. MindMeld now extends its suite of traditional machine learning models (e.g. :sk_guide:`Logistic regression <linear_model.html#logistic-regression>`, :sk_guide:`Decision tree <tree.html#tree>`, etc.) with a variety of deep neural models and an array of configurable parameters.
 
-The deep neural models are available both for text classification aka. sequence classification (:ref:`domain classification <domain_classification>` and :ref:`intent classification <intent_classification>`) as well as for token classification (:ref:`entity recognition <entity_recognition>`) tasks.
-The models are implemented using `Pytorch <https://pytorch.org/>`_ framework and thus need extra installations before starting to use them in your chatbot application.
+Users can now train and use deep neural models for :ref:`domain classification <domain_classification>` and :ref:`intent classification <intent_classification>` (aka. sequence classification) as well as for :ref:`entity recognition <entity_recognition>` (or token classification) tasks.
+
+
 
 .. note::
 
-   Please make sure to install the Pytorch requirement by running in the shell: :code:`pip install mindmeld[torch]`.
+   These models are implemented using `Pytorch <https://pytorch.org/>`_ framework and thus need extra installations before starting to use them in your chatbot application. Please make sure to install the Pytorch requirement by running in the shell:
+
+   :code:`pip install mindmeld[torch]`
 
 MindMeld supports the use of pretrained transformer models such as :wiki_api:`BERT <BERT_(language_model)>` through the popular `Huggingface Transformers <https://huggingface.co/docs/transformers/index>`_ library.
 Several pretrained models from their `Models Hub <https://huggingface.co/models>`_ that can be used for sequence classification or token classification can be employed in your chatbot application.
 
 .. note::
 
-   Install the extra *transformers* requirement by running in the shell: :code:`pip install mindmeld[transformers]`.
+   Install the extra *transformers* requirement by running in the shell:
 
-Before proceeding to use the deep neural models, consider the following possible advantages and disadvantages of using them in place of traditional machine learning models.
+   :code:`pip install mindmeld[transformers]`
 
-Some advantages are:
+Using deep neural models on a MindMeld application has some advantages as well as some drawbacks you may want to consider.
 
-- The deep models generally outperform traditional machine learning models on training sets with at least several hundreds or few thousands of queries when training from scratch, and with at least few hundreds if fine-tuning from a pretrained checkpoint.
-- The deep models require little or no feature engineering work than traditional machine learning models, because they learn the input features (such as word embeddings) compared to several hundred engineered features (n-grams, system entities, and so on) of the latter.
-- On GPU-enabled devices, the deep networks can achieve training time comparable to some of the traditional models in MindMeld.
+Some advantages:
 
-Some disadvantages are:
+- **Better overall performance for larger training sets.** Deep models generally outperform traditional machine learning models on training sets with several hundred to a few thousand queries when training from scratch, and with at least few hundred if fine-tuning from a pretrained checkpoint.
+- **Minimal feature engineering work.** Unlike traditional machine learning models, deep models require little or no feature engineering work because they infer input features (such as word embeddings). Traditional models must take into account several hundred engineered features (n-grams, system entities, and so on), which requires fine-tuning.
+- **Fast training times on GPU devices.** On GPU-enabled devices, deep networks can achieve training times comparable to some of the traditional models in MindMeld.
 
-- Training time on CPU-only machines is a lot slower than for traditional machine learning models.
-- No automated hyperparameter tuning methods like :sk_api:`sklearn.model_selection.GridSearchCV <sklearn.model_selection.GridSearchCV.html>` are available for deep neural models.
-- The deep neural models generally occupy similar or more disk storage space compared to their traditional counterparts.
+Some disadvantages:
 
-Parameter tuning for deep neural models is more involved than for traditional machine learning models.
-A good starting point for understanding this subject is Andrej Karpathy's `course notes <https://cs231n.github.io/neural-networks-3/#baby>`_ from the Convolutional Neural Networks for Visual Recognition course at Stanford University.
+- **Slower training times on CPU devices.** Training time for deep models on CPU-only machines can take much longer than traditional machine learning models.
+- **Manual hyperparameter tuning.** Mindmeld's deep models don't have automated hyperparameter tuning methods like :sk_api:`sklearn.model_selection.GridSearchCV <sklearn.model_selection.GridSearchCV.html>`, which are available for the traditional ML approaches. Parameter tuning for deep neural models is more involved than for traditional machine learning models. A good starting point for understanding this subject is Andrej Karpathy's `course notes <https://cs231n.github.io/neural-networks-3/#baby>`_ from the Convolutional Neural Networks for Visual Recognition course at Stanford University.
+
+- **Larger disk storage required.** While deep neural models can have a similar disk storage footprint to their traditional counterparts, depending on your data, it is not uncommon for them to require more disk storage space.
+
 
 .. note::
 
@@ -47,16 +49,11 @@ Domain and Intent classification
 
 .. _dnns_sequence_classification:
 
-Recall from :ref:`Working with the Domain Classifier <domain_classifier_configuration>` and :ref:`Working with the Intent Classifier <intent_classifier_configuration>` sections that a text classifier configuration consists of the keys
+Using MindMeld’s Deep Neural models requires configuring only two keys: ``'model_settings'`` and ``'params'``. There is no longer a need for handcrafting feature sets for modeling, or for automated hyperparameter tuning.
 
-- ``'features'``,
-- ``'param_selection'``,
-- ``'model_settings'``, and
-- ``'params'``
+This is a departure from other documentation on :ref:`Working with the Domain Classifier <domain_classifier_configuration>` and :ref:`Working with the Intent Classifier <intent_classifier_configuration>`, which outline that text classifier configuration requires an additional two keys (``'features'`` and ``'param_selection'``).
 
-amongst other keys that do not have distinction between traditional models or deep neural models.
-When working with deep neural models, the ``'features'`` and ``'param_selection'`` keys in the classifier configuration are redundant as we neither have to handcraft any feature sets for modeling nor there is an automated hyperparameter tuning.
-Thus, the only relevant keys to be configured when using deep neural models are ``'model_settings'`` and ``'params'``.
+
 
 The ``'model_settings'`` is a :class:`dict` with the single key ``'classifier_type'``, whose value specifies the machine learning model to use.
 The allowed values of ``'classifier_type'`` that are backed by deep neural nets and are meant for sequence classification are:
@@ -80,22 +77,23 @@ See :ref:`Common Configurable Params <common_configurable_params>` section for l
 
 .. _dnns_sequence_classification_models_embedder:
 
-This classifier type includes neural models that are based on either an embedding lookup table or a deep contextualized embedder, along with a pooling operation on top of those embeddings before passing through a classification layer.
-For the former type of embeddings, an embedding lookup table is created depending upon the set of tokens found in training data, with tokens being derived based on a chosen tokenization strategy-- word-level, sub-word-level, or character-level tokenization (see :ref:`Tokenization Choices <choices_for_tokenization>` section below for more details).
-The lookup table by default is randomly initialized but can instead be initialized to a pretrained checkpoint (such as `GloVe <https://nlp.stanford.edu/projects/glove/>`_) when using the word-level tokenization strategy.
+Mindmeld's ``'embedder'`` classifier types use a pooling operation on top of model embeddings, which are based on either a lookup table or a deep neural model:
 
-On the other hand, a deep contextualized embedder is a pretrained embedder such as :wiki_api:`BERT <BERT_(language_model)>`, which consists of its own tokenization strategy and neural embedding process.
-In any case, all the underlying weights can be tuned to the training data provided, or can be kept frozen during the training process.
-Dropout layers are used as regularizers to avoid over-fitting, which is a more common phenomenon when working with small sized datasets.
+- **Lookup table embeddings** can be derived based on a user-defined tokenization strategy-- word-level, sub-word-level, or character-level tokenization (see :ref:`Tokenization Choices <choices_for_tokenization>` below for more details). By default, the lookup table is randomly initialized, but it can instead be initialized to a pretrained checkpoint when using a word-level tokenization strategy (such as `GloVe <https://nlp.stanford.edu/projects/glove/>`_) .
+
+- **Deep contextualized embedders** are pretrained embedders in the style of :wiki_api:`BERT <BERT_(language_model)>`, which consists of its own tokenization strategy and neural embedding process.
+
+
+In either case, all the underlying weights can be tuned to the training data provided, or can be kept frozen during the training process. Dropout layers are used as regularizers to avoid over-fitting, which is a more common phenomenon when working with small sized datasets.
 
 .. note::
 
-   Specify the embedding choice using the param ``embedder_type``. Set it to ``None``, ``'glove'`` or ``'bert'`` to use with desired embeddings-- based on randomly initialized embedding lookup table, based on lookup table initialized with GloVe pretrained embeddings or a BERT-like transformers architecture based deep contextualized embedder, respectively.
+   Specify the embedding choice using the param ``embedder_type``. Set it to ``None``, ``'glove'`` or ``'bert'`` to use with desired embeddings-- based on randomly initialized embedding lookup table, based on lookup table initialized with GloVe pretrained embeddings or a BERT-like deep contextualized embedder, respectively.
 
-Following are the different optional params that are configurable along with the chosen choice of ``embedder_type`` param.
+The following are the different optional params that are configurable along with the chosen choice of ``embedder_type`` param.
 See :ref:`Common Configurable Params <common_configurable_params>` section for list of additional configurable params that are common across classifiers.
 
-1.1 Based on Embedding Lookup Table (``embedder_type``: ``None``)
+1.1 Embedding Lookup Table (``embedder_type``: ``None``)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -160,7 +158,7 @@ See :ref:`Common Configurable Params <common_configurable_params>` section for l
 |                                         | Choices: A float between 0 and 1                                                                                                                                                                                                                 |
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-Below is a minimalistic example of a sequence classifier configuration for classifier based on embedding lookup table:
+Below is a minimal working example of a sequence classifier configuration for a classifier based on an embedding lookup table:
 
 .. code-block:: python
 
@@ -176,7 +174,7 @@ Below is a minimalistic example of a sequence classifier configuration for class
    }
 
 
-1.2 Based on Pretrained Embedding Lookup Table (``embedder_type``: ``glove``)
+1.2 Pretrained Embedding Lookup Table (``embedder_type``: ``glove``)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -240,7 +238,7 @@ Below is a minimalistic example of a sequence classifier configuration for class
 |                                         | Choices: A float between 0 and 1                                                                                                                                                                                                                 |
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-Below is a minimalistic example of a sequence classifier configuration for classifier based on pretrained-initialized embedding lookup table:
+Below is a minimal working example of a sequence classifier configuration for a classifier based on a pretrained-initialized embedding lookup table:
 
 .. code-block:: python
 
@@ -255,7 +253,7 @@ Below is a minimalistic example of a sequence classifier configuration for class
     },
    }
 
-1.3 Based on Deep Contextualized Embeddings (``embedder_type``: ``bert``)
+1.3 Deep Contextualized Embeddings (``embedder_type``: ``bert``)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -310,7 +308,7 @@ Below is a minimalistic example of a sequence classifier configuration for class
 |                                         | Choices: ``True``, ``False``                                                                                                                                                                                                                     |
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-Below is a minimalistic example of a sequence classifier configuration for classifier based on BERT embedder:
+Below is a minimal working example of a sequence classifier configuration for a classifier based on a BERT embedder:
 
 .. code-block:: python
 
@@ -332,14 +330,16 @@ Below is a minimalistic example of a sequence classifier configuration for class
 .. _dnns_sequence_classification_models_cnn:
 
 :wiki_api:`Convolutional neural networks (CNN) <Convolutional_neural_network#Natural_language_processing>` based text classifiers are light-weight neural classifiers that have achieved remarkably strong performance on the practically important task of sentence classification.
-In its typical architecture for text classification, the first layer embeds the sequence of textual tokens obtained from input text into low-dimensional vectors using an embedding lookup table.
-The subsequent layer performs convolutions over the embedded word vectors using kernels (aka. filters); kernels of different lengths capture different patterns from the input text.
-For each chosen length, several kernels are used to capture different patterns at the same receptive range leading to several feature maps- one per kernel.
-Each feature map is reduced to the maximum value observed in that map and maximum values from all maps are combined to form a long feature vector.
-This vector is analogous to a an ``'embedder'`` classifier's pooled output, which is then passed through a classification layer.
+
+Using the input text, the first layer of a CNN embeds these textual sequences into low-dimensional vectors using an embedding lookup table.
+The subsequent layer performs convolutions over the embedded word vectors using kernels (also called *filters*); kernels of different lengths capture different patterns from the input text.
+For each chosen length, several kernels are used to capture different patterns at the same receptive range, leading to one feature map per kernel.
+
+Each feature map is reduced to the maximum value observed in that map, and maximum values from all maps are combined to form a long feature vector.
+This vector is analogous to an ``'embedder'`` classifier's pooled output, which is then passed through a classification layer.
 Dropout layers are used as regularizers to avoid over-fitting, which is a more common phenomenon when working with small sized datasets.
 
-Following are the different optional params that are configurable with the ``'cnn'`` classifier type.
+The following are the different optional params that are configurable with the ``'cnn'`` classifier type.
 See :ref:`Common Configurable Params <common_configurable_params>` section for list of additional configurable params that are common across classifiers.
 
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -420,7 +420,7 @@ See :ref:`Common Configurable Params <common_configurable_params>` section for l
 |                                         | Choices: A list of positive integers; same length as ``window_sizes``                                                                                                                                                                            |
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-Below is a minimalistic example of a sequence classifier configuration for classifier based on CNNs:
+Below is a minimal working example of a sequence classifier configuration for a classifier based on CNNs:
 
 .. code-block:: python
 
@@ -441,16 +441,18 @@ Below is a minimalistic example of a sequence classifier configuration for class
 
 .. _dnns_sequence_classification_models_lstm:
 
-:wiki_api:`Long short-term memory networks (LSTM) <Long_short-term_memory>` based text classifiers are classifiers that utilize recurrent feedback connections to be able to learn temporal dependencies in sequential data.
-In its typical architecture for text classification, the first layer embeds the sequence of textual tokens obtained from input text into low-dimensional vectors using an embedding lookup table.
-The capacity of an LSTM in maintaining the temporal information is generally dependant on its *hidden* dimension.
-Further, several LSTM layers can be stacked one-after-another and each layer can process the text from just beginning-to-end or both ways.
+:wiki_api:`Long short-term memory networks (LSTM) <Long_short-term_memory>` based text classifiers utilize recurrent feedback connections to be able to learn temporal dependencies in sequential data.
+
+Using the input text, the first layer of an LSTM classifier embeds the these textual sequences into low-dimensional vectors using an embedding lookup table.
+An LSTM's ability to maintain temporal information is generally dependent on its *hidden* dimension.
+Several LSTM layers can be stacked one-after-another, and each layer can process the text with forward-looking context, or with both forward- and backward-looking context windows.
 The first layer's output embedding sequence is passed through the stacked LSTMs, which finally produces one vector per token of the input text.
-To obtain a single vector per input text, the vectors for each token can be pooled or the last vector in the sequence can simply be used as representative vector.
-This vector is analogous to a an ``'embedder'`` classifier's pooled output, which is then passed through a classification layer.
+
+To obtain a single vector per input text, the vectors for each token can be pooled or the last vector in the sequence can simply be used as the representative vector.
+This vector is analogous to an ``'embedder'`` classifier's pooled output, which is then passed through a classification layer.
 Dropout layers are used as regularizers to avoid over-fitting, which is a more common phenomenon when working with small sized datasets.
 
-Following are the different optional params that are configurable with the ``'lstm'`` classifier type.
+The following are the different optional params that are configurable with the ``'lstm'`` classifier type.
 See :ref:`Common Configurable Params <common_configurable_params>` section for list of additional configurable params that are common across classifiers.
 
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -555,7 +557,7 @@ See :ref:`Common Configurable Params <common_configurable_params>` section for l
 |                                         | Choices: ``'first'``, ``'last'``, ``'max'``, ``'mean'``, ``'mean_sqrt'``                                                                                                                                                                         |
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-Below is a minimalistic example of a sequence classifier configuration for classifier based on LSTMs:
+Below is a minimal working example of a sequence classifier configuration for a classifier based on LSTMs:
 
 .. code-block:: python
 
@@ -576,16 +578,7 @@ Entity recognition
 
 .. _dnns_token_classification:
 
-Recall from :ref:`Working with the Entity Recognizer <entity_recognizer_configuration>` section that a recognizer's configuration consists of the keys
-
-- ``'features'``,
-- ``'param_selection'``,
-- ``'model_settings'``, and
-- ``'params'``
-
-amongst other keys that do not have distinction between traditional models or deep neural models.
-When working with deep neural models, the ``'features'`` and ``'param_selection'`` keys in the classifier configuration are redundant as we neither have to handcraft any feature sets for modeling nor there is an automated hyperparameter tuning.
-Thus, the only relevant keys to be configured when using deep neural models are ``'model_settings'`` and ``'params'``.
+MindMeld’s deep neural models requires configuring only two keys: ``'model_settings'`` and ``'params'``. These deep neural models do not need handcrafted feature sets for modeling or for automated hyperparameter tuning.
 
 The ``'model_settings'`` is a :class:`dict` with the single key ``'classifier_type'``, whose value specifies the machine learning model to use.
 The allowed values of ``'classifier_type'`` that are backed by deep neural nets and are meant for token classification are:
@@ -606,7 +599,7 @@ The allowed values of ``'classifier_type'`` that are backed by deep neural nets 
 
 The ``'params'`` is also a :class:`dict` with several configurable keys, some of which are specific to the choice of classifier type and others common across all the above classifier types.
 In the following section, the list of allowed parameters related to each choice of classifier type are outlined.
-See :ref:`Common Configurable Params <common_configurable_params>` section for list of configurable params that are not just specific to any classifier type but are common across all the classifier types.
+See :ref:`Common Configurable Params <common_configurable_params>` section for a list of configurable params that are common across all classifier types.
 
 1. ``'embedder'`` classifier type
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -614,25 +607,24 @@ See :ref:`Common Configurable Params <common_configurable_params>` section for l
 .. _dnns_tokens_classification_models_embedder:
 
 This classifier type includes neural models that are based on either an embedding lookup table or a deep contextualized embedder, the outputs of which are then passed through a `Conditional Random Field (CRF) <https://en.wikipedia.org/wiki/Conditional_random_field>`_ or a `Softmax layer <https://en.wikipedia.org/wiki/Softmax_function>`_  which labels the target word as a particular entity.
-For the former type of embeddings, an embedding lookup table is created depending upon the set of tokens found in training data, with tokens being derived based on a chosen tokenization strategy-- word-level, sub-word-level, or character-level tokenization (see :ref:`Tokenization Choices <choices_for_tokenization>` section below for more details).
-The lookup table by default is randomly initialized but can instead be initialized to a pretrained checkpoint (such as `GloVe <https://nlp.stanford.edu/projects/glove/>`_) when using the word-level tokenization strategy.
 
-On the other hand, a deep contextualized embedder is a pretrained embedder such as :wiki_api:`BERT <BERT_(language_model)>`, which consists of its own tokenization strategy and neural embedding process.
-In any case, all the underlying weights can be tuned to the training data provided, or can be kept frozen during the training process.
+- **Lookup table embeddings** can be derived based on a user-defined tokenization strategy-- word-level, sub-word-level, or character-level tokenization (see :ref:`Tokenization Choices <choices_for_tokenization>` below for more details). By default, the lookup table is randomly initialized, but it can instead be initialized to a pretrained checkpoint when using a word-level tokenization strategy (such as `GloVe <https://nlp.stanford.edu/projects/glove/>`_) .
 
-To obtain a single vector per word per input text, the vectors of all tokens corresponding to each word (for which an entity tag is to be ascertained) are pooled.
-This is unlike sequence classification models where all tokens of all words are pooled together.
-The pooled outputs are then passed through a classification layer.
+- **Deep contextualized embedders** are pretrained embedders in the style of :wiki_api:`BERT <BERT_(language_model)>`, which consists of its own tokenization strategy and neural embedding process.
+
+The ``'embedder'`` classifier types pool the vectors of all tokens corresponding to words that have been assigned an entity tag, so as to obtain a single vector per word in an input text.
+
+This is unlike sequence classification models, where all tokens of all words are pooled together, and then passed through a classification layer.
 Dropout layers are used as regularizers to avoid over-fitting, which is a more common phenomenon when working with small sized datasets.
 
 .. note::
 
    Specify the embedding choice using the param ``embedder_type``. Set it to ``None``, ``'glove'`` or ``'bert'`` to use with desired embeddings-- based on randomly initialized embedding lookup table, based on lookup table initialized with GloVe pretrained embeddings or a BERT-like transformers architecture based deep contextualized embedder, respectively.
 
-Following are the different optional params that are configurable along with the chosen choice of ``embedder_type`` param.
-See :ref:`Common Configurable Params <common_configurable_params>` section for list of additional configurable params that are common across classifiers.
+The following are the different optional params that are configurable along with the chosen choice of ``embedder_type`` param.
+See :ref:`Common Configurable Params <common_configurable_params>` for list of additional configurable params that are common across classifiers.
 
-1.1 Based on Embedding Lookup Table (``embedder_type``: ``None``)
+1.1 Embedding Lookup Table (``embedder_type``: ``None``)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -705,7 +697,7 @@ See :ref:`Common Configurable Params <common_configurable_params>` section for l
 |                                         | Choices: ``True``, ``False``                                                                                                                                                                                                                     |
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-Below is a minimalistic example of a token classifier configuration for classifier based on embedding lookup table:
+Below is a minimal working example of a token classifier configuration for a classifier based on an embedding lookup table:
 
 .. code-block:: python
 
@@ -720,7 +712,7 @@ Below is a minimalistic example of a token classifier configuration for classifi
     },
    }
 
-1.2 Based on Pretrained Embedding Lookup Table (``embedder_type``: ``glove``)
+1.2 Pretrained Embedding Lookup Table (``embedder_type``: ``glove``)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -792,7 +784,7 @@ Below is a minimalistic example of a token classifier configuration for classifi
 |                                         | Choices: ``True``, ``False``                                                                                                                                                                                                                     |
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-Below is a minimalistic example of a token classifier configuration for classifier based on pretrained-initialized embedding lookup table:
+Below is a minimal working example of a token classifier configuration for a classifier based on a pretrained-initialized embedding lookup table:
 
 .. code-block:: python
 
@@ -807,7 +799,7 @@ Below is a minimalistic example of a token classifier configuration for classifi
     },
    }
 
-1.3 Based on Deep Contextualized Embeddings (``embedder_type``: ``bert``)
+1.3 Deep Contextualized Embeddings (``embedder_type``: ``bert``)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -870,7 +862,7 @@ Below is a minimalistic example of a token classifier configuration for classifi
 |                                         | Choices: ``True``, ``False``                                                                                                                                                                                                                     |
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-Below is a minimalistic example of a token classifier configuration for classifier based on BERT embedder:
+Below is a minimal working example of a token classifier configuration for a classifier based on a BERT embedder:
 
 .. code-block:: python
 
@@ -891,18 +883,19 @@ Below is a minimalistic example of a token classifier configuration for classifi
 
 .. _dnns_token_classification_models_lstm_pytorch:
 
-:wiki_api:`Long short-term memory networks (LSTM) <Long_short-term_memory>` based text classifiers are classifiers that utilize recurrent feedback connections to be able to learn temporal dependencies in sequential data.
-In its typical architecture for entity recognition, the first layer embeds the sequence of textual tokens obtained from input text into low-dimensional vectors using an embedding lookup table.
-The capacity of an LSTM in maintaining the temporal information is generally dependant on its *hidden* dimension.
-Further, several LSTM layers can be stacked one-after-another and each layer can process the text from just beginning-to-end or both ways.
-The first layer's output embedding sequence is passed through the stacked LSTMs, which finally produces one vector per token of the input text.
 
-To obtain a single vector per word per input text, the vectors of all tokens corresponding to each word (for which an entity tag is to be ascertained) are pooled.
-This is unlike sequence classification models where all tokens of all words are pooled together.
-The pooled outputs are then passed through a classification layer.
+:wiki_api:`Long short-term memory networks (LSTM) <Long_short-term_memory>` based text classifiers utilize recurrent feedback connections to be able to learn temporal dependencies in sequential data. Using the input text, the first layer of an LSTM classifier embeds the these textual sequences into low-dimensional vectors using an embedding lookup table.
+An LSTM's ability to maintain temporal information is generally dependent on its *hidden* dimension.
+
+Several LSTM layers can be stacked one-after-another, and each layer can process the text with forward-looking context, or with both forward- and backward-looking context windows.
+The first layer's output embedding sequence is passed through the stacked LSTMs, which outputs one vector per token of the input text.
+To obtain a single vector per input text, the vectors for each token can be pooled or the last vector in the sequence can simply be used as the representative vector.
+
+This vector is analogous to an ``'embedder'`` classifier's pooled output, which is then passed through a classification layer.
 Dropout layers are used as regularizers to avoid over-fitting, which is a more common phenomenon when working with small sized datasets.
 
-Following are the different optional params that are configurable with the ``'lstm'`` classifier type.
+
+The following are the different optional params that are configurable with the ``'lstm'`` classifier type.
 See :ref:`Common Configurable Params <common_configurable_params>` section for list of additional configurable params that are common across classifiers.
 
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -1015,7 +1008,7 @@ See :ref:`Common Configurable Params <common_configurable_params>` section for l
 |                                         | Choices: ``True``, ``False``                                                                                                                                                                                                                     |
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-Below is a minimalistic example of a token classifier configuration for classifier based on LSTMs:
+Below is a minimal working example of a token classifier configuration for a classifier based on LSTMs:
 
 .. code-block:: python
 
@@ -1036,20 +1029,18 @@ Below is a minimalistic example of a token classifier configuration for classifi
 
 .. _dnns_token_classification_models_cnn_lstm:
 
-:wiki_api:`Long short-term memory networks (LSTM) <Long_short-term_memory>` based text classifiers are classifiers that utilize recurrent feedback connections to be able to learn temporal dependencies in sequential data.
+:wiki_api:`Long short-term memory networks (LSTM) <Long_short-term_memory>` based text classifiers utilize recurrent feedback connections to be able to learn temporal dependencies in sequential data.
 When coupled with :wiki_api:`Convolutional neural networks (CNN) <Convolutional_neural_network#Natural_language_processing>` for extracting character-level features from input text, the overall architecture can better model the textual data as well as it is more robust to variations in the spellings.
-In its typical architecture for entity recognition, the first layer embeds the sequence of words obtained from input text into low-dimensional vectors using an embedding lookup table,
-concatenated with outputs of convolutions at character-level (for each word individually) using kernels of different lengths to capture different patterns.
-The capacity of an LSTM in maintaining the temporal information is generally dependant on its *hidden* dimension.
-Further, several LSTM layers can be stacked one-after-another and each layer can process the text from just beginning-to-end or both ways.
-The first layer's output embedding sequence is passed through the stacked LSTMs, which finally produces one vector per token of the input text.
 
-To obtain a single vector per word per input text, the vectors of all tokens corresponding to each word (for which an entity tag is to be ascertained) are pooled.
-This is unlike sequence classification models where all tokens of all words are pooled together.
-The pooled outputs are then passed through a classification layer.
+Using the input text, the first layer of an LSTM classifier embeds the these textual sequences into low-dimensional vectors using an embedding lookup table. This is then
+concatenated with the outputs of each word's convolutions at the character-level using kernels of different lengths to capture different patterns.
+An LSTM's ability to maintain temporal information is generally dependent on its *hidden* dimension. Several LSTM layers can be stacked one-after-another, and each layer can process the text with forward-looking context, or with both forward- and backward-looking context windows. The first layer's output embedding sequence is passed through the stacked LSTMs, which finally produces one vector per token of the input text.
+
+The  ``'cnn-lstm'`` classifier type pools the vectors of all tokens corresponding to words that have been assigned an entity tag so as to obtain a single vector per word in an input text.
+This is unlike sequence classification models, where all tokens of all words are pooled together, and then passed through a classification layer.
 Dropout layers are used as regularizers to avoid over-fitting, which is a more common phenomenon when working with small sized datasets.
 
-Following are the different optional params that are configurable with the ``'lstm'`` classifier type.
+The following are the different optional params that are configurable with the ``'lstm'`` classifier type.
 See :ref:`Common Configurable Params <common_configurable_params>` section for list of additional configurable params that are common across classifiers.
 
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -1198,7 +1189,7 @@ See :ref:`Common Configurable Params <common_configurable_params>` section for l
 |                                         | Choices: ``True``, ``False``                                                                                                                                                                                                                     |
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-Below is a minimalistic example of a token classifier configuration for classifier based on CNN-LSTM:
+Below is a minimal working example of a token classifier configuration for a classifier based on CNN-LSTM:
 
 .. code-block:: python
 
@@ -1220,20 +1211,19 @@ Below is a minimalistic example of a token classifier configuration for classifi
 
 .. _dnns_token_classification_models_lstm_lstm:
 
-:wiki_api:`Long short-term memory networks (LSTM) <Long_short-term_memory>` based text classifiers are classifiers that utilize recurrent feedback connections to be able to learn temporal dependencies in sequential data.
+:wiki_api:`Long short-term memory networks (LSTM) <Long_short-term_memory>` based text classifiers utilize recurrent feedback connections to be able to learn temporal dependencies in sequential data.
 When coupled with :wiki_api:`Long short-term memory networks (LSTM) <Long_short-term_memory>` for extracting character-level features from input text, the overall architecture can better model the textual data as well as it is more robust to variations in the spellings.
-In its typical architecture for entity recognition, the first layer embeds the sequence of words obtained from input text into low-dimensional vectors using an embedding lookup table,
-concatenated with outputs of character-level LSTM (for each word individually) to capture different patterns.
-The capacity of an LSTM in maintaining the temporal information is generally dependant on its *hidden* dimension.
-Further, several LSTM layers can be stacked one-after-another and each layer can process the text from just beginning-to-end or both ways.
+
+Using the input text, the first embeds the these textual sequences into low-dimensional vectors using an embedding lookup table, and concatenates them with the outputs of character-level LSTM (for each word individually) to capture different patterns.
+The capacity of an LSTM in maintaining the temporal information is generally dependent on its *hidden* dimension.
+Several LSTM layers can be stacked one-after-another, and each layer can process the text with forward-looking context, or with both forward- and backward-looking context windows.
 The first layer's output embedding sequence is passed through the stacked LSTMs, which finally produces one vector per token of the input text.
 
-To obtain a single vector per word per input text, the vectors of all tokens corresponding to each word (for which an entity tag is to be ascertained) are pooled.
-This is unlike sequence classification models where all tokens of all words are pooled together.
-The pooled outputs are then passed through a classification layer.
+The  ``'lstm-lstm'`` classifier type pools the vectors of all tokens corresponding to words that have been assigned an entity tag so as to obtain a single vector per word in an input text.
+This is unlike sequence classification models, where all tokens of all words are pooled together, and then passed through a classification layer.
 Dropout layers are used as regularizers to avoid over-fitting, which is a more common phenomenon when working with small sized datasets.
 
-Following are the different optional params that are configurable with the ``'lstm'`` classifier type.
+The following are the different optional params that are configurable with the ``'lstm'`` classifier type.
 See :ref:`Common Configurable Params <common_configurable_params>` section for list of additional configurable params that are common across classifiers.
 
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -1398,7 +1388,7 @@ See :ref:`Common Configurable Params <common_configurable_params>` section for l
 |                                         | Choices: ``True``, ``False``                                                                                                                                                                                                                     |
 +-----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-Below is a minimalistic example of a token classifier configuration for classifier based on LSTM-LSTM:
+Below is a minimal working example of a token classifier configuration for a classifier based on LSTM-LSTM:
 
 .. code-block:: python
 
@@ -1424,7 +1414,9 @@ A `Tensorflow <https://www.tensorflow.org/>`_ backed implementation of `Bi-Direc
 
 .. note::
 
-   To use this classifier type, please make sure to install the Tensorflow requirement by running in the shell: :code:`pip install mindmeld[tensorflow]`.
+   To use this classifier type, make sure to install the Tensorflow requirement by running in the shell: 
+
+   :code:`pip install mindmeld[tensorflow]`
 
 The MindMeld Bi-Directional LSTM network
 
@@ -1434,7 +1426,7 @@ The MindMeld Bi-Directional LSTM network
  - couples the forget and input gates of the LSTM using a peephole connection, to improve overall accuracies on downstream NLP tasks
  - feeds the output of the LSTM into a `linear chain Conditional Random Field <https://en.wikipedia.org/wiki/Conditional_random_field>`_ (CRF) or `Softmax layer <https://en.wikipedia.org/wiki/Softmax_function>`_  which labels the target word as a particular entity
 
-Following are the different optional params that are configurable with the ``'lstm'`` classifier type.
+The following are the different optional params that are configurable with the ``'lstm'`` classifier type.
 Unlike other classifier types, this classifier type **does not** share any common additional configurable params.
 
 +-----------------------------------------+------------------------------------------------------------------------------------------------+
@@ -1798,11 +1790,12 @@ Tokenization Choices
 .. _choices_for_tokenization:
 
 A noteworthy distinction between the traditional suite of models versus the deep neural models suite is the way the inputs are prepared for the underlying model.
-While the inputs for the former are prepared based on the specifications provided in the ``'features'`` key of the classifier's config, those of the latter are naive in the sense that they are simply a sequence of tokens in the input query;
-the deep neural models do the heavy-lifting of discovering patters to classify the text.
+While the inputs for the former are prepared based on the specifications provided in the ``'features'`` key of the classifier's config, inputs of deep neural models are naive in the sense that they are simply a sequence of tokens in the input query;
+these models do the heavy-lifting of discovering patterns to classify the text.
+
 Broadly, the tokens can be created with individual characters or group of characters (aka. sub-words) or words split at whitespace.
 Based on the choice of tokenization, a sequence of tokens are obtained from the input queries which are then converted into a sequence of ids for the neural model.
-The neural suite has the following choices of tokenizations to prepare inputs for neural models.
+
 
 .. note::
 
@@ -1813,11 +1806,13 @@ The neural suite has the following choices of tokenizations to prepare inputs fo
 
    The choices of tokenization presented here shouldn't be confused with the :ref:`Tokenizers in text preparation pipeline <tokenization_text_preparation_pipeline>`. The tokenizers in text preparation pipeline are used to develop text that is inputted to the neural models while the following are used to prepare sequence of tokens for the underlying embedders.
 
+The neural suite has the following choices of tokenizations to prepare inputs for neural models.
+
 1. ``'whitespace-tokenizer'``
 """""""""""""""""""""""""""""
 
 A Whitespace tokenizer tokenizes a query into a sequence of tokens by splitting it at whitespaces.
-Therefore the tokens are simply the words present in the query.
+The result are tokens that are simply the words present in the query.
 This tokenization strategy is state-less and the sequence of tokens produced will be same irrespective of the queries present in the training data.
 
 2. ``'char-tokenizer'``
@@ -1829,20 +1824,20 @@ This tokenization strategy is state-less and the sequence of tokens produced wil
 3. ``'bpe-tokenizer'``
 """"""""""""""""""""""
 
-A :ref:`Byte-Pair Encoding (BPE) tokenizer <https://huggingface.co/docs/transformers/tokenizer_summary#bytepair-encoding-bpe>` tokenizes a query into a sequence of sub-words based on a vocabulary created from all of the queries in the training data.
+A `Byte-Pair Encoding (BPE) tokenizer <https://huggingface.co/docs/transformers/tokenizer_summary#bytepair-encoding-bpe>`_ tokenizes a query into a sequence of sub-words based on a vocabulary created from all of the queries in the training data.
 This tokenization strategy is state-ful and the sequence of tokens produced might not be same if the queries present in the training data change.
-This tokenizer is implemented using the :ref: Hugginface's Tokenizer library <https://huggingface.co/docs/tokenizers/python/latest/index.html>`.
+This tokenizer is implemented using the `Huggingface's Tokenizer library <https://huggingface.co/docs/tokenizers/python/latest/index.html>`_.
 
 4. ``'wordpiece-tokenizer'``
 """"""""""""""""""""""""""""
 
-A :ref:`Word-Piece tokenizer <https://huggingface.co/docs/transformers/tokenizer_summary#wordpiece>` tokenizes a query into a sequence of sub-words based on a vocabulary created from all of the queries in the training data.
+A `Word-Piece tokenizer <https://huggingface.co/docs/transformers/tokenizer_summary#wordpiece>`_ tokenizes a query into a sequence of sub-words based on a vocabulary created from all of the queries in the training data.
 This tokenization strategy is state-ful and the sequence of tokens produced might not be same if the queries present in the training data change.
-This tokenizer is implemented using the :ref: Hugginface's Tokenizer library <https://huggingface.co/docs/tokenizers/python/latest/index.html>`.
+This tokenizer is implemented using the `Huggingface's Tokenizer library <https://huggingface.co/docs/tokenizers/python/latest/index.html>`_.
 
 5. ``'huggingface_pretrained-tokenizer'``
 """""""""""""""""""""""""""""""""""""""""
 
-A tokenizer pretrained and available as part of :ref:`Huggingface transformers <https://huggingface.co/docs/transformers/index>` library.
+A tokenizer pretrained and available as part of `Huggingface transformers <https://huggingface.co/docs/transformers/index>`_ library.
 Although this tokenization strategy is state-ful due to its pretraining, the sequence of tokens produced will be same irrespective of the queries present in the training data.
 To use this tokenizer, set the ``tokenizer_type`` and ``pretrained_model_name_or_path`` keys appropriately as follows: {``tokenizer_type``: ``'huggingface_pretrained-tokenizer'``, ``pretrained_model_name_or_path``: ``'distilbert-base-uncased'``}.
