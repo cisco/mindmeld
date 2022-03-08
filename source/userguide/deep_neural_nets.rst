@@ -49,7 +49,7 @@ Domain and Intent classification
 
 .. _dnns_sequence_classification:
 
-Using MindMeld’s Deep Neural models requires configuring only two keys: ``'model_settings'`` and ``'params'``. There is no longer a need for handcrafting feature sets for modeling, or for automated hyperparameter tuning.
+Using MindMeld’s Deep Neural models requires configuring only two keys: ``'model_settings'`` and ``'params'``. When working with deep neural models, the ``'features'`` and ``'param_selection'`` keys in the classifier configuration are redundant, as we neither have to handcraft any feature sets for modeling, nor is there automated hyperparameter tuning.
 
 This is a departure from other documentation on :ref:`Working with the Domain Classifier <domain_classifier_configuration>` and :ref:`Working with the Intent Classifier <intent_classifier_configuration>`, which outline that text classifier configuration requires an additional two keys (``'features'`` and ``'param_selection'``).
 
@@ -443,10 +443,10 @@ Below is a minimal working example of a sequence classifier configuration for a 
 
 :wiki_api:`Long short-term memory networks (LSTM) <Long_short-term_memory>` based text classifiers utilize recurrent feedback connections to be able to learn temporal dependencies in sequential data.
 
-Using the input text, the first layer of an LSTM classifier embeds the these textual sequences into low-dimensional vectors using an embedding lookup table.
+Using the input text, the first layer of an LSTM classifier embeds these textual sequences into low-dimensional vectors using an embedding lookup table.
 An LSTM's ability to maintain temporal information is generally dependent on its *hidden* dimension.
-Several LSTM layers can be stacked one-after-another, and each layer can process the text with forward-looking context, or with both forward- and backward-looking context windows.
-The first layer's output embedding sequence is passed through the stacked LSTMs, which finally produces one vector per token of the input text.
+Using the input text, the first layer of an LSTM classifier embeds these textual sequences into low-dimensional vectors using an embedding lookup table.
+The LSTM processes the text from left-to-right or in the case of a bi-directional LSTM (bi-LSTM), it can process the text both ways, from left-to-right and right-to-left. This yields an output sequence of one vector per token of the input text. Optionally, these LSTMs can then be stacked, with the output of one serving as the input to another.
 
 To obtain a single vector per input text, the vectors for each token can be pooled or the last vector in the sequence can simply be used as the representative vector.
 This vector is analogous to an ``'embedder'`` classifier's pooled output, which is then passed through a classification layer.
@@ -884,12 +884,13 @@ Below is a minimal working example of a token classifier configuration for a cla
 .. _dnns_token_classification_models_lstm_pytorch:
 
 
-:wiki_api:`Long short-term memory networks (LSTM) <Long_short-term_memory>` based text classifiers utilize recurrent feedback connections to be able to learn temporal dependencies in sequential data. Using the input text, the first layer of an LSTM classifier embeds the these textual sequences into low-dimensional vectors using an embedding lookup table.
+:wiki_api:`Long short-term memory networks (LSTM) <Long_short-term_memory>` based text classifiers utilize recurrent feedback connections to be able to learn temporal dependencies in sequential data. Using the input text, the first layer of an LSTM classifier embeds these textual sequences into low-dimensional vectors using an embedding lookup table.
 An LSTM's ability to maintain temporal information is generally dependent on its *hidden* dimension.
 
-Several LSTM layers can be stacked one-after-another, and each layer can process the text with forward-looking context, or with both forward- and backward-looking context windows.
-The first layer's output embedding sequence is passed through the stacked LSTMs, which outputs one vector per token of the input text.
+Using the input text, the first layer of an LSTM classifier embeds these textual sequences into low-dimensional vectors using an embedding lookup table.
+The LSTM processes the text from left-to-right or in the case of a bi-directional LSTM (bi-LSTM), it can process the text both ways, from left-to-right and right-to-left. This yields an output sequence of one vector per token of the input text.
 To obtain a single vector per input text, the vectors for each token can be pooled or the last vector in the sequence can simply be used as the representative vector.
+Optionally, these LSTMs can then be stacked, with the output of one serving as the input to another.
 
 This vector is analogous to an ``'embedder'`` classifier's pooled output, which is then passed through a classification layer.
 Dropout layers are used as regularizers to avoid over-fitting, which is a more common phenomenon when working with small sized datasets.
@@ -1032,9 +1033,10 @@ Below is a minimal working example of a token classifier configuration for a cla
 :wiki_api:`Long short-term memory networks (LSTM) <Long_short-term_memory>` based text classifiers utilize recurrent feedback connections to be able to learn temporal dependencies in sequential data.
 When coupled with :wiki_api:`Convolutional neural networks (CNN) <Convolutional_neural_network#Natural_language_processing>` for extracting character-level features from input text, the overall architecture can better model the textual data as well as it is more robust to variations in the spellings.
 
-Using the input text, the first layer of an LSTM classifier embeds the these textual sequences into low-dimensional vectors using an embedding lookup table. This is then
+Using the input text, the first layer of an LSTM classifier embeds these textual sequences into low-dimensional vectors using an embedding lookup table. This is then
 concatenated with the outputs of each word's convolutions at the character-level using kernels of different lengths to capture different patterns.
-An LSTM's ability to maintain temporal information is generally dependent on its *hidden* dimension. Several LSTM layers can be stacked one-after-another, and each layer can process the text with forward-looking context, or with both forward- and backward-looking context windows. The first layer's output embedding sequence is passed through the stacked LSTMs, which finally produces one vector per token of the input text.
+An LSTM's ability to maintain temporal information is generally dependent on its *hidden* dimension. Using the input text, the first layer of an LSTM classifier embeds these textual sequences into low-dimensional vectors using an embedding lookup table.
+The LSTM processes the text from left-to-right or in the case of a bi-directional LSTM (bi-LSTM), it can process the text both ways, from left-to-right and right-to-left. This yields an output sequence of one vector per token of the input text. Optionally, these LSTMs can then be stacked, with the output of one serving as the input to another.
 
 The  ``'cnn-lstm'`` classifier type pools the vectors of all tokens corresponding to words that have been assigned an entity tag so as to obtain a single vector per word in an input text.
 This is unlike sequence classification models, where all tokens of all words are pooled together, and then passed through a classification layer.
@@ -1214,10 +1216,10 @@ Below is a minimal working example of a token classifier configuration for a cla
 :wiki_api:`Long short-term memory networks (LSTM) <Long_short-term_memory>` based text classifiers utilize recurrent feedback connections to be able to learn temporal dependencies in sequential data.
 When coupled with :wiki_api:`Long short-term memory networks (LSTM) <Long_short-term_memory>` for extracting character-level features from input text, the overall architecture can better model the textual data as well as it is more robust to variations in the spellings.
 
-Using the input text, the first embeds the these textual sequences into low-dimensional vectors using an embedding lookup table, and concatenates them with the outputs of character-level LSTM (for each word individually) to capture different patterns.
+Using the input text, the first embeds these textual sequences into low-dimensional vectors using an embedding lookup table, and concatenates them with the outputs of character-level LSTM (for each word individually) to capture different patterns.
 The capacity of an LSTM in maintaining the temporal information is generally dependent on its *hidden* dimension.
-Several LSTM layers can be stacked one-after-another, and each layer can process the text with forward-looking context, or with both forward- and backward-looking context windows.
-The first layer's output embedding sequence is passed through the stacked LSTMs, which finally produces one vector per token of the input text.
+Using the input text, the first layer of an LSTM classifier embeds these textual sequences into low-dimensional vectors using an embedding lookup table.
+The LSTM processes the text from left-to-right or in the case of a bi-directional LSTM (bi-LSTM), it can process the text both ways, from left-to-right and right-to-left. This yields an output sequence of one vector per token of the input text. Optionally, these LSTMs can then be stacked, with the output of one serving as the input to another.
 
 The  ``'lstm-lstm'`` classifier type pools the vectors of all tokens corresponding to words that have been assigned an entity tag so as to obtain a single vector per word in an input text.
 This is unlike sequence classification models, where all tokens of all words are pooled together, and then passed through a classification layer.
@@ -1414,7 +1416,7 @@ A `Tensorflow <https://www.tensorflow.org/>`_ backed implementation of `Bi-Direc
 
 .. note::
 
-   To use this classifier type, make sure to install the Tensorflow requirement by running in the shell: 
+   To use this classifier type, make sure to install the Tensorflow requirement by running in the shell:
 
    :code:`pip install mindmeld[tensorflow]`
 
