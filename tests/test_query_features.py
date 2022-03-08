@@ -289,7 +289,7 @@ def test_entity_query_features(
             "tag_scheme": "IOB",
             "feature_scaler": "max-abs",
         },
-        "params": {"C": 10, "penalty": "l2"},
+        "params": {"C": 10, "penalty": "l2", "solver": "liblinear"},
         "features": {
             "in-gaz-span-seq": {},
             "in-gaz-ngram-seq": {},
@@ -307,8 +307,8 @@ def test_entity_query_features(
 
     entity_recognizer = (
         home_assistant_nlp.domains["times_and_dates"]
-        .intents["change_alarm"]
-        .entity_recognizer
+            .intents["change_alarm"]
+            .entity_recognizer
     )
     entity_recognizer.fit(**entity_recognizer_config_all_features)
 
@@ -466,7 +466,7 @@ def test_entity_gaz_query_features(
             "tag_scheme": "IOB",
             "feature_scaler": "max-abs",
         },
-        "params": {"C": 10, "penalty": "l2"},
+        "params": {"C": 10, "penalty": "l2", "solver": "liblinear"},
         "features": {
             "in-gaz-span-seq": {},
             "in-gaz-ngram-seq": {},
@@ -484,8 +484,8 @@ def test_entity_gaz_query_features(
 
     entity_recognizer = (
         kwik_e_mart_nlp.domains["store_info"]
-        .intents["get_store_hours"]
-        .entity_recognizer
+            .intents["get_store_hours"]
+            .entity_recognizer
     )
     entity_recognizer.fit(**entity_recognizer_config_all_features)
     extracted_features = entity_recognizer.view_extracted_features(query)[index]

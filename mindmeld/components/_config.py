@@ -44,6 +44,9 @@ CONFIG_DEPRECATION_MAPPING = {
 DEFAULT_DOMAIN_CLASSIFIER_CONFIG = {
     "model_type": "text",
     "model_settings": {"classifier_type": "logreg"},
+    "params": {
+      "solver": "liblinear",
+    },
     "param_selection": {
         "type": "k-fold",
         "k": 10,
@@ -55,6 +58,9 @@ DEFAULT_DOMAIN_CLASSIFIER_CONFIG = {
 DEFAULT_INTENT_CLASSIFIER_CONFIG = {
     "model_type": "text",
     "model_settings": {"classifier_type": "logreg"},
+    "params": {
+      "solver": "liblinear",
+    },
     "param_selection": {
         "type": "k-fold",
         "k": 10,
@@ -80,6 +86,9 @@ DEFAULT_ENTITY_RECOGNIZER_CONFIG = {
         "tag_scheme": "IOB",
         "feature_scaler": "max-abs",
     },
+    "params": {
+      "solver": "liblinear",
+    },
     "param_selection": {
         "type": "k-fold",
         "k": 5,
@@ -104,12 +113,15 @@ DEFAULT_ENTITY_RECOGNIZER_CONFIG = {
 DEFAULT_ENTITY_RESOLVER_CONFIG = {
     "model_type": "resolver",
     "model_settings": {"resolver_type": "text_relevance", },
+    "params": {
+      "solver": "liblinear",
+    },
 }
 
 DEFAULT_ROLE_CLASSIFIER_CONFIG = {
     "model_type": "text",
     "model_settings": {"classifier_type": "logreg"},
-    "params": {"C": 100, "penalty": "l1"},
+    "params": {"C": 100, "penalty": "l2", "solver": "liblinear"},
     "features": {
         "bag-of-words-before": {
             "ngram_lengths_to_start_positions": {1: [-2, -1], 2: [-2, -1]}

@@ -271,7 +271,7 @@ def test_get_boundary_counts_sequential(
 
 @pytest.mark.parametrize(
     "model_type,params",
-    [("memm", {"penalty": "l2", "C": 10000}), ("crf", {"c1": 0.01, "c2": 0.01})],
+    [("memm", {"penalty": "l2", "C": 10000, "solver": "liblinear"}), ("crf", {"c1": 0.01, "c2": 0.01})],
 )
 def test_view_extracted_features(kwik_e_mart_nlp, model_type, params):
     config = {
@@ -292,8 +292,8 @@ def test_view_extracted_features(kwik_e_mart_nlp, model_type, params):
     }
     er = (
         kwik_e_mart_nlp.domains["store_info"]
-        .intents["get_store_hours"]
-        .entity_recognizer
+            .intents["get_store_hours"]
+            .entity_recognizer
     )
     er.fit(**config)
     extracted_features = er.view_extracted_features("Main st store hours")
@@ -332,8 +332,8 @@ def test_lstm_er_model_no_tf(kwik_e_mart_nlp):
     }
     er = (
         kwik_e_mart_nlp.domains["store_info"]
-        .intents["get_store_hours"]
-        .entity_recognizer
+            .intents["get_store_hours"]
+            .entity_recognizer
     )
     with pytest.raises(ValueError) as exc_info:
         er.fit(**config)
@@ -371,8 +371,8 @@ def test_lstm_er_model(kwik_e_mart_nlp):
     }
     er = (
         kwik_e_mart_nlp.domains["store_info"]
-        .intents["get_store_hours"]
-        .entity_recognizer
+            .intents["get_store_hours"]
+            .entity_recognizer
     )
     er.fit(**config)
     response = kwik_e_mart_nlp.process("Does the 156th location open on Saturday?")

@@ -52,6 +52,8 @@ class ConditionalRandomFields(Tagger):
 
     def set_params(self, **parameters):
         self._clf = CRF()
+        print(parameters)
+        print(self.get_params())
         self._clf.set_params(**parameters)
         return self
 

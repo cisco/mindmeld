@@ -22,7 +22,7 @@ from abc import ABC, abstractmethod
 from inspect import signature
 from typing import Union
 
-from sklearn.externals import joblib
+import joblib
 from sklearn.model_selection import (
     GridSearchCV,
     GroupKFold,
@@ -442,7 +442,7 @@ class Model(AbstractModel):
             n_jobs=n_jobs,
             return_train_score=False,
         )
-        model = grid_cv.fit(examples, labels, groups)
+        model = grid_cv.fit(examples, y=labels, groups=groups)
 
         for idx, params in enumerate(model.cv_results_["params"]):
             logger.debug("Candidate parameters: %s", params)

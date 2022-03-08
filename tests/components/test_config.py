@@ -128,7 +128,7 @@ def test_get_classifier_config_func():
         "entity", APP_PATH, domain="domain", intent="intent"
     )["params"]
 
-    expected = {"penalty": "l2", "C": 100}
+    expected = {"penalty": "l2", "C": 100, "solver": "liblinear"}
 
     assert actual == expected
 
@@ -139,7 +139,7 @@ def test_get_classifier_config_func_error():
         "params"
     ]
 
-    expected = {"error": "intent", "penalty": "l2", "C": 100}
+    expected = {"error": "intent", "penalty": "l2", "C": 100, "solver": "liblinear"}
 
     assert actual == expected
 

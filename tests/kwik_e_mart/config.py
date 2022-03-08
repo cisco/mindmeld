@@ -11,6 +11,9 @@ DOMAIN_CLASSIFIER_CONFIG = {
     "model_settings": {
         "classifier_type": "logreg",
     },
+    "params": {
+        "solver": "liblinear",
+    },
     "param_selection": {
         "type": "k-fold",
         "k": 10,
@@ -30,6 +33,9 @@ DOMAIN_CLASSIFIER_CONFIG = {
 INTENT_CLASSIFIER_CONFIG = {
     "model_type": "text",
     "model_settings": {"classifier_type": "logreg"},
+    "params": {
+        "solver": "liblinear",
+    },
     "param_selection": {
         "type": "k-fold",
         "k": 10,
@@ -59,6 +65,9 @@ ENTITY_RECOGNIZER_CONFIG = {
         "tag_scheme": "IOB",
         "feature_scaler": "max-abs",
     },
+    "params": {
+        "solver": "liblinear",
+    },
     "param_selection": {
         "type": "k-fold",
         "k": 5,
@@ -81,7 +90,6 @@ ENTITY_RECOGNIZER_CONFIG = {
     },
 }
 
-
 TEST_ENTITY_RECOGNIZER_CONFIG = {
     "model_type": "tagger",
     "label_type": "entities",
@@ -90,7 +98,7 @@ TEST_ENTITY_RECOGNIZER_CONFIG = {
         "tag_scheme": "IOB",
         "feature_scaler": "max-abs",
     },
-    "params": {"penalty": "l1", "C": 50},
+    "params": {"penalty": "l1", "C": 50, "solver": "liblinear"},
     "features": {
         "bag-of-words-seq": {
             "ngram_lengths_to_start_positions": {

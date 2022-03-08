@@ -46,7 +46,7 @@ class MemmModel(Tagger):
         return self
 
     def set_params(self, **parameters):
-        self._clf = LogisticRegression()
+        self._clf = LogisticRegression(solver="liblinear")
         self._clf.set_params(**parameters)
         return self
 
@@ -150,7 +150,7 @@ class MemmModel(Tagger):
             X, _ = self._preprocess_data([features])
             prediction = self._clf.predict_proba(X)[0]
             predicted_tag = np.argmax(prediction)
-            prev_tag = self.class_encoder.inverse_transform(predicted_tag)
+            prev_tag = self.class_encoder.inverse_transform([predicted_tag])[0]
             seq_log_probs.append([prev_tag, prediction[predicted_tag]])
         return seq_log_probs
 
@@ -164,7 +164,7 @@ class MemmModel(Tagger):
                 given the full feature matrix, X and the class labels, y.
         """
         selector = {
-            "l1": SelectFromModel(LogisticRegression(penalty="l1", C=1)),
+            "l1": SelectFromModel(LogisticRegression(penalty="l1", C=1, solver="liblinear")),
             "f": SelectPercentile(),
         }.get(selector_type)
         return selector
