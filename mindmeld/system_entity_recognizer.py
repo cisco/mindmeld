@@ -13,7 +13,6 @@
 import json
 import logging
 import os
-import sys
 from abc import ABC, abstractmethod
 from enum import Enum
 
@@ -286,30 +285,18 @@ class DucklingRecognizer(SystemEntityRecognizer):
                 return response_json, response.status_code
             else:
                 raise SystemEntityError("System entity status code is not 200.")
+
         except requests.ConnectionError:
-            sys.exit(
-                "Unable to connect to the system entity recognizer. Make sure it's "
+            msg = (
+                "Unable to connect to the system entity recognizer at %s. Make sure it's "
                 "running by typing 'mindmeld num-parse' at the command line."
             )
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.error(
-                "Numerical Entity Recognizer Error: %s\nURL: %r\nData: %s",
-                ex,
-                self.url,
-                json.dumps(data),
-            )
-            sys.exit(
-                "\nThe system entity recognizer encountered the following "
-                + "error:\n"
-                + str(ex)
-                + "\nURL: "
-                + self.url
-                + "\nRaw data: "
-                + str(data)
-                + "\nPlease check your data and ensure Numerical parsing service is running. "
-                "Make sure it's running by typing "
-                "'mindmeld num-parse' at the command line."
-            )
+            logger.exception(msg, self.url)
+            raise
+
+        except Exception:  # pylint: disable=broad-except
+            logger.exception("unhandled System Entity Recognizer Error, URL: %s", self.url)
+            raise
 
     def parse(
         self,

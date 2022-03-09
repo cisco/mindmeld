@@ -9,13 +9,13 @@ Tests for Tokenizers in the `text_preparation.tokenizers` module.
 """
 import pytest
 
-
 from mindmeld.text_preparation.tokenizers import (
     LetterTokenizer,
     WhiteSpaceTokenizer,
     SpacyTokenizer,
     CharacterTokenizer,
 )
+from mindmeld.text_preparation.text_preparation_pipeline import TextPreparationPipeline
 
 JA_SENTENCE_ONE = "紳士が過ぎ去った、 なぜそれが起こったのか誰にも分かりません！"
 JA_SENTENCE_TWO = "株式会社ＫＡＤＯＫＡＷＡ Ｆｕｔｕｒｅ Ｐｕｂｌｉｓｈｉｎｇ"
@@ -24,6 +24,12 @@ JA_SENTENCE_FOUR = "サウンドレベルアップして下さい"
 DE_SENTENCE_ONE = "Ein Gentleman ist vorbeigekommen, der weiß"
 ES_SENTENCE_ONE = "Ha pasado un caballero, ¡quién sabe por qué pasó!"
 EN_SENTENCE_ONE = "Hello Sir. I'd like to tell you how much I like MindMeld."
+EN_SENTENCE_TWO = "Hello my name is {Nikhil|name} and I am an {engineer|profession} at {Cisco|organization}."
+EN_SENTENCE_THREE = (
+    "{Jay|name} ordered a {sandwhich|meal} and {pizza|meal} for lunch and dinner."
+)
+EN_SENTENCE_FOUR = "{Spero|name}"
+EN_SENTENCE_FIVE = "I found {Andy Neff|name}"
 
 
 @pytest.fixture
@@ -254,3 +260,82 @@ def test_tokenize(text_preparation_pipeline):
     assert tokens[4]["entity"] == "chyea"
     assert tokens[4]["raw_entity"] == "Chyea!"
     assert tokens[4]["raw_start"] == 26
+
+
+@pytest.mark.parametrize(
+    "raw_text, expected_spans, expected_unannotated_text",
+    [
+        (
+            EN_SENTENCE_ONE,
+            [(0, 57)],
+            "Hello Sir. I'd like to tell you how much I like MindMeld.",
+        ),
+        (
+            EN_SENTENCE_TWO,
+            [(0, 17), (18, 24), (30, 43), (44, 52), (64, 68), (69, 74), (88, 89)],
+            "Hello my name is Nikhil and I am an engineer at Cisco.",
+        ),
+        (
+            EN_SENTENCE_THREE,
+            [(1, 4), (10, 21), (22, 31), (37, 42), (43, 48), (54, 76)],
+            "Jay ordered a sandwhich and pizza for lunch and dinner.",
+        ),
+        (EN_SENTENCE_FOUR, [(1, 6)], "Spero"),
+        (EN_SENTENCE_FIVE, [(0, 8), (9, 18)], "I found Andy Neff"),
+    ],
+)
+def test_calc_unannotated_spans(raw_text, expected_spans, expected_unannotated_text):
+    unannotated_spans = TextPreparationPipeline.calc_unannotated_spans(raw_text)
+    assert unannotated_spans == expected_spans
+    unannotated_text = "".join(
+        [raw_text[span[0] : span[1]] for span in unannotated_spans]
+    )
+    assert unannotated_text == expected_unannotated_text
+
+
+@pytest.mark.parametrize(
+    "unannotated_spans, expected_unannotated_annotated_idx_map",
+    [
+        ([(0, 8)], [0, 1, 2, 3, 4, 5, 6, 7]),
+        ([(0, 3), (4, 7), (9, 10)], [0, 1, 2, 4, 5, 6, 9]),
+        ([(1, 3), (5, 10)], [1, 2, 5, 6, 7, 8, 9]),
+    ],
+)
+def test_unannotated_to_annotated_idx_map(
+    unannotated_spans, expected_unannotated_annotated_idx_map
+):
+    unannotated_annotated_idx_map = (
+        TextPreparationPipeline.unannotated_to_annotated_idx_map(unannotated_spans)
+    )
+    assert unannotated_annotated_idx_map == expected_unannotated_annotated_idx_map
+
+
+@pytest.mark.parametrize(
+    "raw_text, unannotated_to_annotated_idx_mapping, expected_tokens",
+    [
+        (EN_SENTENCE_FOUR, [1, 2, 3, 4, 5], [{"start": 1, "text": "Spero"}]),
+        (
+            EN_SENTENCE_FIVE,
+            [0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17],
+            [
+                {"start": 0, "text": "I"},
+                {"start": 2, "text": "found"},
+                {"start": 9, "text": "Andy"},
+                {"start": 14, "text": "Neff"},
+            ],
+        ),
+    ],
+)
+def test_convert_token_idx_unannotated_to_annotated(
+    text_preparation_pipeline,
+    raw_text,
+    unannotated_to_annotated_idx_mapping,
+    expected_tokens,
+):
+    unannotated_spans = TextPreparationPipeline.calc_unannotated_spans(raw_text)
+    unannotated_text = "".join([raw_text[i[0] : i[1]] for i in unannotated_spans])
+    tokens = text_preparation_pipeline.tokenize(unannotated_text)
+    TextPreparationPipeline.convert_token_idx_unannotated_to_annotated(
+        tokens, unannotated_to_annotated_idx_mapping
+    )
+    assert tokens == expected_tokens

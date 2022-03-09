@@ -27,7 +27,7 @@ from .normalizers import (
 )
 from .preprocessors import Preprocessor, PreprocessorFactory, NoOpPreprocessor
 from .stemmers import Stemmer, StemmerFactory, NoOpStemmer
-from .tokenizers import Tokenizer, TokenizerFactory
+from .tokenizers import SpacyTokenizer, Tokenizer, TokenizerFactory
 
 from ..components._config import (
     get_text_preparation_config,
@@ -40,6 +40,7 @@ from ..constants import UNICODE_SPACE_CATEGORY, DUCKLING_VERSION
 from ..exceptions import MindMeldImportError
 from ..path import get_app
 from .._version import get_mm_version
+
 logger = logging.getLogger(__name__)
 
 
@@ -51,7 +52,7 @@ class TextPreparationPipelineError(Exception):
     pass
 
 
-class TextPreparationPipeline:
+class TextPreparationPipeline:  # pylint: disable=R0904
     """Pipeline Class for MindMeld's text processing."""
 
     def __init__(
@@ -169,16 +170,17 @@ class TextPreparationPipeline:
         return preprocessed_text
 
     def custom_preprocessors_exist(self):
-        """ Checks if the current TextPreparationPipeline has preprocessors that is not
+        """Checks if the current TextPreparationPipeline has preprocessors that are not
         simply the NoOpPreprocessor or None.
 
         Returns:
             has_custom_preprocessors (bool): Whether atleast one custom preprocessor exists.
         """
         return (
-            self.preprocessors is not None
-            and len(self.preprocessors) >= 1
-            and not any([isinstance(elem, NoOpPreprocessor) for elem in self.preprocessors])
+            self.preprocessors
+            and not any(
+                [isinstance(elem, NoOpPreprocessor) for elem in self.preprocessors]
+            )
         )
 
     def normalize(self, text, keep_special_chars=None):
@@ -231,6 +233,11 @@ class TextPreparationPipeline:
                 "'keep_special_chars' is deprecated as a parameter to normalize(). "
                 "You can specify 'keep_special_chars' in the TEXT_PREPARATION_CONFIG."
             )
+        # Single-shot tokenization for Spacy-Based Tokenizers (Performance Optimization)
+        if isinstance(self.tokenizer, SpacyTokenizer):
+            return self.tokenize_using_spacy(text)
+
+        # Non-Spacy Tokenizer Handling
         return self.tokenize_around_mindmeld_annotations(text)
 
     def tokenize_and_normalize(self, text):
@@ -253,9 +260,13 @@ class TextPreparationPipeline:
             if not raw_token["text"]:
                 continue
             normalized_text = self._normalize_text(raw_token["text"])
-            # We tokenize the post-norm text and split the entity if possible
+            # We sub-tokenize the post-norm text and split the entity if possible
             # Ex: normalize("o'clock") -> "o clock" -> ["o", "clock"]
-            normalized_texts = [t["text"] for t in self.tokenize(normalized_text)]
+            # Skip sub-tokenization call if characters are not added/removed
+            if normalized_text.lower() == raw_token["text"].lower():
+                normalized_texts = [normalized_text]
+            else:
+                normalized_texts = [t["text"] for t in self.tokenize(normalized_text)]
 
             if len(normalized_texts) > 0:
                 for token_text in normalized_texts:
@@ -308,7 +319,7 @@ class TextPreparationPipeline:
             "preprocessors": self.preprocessors,
             "normalizers": self.normalizers,
             "tokenizer": self.tokenizer,
-            "stemmer": self.stemmer
+            "stemmer": self.stemmer,
         }
 
     def get_hashid(self):
@@ -334,6 +345,107 @@ class TextPreparationPipeline:
             matches (List[sre.SRE_Match object]): Regex match objects.
         """
         return list(MINDMELD_ANNOTATION_PATTERN.finditer(text))
+
+    @staticmethod
+    def calc_unannotated_spans(text):
+        """Calculates the spans of text that exclude mindmeld entity annotations.
+        For example, "{Lucien|person_name}" would return [(1,7)] since "Lucien" is
+        the only text that is not the annotation.
+
+        Args:
+            text (str): Original sentence with markup to modify.
+        Returns:
+            unannotated_spans (List[Tuple(int, int)]): The list of spans where each span
+                is a section of the original text excluding mindmeld entity annotations of
+                class type and markup symbols ("{", "|", "}"). The first element of the
+                tuple is the start index and the second is the ending index + 1.
+        """
+        matches = TextPreparationPipeline.find_mindmeld_annotation_re_matches(text)
+        unannotated_spans = []
+        prev_entity_end = 0
+
+        for match in matches:
+            entity_start, entity_end = match.span()
+            entity_text = match.group(1)
+
+            unannotated_spans.append((prev_entity_end, entity_start))
+            entity_text_start = entity_start + 1
+            unannotated_spans.append(
+                (entity_text_start, entity_text_start + len(entity_text))
+            )
+            prev_entity_end = entity_end
+
+        # Append a span from the end of last entity to the end of the text (if it exists) 
+        if prev_entity_end < len(text):
+            unannotated_spans.append((prev_entity_end, len(text)))
+
+        # Filter out spans that have a length of 0
+        unannotated_spans = [
+            span for span in unannotated_spans if span[1] - span[0] > 0
+        ]
+        return unannotated_spans
+
+    @staticmethod
+    def unannotated_to_annotated_idx_map(unannotated_spans):
+        """Create a vector mapping indexes from the unannotated text to the original
+        text.
+
+        Args:
+            unannotated_spans (List[Tuple(int, int)]): The list of spans where each span
+                is a section of the original text excluding mindmeld entity annotations of
+                class type and markup symbols ("{", "|", "}"). The first element of the
+                tuple is the start index and the second is the ending index + 1.
+        Returns:
+            unannotated_to_annotated_idx_map (List[int]): A vector where the value at
+                each index represents the mapping of the position of a single character
+                in the unannotated text to the position in the original text.
+        """
+        unannotated_to_annotated_idx_map = []
+        for unannotated_span in unannotated_spans:
+            start, end = unannotated_span
+            for i in range(start, end):
+                unannotated_to_annotated_idx_map.append(i)
+        return unannotated_to_annotated_idx_map
+
+    @staticmethod
+    def convert_token_idx_unannotated_to_annotated(
+        tokens, unannotated_to_annotated_idx_map
+    ):
+        """In-place function that reverts the token start indices to the
+        index of the character in the orginal text with annotations.
+
+        Args:
+            unannotated_to_annotated_idx_map (List[Tuple(int, int)]): A vector where the value at
+                each index represents the mapping of the position of a single character
+                in the unannotated text to the position in the original text.
+            tokens (List[dict]): List of tokens represented as dictionaries. With "start"
+                indices referring to the unannotated text.
+        """
+        for token in tokens:
+            token["start"] = unannotated_to_annotated_idx_map[token["start"]]
+
+    def tokenize_using_spacy(self, text):
+        """Wrapper function used before tokenizing with Spacy. Combines all unannoted text spans
+        into a single string to pass to spacy for tokenization. Applies the correct offset to
+        the resulting tokens to align with the annotated text. This optimization reduces the overall
+        time needed for tokenization.
+
+        Args:
+            text (str): Input text.
+        Returns:
+            tokens (List[dict]): List of tokens represented as dictionaries.
+        """
+        unannotated_spans = TextPreparationPipeline.calc_unannotated_spans(text)
+        unannotated_text = "".join([text[i[0] : i[1]] for i in unannotated_spans])
+        unannotated_to_annotated_idx_mapping = (
+            TextPreparationPipeline.unannotated_to_annotated_idx_map(unannotated_spans)
+        )
+        tokens = self.tokenizer.tokenize(unannotated_text)
+        TextPreparationPipeline.convert_token_idx_unannotated_to_annotated(
+            tokens, unannotated_to_annotated_idx_mapping
+        )
+        tokens = TextPreparationPipeline.filter_out_space_text_tokens(tokens)
+        return tokens
 
     @staticmethod
     def modify_around_annotations(text, function):
@@ -378,7 +490,7 @@ class TextPreparationPipeline:
 
         if prev_entity_end < len(text):
             # Adds the remainder of the text after the last end brace } "function(post_entity_text)"
-            modified_text.append(function(text[prev_entity_end: len(text)]))
+            modified_text.append(function(text[prev_entity_end : len(text)]))
 
         return "".join(modified_text)
 
@@ -426,7 +538,7 @@ class TextPreparationPipeline:
         if prev_entity_end < len(text):
             # Add tokens from the text after the last MindMeld entity
             tokens_after_last_entity = self.tokenizer.tokenize(
-                text[prev_entity_end: len(text)]
+                text[prev_entity_end : len(text)]
             )
             TextPreparationPipeline.offset_token_start_values(
                 tokens=tokens_after_last_entity, offset=prev_entity_end
@@ -583,9 +695,10 @@ class TextPreparationPipelineFactory:
             # Check if a custom TextPreparationPipeline has been created in app.py
             try:
                 app = get_app(app_path)
-                if hasattr(app, 'text_preparation_pipeline') and app.text_preparation_pipeline:
+                if getattr(app, 'text_preparation_pipeline', None):
                     logger.info(
-                        "Using custom text_preparation_pipeline from %s/__init__.py.", app_path
+                        "Using custom text_preparation_pipeline from %s/__init__.py.",
+                        app_path,
                     )
                     return app.text_preparation_pipeline
             except MindMeldImportError:
@@ -594,7 +707,7 @@ class TextPreparationPipelineFactory:
 
     @staticmethod
     def create_from_app_config(app_path):
-        """ Static method to create a TextPreparation pipeline based on the specifications in
+        """Static method to create a TextPreparation pipeline based on the specifications in
         the config.
 
         Args:
@@ -615,23 +728,20 @@ class TextPreparationPipelineFactory:
                 "have not been specified. Will apply specified 'regex_norm_rules' in addition to "
                 "default normalizers. To omit default normalizers set 'normalizers' to []."
             )
-        normalizers = (
-            DEFAULT_NORMALIZERS
-            if "normalizers" not in text_preparation_config
-            else text_preparation_config.get("normalizers")
-        )
+
         stemmer = (
             "NoOpStemmer"
             if "stemmer" in text_preparation_config
                and not text_preparation_config["stemmer"]
             else text_preparation_config.get("stemmer")
         )
+
         return TextPreparationPipelineFactory.create_text_preparation_pipeline(
             language=language,
             preprocessors=text_preparation_config.get("preprocessors"),
             regex_norm_rules=text_preparation_config.get("regex_norm_rules"),
             keep_special_chars=text_preparation_config.get("keep_special_chars"),
-            normalizers=normalizers,
+            normalizers=text_preparation_config.get("normalizers", DEFAULT_NORMALIZERS),
             tokenizer=text_preparation_config.get("tokenizer"),
             stemmer=stemmer,
         )
@@ -698,7 +808,7 @@ class TextPreparationPipelineFactory:
                 Tokenizer, tokenizer, language
             )
             if tokenizer
-            else TokenizerFactory.get_tokenizer_by_language(language)
+            else TokenizerFactory.get_default_tokenizer()
         )
 
         # Instantiate Stemmer
@@ -800,9 +910,10 @@ class TextPreparationPipelineJSONEncoder(json.JSONEncoder):
     """
 
     def default(self, o):
-        tojson = getattr(o, 'tojson', None)
+        tojson = getattr(o, "tojson", None)
         if callable(tojson):
             return tojson()
         else:
             raise TextPreparationPipelineError(
-                f"Missing tojson() for {o.__class__.__name__} to create query cache hash.")
+                f"Missing tojson() for {o.__class__.__name__} to create query cache hash."
+            )
