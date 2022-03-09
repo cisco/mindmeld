@@ -173,6 +173,12 @@ class BaseClassification(nn_module):
             num_labels = len(set(chain.from_iterable(labels)))
         params.update({"num_labels": num_labels})
 
+        # split input data into train & dev splits, and get data loaders
+        train_examples, dev_examples, train_labels, dev_labels = train_test_split(
+            examples, labels, test_size=params["dev_split_ratio"],
+            random_state=TRAIN_DEV_SPLIT_SEED
+        )
+
         # update self.params which will be used throughout the following modeling code
         self.params.update(params)
 
@@ -185,12 +191,6 @@ class BaseClassification(nn_module):
         temp_folder = os.path.join(USER_CONFIG_DIR, "tmp", "pytorch_models", str(uuid.uuid4()))
         temp_weights_save_path = os.path.join(temp_folder, "pytorch_model.bin")
         os.makedirs(temp_folder, exist_ok=True)
-
-        # split input data into train & dev splits, and get data loaders
-        train_examples, dev_examples, train_labels, dev_labels = train_test_split(
-            examples, labels, test_size=self.params.dev_split_ratio,
-            random_state=TRAIN_DEV_SPLIT_SEED
-        )
 
         # create an optimizer and attach all model params to it
         num_training_steps = int(
@@ -534,7 +534,7 @@ class BaseClassification(nn_module):
         device = "cuda" if torch.cuda.is_available() else "cpu"
         if device != module.params.device:
             msg = f"Model was dumped when on the device:{module.params.device} " \
-                  f"but is not being loaded on device:{device}"
+                  f"but is now being loaded on device:{device}"
             logger.warning(msg)
             module.params.device = device
         bin_path = os.path.join(path, "model.bin")
