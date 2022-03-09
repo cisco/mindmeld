@@ -1,6 +1,33 @@
 Recent Changes
 ==============
 
+MindMeld 4.5
+-------------
+.. warning::
+
+   This release includes breaking changes. See below
+   for instructions on migrating your apps from MindMeld 4.4 to MindMeld 4.5
+
+**1. Support for Deep Learning Models **
+
+MindMeld now supports a [suite of deep neural architectures](https://www.mindmeld.com/docs/userguide/deep_neural_nets.html) for domain and intent classification as well as for
+entity recognition in its NLP pipeline. This also includes support for Pretrained Transformer Models (PTMs)
+available as part of the [Huggingface models hub](https://huggingface.co/models). Similar to their shallower counterparts,
+the deep models also support configurable parameters to alter the model architecture and the training process.
+
+
+**2. Active Learning for Entity Recognition **
+
+MindMeld's active learning tool (link: https://www.mindmeld.com/docs/userguide/active_learning.html) now has support for entity recognition models.
+This enables teams to automatically select the most informative subsets from large query datasets based on entities present in the queries.
+
+**3. Improvements to caching mechanism and tokenization performance **
+
+In version 4.5, we have improved the performance for multilingual tokenization and also
+worked on some modifications and bugfixes to the caching mechanism used for models and queries.
+Due to these changes, older saved models will no longer load in 4.5. Please make sure to delete the ``.generated`` folder in
+the top level of the application and re-build the application.
+
 MindMeld 4.4
 -------------
 
