@@ -10,7 +10,7 @@ MindMeld 4.5
 
 **1. Support for Deep Learning Models **
 
-MindMeld now supports a [suite of deep neural architectures](https://www.mindmeld.com/docs/userguide/deep_neural_nets.html) for domain and intent classification as well as for
+MindMeld now supports a :doc:`suite of deep neural architectures <../userguide/deep_neural_nets>` for domain and intent classification as well as for
 entity recognition in its NLP pipeline. This also includes support for Pretrained Transformer Models (PTMs)
 available as part of the [Huggingface models hub](https://huggingface.co/models). Similar to their shallower counterparts,
 the deep models also support configurable parameters to alter the model architecture and the training process.
@@ -18,7 +18,7 @@ the deep models also support configurable parameters to alter the model architec
 
 **2. Active Learning for Entity Recognition **
 
-MindMeld's active learning tool (link: https://www.mindmeld.com/docs/userguide/active_learning.html) now has support for entity recognition models.
+MindMeld's :doc:`active learning tool <../userguide/active_learning>` now has support for entity recognition models.
 This enables teams to automatically select the most informative subsets from large query datasets based on entities present in the queries.
 
 **3. Improvements to caching mechanism and tokenization performance **
@@ -39,34 +39,34 @@ support and also adds a new Spanish blueprint.
 
 Small amounts of training data lead to NLP inaccuracies. Paraphrasing allows application developers to
 increase the size of their training data up to 10x by augmenting it using paraphrased sentences. This capability
-is offered in select languages, including English and Spanish. More details can be found `here <https://www.mindmeld.com/docs/userguide/augmentation.html>`_.
+is offered in select languages, including English and Spanish. More details can be found :doc:`here <../userguide/augmentation>`.
 
 
 **2. Automatic Annotation **
 
-Annotating entities in training data manually can be very time consuming. Using MindMeld's (auto annotator)[https://www.mindmeld.com/docs/userguide/auto_annotator.html]
+Annotating entities in training data manually can be very time consuming. Using MindMeld's :doc:`auto annotator <../userguide/auto_annotator>`
 one can efficiently annotate both system entities and custom entities quickly.
 
 **3. East Asian Tokenization **
 
-Unlike Latin-script languages, words in Japanese, Chinese and Korean (among others) are not separated by spaces. MindMeld has updated it's internal processing (pipeline)[https://www.mindmeld.com/docs/userguide/tokenizer.html]
+Unlike Latin-script languages, words in Japanese, Chinese and Korean (among others) are not separated by spaces. MindMeld has updated it's internal processing :doc:`pipeline <../userguide/tokenizer.html>`
  to handle such languages.
 
 **4. Non-Elasticsearch Entity Resolution and Question Answering **
 
-MindMeld has implemented a (QA component)[https://www.mindmeld.com/docs/userguide/kb.html#questionanswerer-without-elasticsearch]
+MindMeld has implemented a :doc:`QA component <../userguide/kb.html#questionanswerer-without-elasticsearch>`
 that does not rely on Elasticsearch for information retrieval. Similarly for Entity Resolution,
-[configurable](https://www.mindmeld.com/docs/userguide/kb.html#questionanswerer-without-elasticsearch) TFIDF-based and
+:doc:`configurable <../userguide/kb.html#questionanswerer-without-elasticsearch>` TFIDF-based and
 pretrained embedder-based resolvers are implemented in addition to the already available Elasticsearch-based resolution.
 
 **5. Spanish Blueprint **
 
-MindMeld has a [new Spanish blueprint](https://www.mindmeld.com/docs/blueprints/screening_app.html) to aid with development for non-English MindMeld applications.
+MindMeld has a :doc:`new Spanish blueprint <../blueprints/screening_app>` to aid with development for non-English MindMeld applications.
 
 **6. Active Learning **
 
 Active learning is a modality-independent approach for improving the data acquisition capabilities for all machine learning models.
-MindMeld's [active learning tool](https://www.mindmeld.com/docs/walkthroughs/wt_active_learning.html) empowers teams to automatically
+MindMeld's :doc:`active learning tool <..walkthroughs/wt_active_learning>` empowers teams to automatically
 select the most informative subsets from large datasets and unannotated user logs from production machine learning systems.
 Using this tool leads to efficient and accurate models as well as massively reduces the annotation time and costs for new data.
 
