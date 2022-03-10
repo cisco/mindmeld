@@ -388,12 +388,12 @@ Let's take a look at the allowed values for each setting in an intent classifier
   |                       | Examples:                                                                                                  |
   |                       |                                                                                                            |
   |                       | ``{'analyzer': 'composite'}``                                                                              |
-  |                       | - extracts a single feature representing the sentiment normalized to be between -1 (extreme negative) to   |
-  |                       |   +1 (extreme positive).                                                                                   |
+  |                       |  - extracts a single feature representing the sentiment normalized to be between -1 (extreme negative) to  |
+  |                       |    +1 (extreme positive).                                                                                  |
   |                       |                                                                                                            |
   |                       | ``{'analyzer': 'discrete'}``                                                                               |
-  |                       | - extracts three separate features measuring the ratio for each sentiment (positive, neutral and negative) |
-  |                       |   such that their values add up to 1.                                                                      |
+  |                       |  - extracts three separate features measuring the ratio for each sentiment (positive, neutral and negative)|
+  |                       |    such that their values add up to 1.                                                                     |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
 
 .. note::

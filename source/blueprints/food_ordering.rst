@@ -186,6 +186,8 @@ For a more realistic implementation of ``build_order`` that deals with varied us
 
    - Update the natural language response templates to include resolved options that are stored in the dialogue frame (``responder.frame['dishes']``) for each dish. Try to construct your responses such that if someone orders the same dish with different options, instead of saying '*I have 3 orders of steak from ...*' your app could respond with something like '*I have 1 order of steak medium rare and 2 orders of steak well done from ...*'.
 
+.. _food_ordering_kb:
+
 5. Knowledge Base
 ^^^^^^^^^^^^^^^^^
 
