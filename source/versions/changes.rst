@@ -49,14 +49,14 @@ one can efficiently annotate both system entities and custom entities quickly.
 
 **3. East Asian Tokenization **
 
-Unlike Latin-script languages, words in Japanese, Chinese and Korean (among others) are not separated by spaces. MindMeld has updated it's internal processing :doc:`pipeline <../userguide/tokenizer.html>`
+Unlike Latin-script languages, words in Japanese, Chinese and Korean (among others) are not separated by spaces. MindMeld has updated it's internal processing :doc:`pipeline <../userguide/tokenizer>`
  to handle such languages.
 
 **4. Non-Elasticsearch Entity Resolution and Question Answering **
 
-MindMeld has implemented a :doc:`QA component <../userguide/kb.html#questionanswerer-without-elasticsearch>`
+MindMeld has implemented a :ref:`QA component <non_elasticsearch_question_answerer>`
 that does not rely on Elasticsearch for information retrieval. Similarly for Entity Resolution,
-:doc:`configurable <../userguide/kb.html#questionanswerer-without-elasticsearch>` TFIDF-based and
+:ref:`configurable <non_elasticsearch_question_answerer>` TFIDF-based and
 pretrained embedder-based resolvers are implemented in addition to the already available Elasticsearch-based resolution.
 
 **5. Spanish Blueprint **
@@ -66,7 +66,7 @@ MindMeld has a :doc:`new Spanish blueprint <../blueprints/screening_app>` to aid
 **6. Active Learning **
 
 Active learning is a modality-independent approach for improving the data acquisition capabilities for all machine learning models.
-MindMeld's :doc:`active learning tool <..walkthroughs/wt_active_learning>` empowers teams to automatically
+MindMeld's :doc:`active learning tool <../walkthroughs/wt_active_learning>` empowers teams to automatically
 select the most informative subsets from large datasets and unannotated user logs from production machine learning systems.
 Using this tool leads to efficient and accurate models as well as massively reduces the annotation time and costs for new data.
 
