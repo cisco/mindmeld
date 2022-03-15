@@ -224,12 +224,18 @@ class ResultsManager:
             AL_SELECTED_QUERIES_PATH, strategy, epoch, iteration, query_dicts
         )
 
-    def write_log_selected_queries_json(self, strategy: str, queries):
+    def write_log_selected_queries_json(self, strategy: str, queries, tuning_type):
         """Update accuracies.json with iteration metrics"""
         query_dicts = ResultsManager.queries_to_dict(queries)
-        log_selected_queries_path = os.path.join(
-            self.output_folder, "log_selected_queries.json"
-        )
+
+        if tuning_type == TuningType.CLASSIFIER:
+            log_selected_queries_path = os.path.join(
+                self.output_folder, "classifier_selected_queries.json"
+            )
+        else:
+            log_selected_queries_path = os.path.join(
+                self.output_folder, "tagger_selected_queries.json"
+            )
         data = {"strategy": strategy, "selected_queries": query_dicts}
         with open(log_selected_queries_path, "w") as outfile:
             json.dump(data, outfile, indent=4)
