@@ -467,6 +467,14 @@ class DataBucketFactory:
         label_map = LabelMap.create_label_map(app_path, train_pattern)
         resource_loader = ResourceLoader.create_resource_loader(app_path)
 
+        train_query_list = resource_loader.get_flattened_label_set(
+            label_set=train_pattern
+        )
+
+        if TuneLevel.ENTITY.value in tuning_level:
+            label_map.entity2id = LabelMap._get_entity_mappings(train_query_list)
+            label_map.id2entity = LabelMap._reverse_dict(label_map.entity2id)
+
         if labeled_logs_pattern:
             log_query_list = resource_loader.get_flattened_label_set(
                 label_set=labeled_logs_pattern
