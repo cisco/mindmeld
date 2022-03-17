@@ -18,7 +18,7 @@ from mindmeld.text_preparation.tokenizers import (
 from mindmeld.text_preparation.text_preparation_pipeline import TextPreparationPipeline
 
 JA_SENTENCE_ONE = "紳士が過ぎ去った、 なぜそれが起こったのか誰にも分かりません！"
-JA_SENTENCE_TWO = "株式会社ＫＡＤＯＫＡＷＡ Ｆｕｔｕｒｅ Ｐｕｂｌｉｓｈｉｎｇ"
+JA_SENTENCE_TWO = "株式会社ＫＡＤＯＫＡＷＡ Ｆｕｔｕｒｅ Publishing第13地域"
 JA_SENTENCE_THREE = "パピプペポ"
 JA_SENTENCE_FOUR = "サウンドレベルアップして下さい"
 DE_SENTENCE_ONE = "Ein Gentleman ist vorbeigekommen, der weiß"
@@ -100,7 +100,7 @@ def test_white_space_tokenizer_de(white_space_tokenizer):
     assert tokenized_output == expected_output
 
 
-def test_letter_tokenizer_ja(letter_tokenizer):
+def test_letter_tokenizer_ja_one(letter_tokenizer):
     tokenized_output = letter_tokenizer.tokenize(JA_SENTENCE_ONE)
     expected_output = [
         {"start": 0, "text": "紳"},
@@ -133,6 +133,24 @@ def test_letter_tokenizer_ja(letter_tokenizer):
         {"start": 28, "text": "せ"},
         {"start": 29, "text": "ん"},
         {"start": 30, "text": "！"},
+    ]
+    assert tokenized_output == expected_output
+
+
+def test_letter_tokenizer_ja_two(letter_tokenizer):
+    tokenized_output = letter_tokenizer.tokenize(JA_SENTENCE_TWO)
+    expected_output = [
+        {"start": 0, "text": "株"},
+        {"start": 1, "text": "式"},
+        {"start": 2, "text": "会"},
+        {"start": 3, "text": "社"},
+        {"start": 4, "text": "ＫＡＤＯＫＡＷＡ"},
+        {"start": 13, "text": "Ｆｕｔｕｒｅ"},
+        {"start": 20, "text": "Publishing"},
+        {'start': 30, 'text': '第'},
+        {'start': 31, 'text': '13'},
+        {'start': 33, 'text': '地'},
+        {'start': 34, 'text': '域'}
     ]
     assert tokenized_output == expected_output
 
@@ -171,7 +189,10 @@ def test_spacy_tokenizer_ja_two(spacy_tokenizer_ja):
         {"start": 2, "text": "会社"},
         {"start": 4, "text": "ＫＡＤＯＫＡＷＡ"},
         {"start": 13, "text": "Ｆｕｔｕｒｅ"},
-        {"start": 20, "text": "Ｐｕｂｌｉｓｈｉｎｇ"},
+        {"start": 20, "text": "Publishing"},
+        {"start": 30, "text": "第"},
+        {"start": 31, "text": "13"},
+        {"start": 33, "text": "地域"}
     ]
     assert tokenized_output == expected_output
 

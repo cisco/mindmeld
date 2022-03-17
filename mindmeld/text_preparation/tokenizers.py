@@ -146,17 +146,16 @@ class LetterTokenizer(Tokenizer):
                 token_num_by_char.append(None)
                 continue
 
+            prev_category = category_by_char[index - 1] if index > 0 else None
+
             # General Category is represented by the first letter of a Unicode category.
-            general_category_current_char = category[0]
-            general_category_previous_char = (
-                category_by_char[index - 1][0] if index > 0 else None
-            )
-            same_category_as_previous = (
-                general_category_current_char == general_category_previous_char
+            same_general_category = (
+                category[0] == (prev_category[0] if prev_category else None)
             )
 
-            if category == UNICODE_NON_LATIN_CATEGORY or not same_category_as_previous:
+            if UNICODE_NON_LATIN_CATEGORY in (category, prev_category) or not same_general_category:
                 token_num += 1
+
             token_num_by_char.append(token_num)
         return token_num_by_char
 
