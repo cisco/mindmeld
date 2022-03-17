@@ -39,13 +39,13 @@ Bug Fixes and Other Changes
 Major Features and Improvements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Implemented a text preparation pipeline that supports `multilingual tokenization <https://www.mindmeld.com/docs/userguide/tokenizer.html>`_ and makes our Preprocessors, Normalizers, Tokenizers, and Stemmers configurable.
+- Implemented a text preparation pipeline that supports :doc:`multilingual tokenization <../userguide/tokenizer>` and makes our Preprocessors, Normalizers, Tokenizers, and Stemmers configurable.
 
-- Implemented `non-elasticsearch Question Answering capability <https://www.mindmeld.com/docs/userguide/kb.html#questionanswerer-without-elasticsearch>`_ that works similar to Elasticsearch based Question Answerer.
+- Implemented :ref:`non-elasticsearch Question Answering capability <non_elasticsearch_question_answerer>` that works similar to Elasticsearch based Question Answerer.
 
-- Implemented `deny_nlp` functionality for the `nlp.process` API `interface <https://github.com/cisco/mindmeld/pull/311/>`_.
+- Implemented `deny_nlp` functionality for the `nlp.process` `API <https://github.com/cisco/mindmeld/pull/311/>`_.
 
-- Added a `new blueprint <https://www.mindmeld.com/docs/blueprints/screening_app.html>`_ for non-english MindMeld applications.
+- Added a :doc:`new Spanish blueprint <../blueprints/screening_app>` for non-English MindMeld applications.
 
 - Implemented consistent input validation of APIs using Marshmallow
 
@@ -53,9 +53,9 @@ Major Features and Improvements
 
 - Implemented multilingual annotation tools for automatically annotating non-English MindMeld applications
 
-- Implemented `active learning pipeline <https://www.mindmeld.com/docs/walkthroughs/wt_active_learning.html>`_ for MindMeld
+- Implemented :doc:`active learning pipeline <../walkthroughs/wt_active_learning>` for MindMeld
 
-- Implemented multilingual `paraphrasing functionality <https://www.mindmeld.com/docs/userguide/augmentation.html>`_ to make it easier to bootstrap small conversational applications with data augmentation.
+- Implemented multilingual :doc:`paraphrasing functionality <../userguide/augmentation>` to make it easier to bootstrap small conversational applications with data augmentation.
 
 - Implemented query caching using sqlite db to reduce training time speed
 

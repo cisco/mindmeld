@@ -12,7 +12,7 @@ MindMeld 4.5
 
 MindMeld now supports a :doc:`suite of deep neural architectures <../userguide/deep_neural_nets>` for domain and intent classification as well as for
 entity recognition in its NLP pipeline. This also includes support for Pretrained Transformer Models (PTMs)
-available as part of the [Huggingface models hub](https://huggingface.co/models). Similar to their shallower counterparts,
+available as part of the `Huggingface models hub <https://huggingface.co/models>`_. Similar to their shallower counterparts,
 the deep models also support configurable parameters to alter the model architecture and the training process.
 
 
@@ -49,14 +49,13 @@ one can efficiently annotate both system entities and custom entities quickly.
 
 **3. East Asian Tokenization**
 
-Unlike Latin-script languages, words in Japanese, Chinese and Korean (among others) are not separated by spaces. MindMeld has updated it's internal processing :doc:`pipeline <../userguide/tokenizer>`
- to handle such languages.
+Unlike Latin-script languages, words in Japanese, Chinese and Korean (among others) are not separated by spaces.
+MindMeld has updated its internal processing :ref:`pipeline <tokenization>` to handle such languages.
 
 **4. Non-Elasticsearch Entity Resolution and Question Answering**
 
 MindMeld has implemented a :ref:`QA component <non_elasticsearch_question_answerer>`
-that does not rely on Elasticsearch for information retrieval. Similarly for Entity Resolution,
-:ref:`configurable <non_elasticsearch_question_answerer>` TFIDF-based and
+that does not rely on Elasticsearch for information retrieval. Similarly for Entity Resolution, :ref:`configurable <resolver_configurations>` TFIDF-based and
 pretrained embedder-based resolvers are implemented in addition to the already available Elasticsearch-based resolution.
 
 **5. Spanish Blueprint**
@@ -80,7 +79,7 @@ MindMeld supports consistent input validation for all of its APIs.
 
 **9. DagsHub integration**
 
-MindMeld has integrated with [DagsHub](https://dagshub.com/) to support MLOps use-cases like sharing model experimental
+MindMeld has integrated with `DagsHub <https://dagshub.com/>`_ to support MLOps use-cases like sharing model experimental
 results, experiments tracking and visualizations. To get started, run the following command for your app:
 ```python
 python -m <YOUR_APP_PATH> dvc --setup_dagshub
