@@ -899,7 +899,7 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
 
             # https://huggingface.co/docs/transformers/v4.16.2/en/preprocessing
             hgf_encodings = self.tokenizer(
-                examples, padding=True, truncation=True, max_length=None,
+                examples, padding=True, truncation=True, max_length=padding_length,
                 return_tensors="pt"
             )  # Huggingface returns a BatchEncodings object; needs to be converted to a dictionary
             split_lengths = [
