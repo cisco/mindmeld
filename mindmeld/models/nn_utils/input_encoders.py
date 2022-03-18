@@ -917,11 +917,11 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
                 "GPT2Tokenizer" in str(parent_class) for parent_class in
                 self.tokenizer.__class__.__mro__
             ]):  # tokenizers like RobertaTokenizer that use Byte-level BPE (eg. distilroberta-base)
-                msg = f"The inputted choice of pretrained huggingface tokenizer is based on " \
-                      f"Byte-level BPE (eg. 'GPT2Tokenizer', 'RobertaTokenizer', etc.) which " \
-                      f"treats spaces like parts of the tokens. " \
-                      f"This conflicts with the use of 'query_text_type':'normalized_text' for " \
-                      f"tagger models. Consider using a different pretrained model for tagging."
+                msg = "The inputted choice of pretrained huggingface tokenizer is based on " \
+                      "Byte-level BPE (eg. 'GPT2Tokenizer', 'RobertaTokenizer', etc.) which " \
+                      "treats spaces like parts of the tokens. " \
+                      "This conflicts with the use of 'query_text_type':'normalized_text' for " \
+                      "tagger models. Consider using a different pretrained model for tagging."
                 raise NotImplementedError(msg)
 
             # tokenize each word of each input separately
