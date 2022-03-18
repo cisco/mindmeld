@@ -1,6 +1,38 @@
 Package History
 ===============
 
+4.5.0 (2022-01-10)
+------------------
+
+Major Features and Improvements
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Implemented support for deep neural networks and [Huggingface](https://huggingface.co/models) models in our current NLP pipeline.
+
+- Introduce active learning support for entity recognition.
+
+- Improved the performance and speed of the [Tokenization pipeline](https://github.com/cisco/mindmeld/pull/398).
+
+- Updated Duckling dependency with the latest upstream changes.
+
+Breaking Changes
+^^^^^^^^^^^^^^^^
+
+- Fixed a [bug](https://github.com/cisco/mindmeld/pull/405) with the EntityLabelEncoder by refactoring the System Entity Recognizer attribute.
+- Fixed a [bug](https://github.com/cisco/mindmeld/pull/387) that ensures all model cache files are saved properly during an incremental build.
+
+After these 2 fixes, older pickled models that refer to the previous versions will not load, so delete the ``.generated`` folder in application folder, and rebuild all classifiers.
+
+
+Bug Fixes and Other Changes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Fixed an [issue](https://github.com/cisco/mindmeld/pull/400) with the build of docker containers.
+- Set [default tokenizer](https://github.com/cisco/mindmeld/pull/397) for all languages to Whitespace.
+- Refactor how the resource loader is [initialized in NativeQA](https://github.com/cisco/mindmeld/pull/391)
+- Fix a [bug](https://github.com/cisco/mindmeld/pull/390) related to updating the MM version.
+- Remove a redundant warning in [TextPreparationPipeline creation](https://github.com/cisco/mindmeld/pull/385).
+
 4.4.0 (2021-10-18)
 ------------------
 

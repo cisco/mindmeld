@@ -224,6 +224,8 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             self.results_manager.write_log_selected_queries_json(
                 strategy=self.classifier_selection_strategy,
                 queries=newly_sampled_queries,
+                tuning_type=TuningType.CLASSIFIER,
+
             )
 
         if (
@@ -238,6 +240,7 @@ class ActiveLearningPipeline:  # pylint: disable=R0902
             self.results_manager.write_log_selected_queries_json(
                 strategy=self.tagger_selection_strategy,
                 queries=newly_sampled_queries,
+                tuning_type=TuningType.TAGGER,
             )
 
     def plot(self):
