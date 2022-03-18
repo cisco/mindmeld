@@ -56,6 +56,10 @@ class BaseTokenClassification(BaseClassification):
      this base can be trained for sequence tagging aka. token classification.
     """
 
+    @property
+    def classification_type(self):
+        return "tagger"
+
     def _prepare_labels(self, labels: List[List[int]], max_length: int):
         # for token classification, the length of an example matters (i.e. the number of
         # (sub-)words in it) as the labels/targets are one-to-one mapped per (sub-)word.
@@ -162,7 +166,8 @@ class BaseTokenClassification(BaseClassification):
                 batch_data = self.encoder.batch_encode(
                     batch_examples,
                     padding_length=self.params.padding_length,
-                    add_terminals=self.params.add_terminals,
+                    **({'add_terminals': self.params.add_terminals}
+                       if self.params.add_terminals is not None else {})
                 )
                 batch_logits = self.forward(batch_data)["logits"]
                 # find predictions
@@ -198,7 +203,8 @@ class BaseTokenClassification(BaseClassification):
                 batch_data = self.encoder.batch_encode(
                     batch_examples,
                     padding_length=self.params.padding_length,
-                    add_terminals=self.params.add_terminals,
+                    **({'add_terminals': self.params.add_terminals}
+                       if self.params.add_terminals is not None else {})
                 )
                 batch_logits = self.forward(batch_data)["logits"]
                 # find prediction probabilities

@@ -99,6 +99,11 @@ class EmbedderType(enum.Enum):
     BERT = "bert"
 
 
+class ClassificationType(enum.Enum):
+    TEXT = "text"
+    TAGGER = "tagger"
+
+
 class SequenceClassificationType(enum.Enum):
     EMBEDDER = "embedder"
     CNN = "cnn"
@@ -147,12 +152,13 @@ DEFAULT_COMMON_TOKEN_CLASSIFICATION_PARAMS = {
 }
 
 DEFAULT_EMB_DIM = 256
+# TODO: A whitespace default can be inappropriate for languages like Japanese, Chinese, etc. Other
+#  tokenizer types such as character or huggingface-pretrained tokenizers can be used instead.
 DEFAULT_TOKENIZER = TokenizerType.WHITESPACE_TOKENIZER.value
 
 DEFAULT_FORWARD_PASS_PARAMS = {
     "EmbedderForSequenceClassification": {
         "embedder_type": EmbedderType.NONE.value,
-        "add_terminals": False,
         "update_embeddings": True,
         "embedder_output_keep_prob": 0.7,
         "embedder_output_pooling_type": "mean",
@@ -160,7 +166,6 @@ DEFAULT_FORWARD_PASS_PARAMS = {
     },
     "CnnForSequenceClassification": {
         "embedder_type": EmbedderType.NONE.value,
-        "add_terminals": False,
         "update_embeddings": True,
         "embedder_output_keep_prob": 0.7,
         "output_keep_prob": 0.7,
@@ -169,7 +174,6 @@ DEFAULT_FORWARD_PASS_PARAMS = {
     },
     "LstmForSequenceClassification": {
         "embedder_type": EmbedderType.NONE.value,
-        "add_terminals": False,
         "update_embeddings": True,
         "embedder_output_keep_prob": 0.7,
         "output_keep_prob": 0.7,
@@ -188,7 +192,6 @@ DEFAULT_FORWARD_PASS_PARAMS = {
         "output_keep_prob": 1.0,  # this dropout unnecessary upon using `embedder_output_keep_prob`
         # other values for following keys will possibly throw errors
         "embedder_type": "bert",
-        "add_terminals": True,
         "tokenizer_type": TokenizerType.HUGGINGFACE_PRETRAINED_TOKENIZER.value,
         # keys that are not mutually exclusive and are valid when some of the above keys are set
         "save_frozen_embedder": False,  # the key is valid only when update_embeddings=False
@@ -225,6 +228,7 @@ DEFAULT_FORWARD_PASS_PARAMS = {
         "char_number_of_windows": [100, 100, 100],
         "char_cnn_output_keep_prob": 0.7,
         "char_proj_dim": None,
+        "add_terminals": False,
     },
     "CharLstmWithWordLstmForTokenClassification": {
         **DEFAULT_COMMON_TOKEN_CLASSIFICATION_PARAMS,
@@ -242,6 +246,7 @@ DEFAULT_FORWARD_PASS_PARAMS = {
         "char_lstm_bidirectional": True,
         "char_lstm_output_pooling_type": "last",
         "char_proj_dim": None,
+        "add_terminals": False,
     },
     "BertForTokenClassification": {
         **DEFAULT_VANILLA_BERT_MODEL_PARAMS,
@@ -253,7 +258,6 @@ DEFAULT_FORWARD_PASS_PARAMS = {
         "use_crf_layer": False,  # Following BERT paper's best results,
         # other values for following keys will possibly throw errors
         "embedder_type": "bert",
-        "add_terminals": True,
         "tokenizer_type": TokenizerType.HUGGINGFACE_PRETRAINED_TOKENIZER.value,
         # keys that are not mutually exclusive and are valid when some of the above keys are set
         "save_frozen_embedder": False,  # the key is valid only when update_embeddings=False

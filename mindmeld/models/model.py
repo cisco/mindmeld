@@ -820,20 +820,6 @@ class PytorchModel(AbstractModel):
             logger.error(msg)
             raise ValueError(msg)
 
-        # validation
-        if query_text_type == "normalized_text":
-            if params.get("avoid_whitespace_splitting"):
-                # For all supported languages, the normalized_text is created from the raw text
-                # with addition of whitespaces. Thus setting 'avoid_whitespace_splitting' does not
-                # make sense when using query_text_type as 'normalized_text'.
-                msg = "The param 'avoid_whitespace_splitting' cannot be set to True when the " \
-                      "param 'query_text_type' is 'normalized_text'. If you did not set the " \
-                      "latter param explicitly, avoid setting the former as this error might be " \
-                      "due to the chosen model's recommended/required settings to use " \
-                      "'normalized_text' (e.g. a tagger model)."
-                logger.error(msg)
-                raise ValueError(msg)
-
         self._query_text_type = query_text_type  # this var is dumped and loaded when loading models
 
     def _get_texts_from_examples(self, examples: PQL.QueryIterator) -> List[str]:

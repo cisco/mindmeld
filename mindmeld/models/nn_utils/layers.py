@@ -279,9 +279,8 @@ class PoolingLayer(nn_module):
                       f"{self.__class__.__name__}. It is possible that your choice of tokenizer " \
                       f"does not split input text at whitespace (eg. robert-base tokenizer), due " \
                       f"to which tokenization of a word is different between with and without " \
-                      f"context. If working with a transformers model, consider setting the " \
-                      f"param 'avoid_whitespace_splitting' param in your configs dict to the " \
-                      f"boolean value `True` and restart training."
+                      f"context. If working with a transformers model, consider changing the " \
+                      f"pretrained model name and restart training."
                 raise ValueError(msg) from e
             if self.pooling_type == "max":
                 padded_token_embs[mask == 0] = -1e9  # set to a large negative value

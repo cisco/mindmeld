@@ -1756,21 +1756,6 @@ The following are some params that are commonly configurable across all the clas
 |                                 |                                                                                                                                 |
 |                                 | Choices: Any positive integer, ``None``                                                                                         |
 +---------------------------------+---------------------------------------------------------------------------------------------------------------------------------+
-| ``avoid_whitespace_splitting``  | If specified ``True``, the classifier's input encoder does not distinguish whitespace with other characters.                    |
-|                                 | Setting this to ``True`` is useful when using a Huggingface pretrained model whose underlying pretrained tokenizer does not     |
-|                                 | delimit words using whitespace e.g.                                                                                             |
-|                                 | `Byte-level BPE, SentencePiece, etc. <https://huggingface.co/docs/transformers/tokenizer_summary#summary-of-the-tokenizers>`_.  |
-|                                 | Examples of such models are *distilroberta-base*, etc.                                                                          |
-|                                 | Also when setting this to ``True``, the param ``query_text_type`` must be set to either ``'text'`` or ``'processed_text'``.     |
-|                                 |                                                                                                                                 |
-|                                 | Leaving this value as ``None`` assumes any value necessitated by the input encoder.                                             |
-|                                 |                                                                                                                                 |
-|                                 | Type: Union[bool, None]                                                                                                         |
-|                                 |                                                                                                                                 |
-|                                 | Default: ``None``                                                                                                               |
-|                                 |                                                                                                                                 |
-|                                 | Choices: ``None``, ``True``, ``False``                                                                                          |
-+---------------------------------+---------------------------------------------------------------------------------------------------------------------------------+
 | ``query_text_type``             | Determines the choice of text that is fed into the neural model. This param is coupled with the                                 |
 |                                 | *Text Preparation Pipeline* when using a choice other than ``'text'``. The following are the                                    |
 |                                 | three available choices:                                                                                                        |

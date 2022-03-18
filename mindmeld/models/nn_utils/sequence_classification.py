@@ -46,6 +46,10 @@ class BaseSequenceClassification(BaseClassification):
      this base can be trained for sequence classification.
     """
 
+    @property
+    def classification_type(self):
+        return "text"
+
     def _prepare_labels(self, labels: List[int], max_length: int = None):
         # for sequence classification, the length of an example doesn't matter as we have only one
         # label for each example. hence, no need to do any padding or validation checks.
@@ -140,7 +144,8 @@ class BaseSequenceClassification(BaseClassification):
                 batch_data = self.encoder.batch_encode(
                     batch_examples,
                     padding_length=self.params.padding_length,
-                    add_terminals=self.params.add_terminals,
+                    **({'add_terminals': self.params.add_terminals}
+                       if self.params.add_terminals is not None else {})
                 )
                 batch_logits = self.forward(batch_data)["logits"]
                 logits = torch.cat((logits, batch_logits)) if logits is not None else batch_logits

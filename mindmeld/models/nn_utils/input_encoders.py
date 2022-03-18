@@ -21,7 +21,7 @@ from abc import abstractmethod, ABC
 from itertools import chain
 from typing import Dict, List, Union, Any, Tuple
 
-from .helpers import BatchData, TokenizerType
+from .helpers import BatchData, TokenizerType, ClassificationType
 from .._util import _get_module_or_attr
 from ..containers import HuggingfaceTransformersContainer
 
@@ -55,11 +55,11 @@ class AbstractEncoder(ABC):
     embeddings. These outputs are used by the initial layers of neural nets.
     """
 
-    def __init__(self, **_kwargs):
-        ununsed_kwargs = ','.join([f'{k}:{v}' for k, v in _kwargs.items()])
-        msg = f"The following keyword arguments are not used while initializing " \
-              f"{self.__class__.__name__}: {ununsed_kwargs}"
-        logger.debug(msg)
+    def __init__(self, **kwargs):
+        if "classification_type" not in kwargs:
+            msg = "The key 'classification_type' is required to initialize an Encoder class."
+            raise ValueError(msg)
+        self.classification_type = ClassificationType(kwargs["classification_type"])
 
     @abstractmethod
     def prepare(self, examples: List[str]):
@@ -132,12 +132,6 @@ class AbstractEncoder(ABC):
             encoders built on top of AbstractVocabLookupEncoder and True for Hugginface ones. This
             value can be True or False for encoders based on AbstractVocabLookupEncoder for sequence
             classification.
-        Special note on `add_terminals` when using for token classification:
-            When using a CRF layer, `add_terminals` must be set to False and hence Huggingface
-            encoders cannot be used in such scenarios. If not using a CRF layer, one can use any
-            encoders by setting it to True but care must be taken to modify labels accordingly.
-            Hence, it is advisable to use `split_lengths` for padding labels in case of token
-            classification instead of `seq_lengths`
         """
         raise NotImplementedError("Subclasses must implement this method")
 
@@ -158,10 +152,10 @@ class AbstractEncoder(ABC):
     @property
     def number_of_terminal_tokens(self) -> int:
         """
-        Returns the number of terminal tokens used by the encoder during batch encoding when
-        add_terminals is set to True.
+        Returns the (maximum) number of terminal tokens used by the encoder during
+        batch encoding when add_terminals is set to True.
         """
-        return 2
+        raise NotImplementedError
 
 
 def _trim_a_list_of_sub_token_groups(
@@ -223,10 +217,6 @@ class AbstractVocabLookupEncoder(AbstractEncoder):
         super().__init__(**kwargs)
         self.token2id = {}
 
-        # Considers not splitting query text at whitespace if this param is set to True; useful for
-        # languages with non-whitespace script e.g. Japanese, Chinese, etc.
-        self.avoid_whitespace_splitting = kwargs.get("avoid_whitespace_splitting")
-
     @property
     def id2token(self):
         return {i: t for t, i in self.token2id.items()}
@@ -284,10 +274,10 @@ class AbstractVocabLookupEncoder(AbstractEncoder):
         _return_tokenized_examples: bool = False, **kwargs
     ) -> BatchData:
 
-        split_at = " "
         n_terminals = self.number_of_terminal_tokens if add_terminals else 0
 
-        if self.avoid_whitespace_splitting:
+        if self.classification_type == ClassificationType.TEXT:
+
             tokenized_examples = [self._tokenize(example) for example in examples]
 
             max_curr_len = max([len(ex) for ex in tokenized_examples]) + n_terminals
@@ -318,8 +308,13 @@ class AbstractVocabLookupEncoder(AbstractEncoder):
 
         else:
 
+            # We split input text at whitespace because tagger models always use query_text_type
+            # as 'normalized_text' which consist of whitespaces irrespective of the choice of
+            # langauge (English, Japanese, etc.)
+            split_at = " "
+
             # tokenize each word of each input separately
-            # get maximum length of each example, accounting for terminal tokens- cls, sep
+            # get maximum length of each example, accounting for terminals (start & end tokens)
             # If padding_length is None, padding has to be done to the max length of the input batch
             tokenized_examples = [
                 [self._tokenize(word) for word in example.split(split_at)] for example in examples
@@ -403,6 +398,14 @@ class AbstractVocabLookupEncoder(AbstractEncoder):
     def get_vocab(self) -> Dict:
         return self.token2id
 
+    @property
+    def number_of_terminal_tokens(self) -> int:
+        """
+        Returns the (maximum) number of terminal tokens used by the encoder during
+        batch encoding when add_terminals is set to True.
+        """
+        return 2
+
 
 class WhitespaceEncoder(AbstractVocabLookupEncoder):
     """
@@ -412,10 +415,11 @@ class WhitespaceEncoder(AbstractVocabLookupEncoder):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        if self.avoid_whitespace_splitting:
-            msg = f"The param 'avoid_whitespace_splitting' cannot be used with " \
-                  f"{self.__class__.__name__}."
-            raise ValueError(msg)
+        if self.classification_type == ClassificationType.TEXT:
+            msg = "For languages like Japanese, Chinese, etc. that do not have whitespaces, " \
+                  "consider using a pretrained huggingface tokenizer or a character tokenizer " \
+                  "when not using 'query_text_type':'normalized_text'."
+            logger.warning(msg)
 
     def _tokenize(self, text: str) -> List[str]:
         return text.strip("\n").split(" ")
@@ -430,14 +434,13 @@ class CharEncoder(AbstractVocabLookupEncoder):
         return list(text.strip("\n"))
 
 
-class WhitespaceAndCharDualEncoder(WhitespaceEncoder):
+class WhitespaceAndCharDualEncoder(AbstractVocabLookupEncoder):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.char_token2id = {}
 
-        if self.avoid_whitespace_splitting:
-            msg = f"The param 'avoid_whitespace_splitting' cannot be used with " \
-                  f"{self.__class__.__name__}."
+        if self.classification_type != ClassificationType.TAGGER:
+            msg = "The inputted tokenizer type can only be used with a tagger model."
             raise ValueError(msg)
 
     SPECIAL_CHAR_TOKENS_DICT = {
@@ -452,15 +455,18 @@ class WhitespaceAndCharDualEncoder(WhitespaceEncoder):
         return {i: t for t, i in self.char_token2id.items()}
 
     @staticmethod
-    def char_tokenize(text: str) -> List[str]:
+    def _char_tokenize(text: str) -> List[str]:
         return list(text.strip("\n"))
+
+    def _tokenize(self, text: str) -> List[str]:
+        return text.strip("\n").split(" ")
 
     def prepare(self, examples: List[str]):
         super().prepare(examples)
 
         examples = [ex.strip() for ex in examples]
         all_tokens = dict.fromkeys(
-            chain.from_iterable([self.char_tokenize(text) for text in examples])
+            chain.from_iterable([self._char_tokenize(text) for text in examples])
         )
         self.char_token2id = {t: i for i, t in enumerate(all_tokens)}
 
@@ -524,12 +530,12 @@ class WhitespaceAndCharDualEncoder(WhitespaceEncoder):
         return 0
 
     def batch_encode(
-        self, examples: List[str], char_padding_length: int = None, char_add_terminals=True,
-        add_terminals=False, _return_tokenized_examples: bool = False, **kwargs
+        self, examples: List[str], char_padding_length: int = None, char_add_terminals: bool = True,
+        add_terminals: bool = False, _return_tokenized_examples: bool = False, **kwargs
     ) -> BatchData:
 
         if add_terminals:
-            msg = f"The param 'add_terminals' must be False to encode a batch using " \
+            msg = f"The param 'add_terminals' must not be True to encode a batch using " \
                   f"{self.__class__.__name__}."
             logger.error(msg)
             raise ValueError(msg)
@@ -631,17 +637,12 @@ class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
                   "'pip install mindmeld[transformers]'"
             raise ImportError(msg)
 
-        # Considers not splitting query text at whitespace if this param is set to True; useful for
-        # languages with non-whitespace script e.g. Japanese, Chinese, etc.
-        self.avoid_whitespace_splitting = kwargs.get("avoid_whitespace_splitting")
-
-        if self.avoid_whitespace_splitting is not None:
-            # The underlying self.tokenizer.encode_batch() only takes whole query as input and there
-            # is no way to pass a list of tokens instead. Because of this, we cannot distinctly
-            # process the scenarios when avoid_whitespace_splitting is set to True or False.
-            msg = f"The param 'avoid_whitespace_splitting' must not be set to encode a batch " \
-                  f"using {self.__class__.__name__}."
-            raise ValueError(msg)
+        if self.classification_type == ClassificationType.TEXT:
+            msg = f"The pre-tokenizer for {self.__class__.__name__} is set to 'Whitespace'. " \
+                  f"For languages like Japanese, Chinese, etc. that do not have whitespaces, " \
+                  f"consider using a pretrained huggingface tokenizer or a character tokenizer " \
+                  f"when not using 'query_text_type':'normalized_text'."
+            logger.warning(msg)
 
     def prepare(self, examples: List[str]):
         """
@@ -660,6 +661,8 @@ class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
 
     def _prepare_pipeline(self):
         self.tokenizer.normalizer = normalizers.Sequence([NFD(), Lowercase(), StripAccents()])
+        # TODO: The PreTokenizer which is Whitespace currently can be made customizable so as to
+        #  use for languages that have no whitespaces such as Japanese, Chinese, etc.
         self.tokenizer.pre_tokenizer = Whitespace()
         self.tokenizer.post_processor = TemplateProcessing(
             single="[CLS] $A [SEP]",
@@ -711,7 +714,7 @@ class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
         return output.tokens
 
     def batch_encode(
-        self, examples: List[str], padding_length: int = None, add_terminals=True, **kwargs
+        self, examples: List[str], padding_length: int = None, add_terminals: bool = True, **kwargs
     ) -> BatchData:
         """
         Example:
@@ -727,7 +730,7 @@ class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
         """
 
         if not add_terminals:
-            msg = f"The param 'add_terminals' must not be False to encode a batch using " \
+            msg = f"The param 'add_terminals' must be True to encode a batch using " \
                   f"{self.__class__.__name__}."
             raise ValueError(msg)
 
@@ -738,6 +741,8 @@ class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
 
         n_terminals = self.number_of_terminal_tokens if add_terminals else 0
 
+        # We do not distinguish between ClassificationType.TEXT or  ClassificationType.TAGGER here.
+        # Also note that the pre_tokenizer is currently set to Whitespace.
         output = self.tokenizer.encode_batch(examples, add_special_tokens=True)
         seq_ids = [o.ids for o in output]
         attention_masks = [o.attention_mask for o in output]
@@ -783,6 +788,14 @@ class AbstractHuggingfaceTrainableEncoder(AbstractEncoder):
     def get_pad_token_idx(self) -> int:
         return self.tokenizer.token_to_id("[PAD]")
 
+    @property
+    def number_of_terminal_tokens(self) -> int:
+        """
+        Returns the (maximum) number of terminal tokens used by the encoder during
+        batch encoding when add_terminals is set to True.
+        """
+        return 2
+
 
 class BytePairEncodingEncoder(AbstractHuggingfaceTrainableEncoder):
     """
@@ -815,13 +828,6 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
 
         self._number_of_terminal_tokens = None
         self.__model_max_length = -1
-
-        # Considers not splitting query text at whitespace if this param is set to True;
-        #   use for roberta-base like tokenizers where the words are not split at whitespace
-        #   or for languages with non-whitespace script e.g. Japanese, Chinese, etc.
-        # Caution: when this param is set, any truncation of very long inputs due to the
-        #   tokenizer's max length is not checked for and can raise errors in token classification
-        self.avoid_whitespace_splitting = kwargs.get("avoid_whitespace_splitting")
 
     def prepare(self, examples: List[str]):
         del examples
@@ -878,7 +884,7 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
         return self.__model_max_length
 
     def batch_encode(
-        self, examples: List[str], padding_length: int = None, add_terminals=True, **kwargs
+        self, examples: List[str], padding_length: int = None, add_terminals: bool = True, **kwargs
     ) -> BatchData:
 
         if not add_terminals:
@@ -887,10 +893,9 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
             logger.error(msg)
             raise ValueError(msg)
 
-        split_at = " "
         n_terminals = self.number_of_terminal_tokens if add_terminals else 0
 
-        if self.avoid_whitespace_splitting:
+        if self.classification_type == ClassificationType.TEXT:
 
             # https://huggingface.co/docs/transformers/v4.16.2/en/preprocessing
             hgf_encodings = self.tokenizer(
@@ -902,6 +907,22 @@ class HuggingfacePretrainedEncoder(AbstractEncoder):
             ]
 
         else:
+
+            # We split input text at whitespace because tagger models always use query_text_type
+            # as 'normalized_text' which consist of whitespaces irrespective of the choice of
+            # langauge (English, Japanese, etc.)
+            split_at = " "
+
+            if any([
+                "GPT2Tokenizer" in str(parent_class) for parent_class in
+                self.tokenizer.__class__.__mro__
+            ]):  # tokenizers like RobertaTokenizer that use Byte-level BPE (eg. distilroberta-base)
+                msg = f"The inputted choice of pretrained huggingface tokenizer is based on " \
+                      f"Byte-level BPE (eg. 'GPT2Tokenizer', 'RobertaTokenizer', etc.) which " \
+                      f"treats spaces like parts of the tokens. " \
+                      f"This conflicts with the use of 'query_text_type':'normalized_text' for " \
+                      f"tagger models. Consider using a different pretrained model for tagging."
+                raise NotImplementedError(msg)
 
             # tokenize each word of each input separately
             # get maximum length of each example, accounting for terminal tokens- cls, sep

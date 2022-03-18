@@ -77,7 +77,10 @@ class BaseClassification(nn_module):
 
         self.name = self.__class__.__name__
         self.params = Bunch()
-        self.params["name"] = self.name
+        self.params.update({
+            "name": self.name,
+            "classification_type": self.classification_type,
+        })
         self.encoder = None
 
         self.ready = False  # True when .fit() is called or loaded from a checkpoint, else False
@@ -89,7 +92,7 @@ class BaseClassification(nn_module):
         return f"<{self.name}> ready:{self.ready} dirty:{self.dirty}"
 
     def get_default_params(self) -> Dict:
-        return get_default_params(self.__class__.__name__)
+        return get_default_params(self.name)
 
     def log_and_return_model_info(self, verbose: bool = False) -> str:
         """
@@ -152,6 +155,7 @@ class BaseClassification(nn_module):
 
         # obtain and validate all parameters required to fit the model
         params = {
+            **self.params,
             **self.get_default_params(),
             **params  # overwrite keys of default params that are passed-in
         }
@@ -235,7 +239,8 @@ class BaseClassification(nn_module):
                 batch_data = self.encoder.batch_encode(
                     examples=batch_examples,
                     padding_length=self.params.padding_length,
-                    add_terminals=self.params.add_terminals,
+                    **({'add_terminals': self.params.add_terminals}
+                       if self.params.add_terminals is not None else {})
                 )
                 batch_data.update({
                     "_labels": self._prepare_labels(  # `_` 'cause this key is for intermediate use
@@ -246,7 +251,7 @@ class BaseClassification(nn_module):
                 })
                 batch_data = self.forward(batch_data)
                 loss = batch_data["loss"]
-                # .cpu() returns copy of tensor in CPU memory; also see https://tinyurl.com/3b4uvkj2
+                # .cpu() returns copy of tensor in CPU memory
                 train_loss += loss.cpu().detach().numpy()
                 train_batches += 1
                 # find gradients
@@ -347,9 +352,7 @@ class BaseClassification(nn_module):
 
         # populate few required key-values (ensures the key-values are populated if not inputted)
         params.update({
-            "add_terminals": params.get("add_terminals"),  # some encoders need this to be True
-            # (e.g. pretrained huggingface encoder) while some others don't; better not to set a
-            # boolean value as default to avoid raising errors unexpectedly
+            "add_terminals": params.get("add_terminals", True),
             "padding_length": params.get("padding_length"),  # explicitly obtained for more
             # transparent param dictionary
             "tokenizer_type": params.get("tokenizer_type", DEFAULT_TOKENIZER),
@@ -526,7 +529,7 @@ class BaseClassification(nn_module):
         # load encoder's state
         module.params.update(dict(all_params))
         module.encoder = InputEncoderFactory.get_encoder_cls(
-            tokenizer_type=all_params["tokenizer_type"])(**all_params)
+            tokenizer_type=all_params["tokenizer_type"])(**module.params)
         module.encoder.load(path)
 
         # load weights
@@ -590,4 +593,8 @@ class BaseClassification(nn_module):
             examples (List[str]): The list of examples for which class prediction probabilities
                 are computed and returned.
         """
+        raise NotImplementedError
+
+    @property
+    def classification_type(self) -> str:
         raise NotImplementedError
