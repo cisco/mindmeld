@@ -8,20 +8,20 @@ MindMeld 4.5
    This release includes breaking changes. See below
    for instructions on migrating your apps from MindMeld 4.4 to MindMeld 4.5
 
-**1. Support for Deep Learning Models **
+**1. Support for Deep Learning Models**
 
 MindMeld now supports a :doc:`suite of deep neural architectures <../userguide/deep_neural_nets>` for domain and intent classification as well as for
 entity recognition in its NLP pipeline. This also includes support for Pretrained Transformer Models (PTMs)
-available as part of the [Huggingface models hub](https://huggingface.co/models). Similar to their shallower counterparts,
+available as part of the `Huggingface models hub <https://huggingface.co/models>`_. Similar to their shallower counterparts,
 the deep models also support configurable parameters to alter the model architecture and the training process.
 
 
-**2. Active Learning for Entity Recognition **
+**2. Active Learning for Entity Recognition**
 
 MindMeld's :doc:`active learning tool <../userguide/active_learning>` now has support for entity recognition models.
 This enables teams to automatically select the most informative subsets from large query datasets based on entities present in the queries.
 
-**3. Improvements to caching mechanism and tokenization performance **
+**3. Improvements to caching mechanism and tokenization performance**
 
 In version 4.5, we have improved the performance for multilingual tokenization and also
 worked on some modifications and bugfixes to the caching mechanism used for models and queries.
@@ -35,63 +35,62 @@ MindMeld 4.4 packages several new features that help improve NLP performance of 
 small amount of data. It continues to add deeper support for multilingual applications by adding East-Asian tokenization
 support and also adds a new Spanish blueprint.
 
-**1. Paraphrasing **
+**1. Paraphrasing**
 
 Small amounts of training data lead to NLP inaccuracies. Paraphrasing allows application developers to
 increase the size of their training data up to 10x by augmenting it using paraphrased sentences. This capability
 is offered in select languages, including English and Spanish. More details can be found :doc:`here <../userguide/augmentation>`.
 
 
-**2. Automatic Annotation **
+**2. Automatic Annotation**
 
 Annotating entities in training data manually can be very time consuming. Using MindMeld's :doc:`auto annotator <../userguide/auto_annotator>`
 one can efficiently annotate both system entities and custom entities quickly.
 
-**3. East Asian Tokenization **
+**3. East Asian Tokenization**
 
-Unlike Latin-script languages, words in Japanese, Chinese and Korean (among others) are not separated by spaces. MindMeld has updated it's internal processing :doc:`pipeline <../userguide/tokenizer>`
- to handle such languages.
+Unlike Latin-script languages, words in Japanese, Chinese and Korean (among others) are not separated by spaces.
+MindMeld has updated its internal processing :ref:`pipeline <tokenization>` to handle such languages.
 
-**4. Non-Elasticsearch Entity Resolution and Question Answering **
+**4. Non-Elasticsearch Entity Resolution and Question Answering**
 
 MindMeld has implemented a :ref:`QA component <non_elasticsearch_question_answerer>`
-that does not rely on Elasticsearch for information retrieval. Similarly for Entity Resolution,
-:ref:`configurable <non_elasticsearch_question_answerer>` TFIDF-based and
+that does not rely on Elasticsearch for information retrieval. Similarly for Entity Resolution, :ref:`configurable <resolver_configurations>` TFIDF-based and
 pretrained embedder-based resolvers are implemented in addition to the already available Elasticsearch-based resolution.
 
-**5. Spanish Blueprint **
+**5. Spanish Blueprint**
 
 MindMeld has a :doc:`new Spanish blueprint <../blueprints/screening_app>` to aid with development for non-English MindMeld applications.
 
-**6. Active Learning **
+**6. Active Learning**
 
 Active learning is a modality-independent approach for improving the data acquisition capabilities for all machine learning models.
 MindMeld's :doc:`active learning tool <../walkthroughs/wt_active_learning>` empowers teams to automatically
 select the most informative subsets from large datasets and unannotated user logs from production machine learning systems.
 Using this tool leads to efficient and accurate models as well as massively reduces the annotation time and costs for new data.
 
-**7. Query Caching **
+**7. Query Caching**
 
 MindMeld supports query caching to reduce training time and the memory footprint of the NLP pipeline.
 
-**8. MindMeld input validation **
+**8. MindMeld input validation**
 
 MindMeld supports consistent input validation for all of its APIs.
 
-**9. DagsHub integration **
+**9. DagsHub integration**
 
-MindMeld has integrated with [DagsHub](https://dagshub.com/) to support MLOps use-cases like sharing model experimental
+MindMeld has integrated with `DagsHub <https://dagshub.com/>`_ to support MLOps use-cases like sharing model experimental
 results, experiments tracking and visualizations. To get started, run the following command for your app:
 ```python
 python -m <YOUR_APP_PATH> dvc --setup_dagshub
 ```
 
-**10. `deny_nlp` functionality for inference **
+**10. `deny_nlp` functionality for inference**
 
 MindMeld provides functionality to block certain NLP components like domains and intents from being inferred by passing
 the `deny_nlp` flag to the `nlp.process` API.
 
-**11. Updated Duckling **
+**11. Updated Duckling**
 
 MindMeld has updated its Duckling dependency to the latest changes made upstream of it.
 

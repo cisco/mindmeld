@@ -26,7 +26,7 @@ In MindMeld, two different kinds of entities require resolution:
 For example, in a food-ordering app:
 
   - the entity resolver could determine that the entity 'lemon bread' signifies the 'Iced Lemon Pound Cake' on the Buttery Bakery menu, which is represented by the object whose unique ID is '4567.' The result is that 'lemon bread' resolves to the dictionary ``{ 'id': '4567', cname: 'Iced Lemon Pound Cake' }``.
-  - the entity 'Siamese' could resolve to the dictionary ``{ 'id': None, cname: 'Thai' }``. Multiple 'restaurant' objects could have that property/value combination. The property has no ID, but in the 'restaurant' index in the knowledge base, every object does have an ID. See the `Food Ordering blueprint <https://mindmeld.com/docs/blueprints/food_ordering.html#knowledge-base>`_.
+  - the entity 'Siamese' could resolve to the dictionary ``{ 'id': None, cname: 'Thai' }``. Multiple 'restaurant' objects could have that property/value combination. The property has no ID, but in the 'restaurant' index in the knowledge base, every object does have an ID. See the :ref:`Food Ordering blueprint <food_ordering_kb>`.
 
 This discussion assumes that the app has a knowledge base. For apps with no knowledge base, entity resolution is similar but no objects are involved.
 
@@ -176,7 +176,7 @@ Create the synonyms and make them available to your MindMeld app, going entity t
 Train the entity resolver
 -------------------------
 
-Once all of the entity mapping files are generated, you can either (1) build the whole NLP pipeline, which initializes and trains the resolver along with the other components, or (2) access and train a resolver as a standalone component. In the following sections, we use the `Food Ordering blueprint <https://mindmeld.com/docs/blueprints/food_ordering.html>`_ to demonstrate using an entity resolver.
+Once all of the entity mapping files are generated, you can either (1) build the whole NLP pipeline, which initializes and trains the resolver along with the other components, or (2) access and train a resolver as a standalone component. In the following sections, we use the :doc:`Food Ordering blueprint <../blueprints/food_ordering>` to demonstrate using an entity resolver.
 
 When no resolver configurations are provided, the Entity Resolver module by default uses the `Elasticsearch <https://www.elastic.co/products/elasticsearch>`_ full-text search and analytics engine for information retrieval. Once Elasticsearch is up and running, no configuration is further needed within MindMeld. To learn how to set up Elasticsearch, see the :doc:`Getting Started guide <getting_started>`.
 

@@ -7,19 +7,19 @@ Package History
 Major Features and Improvements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Implemented support for deep neural networks and [Huggingface](https://huggingface.co/models) models in our current NLP pipeline.
+- Implemented support for deep neural networks and `Huggingface <https://huggingface.co/models>`_ models in our current NLP pipeline.
 
 - Introduce active learning support for entity recognition.
 
-- Improved the performance and speed of the [Tokenization pipeline](https://github.com/cisco/mindmeld/pull/398).
+- Improved the performance and speed of the `Tokenization pipeline <https://github.com/cisco/mindmeld/pull/398>`_.
 
 - Updated Duckling dependency with the latest upstream changes.
 
 Breaking Changes
 ^^^^^^^^^^^^^^^^
 
-- Fixed a [bug](https://github.com/cisco/mindmeld/pull/405) with the EntityLabelEncoder by refactoring the System Entity Recognizer attribute.
-- Fixed a [bug](https://github.com/cisco/mindmeld/pull/387) that ensures all model cache files are saved properly during an incremental build.
+- Fixed a `bug <https://github.com/cisco/mindmeld/pull/405>`__ with the EntityLabelEncoder by refactoring the System Entity Recognizer attribute.
+- Fixed a `bug <https://github.com/cisco/mindmeld/pull/387>`__ that ensures all model cache files are saved properly during an incremental build.
 
 After these 2 fixes, older pickled models that refer to the previous versions will not load, so delete the ``.generated`` folder in application folder, and rebuild all classifiers.
 
@@ -27,11 +27,11 @@ After these 2 fixes, older pickled models that refer to the previous versions wi
 Bug Fixes and Other Changes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Fixed an [issue](https://github.com/cisco/mindmeld/pull/400) with the build of docker containers.
-- Set [default tokenizer](https://github.com/cisco/mindmeld/pull/397) for all languages to Whitespace.
-- Refactor how the resource loader is [initialized in NativeQA](https://github.com/cisco/mindmeld/pull/391)
-- Fix a [bug](https://github.com/cisco/mindmeld/pull/390) related to updating the MM version.
-- Remove a redundant warning in [TextPreparationPipeline creation](https://github.com/cisco/mindmeld/pull/385).
+- Fixed an `issue <https://github.com/cisco/mindmeld/pull/400>`__ with the build of docker containers.
+- Set `default tokenizer <https://github.com/cisco/mindmeld/pull/397>`_ for all languages to Whitespace.
+- Refactor how the resource loader is `initialized in NativeQA <https://github.com/cisco/mindmeld/pull/391>`_
+- Fix a `bug <https://github.com/cisco/mindmeld/pull/390>`__ related to updating the MM version.
+- Remove a redundant warning in `TextPreparationPipeline creation <https://github.com/cisco/mindmeld/pull/385>`_.
 
 4.4.0 (2021-10-18)
 ------------------
@@ -39,13 +39,13 @@ Bug Fixes and Other Changes
 Major Features and Improvements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Implemented a text preparation pipeline that supports (multilingual tokenization)[https://www.mindmeld.com/docs/userguide/tokenizer.html] and makes our Preprocessors, Normalizers, Tokenizers, and Stemmers configurable.
+- Implemented a text preparation pipeline that supports :doc:`multilingual tokenization <../userguide/tokenizer>` and makes our Preprocessors, Normalizers, Tokenizers, and Stemmers configurable.
 
-- Implemented (non-elasticsearch Question Answering capability)[https://www.mindmeld.com/docs/userguide/kb.html#questionanswerer-without-elasticsearch] that works similar to Elasticsearch based Question Answerer.
+- Implemented :ref:`non-elasticsearch Question Answering capability <non_elasticsearch_question_answerer>` that works similar to Elasticsearch based Question Answerer.
 
-- Implemented `deny_nlp` functionality for the `nlp.process` API [interface](https://github.com/cisco/mindmeld/pull/311/).
+- Implemented `deny_nlp` functionality for the `nlp.process` `API <https://github.com/cisco/mindmeld/pull/311/>`_.
 
-- Added a [new blueprint](https://www.mindmeld.com/docs/blueprints/screening_app.html) for non-english MindMeld applications.
+- Added a :doc:`new Spanish blueprint <../blueprints/screening_app>` for non-English MindMeld applications.
 
 - Implemented consistent input validation of APIs using Marshmallow
 
@@ -53,9 +53,9 @@ Major Features and Improvements
 
 - Implemented multilingual annotation tools for automatically annotating non-English MindMeld applications
 
-- Implemented (active learning pipeline)[https://www.mindmeld.com/docs/walkthroughs/wt_active_learning.html] for MindMeld
+- Implemented :doc:`active learning pipeline <../walkthroughs/wt_active_learning>` for MindMeld
 
-- Implemented multilingual [paraphrasing functionality](https://www.mindmeld.com/docs/userguide/augmentation.html) to make it easier to bootstrap small conversational applications with data augmentation.
+- Implemented multilingual :doc:`paraphrasing functionality <../userguide/augmentation>` to make it easier to bootstrap small conversational applications with data augmentation.
 
 - Implemented query caching using sqlite db to reduce training time speed
 
@@ -67,17 +67,17 @@ Major Features and Improvements
 Bug fixes
 ^^^^^^^^^
 
-- Fixed custom validation [bug](https://github.com/cisco/mindmeld/issues/352) in Automatic Slotfilling
-- Fixed input validation [bug](https://github.com/cisco/mindmeld/issues/363) for certain queries
-- Fixed [serialization issues](https://github.com/cisco/mindmeld/issues/270) with responder object
-- Fixed [bug](https://github.com/cisco/mindmeld/issues/274) where duckling was not returning any entity candidates
-- Fixed RASA to MindMeld conversion [bug](https://github.com/cisco/mindmeld/pull/277)
-- Fixed a [path loading issue](https://github.com/cisco/mindmeld/issues/307) with Windows environments
-- Fixed a memory leak issue when loading multiple MindMeld apps in parallel (https://github.com/cisco/mindmeld/pull/296)
-- Fixed a `sys_candidate` value (bug)[https://github.com/cisco/mindmeld/pull/317]
-- Fixed a (bug)[https://github.com/cisco/mindmeld/pull/318] with the Conditional Random Field model
-- Fixed a feature extraction (bug)[https://github.com/cisco/mindmeld/pull/323] in MindMeld
-- Fixed Question Answerer issue (when using a compact json format for Knowledge Base)[https://github.com/cisco/mindmeld/issues/220] and tightened up its interface to (avoid conflicting usage)[https://github.com/cisco/mindmeld/issues/219] of app_namespace and app_path arguments.
+- Fixed custom validation `bug <https://github.com/cisco/mindmeld/issues/352>`__ in Automatic Slotfilling
+- Fixed input validation `bug <https://github.com/cisco/mindmeld/issues/363>`__ for certain queries
+- Fixed `serialization issues <https://github.com/cisco/mindmeld/issues/270>`__ with responder object
+- Fixed `bug <https://github.com/cisco/mindmeld/issues/274>`__ where duckling was not returning any entity candidates
+- Fixed RASA to MindMeld conversion `bug <https://github.com/cisco/mindmeld/pull/277>`__
+- Fixed a `path loading issue <https://github.com/cisco/mindmeld/issues/307>`_ with Windows environments
+- Fixed a `memory leak issue <https://github.com/cisco/mindmeld/pull/296>`_ when loading multiple MindMeld apps in parallel
+- Fixed a `sys_candidate` value `bug <https://github.com/cisco/mindmeld/pull/317>`__
+- Fixed a `bug <https://github.com/cisco/mindmeld/pull/318>`__ with the Conditional Random Field model
+- Fixed a feature extraction `bug <https://github.com/cisco/mindmeld/pull/323>`__ in MindMeld
+- Fixed Question Answerer `issue <https://github.com/cisco/mindmeld/issues/220>`__ when using a compact json format for Knowledge Base and tightened up its interface to `avoid conflicting usage <https://github.com/cisco/mindmeld/issues/219>`_ of app_namespace and app_path arguments.
 
 
 Legacy
