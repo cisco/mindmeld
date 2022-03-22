@@ -798,11 +798,11 @@ class PytorchModel(AbstractModel):
             # this condition is satisfied during loading of models
             return
 
-        # While the key '_query_text_type' in config params allows for end-users to configure the
+        # While the key 'query_text_type' in config params allows for end-users to configure the
         # choice of text_type to be used, it also needs the user to have knowledge about different
-        # text types in a Query object. Hence, this key is _underscored_ and is kept mainly for
-        # developer/benchmarking puposes.
-        query_text_type = params.get("_query_text_type", default) if params else default
+        # text types in a Query object. Three values are available as of now-
+        # ["text", "processed_text", "normalized_text"].
+        query_text_type = params.get("query_text_type", default) if params else default
 
         # consider raw text for pretrained transformer models
         if not query_text_type:
@@ -838,6 +838,7 @@ class PytorchModel(AbstractModel):
             msg = "The instance attribute '_query_text_type' must be set by calling " \
                   "_set_query_text_type() method before calling the " \
                   "_get_texts_from_examples() method."
+            logger.debug(msg)
             raise ValueError(msg)
         return [getattr(example, self._query_text_type) for example in examples]
 

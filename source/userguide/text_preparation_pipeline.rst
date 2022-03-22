@@ -159,6 +159,8 @@ The steps to use a custom Preprocessor in your application are explained :ref:`h
 Tokenization
 -------------
 
+.. _tokenization_text_preparation_pipeline:
+
 Tokenization is the process of splitting the text of a query into smaller chunks. MindMeld offers a number of ready-made tokenizers that you can use
 for your application. MindMeld supports the development of custom tokenizers as well.
 

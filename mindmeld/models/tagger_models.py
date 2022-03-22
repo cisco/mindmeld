@@ -520,6 +520,15 @@ class PytorchTaggerModel(PytorchModel):
         y = list(encoded_y)
 
         params = params or self.config.params
+        if params and params.get("query_text_type"):
+            if params.get("query_text_type") != "normalized_text":
+                msg = f"The param 'query_text_type' for {self.__class__.__name__} must be " \
+                      f"'normalized_text' but found '{params.get('query_text_type')}'. " \
+                      f"This is required as the labels are created " \
+                      f"based on the type 'normalized_text' only."
+                logger.error(msg)
+                raise ValueError(msg)
+
         self._set_query_text_type(params, default="normalized_text")
         examples_texts = self._get_texts_from_examples(examples)
         self._validate_training_data(examples_texts, y)

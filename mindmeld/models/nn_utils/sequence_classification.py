@@ -46,6 +46,10 @@ class BaseSequenceClassification(BaseClassification):
      this base can be trained for sequence classification.
     """
 
+    @property
+    def classification_type(self):
+        return "text"
+
     def _prepare_labels(self, labels: List[int], max_length: int = None):
         # for sequence classification, the length of an example doesn't matter as we have only one
         # label for each example. hence, no need to do any padding or validation checks.
@@ -140,7 +144,8 @@ class BaseSequenceClassification(BaseClassification):
                 batch_data = self.encoder.batch_encode(
                     batch_examples,
                     padding_length=self.params.padding_length,
-                    add_terminals=self.params.add_terminals,
+                    **({'add_terminals': self.params.add_terminals}
+                       if self.params.add_terminals is not None else {})
                 )
                 batch_logits = self.forward(batch_data)["logits"]
                 logits = torch.cat((logits, batch_logits)) if logits is not None else batch_logits
@@ -186,15 +191,15 @@ class EmbedderForSequenceClassification(BaseSequenceClassification):
     def _forward_core(self, batch_data):
         seq_ids = batch_data["seq_ids"]  # [BS, SEQ_LEN]
 
-        flattened_split_lengths = [
+        summed_split_lengths = [
             sum(_split_lengths) +
             (self.encoder.number_of_terminal_tokens if self.params.add_terminals else 0)
             for _split_lengths in batch_data["split_lengths"]
         ]
-        flattened_split_lengths = torch.as_tensor(flattened_split_lengths, dtype=torch.long)  # [BS]
+        summed_split_lengths = torch.as_tensor(summed_split_lengths, dtype=torch.long)  # [BS]
 
         encodings = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, EMD_DIM]
-        encodings = self.emb_layer_pooling(encodings, flattened_split_lengths)  # [BS, self.out_dim]
+        encodings = self.emb_layer_pooling(encodings, summed_split_lengths)  # [BS, self.out_dim]
 
         batch_data.update({"seq_embs": encodings})
 
@@ -272,16 +277,16 @@ class LstmForSequenceClassification(BaseSequenceClassification):
     def _forward_core(self, batch_data):
         seq_ids = batch_data["seq_ids"]  # [BS, SEQ_LEN]
 
-        flattened_split_lengths = [
+        summed_split_lengths = [
             sum(_split_lengths) +
             (self.encoder.number_of_terminal_tokens if self.params.add_terminals else 0)
             for _split_lengths in batch_data["split_lengths"]
         ]
-        flattened_split_lengths = torch.as_tensor(flattened_split_lengths, dtype=torch.long)  # [BS]
+        summed_split_lengths = torch.as_tensor(summed_split_lengths, dtype=torch.long)  # [BS]
 
         encodings = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, EMD_DIM]
-        encodings = self.lstm_layer(encodings, flattened_split_lengths)  # [BS,SEQ_LEN,self.out_dim]
-        encodings = self.lstm_layer_pooling(encodings, flattened_split_lengths)  # [BS,self.out_dim]
+        encodings = self.lstm_layer(encodings, summed_split_lengths)  # [BS,SEQ_LEN,self.out_dim]
+        encodings = self.lstm_layer_pooling(encodings, summed_split_lengths)  # [BS,self.out_dim]
 
         batch_data.update({"seq_embs": encodings})
 
@@ -320,8 +325,9 @@ class BertForSequenceClassification(BaseSequenceClassification):
 
         params.update({
             "embedder_type": embedder_type,
-            "save_frozen_bert_weights": params.get("save_frozen_bert_weights", False)  # if True,
-            # frozen set of bert weights are also dumped
+            "save_frozen_embedder": params.get("save_frozen_embedder", False)  # if True,
+            # frozen set of bert weights are also dumped, else they are skipped as they are not
+            # tuned and anyway frozen during training.
         })
 
         super().fit(examples, labels, **params)
@@ -366,7 +372,7 @@ class BertForSequenceClassification(BaseSequenceClassification):
         return optimizer
 
     def _get_dumpable_state_dict(self):
-        if not self.params.update_embeddings and not self.params.save_frozen_bert_weights:
+        if not self.params.update_embeddings and not self.params.save_frozen_embedder:
             state_dict = OrderedDict(
                 {k: v for k, v in self.state_dict().items() if not k.startswith("bert_model")}
             )
@@ -392,6 +398,8 @@ class BertForSequenceClassification(BaseSequenceClassification):
             )
         self.out_dim = self.params.emb_dim
 
+        self.no_pooler_output_exists = None  # relevant in forward() if the pooling type is "first"
+
     def _forward_core(self, batch_data):
 
         # refer to https://huggingface.co/docs/transformers/master/en/main_classes/output
@@ -399,7 +407,37 @@ class BertForSequenceClassification(BaseSequenceClassification):
 
         bert_outputs = self.bert_model(**batch_data["hgf_encodings"], return_dict=True)
 
-        if self.params.embedder_output_pooling_type != "first":
+        if self.params.embedder_output_pooling_type == "first":
+            # 'pooler_output' refers to the first token's (aka. CLS) representation obtained form
+            # the last hidden layer, and hence its dimension [BS, self.out_dim]
+            if not self.no_pooler_output_exists:
+                pooler_output = bert_outputs.get("pooler_output")  # [BS, self.out_dim]
+                if pooler_output is None:
+                    available_keys = bert_outputs.keys()
+                    msg = f"The transformer model ({self.params.pretrained_model_name_or_path}) " \
+                          f"has no key 'pooler_output' in its output dictionary (maybe the " \
+                          f"selected choice of model has no specific pooler layer on top of the " \
+                          f"CLS kind-of token?). The available keys are: {available_keys}.\n"
+                    msg += f"Continuing to obtain the first index of the last hidden state due " \
+                           f"to the passed-in value for embedder output pooling type param: " \
+                           f"'{self.params.embedder_output_pooling_type}'. If you wish to pool " \
+                           f"differently (eg. 'mean' or 'max' pooling), change the " \
+                           f"'embedder_output_pooling_type' param value in configs and restart " \
+                           f"training."
+                    logger.error(msg)
+                    self.no_pooler_output_exists = True  # avoids logging same error multiple times
+            if self.no_pooler_output_exists:  # not just if-else cond. as its initial value is None
+                last_hidden_state = bert_outputs.get("last_hidden_state")  # [BS, SEQ_LEN, EMD_DIM]
+                if last_hidden_state is None:
+                    available_keys = bert_outputs.keys()
+                    msg = f"The choice of pretrained transformer model " \
+                          f"({self.params.pretrained_model_name_or_path}) " \
+                          f"has no key 'last_hidden_state' in its output dictionary. " \
+                          f"The available keys are: {available_keys}."
+                    raise ValueError(msg)
+                pooler_output = last_hidden_state[:, 0, :]  # [BS, self.out_dim]
+            encodings = self.dropout(pooler_output)
+        else:
             # 'last_hidden_state' refers to the tensor output of the final transformer layer (i.e.
             # before the logit layer) and hence its dimension  [BS, SEQ_LEN, EMD_DIM]
             last_hidden_state = bert_outputs.get("last_hidden_state")  # [BS, SEQ_LEN, EMD_DIM]
@@ -411,36 +449,14 @@ class BertForSequenceClassification(BaseSequenceClassification):
                       f"has no key 'last_hidden_state' in its output dictionary."
                 raise ValueError(msg)
             last_hidden_state = self.dropout(last_hidden_state)
-            flattened_split_lengths = [
+            summed_split_lengths = [
                 sum(_split_lengths) +
                 (self.encoder.number_of_terminal_tokens if self.params.add_terminals else 0)
                 for _split_lengths in batch_data["split_lengths"]
             ]
-            flattened_split_lengths = torch.as_tensor(flattened_split_lengths, dtype=torch.long)
+            summed_split_lengths = torch.as_tensor(summed_split_lengths, dtype=torch.long)
             encodings = self.emb_layer_pooling(
-                last_hidden_state, flattened_split_lengths)  # [BS, self.out_dim]
-        else:
-            # 'pooler_output' refers to the first token's (aka. CLS) representation obtained form
-            # the last hidden layer, and hence its dimension [BS, self.out_dim]
-            pooler_output = bert_outputs.get("pooler_output")  # [BS, self.out_dim]
-            if pooler_output is None:
-                msg = f"The chosen pretrained bert ({self.params.pretrained_model_name_or_path}) " \
-                      "has no key 'pooler_output' in its output dictionary (maybe the selected " \
-                      "choice of transformers model has no CLS kind-of token?). " \
-                      "Continuing to obtain the first representation of the last hidden state " \
-                      "due to the passed-in value for embedder output pooling type param: " \
-                      f"{self.params.embedder_output_pooling_type}. " \
-                      f"If you wish to pool differently (eg. mean pooling), change the param " \
-                      f"value in configs and run training."
-                logger.error(msg)
-                last_hidden_state = bert_outputs.get("last_hidden_state")  # [BS, SEQ_LEN, EMD_DIM]
-                if last_hidden_state is None:
-                    msg = f"The choice of pretrained bert model " \
-                          f"({self.params.pretrained_model_name_or_path}) " \
-                          f"has no key 'last_hidden_state' in its output dictionary."
-                    raise ValueError(msg)
-                pooler_output = last_hidden_state[:, 0, :]  # [BS, self.out_dim]
-            encodings = self.dropout(pooler_output)
+                last_hidden_state, summed_split_lengths)  # [BS, self.out_dim]
 
         batch_data.update({"seq_embs": encodings})
 

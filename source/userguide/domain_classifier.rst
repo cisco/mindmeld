@@ -1,6 +1,8 @@
 Working with the Domain Classifier
 ==================================
 
+.. _domain_classification:
+
 The Domain Classifier
 
  - is run as the first step in the :ref:`natural language processing pipeline <arch_nlp>`
@@ -94,6 +96,8 @@ Using default settings is the recommended (and quickest) way to get started with
 
 Classifier configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. _domain_classifier_configuration:
 
 Use the :attr:`config` attribute of a trained classifier to view the :ref:`configuration <config>` that the classifier is using. Here's an example where we view the configuration of a baseline domain classifier trained using default settings:
 
@@ -1079,3 +1083,8 @@ You can load the saved model anytime using the :meth:`DomainClassifier.load` met
 .. code-block:: console
 
    Loading domain classifier
+
+Using Deep Neural Models for Domain Classification
+--------------------------------------------------
+
+MindMeld supports using deep neural models for domain classification. Refer to :ref:`Deep Neural Networks in MindMeld <dnns_sequence_classification>` section for details on the different configurable parameters. Assign a sequence classification config dictionary to :data:`DOMAIN_CLASSIFIER_CONFIG` and start using deep neural models for domain classification. Note that viewing features extracted for classification is not available with deep neural models.

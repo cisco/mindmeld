@@ -56,6 +56,10 @@ class BaseTokenClassification(BaseClassification):
      this base can be trained for sequence tagging aka. token classification.
     """
 
+    @property
+    def classification_type(self):
+        return "tagger"
+
     def _prepare_labels(self, labels: List[List[int]], max_length: int):
         # for token classification, the length of an example matters (i.e. the number of
         # (sub-)words in it) as the labels/targets are one-to-one mapped per (sub-)word.
@@ -162,7 +166,8 @@ class BaseTokenClassification(BaseClassification):
                 batch_data = self.encoder.batch_encode(
                     batch_examples,
                     padding_length=self.params.padding_length,
-                    add_terminals=self.params.add_terminals,
+                    **({'add_terminals': self.params.add_terminals}
+                       if self.params.add_terminals is not None else {})
                 )
                 batch_logits = self.forward(batch_data)["logits"]
                 # find predictions
@@ -198,7 +203,8 @@ class BaseTokenClassification(BaseClassification):
                 batch_data = self.encoder.batch_encode(
                     batch_examples,
                     padding_length=self.params.padding_length,
-                    add_terminals=self.params.add_terminals,
+                    **({'add_terminals': self.params.add_terminals}
+                       if self.params.add_terminals is not None else {})
                 )
                 batch_logits = self.forward(batch_data)["logits"]
                 # find prediction probabilities
@@ -283,16 +289,16 @@ class LstmForTokenClassification(BaseTokenClassification):
     def _forward_core(self, batch_data):
         seq_ids = batch_data["seq_ids"]  # [BS, SEQ_LEN]
 
-        flattened_split_lengths = [
+        summed_split_lengths = [
             sum(_split_lengths) +
             (self.encoder.number_of_terminal_tokens if self.params.add_terminals else 0)
             for _split_lengths in batch_data["split_lengths"]
         ]
-        flattened_split_lengths = torch.as_tensor(flattened_split_lengths, dtype=torch.long)  # [BS]
+        summed_split_lengths = torch.as_tensor(summed_split_lengths, dtype=torch.long)  # [BS]
 
         token_embs = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, EMD_DIM]
         token_embs = self.lstm_layer(
-            token_embs, flattened_split_lengths)  # [BS, SEQ_LEN, self.out_dim]
+            token_embs, summed_split_lengths)  # [BS, SEQ_LEN, self.out_dim]
 
         batch_data.update({"token_embs": token_embs})
 
@@ -385,18 +391,18 @@ class CharLstmWithWordLstmForTokenClassification(BaseTokenClassification):
         encs = pad_sequence(encs, batch_first=True)  # [BS, SEQ_LEN, char_out_dim]
         char_encs = self.char_lstm_output_transform(encs)  # [BS, SEQ_LEN, self.char_proj_dim]
 
-        flattened_split_lengths = [
+        summed_split_lengths = [
             sum(_split_lengths) +
             (self.encoder.number_of_terminal_tokens if self.params.add_terminals else 0)
             for _split_lengths in batch_data["split_lengths"]
         ]
-        flattened_split_lengths = torch.as_tensor(flattened_split_lengths, dtype=torch.long)  # [BS]
+        summed_split_lengths = torch.as_tensor(summed_split_lengths, dtype=torch.long)  # [BS]
 
         seq_ids = batch_data["seq_ids"]  # [BS, SEQ_LEN]
         word_encs = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, self.emb_dim]
         char_plus_word_encs = torch.cat((char_encs, word_encs), dim=-1)  # [BS, SEQ_LEN, sum(both)]
         token_embs = self.lstm_layer(
-            char_plus_word_encs, flattened_split_lengths)  # [BS, SEQ_LEN, self.out_dim]
+            char_plus_word_encs, summed_split_lengths)  # [BS, SEQ_LEN, self.out_dim]
 
         batch_data.update({"token_embs": token_embs})
 
@@ -478,18 +484,18 @@ class CharCnnWithWordLstmForTokenClassification(BaseTokenClassification):
         encs = pad_sequence(encs, batch_first=True)  # [BS, SEQ_LEN, sum(self.number_of_windows)]
         char_encs = self.char_cnn_output_transform(encs)  # [BS, SEQ_LEN, self.char_proj_dim]
 
-        flattened_split_lengths = [
+        summed_split_lengths = [
             sum(_split_lengths) +
             (self.encoder.number_of_terminal_tokens if self.params.add_terminals else 0)
             for _split_lengths in batch_data["split_lengths"]
         ]
-        flattened_split_lengths = torch.as_tensor(flattened_split_lengths, dtype=torch.long)  # [BS]
+        summed_split_lengths = torch.as_tensor(summed_split_lengths, dtype=torch.long)  # [BS]
 
         seq_ids = batch_data["seq_ids"]  # [BS, SEQ_LEN]
         word_encs = self.emb_layer(seq_ids)  # [BS, SEQ_LEN, self.emb_dim]
         char_plus_word_encs = torch.cat((char_encs, word_encs), dim=-1)  # [BS, SEQ_LEN, sum(both)]
         token_embs = self.lstm_layer(
-            char_plus_word_encs, flattened_split_lengths)  # [BS, SEQ_LEN, self.out_dim]
+            char_plus_word_encs, summed_split_lengths)  # [BS, SEQ_LEN, self.out_dim]
 
         batch_data.update({"token_embs": token_embs})
 
@@ -527,7 +533,10 @@ class BertForTokenClassification(BaseTokenClassification):
                 params.update({k: v})
 
         params.update({
-            "embedder_type": embedder_type
+            "embedder_type": embedder_type,
+            "save_frozen_embedder": params.get("save_frozen_embedder", False)  # if True,
+            # frozen set of bert weights are also dumped, else they are skipped as they are not
+            # tuned and anyway frozen during training.
         })
 
         super().fit(examples, labels, **params)
@@ -572,7 +581,7 @@ class BertForTokenClassification(BaseTokenClassification):
         return optimizer, scheduler
 
     def _get_dumpable_state_dict(self):
-        if not self.params.update_embeddings and not self.params.save_frozen_bert_weights:
+        if not self.params.update_embeddings and not self.params.save_frozen_embedder:
             state_dict = OrderedDict(
                 {k: v for k, v in self.state_dict().items() if not k.startswith("bert_model")}
             )

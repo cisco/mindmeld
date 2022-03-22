@@ -621,7 +621,7 @@ class TestSequenceClassification:
                 "pretrained_model_name_or_path": "roberta-base",
             }
         }
-        with pytest.raises(ValueError):
+        with pytest.raises(NotImplementedError):
             model = ModelFactory.create_model_from_config(ModelConfig(**config))
             model.initialize_resources(resource_loader, examples, labels)
             model.fit(examples, labels)
@@ -666,3 +666,27 @@ class TestSequenceClassification:
         # do predictions with loaded model
         model._clf = new_clf
         model_predictions_assertions(model)
+
+    @pytest.mark.xfail(strict=False)
+    @pytest.mark.transformers
+    def test_bert_embedder_unsupported(self, resource_loader):
+        """Tests that a fit succeeds w/ and w/o crf layer"""
+        config = {
+            "model_type": "tagger",
+            "example_type": ENTITY_EXAMPLE_TYPE,
+            "label_type": ENTITIES_LABEL_TYPE,
+            "model_settings": {"classifier_type": "embedder"},
+            "params": {
+                "embedder_type": "bert",
+                "pretrained_model_name_or_path": "distilroberta-base",
+                "add_terminals": True
+            },
+        }
+        examples = self.labeled_data.queries()
+        labels = self.labeled_data.entities()
+
+        with pytest.raises(NotImplementedError):
+            model = ModelFactory.create_model_from_config(ModelConfig(**config))
+            model.initialize_resources(resource_loader, examples, labels)
+            model.fit(examples, labels)
+            model_predictions_assertions(model)
