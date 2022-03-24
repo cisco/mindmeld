@@ -520,7 +520,7 @@ class NaturalLanguageProcessor(Processor):
             domain_eval = self.domain_classifier.evaluate(label_set=label_set)
             if domain_eval:
                 print(
-                    "Domain classification accuracy: '{}'".format(
+                    "Domain classification accuracy: {}".format(
                         domain_eval.get_accuracy()
                     )
                 )
@@ -890,7 +890,7 @@ class DomainProcessor(Processor):
             intent_eval = self.intent_classifier.evaluate(label_set=label_set)
             if intent_eval:
                 print(
-                    "Intent classification accuracy for the {} domain: {}".format(
+                    "Intent classification accuracy for the '{}' domain: {}".format(
                         self.name, intent_eval.get_accuracy()
                     )
                 )
@@ -1738,7 +1738,7 @@ class EntityProcessor(Processor):
             role_eval = self.role_classifier.evaluate(label_set=label_set)
             if role_eval:
                 print(
-                    "Role classification accuracy for the {}.{}.{}' entity type: {}".format(
+                    "Role classification accuracy for the '{}.{}.{}' entity type: {}".format(
                         self.domain, self.intent, self.type, role_eval.get_accuracy()
                     )
                 )
