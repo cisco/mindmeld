@@ -34,7 +34,7 @@ from .path import EMBEDDINGS_FOLDER_PATH, \
     PARAPHRASER_FILE_PATH, \
     PARAPHRASER_MODEL_PATH, \
     HUGGINGFACE_PARAPHRASER_MODEL_PATH
-from .models.taggers.embeddings import TqdmUpTo
+from .models.containers import TqdmUpTo
 
 logger = logging.getLogger(__name__)
 
@@ -472,6 +472,7 @@ class EnglishParaphraser(Augmentor):
             batch = self.tokenizer.prepare_seq2seq_batch(
                 tokenizer_input,
                 **self.default_tokenizer_params,
+                return_tensors="pt",
             ).to(self.torch_device)
             with _get_module_or_attr("torch", "no_grad")():
                 generated = self.model.generate(

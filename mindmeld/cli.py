@@ -926,7 +926,7 @@ def augment(app_path, language):
 @click.option(
     "--tuning_level",
     type=str,
-    help="The hierarchy level to run strategy tuning ('domain' or 'intent').",
+    help="The hierarchy level to run strategy tuning ('domain', 'intent' and/or 'entity').",
 )
 @click.option(
     "--output_folder",
@@ -955,9 +955,14 @@ def augment(app_path, language):
     help="Execute active learning log query selection.",
 )
 @click.option(
-    "--strategy",
+    "--classifier_strategy",
     type=str,
-    help="Select a single strategy instead of the strategies listed in the config.",
+    help="Select a single classifier strategy instead of the strategies listed in the config.",
+)
+@click.option(
+    "--tagger_strategy",
+    type=str,
+    help="Select a single tagger strategy instead of the strategies listed in the config.",
 )
 @click.option(
     "--unlabeled_logs_path",
@@ -982,7 +987,8 @@ def active_learning(  # pylint: disable=R0913
     n_epochs,
     plot,
     select,
-    strategy,
+    classifier_strategy,
+    tagger_strategy,
     unlabeled_logs_path,
     log_usage_pct,
     labeled_logs_pattern,
@@ -995,7 +1001,7 @@ def active_learning(  # pylint: disable=R0913
     if batch_size:
         config["tuning"]["batch_size"] = batch_size
     if tuning_level:
-        config["tuning"]["tuning_level"] = tuning_level
+        config["tuning"]["tuning_level"] = [tuning_level]
     config["output_folder"] = output_folder or config.get("output_folder")
     if not output_folder:
         raise AssertionError(
@@ -1005,11 +1011,16 @@ def active_learning(  # pylint: disable=R0913
         config["pre_tuning"]["train_seed_pct"] = train_seed_pct
     if n_epochs:
         config["tuning"]["n_epochs"] = n_epochs
-    if strategy:
+    if classifier_strategy:
         if tune:
-            config["tuning"]["tuning_strategies"] = [strategy]
+            config["tuning"]["classifier_tuning_strategies"] = [classifier_strategy]
         elif select:
-            config["query_selection"]["selection_strategy"] = strategy
+            config["query_selection"]["classifier_selection_strategy"] = classifier_strategy
+    if tagger_strategy:
+        if tune:
+            config["tuning"]["tagger_tuning_strategies"] = [tagger_strategy]
+        elif select:
+            config["query_selection"]["tagger_selection_strategy"] = tagger_strategy
     if unlabeled_logs_path:
         config["query_selection"]["unlabeled_logs_path"] = unlabeled_logs_path
     if log_usage_pct:

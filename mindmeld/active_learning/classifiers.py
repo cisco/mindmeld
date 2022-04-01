@@ -34,7 +34,8 @@ from .heuristics import (
 from ..components.classifier import Classifier
 from ..components.nlp import NaturalLanguageProcessor
 from ..constants import (
-    TUNE_LEVEL_INTENT,
+    TuneLevel,
+    TuningType,
     ACTIVE_LEARNING_RANDOM_SEED,
     AL_DEFAULT_AGGREGATE_STATISTIC,
     AL_DEFAULT_CLASS_LEVEL_STATISTIC,
@@ -51,11 +52,11 @@ MULTI_MODEL_HEURISTICS = (KLDivergenceSampling, DisagreementSampling, EnsembleSa
 class ALClassifier(ABC):
     """ Abstract class for Active Learning Classifiers."""
 
-    def __init__(self, app_path: str, tuning_level: str):
+    def __init__(self, app_path: str, tuning_level: list):
         """
         Args:
             app_path (str): Path to MindMeld application
-            tuning_level (str): The hierarchy level to tune ("domain" or "intent")
+            tuning_level (list): The hierarchy levels to tune ("domain", "intent" or "entity")
         """
         self.app_path = app_path
         self.tuning_level = tuning_level
@@ -99,7 +100,7 @@ class MindMeldALClassifier(ALClassifier):
     def __init__(
         self,
         app_path: str,
-        tuning_level: str,
+        tuning_level: list,
         n_classifiers: int,
         aggregate_statistic: str = None,
         class_level_statistic: str = None,
@@ -107,7 +108,7 @@ class MindMeldALClassifier(ALClassifier):
         """
         Args:
             app_path (str): Path to MindMeld application
-            tuning_level (str): The hierarchy level to tune ("domain" or "intent")
+            tuning_level (list): The hierarchy levels to tune ("domain", "intent" or "entity")
             n_classifiers (int): Number of classifiers to be used by multi-model strategies.
         """
         super().__init__(app_path=app_path, tuning_level=tuning_level)
@@ -169,10 +170,80 @@ class MindMeldALClassifier(ALClassifier):
         return class_level_statistic
 
     @staticmethod
-    def _get_probs(
-        classifier: Classifier, queries: ProcessedQueryList, nlp_component_to_id: Dict
+    def _get_tagger_probs(
+        classifier: Classifier,
+        queries: ProcessedQueryList,
+        entity_tag_to_id: Dict,
     ):
-        """Get the probability distribution for a query across domains or intents.
+        """Get the probability distribution for a query across entities.
+            For each token within a query, this function will obtain the probability distribution
+            for entity tags as predicted by the entity recognition model.
+            output dimension will be: [# queries] * [# tokens] * [# tags]
+
+        Args:
+            classifier (MindMeld Classifer): Domain or Intent Classifier
+            queries (ProcessedQueryList): List of MindMeld queries
+            entity_tag_to_id (Dict): Dictionary mapping domain or intent names to vector index
+                positions.
+
+        Returns:
+            prob_vector (List[List[List]]]): Probability distribution vectors for given queries.
+        """
+        queries_prob_vectors = []
+        if not queries:
+            return queries_prob_vectors
+
+        classifier_eval = classifier.evaluate(queries=queries, fetch_distribution=True)
+
+        domain = classifier.domain
+        intent = classifier.intent
+        # default is set to 1. If there are no entities, this token/query will not get preference
+        # setting it to 0 would cause active learning to select these tokens/queries first.
+        default_prob = 1.0
+        default_tag = "O|"
+        default_key = f"{domain}.{intent}.{default_tag}"
+        default_idx = entity_tag_to_id[default_key]
+
+        if not classifier_eval:
+            # if no classifier is fit, then the evaluation object cannot be created.
+            # This case is the default.
+            for _ in range(len(queries)):
+                query_prob_vector_2d = np.zeros((1, len(entity_tag_to_id)))
+
+                query_prob_vector_2d[0][default_idx] = default_prob
+                queries_prob_vectors.append(query_prob_vector_2d)
+            return queries_prob_vectors
+
+        # Else, if there is classifier eval object
+        for query in classifier_eval.results:
+
+            if not (query.predicted and query.probas):
+                query_prob_vector_2d = np.zeros((1, len(entity_tag_to_id)))
+                query_prob_vector_2d[0][default_idx] = default_prob
+
+            else:
+                # Create and populate a 2D vector (# tokens * # tags)
+                query_prob_vector_2d = np.zeros(
+                    (len(query.probas), len(entity_tag_to_id))
+                )
+                for token_idx, tags_probas_pair in enumerate(query.probas):
+                    tags, probas = tags_probas_pair
+                    for i, tag in enumerate(tags):
+                        key = f"{domain}.{intent}.{tag}"
+                        tag_index = entity_tag_to_id.get(key, default_idx)
+                        # To-do: check default idx to default value map, whether needed.
+                        query_prob_vector_2d[token_idx][tag_index] = probas[i]
+
+            queries_prob_vectors.append(query_prob_vector_2d)
+        return queries_prob_vectors
+
+    @staticmethod
+    def _get_classifier_probs(
+        classifier: Classifier,
+        queries: ProcessedQueryList,
+        nlp_component_to_id: Dict,
+    ):
+        """Get the probability distribution for a query across domains or intents
 
         Args:
             classifier (MindMeld Classifer): Domain or Intent Classifier
@@ -193,6 +264,40 @@ class MindMeldALClassifier(ALClassifier):
                 queries_prob_vectors.append(query_prob_vector)
             assert len(queries_prob_vectors) == len(queries)
         return queries_prob_vectors
+
+    @staticmethod
+    def _get_probs(
+        classifier: Classifier,
+        queries: ProcessedQueryList,
+        nlp_component_to_id: Dict,
+        nlp_component_type=None,
+    ):
+        """Get the probability distribution for a query across domains, intents or entities.
+
+        Args:
+            classifier (MindMeld Classifer): Domain or Intent Classifier
+            queries (ProcessedQueryList): List of MindMeld queries
+            nlp_component_to_id (Dict): Dictionary mapping domain or intent names to vector index
+                positions.
+            nlp_component_type (str): Domain/Intent/Entity
+
+        Returns:
+            prob_vector (List[List]]): Probability distribution vectors for given queries.
+        """
+        # If type is entity, get recognizer probabilities
+        if nlp_component_type == TuneLevel.ENTITY.value:
+            return MindMeldALClassifier._get_tagger_probs(
+                classifier=classifier,
+                queries=queries,
+                entity_tag_to_id=nlp_component_to_id,
+            )
+
+        # Else obtain classifier probabilities
+        return MindMeldALClassifier._get_classifier_probs(
+            classifier=classifier,
+            queries=queries,
+            nlp_component_to_id=nlp_component_to_id,
+        )
 
     def _pad_intent_probs(
         self, ic_queries_prob_vectors: List[List[float]], intents: List
@@ -218,40 +323,60 @@ class MindMeldALClassifier(ALClassifier):
             padded_ic_queries_prob_vectors.append(ordered_ic_query_prob_vector)
         return padded_ic_queries_prob_vectors
 
-    def train(self, data_bucket: DataBucket, heuristic: Heuristic):
+    def train(
+        self,
+        data_bucket: DataBucket,
+        heuristic: Heuristic,
+        tuning_type: TuningType = TuningType.CLASSIFIER,
+    ):
         """Main training function.
 
         Args:
             data_bucket (DataBucket): DataBucket for current iteration
             heuristic (Heuristic): Current Heuristic.
+            tuning_type (TuningType): Component to be tuned ("classifier" or "tagger")
 
         Returns:
             eval_stats (defaultdict): Evaluation metrics to be included in accuracies.json
             confidences_2d (List[List]): 2D array with probability vectors for unsampled queries
+                (returns a 3d output for tagger tuning).
             confidences_3d (List[List[List]]]): 3D array with probability vectors for unsampled
                 queries from multiple classifiers
             domain_indices (Dict): Maps domains to a tuple containing the start and
                 ending indexes of intents with the given domain.
         """
+        self.tuning_type = tuning_type
         eval_stats = defaultdict(dict)
         eval_stats["num_sampled"] = len(data_bucket.sampled_queries)
-        confidences_2d = self.train_single(data_bucket, eval_stats)
+        confidences_2d, eval_stats = self.train_single(data_bucket, eval_stats)
         return_confidences_3d = isinstance(heuristic, MULTI_MODEL_HEURISTICS)
+
         confidences_3d = (
             self.train_multi(data_bucket) if return_confidences_3d else None
         )
+
         domain_indices = (
             self.domain_indices if isinstance(heuristic, KLDivergenceSampling) else None
         )
-        return eval_stats, confidences_2d, confidences_3d, domain_indices
+        return (
+            eval_stats,
+            confidences_2d,
+            confidences_3d,
+            domain_indices,
+        )
 
-    def train_single(self, data_bucket: DataBucket, eval_stats: defaultdict = None):
+    def train_single(
+        self,
+        data_bucket: DataBucket,
+        eval_stats: defaultdict = None,
+    ):
         """Trains a single model to get a 2D probability array for single-model selection strategies.
         Args:
             data_bucket (DataBucket): Databucket for current iteration
             eval_stats (defaultdict): Evaluation metrics to be included in accuracies.json
         Returns:
             confidences_2d (List): 2D array with probability vectors for unsampled queries
+                (returns a 3d output for tagger tuning).
         """
         return self._train_single(
             sampled_queries=data_bucket.sampled_queries,
@@ -279,36 +404,54 @@ class MindMeldALClassifier(ALClassifier):
             eval_stats (Dict): Evaluation metrics to be included in accuracies.json
         Returns:
             confidences_2d (List): 2D array with probability vectors for unsampled queries
+                (returns a 3d output for tagger tuning).
         """
-
-        # Domain_Level
-        dc_queries_prob_vectors, dc_eval_test = self.domain_classifier_fit_eval(
-            sampled_queries=sampled_queries,
-            unsampled_queries=unsampled_queries,
-            test_queries=test_queries,
-            domain2id=label_map.domain2id,
-        )
-        if eval_stats:
-            self._update_eval_stats_domain_level(eval_stats, dc_eval_test)
-        confidences_2d = dc_queries_prob_vectors
-
-        # Intent_Level
-        if self.tuning_level == TUNE_LEVEL_INTENT:
-            (
-                ic_queries_prob_vectors,
-                ic_eval_test_dict,
-            ) = self.intent_classifiers_fit_eval(
+        if self.tuning_type == TuningType.CLASSIFIER:
+            # Domain Level
+            dc_queries_prob_vectors, dc_eval_test = self.domain_classifier_fit_eval(
                 sampled_queries=sampled_queries,
                 unsampled_queries=unsampled_queries,
                 test_queries=test_queries,
-                domain_list=list(label_map.domain2id),
-                domain_to_intent2id=label_map.domain_to_intent2id,
+                domain2id=label_map.domain2id,
             )
             if eval_stats:
-                self._update_eval_stats_intent_level(eval_stats, ic_eval_test_dict)
-            confidences_2d = ic_queries_prob_vectors
+                self._update_eval_stats_domain_level(eval_stats, dc_eval_test)
+            confidences_2d = dc_queries_prob_vectors
 
-        return confidences_2d
+            # Intent Level
+            if TuneLevel.INTENT.value in self.tuning_level:
+                (
+                    ic_queries_prob_vectors,
+                    ic_eval_test_dict,
+                ) = self.intent_classifiers_fit_eval(
+                    sampled_queries=sampled_queries,
+                    unsampled_queries=unsampled_queries,
+                    test_queries=test_queries,
+                    domain_list=list(label_map.domain2id),
+                    domain_to_intent2id=label_map.domain_to_intent2id,
+                )
+                if eval_stats:
+                    self._update_eval_stats_intent_level(eval_stats, ic_eval_test_dict)
+                confidences_2d = ic_queries_prob_vectors
+
+        else:
+            # Entity Level
+            if TuneLevel.ENTITY.value in self.tuning_level:
+                (
+                    er_queries_prob_vectors,
+                    er_eval_test_dict,
+                ) = self.entity_recognizers_fit_eval(
+                    sampled_queries=sampled_queries,
+                    unsampled_queries=unsampled_queries,
+                    test_queries=test_queries,
+                    domain_to_intents=label_map.domain_to_intents,
+                    entity2id=label_map.entity2id,
+                )
+                if eval_stats:
+                    self._update_eval_stats_entity_level(eval_stats, er_eval_test_dict)
+                confidences_2d = er_queries_prob_vectors
+
+        return confidences_2d, eval_stats
 
     def train_multi(self, data_bucket: DataBucket):
         """Trains multiple models to get a 3D probability array for multi-model selection strategies.
@@ -366,11 +509,14 @@ class MindMeldALClassifier(ALClassifier):
         ]
         confidences_3d = []
         for fold_sample_queries in fold_sampled_queries_lists:
-            confidences_3d.append(
-                self._train_single(
-                    fold_sample_queries, unsampled_queries, test_queries, label_map
-                )
+            confidences_2d, _ = self._train_single(
+                fold_sample_queries,
+                unsampled_queries,
+                test_queries,
+                label_map,
             )
+            confidences_3d.append(confidences_2d)
+
         return confidences_3d
 
     def domain_classifier_fit_eval(
@@ -430,7 +576,7 @@ class MindMeldALClassifier(ALClassifier):
         domain_list: Dict,
         domain_to_intent2id: Dict,
     ):
-        """Fit and evaluate the domain classifier.
+        """Fit and evaluate the intent classifier.
         Args:
             sampled_queries (ProcessedQueryList): List of Sampled Queries.
             unsampled_queries (ProcessedQueryList): List of Unsampled Queries.
@@ -448,15 +594,21 @@ class MindMeldALClassifier(ALClassifier):
         unsampled_idx_preds_pairs = []
         for domain in domain_list:
             # Filter Queries
-            _, filtered_sampled_queries = DataBucket.filter_queries_by_domain(
-                sampled_queries, domain
+            _, filtered_sampled_queries = DataBucket.filter_queries_by_nlp_component(
+                query_list=sampled_queries,
+                component_type="domain",
+                component_name=domain,
             )
             (
                 filtered_unsampled_queries_indices,
                 filtered_unsampled_queries,
-            ) = DataBucket.filter_queries_by_domain(unsampled_queries, domain)
-            _, filtered_test_queries = DataBucket.filter_queries_by_domain(
-                test_queries, domain
+            ) = DataBucket.filter_queries_by_nlp_component(
+                query_list=unsampled_queries,
+                component_type="domain",
+                component_name=domain,
+            )
+            _, filtered_test_queries = DataBucket.filter_queries_by_nlp_component(
+                query_list=test_queries, component_type="domain", component_name=domain
             )
             # Train
             ic = self.nlp.domains[domain].intent_classifier
@@ -531,3 +683,128 @@ class MindMeldALClassifier(ALClassifier):
                         self.class_level_statistic
                     ][i]
                 }
+
+    def entity_recognizers_fit_eval(
+        self,
+        sampled_queries: ProcessedQueryList,
+        unsampled_queries: ProcessedQueryList,
+        test_queries: ProcessedQueryList,
+        domain_to_intents: Dict,
+        entity2id: Dict,
+    ):
+        """Fit and evaluate the entity recognizer.
+        Args:
+            sampled_queries (ProcessedQueryList): List of Sampled Queries.
+            unsampled_queries (ProcessedQueryList): List of Unsampled Queries.
+            test_queries (ProcessedQueryList): List of Test Queries.
+            domain_to_intents (Dict): Dictionary mapping domain to list of intents.
+            entity2id (Dict): Dictionary mapping entities to IDs.
+
+        Returns:
+            ic_queries_prob_vectors (List[List]): List of probability distributions
+                for unsampled queries.
+            ic_eval_test_dict (Dict): Dictionary mapping a domain (str) to the
+                associated ic_eval_test object.
+        """
+        er_eval_test_dict = {}
+        unsampled_idx_preds_pairs = {}
+        for domain, intents in domain_to_intents.items():
+            for intent in intents:
+                # Filter Queries
+                (
+                    _,
+                    filtered_sampled_queries,
+                ) = DataBucket.filter_queries_by_nlp_component(
+                    query_list=sampled_queries,
+                    component_type=TuneLevel.INTENT.value,
+                    component_name=intent,
+                )
+                (
+                    filtered_unsampled_queries_indices,
+                    filtered_unsampled_queries,
+                ) = DataBucket.filter_queries_by_nlp_component(
+                    query_list=unsampled_queries,
+                    component_type=TuneLevel.INTENT.value,
+                    component_name=intent,
+                )
+                _, filtered_test_queries = DataBucket.filter_queries_by_nlp_component(
+                    query_list=test_queries,
+                    component_type=TuneLevel.INTENT.value,
+                    component_name=intent,
+                )
+                # Train
+                er = self.nlp.domains[domain].intents[intent].entity_recognizer
+                try:
+                    er.fit(queries=filtered_sampled_queries)
+                except ValueError:
+                    # single class, cannot fit with solver
+                    logger.info(
+                        "Skipped fitting entity recognizer for domain `%s` and intent `%s`."
+                        "Cannot fit with solver.",
+                        domain,
+                        intent,
+                    )
+
+                # Evaluate Test Queries
+                er_eval_test = er.evaluate(queries=filtered_test_queries)
+                er_eval_test_dict[f"{domain}.{intent}"] = er_eval_test
+
+                # Get Probability Vectors
+                er_queries_prob_vectors = MindMeldALClassifier._get_probs(
+                    classifier=er,
+                    queries=filtered_unsampled_queries,
+                    nlp_component_to_id=entity2id,
+                    nlp_component_type=TuneLevel.ENTITY.value,
+                )
+
+                for i, index in enumerate(filtered_unsampled_queries_indices):
+                    unsampled_idx_preds_pairs[index] = er_queries_prob_vectors[i]
+
+        indices = list(unsampled_idx_preds_pairs.keys())
+        indices.sort()
+        er_queries_prob_vectors = [
+            unsampled_idx_preds_pairs[index] for index in indices
+        ]
+        return er_queries_prob_vectors, er_eval_test_dict
+
+    def _update_eval_stats_entity_level(
+        self,
+        eval_stats: defaultdict,
+        er_eval_test_dict: Dict,
+        verbose: bool = False,
+    ):
+        """Update the eval_stats dictionary with evaluation metrics from entity
+        recognizers.
+
+        Args:
+            eval_stats (defaultdict): Evaluation metrics to be included in accuracies.json.
+            er_eval_test_dict (Dict): Dictionary mapping a domain.intent (str) to the
+                associated er_eval_test object.
+        """
+        for domain_intent, er_eval_test in er_eval_test_dict.items():
+            domain, intent = domain_intent.split(".")
+
+            if er_eval_test:
+                if domain not in eval_stats["accuracies"]:
+                    eval_stats["accuracies"].update({domain: {}})
+                if intent not in eval_stats["accuracies"][domain]:
+                    eval_stats["accuracies"][domain].update({intent: {}})
+
+                eval_stats["accuracies"][domain][intent]["entities"] = {
+                    "overall": er_eval_test.get_stats()["stats_overall"][
+                        self.aggregate_statistic
+                    ]
+                }
+
+                if verbose:
+                    # To generate plots at a sub-entity level (B, I, O, E, S tags)
+                    for e, entity in enumerate(
+                        er_eval_test.get_stats()["class_labels"]
+                    ):
+                        eval_stats["accuracies"][domain][intent]["entities"][
+                            entity
+                        ] = er_eval_test.get_stats()["class_stats"][
+                            self.class_level_statistic
+                        ][
+                            e
+                        ]

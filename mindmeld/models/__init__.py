@@ -14,11 +14,10 @@
 # Need to import the following so models, label encoders, features are registered.
 # See helpers module
 from . import (
-    auto_model,
+    model_factory,
     embedder_models,
     labels
 )
-from .auto_model import AutoModel
 from .embedder_models import Embedder
 from .features import (
     entity_features,
@@ -35,12 +34,13 @@ from .helpers import (
     register_embedder,
 )
 from .model import ModelConfig
+from .model_factory import ModelFactory
 
 __all__ = [
-    "auto_model",
+    "model_factory",
     "embedder_models",
     "labels",
-    "AutoModel",
+    "ModelFactory",
     "Embedder",
     "query_features",
     "entity_features",

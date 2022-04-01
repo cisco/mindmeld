@@ -463,6 +463,17 @@ class BaseEntityResolver(ABC):  # pylint: disable=too-many-instance-attributes
         self.ready = True
         self.dirty = False
 
+    # TODO: method to be removed in a next major release of Mindmeld
+    @abstractmethod
+    def load_deprecated(self):
+        """
+        A method to handle the deprecated way of using the .load() method in entity resolvers. This
+        ensures backwards compatibility when loading models that were built using an older version
+        of Mindmeld i.e a version <=4.4.0. Since no hash pickle file is dumped in the older version
+        of MindMeld, using the latest .load() method throws a FileNotFoundError.
+        """
+        raise NotImplementedError
+
     def unload(self):
         """
         Unloads the model from memory. This helps reduce memory requirements while
@@ -783,6 +794,9 @@ class ExactMatchEntityResolver(BaseEntityResolver):
 
     def _unload(self):
         self.processed_entity_map = None
+
+    def load_deprecated(self):
+        self.fit()
 
 
 class ElasticsearchEntityResolver(BaseEntityResolver):
@@ -1221,6 +1235,30 @@ class ElasticsearchEntityResolver(BaseEntityResolver):
         except _getattr("elasticsearch", "ElasticsearchException") as e:
             raise EntityResolverError from e
 
+    def load_deprecated(self):
+        try:
+            scoped_index_name = get_scoped_index_name(
+                self._app_namespace, self._es_index_name
+            )
+            if not self._es_client.indices.exists(index=scoped_index_name):
+                self.fit()
+        except _getattr("elasticsearch", "ConnectionError") as e:
+            logger.error(
+                "Unable to connect to Elasticsearch: %s details: %s", e.error, e.info
+            )
+            raise ElasticsearchConnectionError(es_host=self._es_client.transport.hosts) from e
+        except _getattr("elasticsearch", "TransportError") as e:
+            logger.error(
+                "Unexpected error occurred when sending requests to Elasticsearch: %s "
+                "Status code: %s details: %s",
+                e.error,
+                e.status_code,
+                e.info,
+            )
+            raise EntityResolverError from e
+        except _getattr("elasticsearch", "ElasticsearchException") as e:
+            raise EntityResolverError from e
+
 
 class TfIdfSparseCosSimEntityResolver(BaseEntityResolver):
     # pylint: disable=too-many-instance-attributes
@@ -1526,6 +1564,9 @@ class TfIdfSparseCosSimEntityResolver(BaseEntityResolver):
 
         return results
 
+    def load_deprecated(self):
+        self.fit()
+
 
 class EmbedderCosSimEntityResolver(BaseEntityResolver):
     """
@@ -1785,6 +1826,9 @@ class EmbedderCosSimEntityResolver(BaseEntityResolver):
         results_list = self._predict_batch(nbest_entities_list, batch_size)
 
         return [self._trim_and_sort_results(results, top_n) for results in results_list]
+
+    def load_deprecated(self):
+        self.fit()
 
 
 class SentenceBertCosSimEntityResolver(EmbedderCosSimEntityResolver):

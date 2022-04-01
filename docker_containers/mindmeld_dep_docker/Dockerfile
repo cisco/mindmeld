@@ -55,7 +55,7 @@ COPY ./conf/elasticsearch.yml /elasticsearch/config/elasticsearch.yml
 
 WORKDIR /root
 
-RUN curl -o /tmp/get-pip.py https://bootstrap.pypa.io/get-pip.py
+RUN curl -o /tmp/get-pip.py https://bootstrap.pypa.io/pip/3.6/get-pip.py
 RUN python3 /tmp/get-pip.py
 
 # system as both 2 and 3, make 3 the default
@@ -68,7 +68,6 @@ RUN pip3 install click-log==0.1.8
 
 RUN export LC_ALL=C.UTF-8 && \
     export LANG=C.UTF-8 && \
-    pip3 install mindmeld --upgrade && \
     mindmeld num-parse --start
 
 # Expose ports.
@@ -81,6 +80,5 @@ EXPOSE 7151
 ENTRYPOINT export LC_ALL=C.UTF-8 && \
     export LANG=C.UTF-8 && \
     pip3 install mindmeld --upgrade && \
-    mindmeld num-parse --start && \
     su mindmeld -c "ES_JAVA_OPTS='-Xms1g -Xmx1g' /elasticsearch/bin/elasticsearch"
 

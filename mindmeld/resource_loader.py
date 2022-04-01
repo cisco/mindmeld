@@ -465,7 +465,8 @@ class ResourceLoader:
                     # model; which implies that a model was probably not required (eg. only 1 domain
                     # in case of domain classifier or only 1 intent in an intent classifier or no
                     # entity types for an entity recognizer)
-                    logger.info("Could not find the serialized model")
+                    msg = f"No serialized model available at {classifier_file_path}"
+                    logger.info(msg)
                 self._hash_to_model_path[hash_val] = classifier_file_path
 
     def _gaz_needs_build(self, gaz_name):

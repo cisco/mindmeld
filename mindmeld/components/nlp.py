@@ -520,7 +520,7 @@ class NaturalLanguageProcessor(Processor):
             domain_eval = self.domain_classifier.evaluate(label_set=label_set)
             if domain_eval:
                 print(
-                    "Domain classification accuracy: '{}'".format(
+                    "Domain classification accuracy: {}".format(
                         domain_eval.get_accuracy()
                     )
                 )
@@ -890,7 +890,7 @@ class DomainProcessor(Processor):
             intent_eval = self.intent_classifier.evaluate(label_set=label_set)
             if intent_eval:
                 print(
-                    "Intent classification accuracy for the {} domain: {}".format(
+                    "Intent classification accuracy for the '{}' domain: {}".format(
                         self.name, intent_eval.get_accuracy()
                     )
                 )
@@ -1718,9 +1718,19 @@ class EntityProcessor(Processor):
             self.type,
             timestamp=incremental_timestamp,
         )
-        self.entity_resolver.load(
-            incremental_model_path if incremental_timestamp else model_path
-        )
+        try:
+            self.entity_resolver.load(
+                incremental_model_path if incremental_timestamp else model_path
+            )
+        except FileNotFoundError as e:
+            logger.error(e)
+            msg = "No cached hash (pkl) file found. This can happen if you are trying to load " \
+                  "entity resolvers that were built using mindmeld version <=4.4.0 but trying to " \
+                  "load them using version >4.4.0"
+            msg += "\nConsider doing an incremental build of your nlp hierarchy to not see this " \
+                   "error message again."
+            logger.error(msg)
+            self.entity_resolver.load_deprecated()
 
     def _evaluate(self, print_stats, label_set="test"):
         # evaluation can be done only for role classifier and not for entity resolver
@@ -1728,7 +1738,7 @@ class EntityProcessor(Processor):
             role_eval = self.role_classifier.evaluate(label_set=label_set)
             if role_eval:
                 print(
-                    "Role classification accuracy for the {}.{}.{}' entity type: {}".format(
+                    "Role classification accuracy for the '{}.{}.{}' entity type: {}".format(
                         self.domain, self.intent, self.type, role_eval.get_accuracy()
                     )
                 )

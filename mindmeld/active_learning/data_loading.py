@@ -18,11 +18,11 @@ This module contains classes used to load queries for the Active Learning Pipeli
 from typing import Dict, List
 import logging
 
-from .heuristics import Heuristic, stratified_random_sample
+from .heuristics import Heuristic, stratified_random_sample, EntropySampling
 
 from ..auto_annotator import BootstrapAnnotator
 from ..components._config import DEFAULT_AUTO_ANNOTATOR_CONFIG
-from ..constants import TUNE_LEVEL_DOMAIN, TUNE_LEVEL_INTENT, AL_MAX_LOG_USAGE_PCT
+from ..constants import TuneLevel, TuningType, AL_MAX_LOG_USAGE_PCT
 from ..core import ProcessedQuery
 from ..markup import read_query_file
 from ..resource_loader import ResourceLoader, ProcessedQueryList
@@ -39,11 +39,10 @@ class LabelMap:
             query_tree (dict): Nested Dictionary containing queries.
                 Has the format: {"domain":{"intent":[Query List]}}.
         """
-        domain_to_intents = LabelMap.get_domain_to_intents(query_tree)
-
-        self.domain2id = LabelMap._get_domain_mappings(domain_to_intents)
+        self.domain_to_intents = LabelMap.get_domain_to_intents(query_tree)
+        self.domain2id = LabelMap._get_domain_mappings(self.domain_to_intents)
         self.id2domain = LabelMap._reverse_dict(self.domain2id)
-        self.domain_to_intent2id = LabelMap._get_intent_mappings(domain_to_intents)
+        self.domain_to_intent2id = LabelMap._get_intent_mappings(self.domain_to_intents)
         self.id2intent = LabelMap._reverse_nested_dict(self.domain_to_intent2id)
 
     @staticmethod
@@ -117,30 +116,56 @@ class LabelMap:
         return reversed_dict
 
     @staticmethod
+    def _get_entity_mappings(query_list: ProcessedQueryList) -> Dict:
+        """
+        Generates index mapping for entity labels in an application.
+        Supports both BIO  and BIOES tag schemes.
+
+        Args:
+            query_list (ProcessedQueryList): Data structure containing a list of processed queries.
+
+        Returns:
+            Dictionary mapping entity tags to index in entity vector.
+        """
+        entity_labels = set()
+        logger.info("Generating Entity Labels...")
+        for d, i, entities in zip(
+            query_list.domains(), query_list.intents(), query_list.entities()
+        ):
+            if len(entities):
+                for entity in entities:
+                    e = str(entity.entity.type)
+                    entity_labels.add(f"{d}.{i}.B|{e}")
+                    entity_labels.add(f"{d}.{i}.I|{e}")
+                    entity_labels.add(f"{d}.{i}.S|{e}")
+                    entity_labels.add(f"{d}.{i}.E|{e}")
+
+            e = "O|"
+            entity_labels.add(f"{d}.{i}.{e}")
+
+        entity_labels = sorted(list(entity_labels))
+        return dict(zip(entity_labels, range(len(entity_labels))))
+
+    @staticmethod
     def get_class_labels(
-        tuning_level: str, query_list: ProcessedQueryList
+        tuning_level: list, query_list: ProcessedQueryList
     ) -> List[str]:
         """Creates a class label for a set of queries. These labels are used to split
             queries by type. Labels follow the format of "domain" or "domain|intent".
             For example, "date|get_date".
 
         Args:
-            tuning_level (str): The hierarchy level to tune ("domain" or "intent")
+            tuning_level (list): The hierarchy levels to tune ("domain", "intent" or "entity")
             query_list (ProcessedQueryList): Data structure containing a list of processed queries.
         Returns:
             class_labels (List[str]): list of labels for classification task.
         """
-        if tuning_level == TUNE_LEVEL_DOMAIN:
-            return [f"{d}" for d in query_list.domains()]
-        elif tuning_level == TUNE_LEVEL_INTENT:
+        if TuneLevel.INTENT.value in tuning_level:
             return [
                 f"{d}.{i}" for d, i in zip(query_list.domains(), query_list.intents())
             ]
         else:
-            raise ValueError(
-                f"Invalid label_type {tuning_level}. Must be '{TUNE_LEVEL_DOMAIN}'"
-                f" or '{TUNE_LEVEL_INTENT}'"
-            )
+            return [f"{d}" for d in query_list.domains()]
 
     @staticmethod
     def create_label_map(app_path, file_pattern):
@@ -159,11 +184,11 @@ class LabelMap:
 
 
 class LogQueriesLoader:
-    def __init__(self, app_path: str, tuning_level: str, log_file_path: str):
+    def __init__(self, app_path: str, tuning_level: list, log_file_path: str):
         """This class loads data as processed queries from a specified log file.
         Args:
             app_path (str): Path to the MindMeld application.
-            tuning_level (str): The hierarchy level to tune ("domain" or "intent")
+            tuning_level (list): The hierarchy levels to tune ("domain", "intent" or "entity")
             log_file_path (str): Path to the log file with log queries.
         """
         self.app_path = app_path
@@ -281,32 +306,48 @@ class DataBucket:
         confidences_3d: List[List[List[float]]],
         heuristic: Heuristic,
         confidence_segments: Dict = None,
+        tuning_type: TuningType = TuningType.CLASSIFIER,
     ):
         """Method to sample a DataBucket's unsampled_queries and update its sampled_queries
         and newly_sampled_queries.
         Args:
             sampling_size (int): Number of elements to sample in the next iteration.
             confidences_2d (List[List[float]]): Confidence probabilities per element.
+                (3d for tagger tuning)
             confidences_3d (List[List[List[float]]]): Confidence probabilities per element.
             heuristic (Heuristic): Selection strategy.
             confidence_segments (Dict[(str, Tuple(int,int))]): A dictionary mapping
                 segments to run KL Divergence.
+            tuning_type (TuningType): Component to be tuned ("classifier" or "tagger")
         Returns:
             newly_sampled_queries_ids (List[int]): List of ids corresponding the newly sampled
                 queries in the QueryCache.
         """
 
-        params_rank_3d = {"confidences_3d": confidences_3d}
-        if confidence_segments:
-            params_rank_3d["confidence_segments"] = confidence_segments
+        if tuning_type == TuningType.CLASSIFIER:
+            params_rank_3d = {"confidences_3d": confidences_3d}
+            if confidence_segments:
+                params_rank_3d["confidence_segments"] = confidence_segments
 
-        ranked_indices = (
-            heuristic.rank_3d(**params_rank_3d)
-            if confidences_3d
-            else heuristic.rank_2d(confidences_2d)
-        )
-        newly_sampled_indices = ranked_indices[:sampling_size]
-        remaining_indices = ranked_indices[sampling_size:]
+            ranked_indices_2d = (
+                heuristic.rank_3d(**params_rank_3d)
+                if confidences_3d
+                else heuristic.rank_2d(confidences_2d)
+            )
+
+            newly_sampled_indices = ranked_indices_2d[:sampling_size]
+            remaining_indices = ranked_indices_2d[sampling_size:]
+
+        else:
+            try:
+                ranked_entity_indices = heuristic.rank_entities(confidences_2d)
+            except (TypeError, ValueError):
+                # if heuristic does not have entity AL support default to entropy
+                heuristic = EntropySampling
+                ranked_entity_indices = heuristic.rank_entities(confidences_2d)
+
+            newly_sampled_indices = ranked_entity_indices[:sampling_size]
+            remaining_indices = ranked_entity_indices[sampling_size:]
 
         newly_sampled_queries_ids = [
             self.unsampled_queries.elements[i] for i in newly_sampled_indices
@@ -316,21 +357,25 @@ class DataBucket:
         return newly_sampled_queries_ids
 
     @staticmethod
-    def filter_queries_by_domain(query_list: ProcessedQueryList, domain: str):
+    def filter_queries_by_nlp_component(
+        query_list: ProcessedQueryList, component_type: str, component_name: str
+    ):
         """Filter queries for training preperation.
 
         Args:
             query_list (list): List of queries to filter
-            domain (str): Domain of desired queries
+            component_type (str): Component type of desired queries (e.g. "domain")
+            component_name (str): Component name of desired queries (e.g. "smart_home")
 
         Returns:
             filtered_queries_indices (list): List of indices of filtered queries.
             filtered_queries (list): List of filtered queries.
         """
+
         filtered_queries = []
         filtered_queries_indices = []
         for index, query in enumerate(query_list.processed_queries()):
-            if query.domain == domain:
+            if getattr(query, component_type) == component_name:
                 filtered_queries_indices.append(index)
                 filtered_queries.append(query)
         return filtered_queries_indices, filtered_queries
@@ -344,7 +389,7 @@ class DataBucketFactory:
     @staticmethod
     def get_data_bucket_for_strategy_tuning(
         app_path: str,
-        tuning_level: str,
+        tuning_level: list,
         train_pattern: str,
         test_pattern: str,
         train_seed_pct: float,
@@ -353,7 +398,7 @@ class DataBucketFactory:
 
         Args:
             app_path (str): Path to MindMeld application
-            tuning_level (str): The hierarchy level to tune ("domain" or "intent")
+            tuning_level (list): The hierarchy levels to tune ("domain", "intent" or "entity")
             train_pattern (str): Regex pattern to match train files. (".*train.*.txt")
             test_pattern (str): Regex pattern to match test files. (".*test.*.txt")
             train_seed_pct (float): Percentage of training data to use as the initial seed
@@ -367,6 +412,11 @@ class DataBucketFactory:
         train_query_list = resource_loader.get_flattened_label_set(
             label_set=train_pattern
         )
+
+        if TuneLevel.ENTITY.value in tuning_level:
+            label_map.entity2id = LabelMap._get_entity_mappings(train_query_list)
+            label_map.id2entity = LabelMap._reverse_dict(label_map.entity2id)
+
         train_class_labels = LabelMap.get_class_labels(tuning_level, train_query_list)
         ranked_indices = stratified_random_sample(train_class_labels)
         sampling_size = int(train_seed_pct * len(train_query_list))
@@ -393,7 +443,7 @@ class DataBucketFactory:
     @staticmethod
     def get_data_bucket_for_query_selection(
         app_path: str,
-        tuning_level: str,
+        tuning_level: list,
         train_pattern: str,
         test_pattern: str,
         unlabeled_logs_path: str,
@@ -404,7 +454,7 @@ class DataBucketFactory:
 
         Args:
             app_path (str): Path to MindMeld application
-            tuning_level (str): The hierarchy level to train ("domain" or "intent")
+            tuning_level (list): The hierarchy levels to tune ("domain", "intent" or "entity")
             train_pattern (str): Regex pattern to match train files. For example, ".*train.*.txt"
             test_pattern (str): Regex pattern to match test files. For example, ".*test.*.txt"
             unlabeled_logs_path (str): Path a logs text file with unlabeled queries
@@ -416,6 +466,14 @@ class DataBucketFactory:
         """
         label_map = LabelMap.create_label_map(app_path, train_pattern)
         resource_loader = ResourceLoader.create_resource_loader(app_path)
+
+        train_query_list = resource_loader.get_flattened_label_set(
+            label_set=train_pattern
+        )
+
+        if TuneLevel.ENTITY.value in tuning_level:
+            label_map.entity2id = LabelMap._get_entity_mappings(train_query_list)
+            label_map.id2entity = LabelMap._reverse_dict(label_map.entity2id)
 
         if labeled_logs_pattern:
             log_query_list = resource_loader.get_flattened_label_set(
@@ -439,7 +497,9 @@ class DataBucketFactory:
 
         if log_usage_pct < AL_MAX_LOG_USAGE_PCT:
             sampling_size = int(log_usage_pct * len(log_query_list))
-            log_class_labels = LabelMap.get_class_labels(tuning_level, log_query_list)
+            log_class_labels, _ = label_map.get_class_labels(
+                tuning_level, log_query_list
+            )
             ranked_indices = stratified_random_sample(log_class_labels)
             log_query_ids = [
                 log_query_list.elements[i] for i in ranked_indices[:sampling_size]

@@ -24,8 +24,10 @@ import numpy as np
 from ..components._util import _is_module_available, _get_module_or_attr
 from .classifiers import MindMeldALClassifier
 from ..path import (
-    AL_ACCURACIES_PATH,
-    AL_SELECTED_QUERIES_PATH,
+    AL_CLASSIFIER_ACCURACIES_PATH,
+    AL_TAGGER_ACCURACIES_PATH,
+    AL_CLASSIFIER_SELECTED_QUERIES_PATH,
+    AL_TAGGER_SELECTED_QUERIES_PATH,
 )
 
 
@@ -54,6 +56,8 @@ class PlotManager:
         experiment_dir_path: str,
         aggregate_statistic: str,
         class_level_statistic: str,
+        plot_entities: bool,
+        plot_intents: bool,
     ):
         """
         Args:
@@ -72,6 +76,8 @@ class PlotManager:
         )
         self.accuracies_data = self.get_accuracies_json_data()
         self.queries_data = self.get_queries_json_data()
+        self.plot_entities = plot_entities
+        self.plot_intents = plot_intents
 
         if not _is_module_available("matplotlib"):
             raise ModuleNotFoundError(
@@ -82,29 +88,53 @@ class PlotManager:
         self.plt = _get_module_or_attr("matplotlib.pyplot")
 
     # Get JSON Data
-    def get_accuracies_json_data(self) -> Dict:
+    def get_accuracies_json_data(self) -> List[Dict]:
         """Loads accuracies.json from the experiment directory path.
         Returns:
-            data (dict): Data loaded from accuracies.json.
+            data (List[dict]): Data loaded from accuracies.json.
         """
-        accuracies_json_path = AL_ACCURACIES_PATH.format(
+        classifier_accuracies_json_path = AL_CLASSIFIER_ACCURACIES_PATH.format(
             experiment_folder=self.experiment_dir_path
         )
-        with open(accuracies_json_path, "r") as infile:
-            return json.load(infile)
+        tagger_accuracies_json_path = AL_TAGGER_ACCURACIES_PATH.format(
+            experiment_folder=self.experiment_dir_path
+        )
+        cls_data, tag_data = [], []
+        if os.path.isfile(classifier_accuracies_json_path):
+            with open(classifier_accuracies_json_path, "r") as cls_infile:
+                cls_data = json.load(cls_infile)
 
-    def get_queries_json_data(self) -> Dict:
+        if os.path.isfile(tagger_accuracies_json_path):
+            with open(tagger_accuracies_json_path, "r") as tag_infile:
+                tag_data = json.load(tag_infile)
+
+        return cls_data, tag_data
+
+    def get_queries_json_data(self) -> List[Dict]:
         """Loads selected_queries.json from the experiment directory path.
         selected_queries.json stores the queries selected by active learning
         at each iteration.
         Returns:
-            data (dict): Data loaded from selected_queries.json.
+            data (List[dict]): Data loaded from selected_queries.json.
         """
-        selected_queries_json_path = AL_SELECTED_QUERIES_PATH.format(
+        classifier_selected_queries_json_path = (
+            AL_CLASSIFIER_SELECTED_QUERIES_PATH.format(
+                experiment_folder=self.experiment_dir_path
+            )
+        )
+        tagger_selected_queries_json_path = AL_TAGGER_SELECTED_QUERIES_PATH.format(
             experiment_folder=self.experiment_dir_path
         )
-        with open(selected_queries_json_path, "r") as infile:
-            return json.load(infile)
+        cls_data, tag_data = [], []
+        if os.path.isfile(classifier_selected_queries_json_path):
+            with open(classifier_selected_queries_json_path, "r") as cls_infile:
+                cls_data = json.load(cls_infile)
+
+        if os.path.isfile(tagger_selected_queries_json_path):
+            with open(tagger_selected_queries_json_path, "r") as tag_infile:
+                tag_data = json.load(tag_infile)
+
+        return cls_data, tag_data
 
     def queries_json_data_has_data(self) -> Dict:
         """Checks whether queries.json is empty {}.
@@ -134,8 +164,6 @@ class PlotManager:
         self,
         function,
         plot_domain: bool = True,
-        plot_intents: bool = True,
-        plot_entities: bool = False,
     ):
         """Plotting wrapper functions for plots that use data from accuracies.json
         Args:
@@ -149,22 +177,23 @@ class PlotManager:
             return
         function(self, y_keys=["overall"])
         for domain in self.get_domain_list():
-            function(self, y_keys=[domain, "overall"])
-            if not plot_intents:
-                continue
-            for intent in self.get_intent_list(domain):
-                function(
-                    self,
-                    y_keys=[domain, intent, "overall"],
-                    use_aggregate_statistic=False,
-                )
-                if not plot_entities:
-                    continue
-                y_keys = [domain, intent, "entities", "overall"]
-                function(self, y_keys=y_keys)
-                for entity in self.get_entity_list(domain, intent):
-                    y_keys = [domain, intent, "entities", entity]
+            # To-do: check if order can be reversed
+            if self.plot_entities:
+                for intent in self.get_intent_list(domain):
+                    y_keys = [domain, intent, "entities", "overall"]
                     function(self, y_keys=y_keys)
+                    for entity in self.get_entity_list(domain, intent):
+                        y_keys = [domain, intent, "entities", entity]
+                        function(self, y_keys=y_keys)
+
+            if self.plot_intents:
+                function(self, y_keys=[domain, "overall"])
+                for intent in self.get_intent_list(domain):
+                    function(
+                        self,
+                        y_keys=[domain, intent, "overall"],
+                        use_aggregate_statistic=False,
+                    )
 
     # Helper Methods
     @staticmethod
@@ -178,7 +207,7 @@ class PlotManager:
             data_dict (dict): Dictionary containing the filtered nested data.
         """
         for selected_key in selected_keys:
-            data_dict = data_dict[selected_key]
+            data_dict = data_dict.get(selected_key, 1.0)
         return data_dict
 
     @staticmethod
@@ -201,10 +230,12 @@ class PlotManager:
         Returns:
             strategies (list): List of selection strategies for the given experiment.
         """
-        strategies = list(self.accuracies_data)
-        if len(strategies) == 0:
+        cls_data, tag_data = self.accuracies_data
+        cls_strategies = list(cls_data)
+        tag_strategies = list(tag_data)
+        if not (cls_strategies or tag_strategies):
             raise MissingDataError("Did not find data in accuracies.json.")
-        return strategies
+        return [cls_strategies, tag_strategies]
 
     def _check_first_epoch_and_iter_exist(self):
         """Check whether data for the first iteration in the first epoch exists.
@@ -213,10 +244,14 @@ class PlotManager:
         Raises:
             MissingDataError: Throws an error if the anticipated data is not found.
         """
-        first_strategy = self.strategies[0]
-        if FIRST_EPOCH not in self.accuracies_data[first_strategy]:
+        key = 1 if self.plot_entities else 0
+        first_strategy = self.strategies[key][0]
+        if FIRST_EPOCH not in self.accuracies_data[key][first_strategy]:
             raise MissingDataError("Did not find data for the first epoch.")
-        if FIRST_ITERATION not in self.accuracies_data[first_strategy][FIRST_EPOCH]:
+        if (
+            FIRST_ITERATION
+            not in self.accuracies_data[key][first_strategy][FIRST_EPOCH]
+        ):
             raise MissingDataError(
                 "Did not find data for the first iteration in the first epoch."
             )
@@ -226,14 +261,16 @@ class PlotManager:
         Returns:
             domain_list (list): List of domains for the current experiment.
         """
-        first_strategy = self.strategies[0]
+        key = 1 if self.plot_entities else 0
+        first_strategy = self.strategies[key][0]
         domain_list = list(
-            self.accuracies_data[first_strategy][FIRST_EPOCH][FIRST_ITERATION][
+            self.accuracies_data[key][first_strategy][FIRST_EPOCH][FIRST_ITERATION][
                 "accuracies"
             ].keys()
         )
         # The 'overall' score across domains is removed as it is not a domain
-        domain_list.remove("overall")
+        if "overall" in domain_list:
+            domain_list.remove("overall")
         return domain_list
 
     def get_intent_list(self, domain: str) -> List:
@@ -243,14 +280,16 @@ class PlotManager:
         Returns:
             intent_list (list): List of intent for a given domain in the current experiment.
         """
-        first_strategy = self.strategies[0]
+        key = 1 if self.plot_entities else 0
+        first_strategy = self.strategies[key][0]
         intent_list = list(
-            self.accuracies_data[first_strategy][FIRST_EPOCH][FIRST_ITERATION][
+            self.accuracies_data[key][first_strategy][FIRST_EPOCH][FIRST_ITERATION][
                 "accuracies"
             ][domain].keys()
         )
         # The 'overall' score across intents is removed as it is not an intent
-        intent_list.remove("overall")
+        if "overall" in intent_list:
+            intent_list.remove("overall")
         return intent_list
 
     def get_entity_list(self, domain: str, intent: str) -> List:
@@ -261,9 +300,9 @@ class PlotManager:
         Returns:
             entity_list (list): List of entities in the given intent.
         """
-        first_strategy = self.strategies[0]
+        first_strategy = self.strategies[1][0]
         entity_list = list(
-            self.accuracies_data[first_strategy][FIRST_EPOCH][FIRST_ITERATION][
+            self.accuracies_data[1][first_strategy][FIRST_EPOCH][FIRST_ITERATION][
                 "accuracies"
             ][domain][intent]["entities"].keys()
         )
@@ -309,32 +348,37 @@ class PlotManager:
                 label for the y_axis. If False, the class_level_statistic will be used.
         """
         self.create_plot_dir(y_keys)
-        for strategy in self.strategies:
-            epoch_dict = self.accuracies_data[strategy][str(epoch)]
-            x_values = PlotManager.get_across_iterations(epoch_dict, ["num_sampled"])
-            y_values = PlotManager.get_across_iterations(
-                epoch_dict, ["accuracies"] + y_keys
-            )
-            self.plt.plot(x_values, y_values)
+        key = 1 if "entities" in y_keys else 0
+        strategies = self.strategies[key]
+        if strategies:
+            for strategy in strategies:
+                epoch_dict = self.accuracies_data[key][strategy][str(epoch)]
+                x_values = PlotManager.get_across_iterations(
+                    epoch_dict, ["num_sampled"]
+                )
+                y_values = PlotManager.get_across_iterations(
+                    epoch_dict, ["accuracies"] + y_keys
+                )
+                self.plt.plot(x_values, y_values)
 
-        self.plt.xlabel("Number of selected queries")
-        y_label = (
-            self.aggregate_statistic
-            if use_aggregate_statistic
-            else self.class_level_statistic
-        )
-        self.plt.ylabel(y_label.capitalize())
-        title = f"Epoch_{epoch}_Results_({'-'.join(y_keys)})"
-        self.plt.title(title)
-        self.plt.legend(self.strategies, loc="lower right")
-        self.plt.grid()
-        self.plt.tight_layout()
-        fig = self.plt.gcf()
-        if display:
-            self.plt.show()
-        if save:
-            fig.savefig(self.get_img_path(y_keys, title))
-            self.plt.clf()
+            self.plt.xlabel("Number of selected queries")
+            y_label = (
+                self.aggregate_statistic
+                if use_aggregate_statistic
+                else self.class_level_statistic
+            )
+            self.plt.ylabel(y_label.capitalize())
+            title = f"Epoch_{epoch}_Results_({'-'.join(y_keys)})"
+            self.plt.title(title)
+            self.plt.legend(strategies, loc="lower right")
+            self.plt.grid()
+            self.plt.tight_layout()
+            fig = self.plt.gcf()
+            if display:
+                self.plt.show()
+            if save:
+                fig.savefig(self.get_img_path(y_keys, title))
+                self.plt.clf()
 
     def plot_avg_across_epochs(
         self,
@@ -352,40 +396,43 @@ class PlotManager:
                 label for the y_axis. If False, the class_level_statistic will be used.
         """
         self.create_plot_dir(y_keys)
-        for strategy in self.strategies:
-            n_epochs = len(self.accuracies_data[strategy])
-            all_y_values = []
-            for epoch in range(n_epochs):
-                epoch_dict = self.accuracies_data[strategy][str(epoch)]
-                x_values = PlotManager.get_across_iterations(
-                    epoch_dict, ["num_sampled"]
-                )
-                y_values = PlotManager.get_across_iterations(
-                    epoch_dict, ["accuracies"] + y_keys
-                )
-                all_y_values.append(y_values)
-            all_y_values = np.array(all_y_values)
-            y_avg_values = all_y_values.mean(axis=0)
-            self.plt.plot(x_values, y_avg_values)
+        key = 1 if "entities" in y_keys else 0
+        strategies = self.strategies[key]
+        if strategies:
+            for strategy in strategies:
+                n_epochs = len(self.accuracies_data[key][strategy])
+                all_y_values = []
+                for epoch in range(n_epochs):
+                    epoch_dict = self.accuracies_data[key][strategy][str(epoch)]
+                    x_values = PlotManager.get_across_iterations(
+                        epoch_dict, ["num_sampled"]
+                    )
+                    y_values = PlotManager.get_across_iterations(
+                        epoch_dict, ["accuracies"] + y_keys
+                    )
+                    all_y_values.append(y_values)
+                all_y_values = np.array(all_y_values)
+                y_avg_values = all_y_values.mean(axis=0)
+                self.plt.plot(x_values, y_avg_values)
 
-        self.plt.xlabel("Number of selected queries")
-        y_label = (
-            self.aggregate_statistic
-            if use_aggregate_statistic
-            else self.class_level_statistic
-        )
-        self.plt.ylabel(y_label.capitalize())
-        title = f"Avg_Across_Epochs_({'-'.join(y_keys)})"
-        self.plt.title(title)
-        self.plt.legend(self.strategies, loc="lower right")
-        self.plt.grid()
-        self.plt.tight_layout()
-        fig = self.plt.gcf()
-        if display:
-            self.plt.show()
-        if save:
-            fig.savefig(self.get_img_path(y_keys, title))
-            self.plt.clf()
+            self.plt.xlabel("Number of selected queries")
+            y_label = (
+                self.aggregate_statistic
+                if use_aggregate_statistic
+                else self.class_level_statistic
+            )
+            self.plt.ylabel(y_label.capitalize())
+            title = f"Avg_Across_Epochs_({'-'.join(y_keys)})"
+            self.plt.title(title)
+            self.plt.legend(strategies, loc="lower right")
+            self.plt.grid()
+            self.plt.tight_layout()
+            fig = self.plt.gcf()
+            if display:
+                self.plt.show()
+            if save:
+                fig.savefig(self.get_img_path(y_keys, title))
+                self.plt.clf()
 
     def plot_all_epochs(
         self,
@@ -403,51 +450,55 @@ class PlotManager:
                 label for the y_axis. If False, the class_level_statistic will be used.
         """
         self.create_plot_dir(y_keys)
-        for strategy in self.strategies:
-            n_epochs = len(self.accuracies_data[strategy].keys())
-            all_y_values = []
-            for epoch in range(n_epochs):
-                epoch_dict = self.accuracies_data[strategy][str(epoch)]
-                x_values = PlotManager.get_across_iterations(
-                    epoch_dict, ["num_sampled"]
-                )
-                y_values = PlotManager.get_across_iterations(
-                    epoch_dict, ["accuracies"] + y_keys
-                )
-                self.plt.plot(x_values, y_values)
-                all_y_values.append(y_values)
-            max_len = max([len(i) for i in all_y_values])
-            for y_values in all_y_values:
-                y_values = np.pad(
-                    y_values,
-                    (0, max_len - len(y_values)),
-                    "constant",
-                    constant_values=(0, y_values[-1]),
-                )
-            y_avg_values = np.array(all_y_values).mean(axis=0)
-            self.plt.plot(x_values, y_avg_values)
+        key = 1 if "entities" in y_keys else 0
+        strategies = self.strategies[key]
+        if strategies:
+            for strategy in strategies:
+                n_epochs = len(self.accuracies_data[key][strategy].keys())
+                all_y_values = []
+                for epoch in range(n_epochs):
+                    epoch_dict = self.accuracies_data[key][strategy][str(epoch)]
+                    x_values = PlotManager.get_across_iterations(
+                        epoch_dict, ["num_sampled"]
+                    )
+                    y_values = PlotManager.get_across_iterations(
+                        epoch_dict, ["accuracies"] + y_keys
+                    )
+                    self.plt.plot(x_values, y_values)
+                    all_y_values.append(y_values)
+                max_len = max([len(i) for i in all_y_values])
+                # padding by extending the last value to cover difference between max_len and y_values
+                for y_values in all_y_values:
+                    y_values = np.pad(
+                        y_values,
+                        (0, max_len - len(y_values)),
+                        "constant",
+                        constant_values=(0, y_values[-1]),
+                    )
+                y_avg_values = np.array(all_y_values).mean(axis=0)
+                self.plt.plot(x_values, y_avg_values)
 
-            self.plt.xlabel("Number of selected queries")
-            y_label = (
-                self.aggregate_statistic
-                if use_aggregate_statistic
-                else self.class_level_statistic
-            )
-            self.plt.ylabel(y_label.capitalize())
-            title = f"{strategy}_All_Epochs_({'-'.join(y_keys)})"
-            self.plt.title(title)
-            self.plt.legend(
-                ["epoch " + str(epoch) for epoch in range(n_epochs)] + ["avg"],
-                loc="lower right",
-            )
-            self.plt.grid()
-            self.plt.tight_layout()
-            fig = self.plt.gcf()
-            if display:
-                self.plt.show()
-            if save:
-                fig.savefig(self.get_img_path(y_keys, title))
-                self.plt.clf()
+                self.plt.xlabel("Number of selected queries")
+                y_label = (
+                    self.aggregate_statistic
+                    if use_aggregate_statistic
+                    else self.class_level_statistic
+                )
+                self.plt.ylabel(y_label.capitalize())
+                title = f"{strategy}_All_Epochs_({'-'.join(y_keys)})"
+                self.plt.title(title)
+                self.plt.legend(
+                    ["epoch " + str(epoch) for epoch in range(n_epochs)] + ["avg"],
+                    loc="lower right",
+                )
+                self.plt.grid()
+                self.plt.tight_layout()
+                fig = self.plt.gcf()
+                if display:
+                    self.plt.show()
+                if save:
+                    fig.savefig(self.get_img_path(y_keys, title))
+                    self.plt.clf()
 
     @staticmethod
     def get_unique_labels(all_counters: List) -> List:
@@ -494,8 +545,10 @@ class PlotManager:
             plot_domain (bool): Whether to generate plots at the domain level.
             plot_intents (bool): Whether to generate plots at the intent level.
         """
-        for strategy in self.queries_data:
-            epoch_dict = self.queries_data[strategy][str(epoch)]
+        # Plots stacked bar for only classifier tuning (hence strategies key = 0).
+        # If no classifier tuning strategy is provided, skips stacked bar plotting.
+        for strategy in self.strategies[0]:
+            epoch_dict = self.queries_data[0][strategy][str(epoch)]
             domain_counters, intent_counters = [], []
             for iteration in epoch_dict:
                 query_list = epoch_dict[iteration]

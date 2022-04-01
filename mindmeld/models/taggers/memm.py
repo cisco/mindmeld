@@ -154,6 +154,32 @@ class MemmModel(Tagger):
             seq_log_probs.append([prev_tag, prediction[predicted_tag]])
         return seq_log_probs
 
+    def predict_proba_distribution(self, examples, config, resources):
+        return [
+            self._predict_proba_distribution_example(example, config, resources)
+            for example in examples
+        ]
+
+    def _predict_proba_distribution_example(self, example, config, resources):
+        features_by_segment = self.extract_example_features(example, config, resources)
+        if len(features_by_segment) == 0:
+            return []
+
+        prev_tag = START_TAG
+        predictions = []
+        tag_maps = []
+        for features in features_by_segment:
+            features["prev_tag"] = prev_tag
+            X, _ = self._preprocess_data([features])
+            prediction = self._clf.predict_proba(X)[0]
+            predictions.append(list(prediction))
+            tag_maps.append(
+                [
+                    self.class_encoder.inverse_transform(i) for i in range(len(prediction))
+                ]
+            )
+        return [tag_maps, predictions]
+
     @staticmethod
     def _get_feature_selector(selector_type):
         """Get a feature selector instance based on the feature_selector model

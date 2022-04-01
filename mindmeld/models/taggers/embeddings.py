@@ -13,173 +13,20 @@
 import logging
 import os
 import pickle
-import zipfile
-from urllib.request import urlretrieve
 
 import numpy as np
-from tqdm import tqdm
-
-from ...exceptions import EmbeddingDownloadError
-from ...path import (
-    EMBEDDINGS_FILE_PATH,
-    EMBEDDINGS_FOLDER_PATH,
+from mindmeld.path import (
     PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH,
     PREVIOUSLY_USED_WORD_EMBEDDINGS_FILE_PATH,
 )
+
+from ..containers import GloVeEmbeddingsContainer
 
 logger = logging.getLogger(__name__)
 
 GLOVE_DOWNLOAD_LINK = "http://nlp.stanford.edu/data/glove.6B.zip"
 EMBEDDING_FILE_PATH_TEMPLATE = "glove.6B.{}d.txt"
 ALLOWED_WORD_EMBEDDING_DIMENSIONS = [50, 100, 200, 300]
-
-
-class TqdmUpTo(tqdm):
-    """Provides `update_to(n)` which uses `tqdm.update(delta_n)`."""
-
-    def update_to(self, b=1, bsize=1, tsize=None):
-        """Reports update statistics on the download progress.
-
-        Args:
-            b (int): Number of blocks transferred so far [default: 1].
-            bsize (int): Size of each block (in tqdm units) [default: 1].
-            tsize (int): Total size (in tqdm units). If [default: None] remains unchanged.
-        """
-        if tsize is not None:
-            self.total = tsize
-        self.update(b * bsize - self.n)  # will also set self.n = b * bsize
-
-
-class GloVeEmbeddingsContainer:
-    """This class is responsible for the downloading, extraction and storing of
-    word embeddings based on the GloVe format."""
-
-    def __init__(self, token_dimension=300, token_pretrained_embedding_filepath=None):
-
-        self.token_pretrained_embedding_filepath = token_pretrained_embedding_filepath
-
-        self.token_dimension = token_dimension
-
-        if self.token_dimension not in ALLOWED_WORD_EMBEDDING_DIMENSIONS:
-            logger.info(
-                "Token dimension %s not supported, "
-                "chose from these dimensions: %s. "
-                "Selected 300 by default",
-                token_dimension,
-                str(ALLOWED_WORD_EMBEDDING_DIMENSIONS),
-            )
-            self.token_dimension = 300
-
-        self.word_to_embedding = {}
-        self._extract_embeddings()
-
-    def get_pretrained_word_to_embeddings_dict(self):
-        """Returns the word to embedding dict.
-
-        Returns:
-            (dict): word to embedding mapping.
-        """
-        return self.word_to_embedding
-
-    def _download_embeddings_and_return_zip_handle(self):
-
-        logger.info("Downloading embedding from %s", GLOVE_DOWNLOAD_LINK)
-
-        # Make the folder that will contain the embeddings
-        if not os.path.exists(EMBEDDINGS_FOLDER_PATH):
-            os.makedirs(EMBEDDINGS_FOLDER_PATH)
-
-        with TqdmUpTo(
-            unit="B", unit_scale=True, miniters=1, desc=GLOVE_DOWNLOAD_LINK
-        ) as t:
-
-            try:
-                urlretrieve(
-                    GLOVE_DOWNLOAD_LINK, EMBEDDINGS_FILE_PATH, reporthook=t.update_to
-                )
-
-            except ConnectionError as e:
-                logger.error(
-                    "There was an issue downloading from this "
-                    "link %s with the following error: "
-                    "%s",
-                    GLOVE_DOWNLOAD_LINK,
-                    e,
-                )
-                return
-
-            file_name = EMBEDDING_FILE_PATH_TEMPLATE.format(self.token_dimension)
-            zip_file_object = zipfile.ZipFile(EMBEDDINGS_FILE_PATH, "r")
-
-            if file_name not in zip_file_object.namelist():
-                logger.info(
-                    "Embedding file with %s dimensions " "not found",
-                    self.token_dimension,
-                )
-                return
-
-            return zip_file_object
-
-    def _extract_and_map(self, glove_file):
-        for line in glove_file:
-            values = line.split()
-            word = values[0]
-            coefs = np.asarray(values[1:], dtype="float32")
-            self.word_to_embedding[word] = coefs
-
-    def _extract_embeddings(self):
-        file_location = self.token_pretrained_embedding_filepath
-
-        if file_location and os.path.isfile(file_location):
-            logger.info(
-                "Extracting embeddings from provided " "file location %s.",
-                str(file_location),
-            )
-            with open(file_location, "r") as embedding_file:
-                self._extract_and_map(embedding_file)
-            return
-
-        logger.info("Provided file location %s does not exist.", str(file_location))
-
-        file_name = EMBEDDING_FILE_PATH_TEMPLATE.format(self.token_dimension)
-
-        if os.path.isfile(EMBEDDINGS_FILE_PATH):
-            logger.info(
-                "Extracting embeddings from default folder " "location %s.",
-                EMBEDDINGS_FILE_PATH,
-            )
-
-            try:
-                zip_file_object = zipfile.ZipFile(EMBEDDINGS_FILE_PATH, "r")
-                with zip_file_object.open(file_name) as embedding_file:
-                    self._extract_and_map(embedding_file)
-            except zipfile.BadZipFile:
-                logger.warning(
-                    "%s is corrupt. Deleting the zip file and attempting to"
-                    " download the embedding file again",
-                    EMBEDDINGS_FILE_PATH,
-                )
-                os.remove(EMBEDDINGS_FILE_PATH)
-                self._extract_embeddings()
-            except IOError:
-                logger.error(
-                    "An error occurred when reading %s zip file. The file might"
-                    " be corrupt, so try deleting the file and running the program "
-                    "again",
-                    EMBEDDINGS_FILE_PATH,
-                )
-            return
-
-        logger.info("Default folder location %s does not exist.", EMBEDDINGS_FILE_PATH)
-
-        zip_file_object = self._download_embeddings_and_return_zip_handle()
-
-        if not zip_file_object:
-            raise EmbeddingDownloadError("Failed to download embeddings.")
-
-        with zip_file_object.open(file_name) as embedding_file:
-            self._extract_and_map(embedding_file)
-        return
 
 
 class WordSequenceEmbedding:

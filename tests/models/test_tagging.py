@@ -306,6 +306,46 @@ def test_view_extracted_features(kwik_e_mart_nlp, model_type, params):
     assert extracted_features == expected_features
 
 
+@pytest.mark.parametrize(
+    "query,model_type,params",
+    [
+        ("Main st store hours", "memm", {"penalty": "l2", "C": 10000}),
+        ("Main st store hours", "crf", {"c1": 0.01, "c2": 0.01}),
+    ],
+)
+def test_fetch_distribution(kwik_e_mart_nlp, query, model_type, params):
+    config = {
+        "model_type": "tagger",
+        "model_settings": {
+            "classifier_type": model_type,
+            "tag_scheme": "IOB",
+            "feature_scaler": "max-abs",
+        },
+        "params": params,
+        "features": {
+            "bag-of-words-seq": {
+                "ngram_lengths_to_start_positions": {
+                    1: [0],
+                }
+            },
+        },
+    }
+    er = (
+        kwik_e_mart_nlp.domains["store_info"]
+        .intents["get_store_hours"]
+        .entity_recognizer
+    )
+    er.fit(**config)
+    processed_query = kwik_e_mart_nlp.create_query(query)
+    output_tags_probas = er._model.predict_proba(
+        [processed_query], fetch_distribution=True
+    )
+
+    # check length of probability distribution is always equal to number of tokens
+    for idx, tags_probas in enumerate(output_tags_probas):
+        assert len(tags_probas[1]) == 5
+
+
 @pytest.mark.no_extras
 @pytest.mark.no_tensorflow
 def test_lstm_er_model_no_tf(kwik_e_mart_nlp):

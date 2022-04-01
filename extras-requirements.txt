@@ -4,5 +4,8 @@
 -e .[examples]
 -e .[augment]
 -e .[language_annotator]
+-e .[elasticsearch]
 -e .[active_learning]
 -e .[dvc]
+-e .[torch]
+-e .[transformers]

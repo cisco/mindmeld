@@ -22,7 +22,6 @@ from ..components._config import ENGLISH_LANGUAGE_CODE
 from ..constants import (
     UNICODE_NON_LATIN_CATEGORY,
     UNICODE_SPACE_CATEGORY,
-    SPACY_SUPPORTED_LANGUAGES,
 )
 
 logger = logging.getLogger(__name__)
@@ -147,17 +146,16 @@ class LetterTokenizer(Tokenizer):
                 token_num_by_char.append(None)
                 continue
 
+            prev_category = category_by_char[index - 1] if index > 0 else None
+
             # General Category is represented by the first letter of a Unicode category.
-            general_category_current_char = category[0]
-            general_category_previous_char = (
-                category_by_char[index - 1][0] if index > 0 else None
-            )
-            same_category_as_previous = (
-                general_category_current_char == general_category_previous_char
+            same_general_category = (
+                category[0] == (prev_category[0] if prev_category else None)
             )
 
-            if category == UNICODE_NON_LATIN_CATEGORY or not same_category_as_previous:
+            if UNICODE_NON_LATIN_CATEGORY in (category, prev_category) or not same_general_category:
                 token_num += 1
+
             token_num_by_char.append(token_num)
         return token_num_by_char
 
@@ -242,8 +240,9 @@ class SpacyTokenizer(Tokenizer):
             spacy_model_size (str, optional): Size of the Spacy model to use. ("sm", "md", or "lg")
         """
         self.spacy_model = SpacyModelFactory.get_spacy_language_model(
-            language, spacy_model_size
+            language, spacy_model_size, disable=["tagger", "parser", "ner", "attribute_ruler", "lemmatizer"]
         )
+        assert self.spacy_model.pipeline == []
 
     def tokenize(self, text):
         """
@@ -294,9 +293,8 @@ class TokenizerFactory:
         return tokenizer_class()
 
     @staticmethod
-    def get_tokenizer_by_language(language):
-        """Creates a tokenizer based on the language. If the language is supported by Spacy a SpacyTokenizer
-        will be initialized, otherwise a WhiteSpaceTokenizer will be initialized.
+    def get_default_tokenizer():
+        """Creates the default tokenizer (WhiteSpaceTokenizer) irrespective of the language of the current application.
 
         Args:
             language (str, optional): Language as specified using a 639-1/2 code.
@@ -304,7 +302,4 @@ class TokenizerFactory:
         Returns:
             (Tokenizer): Tokenizer Class
         """
-        if language in SPACY_SUPPORTED_LANGUAGES:
-            return SpacyTokenizer(language, spacy_model_size="sm")
-        else:
-            return WhiteSpaceTokenizer()
+        return WhiteSpaceTokenizer()

@@ -12,6 +12,7 @@
 # limitations under the License.
 
 """This module contains base classes for models defined in the models subpackage."""
+
 import copy
 import json
 import logging
@@ -20,7 +21,7 @@ import os
 import pickle
 from abc import ABC, abstractmethod
 from inspect import signature
-from typing import Union
+from typing import Union, Type, Dict, Any, Tuple, List, Pattern, Set
 
 import joblib
 from sklearn.model_selection import (
@@ -32,7 +33,10 @@ from sklearn.model_selection import (
     StratifiedKFold,
     StratifiedShuffleSplit,
 )
+from sklearn.preprocessing import LabelEncoder as SKLabelEncoder
 
+from ._util import _is_module_available
+from .evaluation import EntityModelEvaluation, StandardModelEvaluation
 from .helpers import (
     CHAR_NGRAM_FREQ_RSC,
     ENABLE_STEMMING,
@@ -46,10 +50,22 @@ from .helpers import (
     get_label_encoder,
     ingest_dynamic_gazetteer,
 )
+from .nn_utils.helpers import EmbedderType
 from .._version import get_mm_version
-from ..text_preparation.text_preparation_pipeline import TextPreparationPipelineFactory
+from ..core import ProcessedQuery, QueryEntity
+from ..resource_loader import ResourceLoader, ProcessedQueryList as PQL
+from ..text_preparation.text_preparation_pipeline import (
+    TextPreparationPipelineFactory,
+    TextPreparationPipeline
+)
+
+# for backwards compatability for sklearn models serialized and dumped in previous version
+from .labels import LabelEncoder, EntityLabelEncoder  # pylint: disable=unused-import
 
 logger = logging.getLogger(__name__)
+
+Examples = Union[PQL.QueryIterator, PQL.ListIterator]
+Labels = Union[PQL.DomainIterator, PQL.IntentIterator, PQL.EntitiesIterator]
 
 
 class ModelConfig:
@@ -97,19 +113,18 @@ class ModelConfig:
 
     def __init__(
         self,
-        model_type=None,
-        example_type=None,
-        label_type=None,
-        features=None,
-        model_settings=None,
-        params=None,
-        param_selection=None,
-        train_label_set=None,
-        test_label_set=None,
+        model_type: str = None,
+        example_type: str = None,
+        label_type: str = None,
+        features: Dict = None,
+        model_settings: Dict = None,
+        params: Dict = None,
+        param_selection: Dict = None,
+        train_label_set: Pattern[str] = None,
+        test_label_set: Pattern[str] = None,
     ):
         for arg, val in {
             "model_type": model_type,
-            "example_type": example_type,
             "label_type": label_type,
         }.items():
             if val is None:
@@ -130,7 +145,7 @@ class ModelConfig:
         )
         return "{}({})".format(self.__class__.__name__, args_str)
 
-    def to_dict(self):
+    def to_dict(self) -> Dict:
         """Converts the model config object into a dict
 
         Returns:
@@ -141,7 +156,7 @@ class ModelConfig:
             result[attr] = getattr(self, attr)
         return result
 
-    def to_json(self):
+    def to_json(self) -> str:
         """Converts the model config object to JSON
 
         Returns:
@@ -149,7 +164,7 @@ class ModelConfig:
         """
         return json.dumps(self.to_dict(), sort_keys=True)
 
-    def resolve_config(self, new_config):
+    def resolve_config(self, new_config: "ModelConfig"):
         """This method resolves any config incompatibility issues by
         loading the latest settings from the app config to the current config
 
@@ -163,7 +178,7 @@ class ModelConfig:
         for setting in new_settings:
             setattr(self, setting, getattr(new_config, setting))
 
-    def get_ngram_lengths_and_thresholds(self, rname):
+    def get_ngram_lengths_and_thresholds(self, rname: str) -> Tuple:
         """
         Returns the n-gram lengths and thresholds to extract to optimize resource collection
 
@@ -204,7 +219,7 @@ class ModelConfig:
 
         return lengths, thresholds
 
-    def required_resources(self):
+    def required_resources(self) -> Set:
         """Returns the resources this model requires
 
         Returns:
@@ -212,15 +227,23 @@ class ModelConfig:
         """
         # get list of resources required by feature extractors
         required_resources = set()
-        for name in self.features:
-            feature = get_feature_extractor(self.example_type, name)
-            required_resources.update(feature.__dict__.get("requirements", []))
+        if self.features:
+            for name in self.features:
+                feature = get_feature_extractor(self.example_type, name)
+                required_resources.update(feature.__dict__.get("requirements", []))
         return required_resources
 
 
 class AbstractModel(ABC):
     """
     A minimalistic abstract class upon which all models are based.
+
+    In order to maintain backwards compatability, the skeleton of this class is designed based on
+    all the access points of Classifier class and its sub-classes. In addition, it also introduces
+    the decoupled way of dumping/loading across different model types (meaning not all models are
+    dumped/loaded the same way). Furthermore, methods for validation are also introduced so as to
+    cater to the model specific config validations. Lastly, this skeleton also includes some
+    common properties that could be used across all model types.
     """
 
     def __init__(self, config: ModelConfig):
@@ -231,32 +254,40 @@ class AbstractModel(ABC):
         self._validate_model_configs()
 
     @abstractmethod
-    def initialize_resources(self, resource_loader, examples=None, labels=None):
+    def initialize_resources(
+        self, resource_loader: ResourceLoader, examples: Examples = None, labels: Labels = None
+    ):
         raise NotImplementedError
 
     @abstractmethod
-    def fit(self, examples, labels, params=None):
+    def fit(self, examples: Examples, labels: Labels, params: Dict = None):
         raise NotImplementedError
 
     @abstractmethod
-    def predict(self, examples, dynamic_resource=None):
+    def predict(
+        self, examples: Examples, dynamic_resource: Dict = None
+    ) -> Union[List[Any], List[List[Any]]]:
         raise NotImplementedError
 
     @abstractmethod
-    def predict_proba(self, examples):
+    def predict_proba(
+        self, examples: Examples, dynamic_resource: Dict = None
+    ) -> Union[List[Tuple[str, Dict[str, float]]], Tuple[Tuple[QueryEntity, float]]]:
         raise NotImplementedError
 
     @abstractmethod
-    def evaluate(self, examples, labels):
+    def evaluate(
+        self, examples: Examples, labels: Labels
+    ) -> Union[StandardModelEvaluation, EntityModelEvaluation]:
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def load(cls, path):
+    def load(cls, path: str) -> Type["AbstractModel"]:
         raise NotImplementedError
 
     @classmethod
-    def load_model_config(cls, path):
+    def load_model_config(cls, path: str) -> ModelConfig:
         """
         Dumps the model's configs. Raises a FileNotFoundError if no configs file is found.
         For backwards compatability wherein TextModel was serialized and dumped, the textModel file
@@ -300,7 +331,7 @@ class AbstractModel(ABC):
 
         return model_config
 
-    def dump(self, path) -> None:
+    def dump(self, path: str):
         """
         Dumps the model's configs and calls the child model's dump method
 
@@ -317,7 +348,7 @@ class AbstractModel(ABC):
         # (eg. serialized dump for sklearn-based models, .bin files for pytorch-based models, etc.)
         self._dump(path)
 
-    def _dump_model_config(self, path) -> None:
+    def _dump_model_config(self, path: str):
         """
         Dumps the model's configs
         """
@@ -326,7 +357,7 @@ class AbstractModel(ABC):
         pickle.dump(self.config, open(model_configs_save_path, "wb"))
 
     @abstractmethod
-    def _dump(self, path) -> None:
+    def _dump(self, path: str):
         """
         Dumps the model and calls the underlying algo to dump its state.
 
@@ -335,8 +366,17 @@ class AbstractModel(ABC):
         """
         pass
 
-    def view_extracted_features(self, example, dynamic_resource=None):
-        # Not implemeneted for deep neural models
+    @staticmethod
+    def _get_model_config_save_path(path: str) -> str:
+        head, ext = os.path.splitext(path)
+        model_config_save_path = head + ".config" + ext
+        os.makedirs(os.path.dirname(model_config_save_path), exist_ok=True)
+        return model_config_save_path
+
+    def view_extracted_features(
+        self, example: ProcessedQuery, dynamic_resource: Dict = None
+    ) -> List[Dict]:
+        # Not implemeneted unless overwritten by child class
         raise NotImplementedError
 
     def register_resources(self, **kwargs):  # pylint: disable=no-self-use
@@ -344,15 +384,22 @@ class AbstractModel(ABC):
         del kwargs
         pass
 
-    def get_resource(self, name):
+    def get_resource(self, name) -> Any:
         return self._resources.get(name)
 
-    @staticmethod
-    def _get_model_config_save_path(path):
-        head, ext = os.path.splitext(path)
-        model_config_save_path = head + ".config" + ext
-        os.makedirs(os.path.dirname(model_config_save_path), exist_ok=True)
-        return model_config_save_path
+    @property
+    def text_preparation_pipeline(self) -> TextPreparationPipeline:
+
+        text_preparation_pipeline = self._resources.get("text_preparation_pipeline")
+
+        if not text_preparation_pipeline:
+            logger.error(
+                "The text_preparation_pipeline resource has not been registered "
+                "to the model. Using default text_preparation_pipeline."
+            )
+            return TextPreparationPipelineFactory.create_default_text_preparation_pipeline()
+
+        return text_preparation_pipeline
 
     def _validate_model_configs(self):
         pass
@@ -367,6 +414,7 @@ class Model(AbstractModel):
 
     # model scoring type
     LIKELIHOOD_SCORING = "log_loss"
+    ALLOWED_CLASSIFIER_TYPES: List[str] = NotImplemented
 
     def __init__(self, config):
         super().__init__(config)
@@ -380,20 +428,6 @@ class Model(AbstractModel):
 
     def _get_model_constructor(self):
         raise NotImplementedError
-
-    @property
-    def text_preparation_pipeline(self):
-
-        text_preparation_pipeline = self._resources.get("text_preparation_pipeline")
-
-        if not text_preparation_pipeline:
-            logger.error(
-                "The text_preparation_pipeline resource has not been registered "
-                "to the model. Using default text_preparation_pipeline."
-            )
-            return TextPreparationPipelineFactory.create_default_text_preparation_pipeline()
-
-        return text_preparation_pipeline
 
     def _fit_cv(self, examples, labels, groups=None, selection_settings=None):
         """Called by the fit method when cross validation parameters are passed in. Runs cross
@@ -712,7 +746,10 @@ class Model(AbstractModel):
 
     def _validate_model_configs(self) -> Union[TypeError, ValueError]:
 
-        for arg, val in {"features": self.config.features, }.items():
+        for arg, val in {
+            "features": self.config.features,
+            "example_type": self.config.example_type
+        }.items():
             if val is None:
                 raise TypeError("__init__() missing required argument {!r}".format(arg))
 
@@ -725,28 +762,92 @@ class Model(AbstractModel):
 
 
 class PytorchModel(AbstractModel):
+    ALLOWED_CLASSIFIER_TYPES: List[str] = NotImplemented  # to be implemented in child classes
 
-    def __init__(self, config):  # pylint: disable=useless-super-delegation
+    def __init__(self, config):
+        if not _is_module_available('torch'):
+            raise ImportError("Install the extra 'torch' library by runnning "
+                              "'pip install mindmeld[torch]' to use pytorch based neural models")
+
         super().__init__(config)
+        self._label_encoder = get_label_encoder(self.config)
+        self._class_encoder = SKLabelEncoder()
+        self._query_text_type = None
+        self._clf = None
 
     def initialize_resources(self, resource_loader, examples=None, labels=None):
-        raise NotImplementedError
+        del resource_loader, examples, labels
 
-    def fit(self, examples, labels, params=None):
-        raise NotImplementedError
+    @staticmethod
+    def _validate_training_data(examples: List[Any], labels: Union[List[int], List[List[int]]]):
+        if len(examples) != len(labels):
+            msg = f"Number of 'labels' ({len(labels)}) must be same as number of 'examples' " \
+                  f"({len(examples)})"
+            raise AssertionError(msg)
 
-    def predict(self, examples, dynamic_resource=None):
-        raise NotImplementedError
+    def _set_query_text_type(self, params: Dict = None, default: str = None):
+        """
+        Returns the query text type to use for obtaining training examples from Query objects.
 
-    def predict_proba(self, examples):
-        raise NotImplementedError
+        Args:
+            params (Dict, optional): The config params passed in to train the model
+            default (str, optional): The default text type to use in case no related configs found
+        """
 
-    def evaluate(self, examples, labels):
-        raise NotImplementedError
+        if params is None and self._query_text_type:
+            # this condition is satisfied during loading of models
+            return
 
-    @classmethod
-    def load(cls, path):
-        raise NotImplementedError
+        # While the key 'query_text_type' in config params allows for end-users to configure the
+        # choice of text_type to be used, it also needs the user to have knowledge about different
+        # text types in a Query object. Three values are available as of now-
+        # ["text", "processed_text", "normalized_text"].
+        query_text_type = params.get("query_text_type", default) if params else default
 
-    def _dump(self, path):
+        # consider raw text for pretrained transformer models
+        if not query_text_type:
+            if params and EmbedderType(params.get("embedder_type")) == EmbedderType.BERT:
+                query_text_type = "text"
+
+        # if a NoneType value is found, use the processed_text by default
+        query_text_type = query_text_type or "processed_text"
+
+        # validation
+        allowed_text_types = ["text", "processed_text", "normalized_text"]
+        if query_text_type not in allowed_text_types:
+            msg = f"The params 'query_text_type' can only be among " \
+                  f"{allowed_text_types} but found value {query_text_type}."
+            logger.error(msg)
+            raise ValueError(msg)
+
+        self._query_text_type = query_text_type  # this var is dumped and loaded when loading models
+
+    def _get_texts_from_examples(self, examples: PQL.QueryIterator) -> List[str]:
+        """
+        Method that decides which text type- processed_text or raw_text -that needs to be used for
+        neural model training/inference.
+
+        Args:
+            examples (QueryIterator): A list of ProcessedQuery objects.
+
+        Returns:
+            texts (List[str]): A list of strings obtained from the query objects based on the
+                provided input configs
+        """
+        if not self._query_text_type:
+            msg = "The instance attribute '_query_text_type' must be set by calling " \
+                  "_set_query_text_type() method before calling the " \
+                  "_get_texts_from_examples() method."
+            logger.debug(msg)
+            raise ValueError(msg)
+        return [getattr(example, self._query_text_type) for example in examples]
+
+
+class AbstractModelFactory(ABC):
+    """
+    Abstract class for individual model factories like TextModelFactory and TaggerModelFactory
+    """
+
+    @abstractmethod
+    def get_model_cls(self, config: ModelConfig) -> Type[AbstractModel]:
         raise NotImplementedError

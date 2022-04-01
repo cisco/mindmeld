@@ -17,6 +17,7 @@ This module contains query selection heuristics for the Active Learning Pipeline
 from abc import ABC, abstractmethod
 from typing import List, Dict
 from collections import defaultdict
+import math
 from scipy.stats import entropy as scipy_entropy
 import numpy as np
 
@@ -202,6 +203,22 @@ class LeastConfidenceSampling(ABC):
         ]
         return Heuristic.ordered_indices_list_to_final_rank(all_ordered_sample_indices)
 
+    @staticmethod
+    def rank_entities(entity_confidences: List[List[List[float]]]) -> List[int]:
+        query_uncertainty_list = []
+
+        for sequence in entity_confidences:
+            most_likely_sequence_prob = 1.0
+            for token in sequence:
+                max_token_posterior = max(np.array(token))
+                most_likely_sequence_prob *= max_token_posterior
+
+            query_uncertainty = 1 - most_likely_sequence_prob
+            query_uncertainty_list.append(query_uncertainty)
+
+        high_to_low_uncertainties = np.argsort(query_uncertainty_list)[::-1]
+        return list(high_to_low_uncertainties)
+
 
 class MarginSampling(ABC):
     @staticmethod
@@ -241,6 +258,59 @@ class MarginSampling(ABC):
         all_ordered_sample_indices = [MarginSampling.rank_2d(c) for c in confidences_3d]
         return Heuristic.ordered_indices_list_to_final_rank(all_ordered_sample_indices)
 
+    @staticmethod
+    def beam_search_decoder(predictions, top_k=3):
+        output_sequences = [([], 0)]
+
+        # looping through all the predictions
+        for token_probs in predictions:
+            new_sequences = []
+
+            # append new tokens to old sequences and re-score
+            for old_seq, old_score in output_sequences:
+                for char_index, char in enumerate(token_probs):
+                    new_seq = old_seq + [char_index]
+                    # considering log-likelihood for scoring
+                    value = char
+                    if value:
+                        new_score = old_score + math.log(value)
+                    else:
+                        new_score = old_score - math.inf
+                    new_sequences.append((new_seq, new_score))
+
+            # sort all new sequences in the de-creasing order of their score
+            output_sequences = sorted(
+                new_sequences, key=lambda val: val[1], reverse=True
+            )
+
+            # select top-k based on score
+            output_sequences = output_sequences[:top_k]
+
+        return output_sequences
+
+    @staticmethod
+    def rank_entities(entity_confidences: List[List[List[float]]]) -> List[int]:
+        """
+        Queries are ranked on the basis of Margin Sampling for tag sequences. This approach uses beam search to
+        obtain the top 2 queries/sequences in terms of the query confidences for entities. The margin is calculated
+        between these top two sequences.
+        (For more information about this method: https://dl.acm.org/doi/pdf/10.5555/1613715.1613855)
+        """
+        query_margin_list = []
+
+        for sequence in entity_confidences:
+            top_two_sequences = MarginSampling.beam_search_decoder(sequence, top_k=2)
+
+            # anti-log to get back probabilities
+            margin = math.exp(top_two_sequences[0][1]) - math.exp(
+                top_two_sequences[1][1]
+            )
+
+            query_margin_list.append(margin)
+
+        low_to_high_margin = np.argsort(query_margin_list)
+        return list(low_to_high_margin)
+
 
 class EntropySampling(ABC):
     @staticmethod
@@ -274,6 +344,28 @@ class EntropySampling(ABC):
             EntropySampling.rank_2d(c) for c in confidences_3d
         ]
         return Heuristic.ordered_indices_list_to_final_rank(all_ordered_sample_indices)
+
+    @staticmethod
+    def rank_entities(entity_confidences: List[List[List[float]]]) -> List[int]:
+        """Calculates the entropy score of the entity confidences per element.
+        Elements are ranked from highest to lowest entropy.
+        Returns:
+            Ranked lists based on either:
+            Token Entropy: Average of per token entropies across a query; or
+            Total Token Entropy: Sum of token entropies across a query.
+        """
+        sequence_entropy_list = []
+        for sequence in entity_confidences:
+            entropy_per_token = scipy_entropy(
+                np.array(sequence), axis=1, base=ENTROPY_LOG_BASE
+            )
+
+            total_entropy = sum(entropy_per_token)
+            total_token_entropy = total_entropy / len(entropy_per_token)
+            sequence_entropy_list.append(total_token_entropy)
+
+        high_to_low_entropy = np.argsort(sequence_entropy_list)[::-1]
+        return list(high_to_low_entropy)
 
 
 class DisagreementSampling(ABC):

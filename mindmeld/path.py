@@ -152,8 +152,10 @@ BLUEPRINT_PATH = os.path.join(BLUEPRINTS_PATH, "{name}")
 AL_EXPERIMENT_FOLDER = "{experiment_folder}"
 AL_PARAMS_PATH = os.path.join(AL_EXPERIMENT_FOLDER, "params.json")
 AL_RESULTS_FOLDER = os.path.join(AL_EXPERIMENT_FOLDER, "results")
-AL_ACCURACIES_PATH = os.path.join(AL_RESULTS_FOLDER, "accuracies.json")
-AL_SELECTED_QUERIES_PATH = os.path.join(AL_RESULTS_FOLDER, "selected_queries.json")
+AL_CLASSIFIER_ACCURACIES_PATH = os.path.join(AL_RESULTS_FOLDER, "classifier_accuracies.json")
+AL_TAGGER_ACCURACIES_PATH = os.path.join(AL_RESULTS_FOLDER, "tagger_accuracies.json")
+AL_CLASSIFIER_SELECTED_QUERIES_PATH = os.path.join(AL_RESULTS_FOLDER, "classifier_selected_queries.json")
+AL_TAGGER_SELECTED_QUERIES_PATH = os.path.join(AL_RESULTS_FOLDER, "tagger_selected_queries.json")
 AL_PLOTS_FOLDER = os.path.join(AL_EXPERIMENT_FOLDER, "plots")
 
 logger = logging.getLogger(__name__)

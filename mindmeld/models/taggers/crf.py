@@ -86,6 +86,33 @@ class ConditionalRandomFields(Tagger):
             marginal_tuples.append(query_marginal_tuples)
         return marginal_tuples
 
+    def predict_proba_distribution(self, examples, config, resources):
+        """
+        Args:
+            examples (list of mindmeld.core.Query): a list of queries to predict on
+            config (ModelConfig): The ModelConfig which may contain information used for feature
+                                  extraction
+            resources (dict): Resources which may be used for this model's feature extraction
+
+        Returns:
+            list of tuples of (mindmeld.core.QueryEntity): a list of predicted labels \
+             with confidence scores
+        """
+        X, _, _ = self.extract_features(examples, config, resources, in_memory=True)
+        seq = self._clf.predict(X)
+        marginals_dict = self._clf.predict_marginals(X)
+        predictions = []
+        tag_maps = []
+        for query_index, query_seq in enumerate(seq):
+            tags = []
+            preds = []
+            for i in range(len(query_seq)):
+                tags.append(list(marginals_dict[query_index][i].keys()))
+                preds.append(list(marginals_dict[query_index][i].values()))
+            tag_maps.extend(tags)
+            predictions.extend(preds)
+        return [[tag_maps, predictions]]
+
     def extract_features(self,
                          examples,
                          config,

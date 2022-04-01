@@ -18,8 +18,7 @@ from mindmeld.active_learning.heuristics import (
 from mindmeld.constants import (
     DEFAULT_TRAIN_SET_REGEX,
     DEFAULT_TEST_SET_REGEX,
-    TUNE_LEVEL_INTENT,
-    TUNE_LEVEL_DOMAIN,
+    TuneLevel,
 )
 
 
@@ -27,7 +26,7 @@ from mindmeld.constants import (
 def mindmeld_al_classifier(kwik_e_mart_app_path):
     return MindMeldALClassifier(
         app_path=kwik_e_mart_app_path,
-        tuning_level=TUNE_LEVEL_INTENT,
+        tuning_level=[TuneLevel.INTENT.value],
         n_classifiers=3,
     )
 
@@ -36,7 +35,7 @@ def mindmeld_al_classifier(kwik_e_mart_app_path):
 def mindmeld_al_classifier_domain(kwik_e_mart_app_path):
     return MindMeldALClassifier(
         app_path=kwik_e_mart_app_path,
-        tuning_level=TUNE_LEVEL_DOMAIN,
+        tuning_level=[TuneLevel.DOMAIN.value],
         n_classifiers=3,
     )
 
@@ -45,7 +44,7 @@ def mindmeld_al_classifier_domain(kwik_e_mart_app_path):
 def tuning_data_bucket(kwik_e_mart_app_path):
     return DataBucketFactory.get_data_bucket_for_strategy_tuning(
         app_path=kwik_e_mart_app_path,
-        tuning_level=TUNE_LEVEL_INTENT,
+        tuning_level=[TuneLevel.INTENT.value],
         train_pattern=DEFAULT_TRAIN_SET_REGEX,
         test_pattern=DEFAULT_TEST_SET_REGEX,
         train_seed_pct=0.2,
@@ -56,7 +55,7 @@ def tuning_data_bucket(kwik_e_mart_app_path):
 def tuning_data_bucket_domain(kwik_e_mart_app_path):
     return DataBucketFactory.get_data_bucket_for_strategy_tuning(
         app_path=kwik_e_mart_app_path,
-        tuning_level=TUNE_LEVEL_DOMAIN,
+        tuning_level=[TuneLevel.DOMAIN.value],
         train_pattern=DEFAULT_TRAIN_SET_REGEX,
         test_pattern=DEFAULT_TEST_SET_REGEX,
         train_seed_pct=0.2,
@@ -87,9 +86,16 @@ def test_validate_class_level_statistic(mindmeld_al_classifier):
 
 
 # Test single model classification, for example: LeastConfidenceSampling.
-def test_single_model_classification(mindmeld_al_classifier_domain, tuning_data_bucket_domain):
+def test_single_model_classification(
+    mindmeld_al_classifier_domain, tuning_data_bucket_domain
+):
 
-    _, confidences_2d, confidences_3d, domain_indices = mindmeld_al_classifier_domain.train(
+    (
+        _,
+        confidences_2d,
+        confidences_3d,
+        domain_indices,
+    ) = mindmeld_al_classifier_domain.train(
         tuning_data_bucket_domain, LeastConfidenceSampling()
     )
     assert len(confidences_2d) == len(tuning_data_bucket_domain.unsampled_queries)
@@ -98,9 +104,16 @@ def test_single_model_classification(mindmeld_al_classifier_domain, tuning_data_
 
 
 # Test multi model classification, for example: KLDivergenceSampling.
-def test_multi_model_classification(mindmeld_al_classifier_domain, tuning_data_bucket_domain):
+def test_multi_model_classification(
+    mindmeld_al_classifier_domain, tuning_data_bucket_domain
+):
 
-    _, confidences_2d, confidences_3d, domain_indices = mindmeld_al_classifier_domain.train(
+    (
+        _,
+        confidences_2d,
+        confidences_3d,
+        domain_indices,
+    ) = mindmeld_al_classifier_domain.train(
         tuning_data_bucket_domain, KLDivergenceSampling()
     )
     assert len(confidences_2d) == len(tuning_data_bucket_domain.unsampled_queries)
@@ -111,6 +124,9 @@ def test_multi_model_classification(mindmeld_al_classifier_domain, tuning_data_b
 # Intentional fail test, only single intent in domain.
 def test_single_model_classification_intent(mindmeld_al_classifier, tuning_data_bucket):
     with pytest.raises(ValueError):
-        _, confidences_2d, confidences_3d, domain_indices = mindmeld_al_classifier.train(
-            tuning_data_bucket, LeastConfidenceSampling()
-        )
+        (
+            _,
+            confidences_2d,
+            confidences_3d,
+            domain_indices,
+        ) = mindmeld_al_classifier.train(tuning_data_bucket, LeastConfidenceSampling())
