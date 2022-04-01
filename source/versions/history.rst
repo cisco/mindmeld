@@ -32,6 +32,7 @@ Bug Fixes and Other Changes
 - Refactor how the resource loader is `initialized in NativeQA <https://github.com/cisco/mindmeld/pull/391>`_
 - Fix a `bug <https://github.com/cisco/mindmeld/pull/390>`__ related to updating the MM version.
 - Remove a redundant warning in `TextPreparationPipeline creation <https://github.com/cisco/mindmeld/pull/385>`_.
+- Fixed a `bug <https://github.com/cisco/mindmeld/pull/408>`__ with the Letter Tokenizer that showed incorrect behavior when a mix of Latin/non-Latin characters appeared.
 
 4.4.0 (2021-10-18)
 ------------------
