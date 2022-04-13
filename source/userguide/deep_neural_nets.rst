@@ -565,6 +565,8 @@ Below is a minimal working example of a sequence classifier configuration for a 
     },
    }
 
+.. _deep_ner:
+
 Entity recognition
 ------------------
 

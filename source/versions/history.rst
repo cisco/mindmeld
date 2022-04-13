@@ -40,7 +40,7 @@ Bug Fixes and Other Changes
 Major Features and Improvements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Implemented a text preparation pipeline that supports :doc:`multilingual tokenization <../userguide/tokenizer>` and makes our Preprocessors, Normalizers, Tokenizers, and Stemmers configurable.
+- Implemented a text preparation pipeline that supports :ref:`multilingual tokenization <tokenization>` and makes our Preprocessors, Normalizers, Tokenizers, and Stemmers configurable.
 
 - Implemented :ref:`non-elasticsearch Question Answering capability <non_elasticsearch_question_answerer>` that works similar to Elasticsearch based Question Answerer.
 

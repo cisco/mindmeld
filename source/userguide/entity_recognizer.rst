@@ -215,7 +215,7 @@ Let's take a look at the allowed values for each setting in an entity recognizer
   =============== ============================================================================================ ==========================================
   ``'memm'``      `Maximum Entropy Markov Model <https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model>`_ :sk_api:`sklearn.linear_model.LogisticRegression <sklearn.linear_model.LogisticRegression.html>`
   ``'crf'``       `Conditional Random Field <https://en.wikipedia.org/wiki/Conditional_random_field>`_         `sklearn-crfsuite <https://sklearn-crfsuite.readthedocs.io/en/latest/api.html>`_
-  ``'lstm'``      `Long Short-Term Memory <https://en.wikipedia.org/wiki/Long_short-term_memory>`_             :doc:`lstm API <../userguide/lstm>`
+  ``'lstm'``      `Long Short-Term Memory <https://en.wikipedia.org/wiki/Long_short-term_memory>`_             :ref:`lstm API <deep_ner>`
   =============== ============================================================================================ ==========================================
 
   Tagger models allow you to specify the additional model settings shown below.

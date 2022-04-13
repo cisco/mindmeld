@@ -410,7 +410,7 @@ For applications dealing with temporal events, you can now specify the time zone
 
 **5. Preprocessor**
 
-The preprocessor is a new component that has been added to MindMeld in version 3.3. It allows developers to define any custom preprocessing logic that must be applied on each query before being processed by the NLP pipeline. Read more in the new user guide chapter on :doc:`../userguide/preprocessor`.
+The preprocessor is a new component that has been added to MindMeld in version 3.3. It allows developers to define any custom preprocessing logic that must be applied on each query before being processed by the NLP pipeline. Read more in the new user guide chapter on :ref:`Preprocessing <preprocessing>`.
 
 
 MindMeld 3.2
