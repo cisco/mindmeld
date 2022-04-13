@@ -106,7 +106,6 @@ Contents
    userguide/getting_started
    userguide/architecture
    userguide/optional_dependency
-   userguide/preprocessor
    userguide/nlp
    userguide/domain_classifier
    userguide/intent_classifier
@@ -123,7 +122,6 @@ Contents
    userguide/active_learning
    userguide/augmentation
    userguide/deep_neural_nets
-   userguide/tokenizer
    userguide/internationalization
    userguide/voice
    userguide/dvc
