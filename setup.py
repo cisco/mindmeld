@@ -45,7 +45,8 @@ requirements = [
     # our flask dependency, and likely move it to an extra
     "markupsafe==2.0.1",
     'torch~=1.7.0; python_version>="3.6"',
-    'pytorch-crf~=0.7.2'
+    'pytorch-crf~=0.7.2',
+    'torch-sparse'
 
 ]
 
@@ -127,7 +128,6 @@ setup(
             'pygit2>=1.5.0,<1.7; python_version < "3.7"',
             "dvc>=1.8.1"
         ],
-
         "transformers": [  # huggingface-transformers
             'transformers~=4.15.0; python_version>="3.6"',
         ],
