@@ -44,6 +44,9 @@ requirements = [
     # As a stop gap, we'll pin our version of markupsafe to that last 2.0 version. Longer term we need to update
     # our flask dependency, and likely move it to an extra
     "markupsafe==2.0.1",
+    'torch~=1.7.0; python_version>="3.6"',
+    'pytorch-crf~=0.7.2'
+
 ]
 
 setup_requirements = ["pytest-runner~=2.11", "setuptools>=36"]
@@ -124,10 +127,7 @@ setup(
             'pygit2>=1.5.0,<1.7; python_version < "3.7"',
             "dvc>=1.8.1"
         ],
-        "torch": [
-            'torch~=1.7.0; python_version>="3.6"',
-            'pytorch-crf~=0.7.2'
-        ],
+
         "transformers": [  # huggingface-transformers
             'transformers~=4.15.0; python_version>="3.6"',
         ],
