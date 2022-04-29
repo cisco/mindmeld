@@ -16,7 +16,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from torch import optim
 from torch.utils.data import Dataset, DataLoader
-from torch_sparse import cat, tensor
 from torchcrf import CRF
 from tqdm import tqdm
 
@@ -58,6 +57,44 @@ class TaggerDataset(Dataset):
             return self.input[index], mask
 
 
+def custom_coo_cat(tensors):
+    assert len(tensors) > 0
+
+    rows = []
+    cols = []
+    values = []
+    sparse_sizes = [0, 0]
+
+    nnz = 0
+    for tensor in tensors:
+        tensor = tensor.coalesce()
+        row, col = tensor.indices()[0], tensor.indices()[1]
+        if row is not None:
+            rows.append(row + sparse_sizes[0])
+
+        cols.append(col + sparse_sizes[1])
+
+        value = tensor.values()
+        if value is not None:
+            values.append(value)
+
+        sparse_sizes[0] += tensor.shape[0]
+        sparse_sizes[1] += tensor.shape[1]
+        nnz += tensor._nnz()
+
+    row = None
+    if len(rows) == len(tensors):
+        row = torch.cat(rows, dim=0)
+
+    col = torch.cat(cols, dim=0)
+
+    value = None
+    if len(values) == len(tensors):
+        value = torch.cat(values, dim=0)
+
+    return torch.sparse_coo_tensor(indices=torch.stack([row, col]), values=value, size=sparse_sizes).coalesce()
+
+
 def init_weights(m):
     if type(m) == nn.Linear:
         torch.nn.init.xavier_normal_(m.weight)
@@ -67,11 +104,10 @@ def init_weights(m):
 def custom_collate(sequence):
     if len(sequence[0]) == 3:
         sparse_mats, masks, labels = zip(*sequence)
-        return cat(sparse_mats, dim=(0, 1)).to_torch_sparse_coo_tensor().coalesce(), torch.stack(masks), torch.stack(
-            labels)
+        return custom_coo_cat(sparse_mats), torch.stack(masks), torch.stack(labels)
     elif len(sequence[0]) == 2:
         sparse_mats, masks = zip(*sequence)
-        return cat(sparse_mats, dim=(0, 1)).to_torch_sparse_coo_tensor().coalesce(), torch.stack(masks)
+        return custom_coo_cat(sparse_mats), torch.stack(masks)
 
 
 class Encoder:
@@ -109,8 +145,10 @@ class Encoder:
         for i, (x, y) in enumerate(zip_longest(feat_dicts, labels)):
 
             padded_x = x + [{}] * (max_seq_len - seq_lens[i])
-            sparse_feat = self.feat_extractor.transform(padded_x)
-            sparse_feat_tensor = tensor.from_scipy(sparse_feat)
+            sparse_feat = self.feat_extractor.transform(padded_x).tocoo()
+            sparse_feat_tensor = torch.sparse_coo_tensor(
+                indices=torch.as_tensor(np.stack([sparse_feat.row, sparse_feat.col])),
+                values=torch.as_tensor(sparse_feat.data), size=sparse_feat.shape)
             feats.append(sparse_feat_tensor)
 
             if y:

@@ -46,8 +46,6 @@ requirements = [
     "markupsafe==2.0.1",
     'torch~=1.7.0; python_version>="3.6"',
     'pytorch-crf~=0.7.2',
-    'torch-sparse'
-
 ]
 
 setup_requirements = ["pytest-runner~=2.11", "setuptools>=36"]
