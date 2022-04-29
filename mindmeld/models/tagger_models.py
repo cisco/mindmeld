@@ -27,7 +27,7 @@ from .helpers import (
 )
 from .model import ModelConfig, Model, PytorchModel, AbstractModelFactory
 from .nn_utils import get_token_classifier_cls, TokenClassificationType
-from .taggers.crf import ConditionalRandomFields
+from .taggers.crf import ConditionalRandomFields, PyTorchCRF
 from .taggers.memm import MemmModel
 from ..exceptions import MindMeldError
 
@@ -73,12 +73,13 @@ class TaggerModel(Model):
     CRF_TYPE = "crf"
     MEMM_TYPE = "memm"
     LSTM_TYPE = "lstm"
-    ALLOWED_CLASSIFIER_TYPES = [CRF_TYPE, MEMM_TYPE, LSTM_TYPE]
+    TORCH_CRF_TYPE = "torch-crf"
+    ALLOWED_CLASSIFIER_TYPES = [CRF_TYPE, MEMM_TYPE, LSTM_TYPE, TORCH_CRF_TYPE]
 
     # for default model scoring types
     ACCURACY_SCORING = "accuracy"
     SEQ_ACCURACY_SCORING = "seq_accuracy"
-    SEQUENCE_MODELS = ["crf"]
+    SEQUENCE_MODELS = ["crf", "torch-crf"]
 
     DEFAULT_FEATURES = {
         "bag-of-words-seq": {
@@ -131,6 +132,7 @@ class TaggerModel(Model):
             return {
                 TaggerModel.MEMM_TYPE: MemmModel,
                 TaggerModel.CRF_TYPE: ConditionalRandomFields,
+                TaggerModel.TORCH_CRF_TYPE: PyTorchCRF,
                 TaggerModel.LSTM_TYPE: LstmModel,
             }[classifier_type]
         except KeyError as e:
@@ -231,7 +233,7 @@ class TaggerModel(Model):
                 "There are no labels in this label set, so we don't fit the model."
             )
             return self
-        # Extract labels - label encoders are the same accross all entity recognition models
+        # Extract labels - label encoders are the same across all entity recognition models
         self._label_encoder = get_label_encoder(self.config)
         y = self._label_encoder.encode(labels, examples=examples)
 
@@ -246,8 +248,8 @@ class TaggerModel(Model):
             self._current_params = params
         else:
             # run cross validation to select params
-            if self._clf.__class__ == LstmModel:
-                raise MindMeldError("The LSTM model does not support cross-validation")
+            if self._clf.__class__ in (LstmModel, PyTorchCRF):
+                raise MindMeldError(f"The {self._clf.__class__.__name__} model does not support cross-validation")
 
             _, best_params = self._fit_cv(X, y, groups)
             self._clf = self._fit(X, y, best_params)

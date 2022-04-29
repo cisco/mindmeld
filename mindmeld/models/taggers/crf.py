@@ -23,6 +23,7 @@ from sklearn_crfsuite import CRF
 
 from .taggers import Tagger, extract_sequence_features
 from ..helpers import FileBackedList
+from .pytorch_crf import TorchCRF
 
 logger = logging.getLogger(__name__)
 
@@ -176,6 +177,150 @@ class ConditionalRandomFields(Tagger):
                     temp_list.append("{}={}".format(feat_type, str(feature[feat_type])))
                 feat_list.append(temp_list)
             new_X.append(feat_list)
+        return new_X
+
+    def setup_model(self, config):
+        self._feat_binner = FeatureBinner()
+
+
+class PyTorchCRF(Tagger):
+    """A Conditional Random Fields model."""
+
+    @staticmethod
+    def _predict_proba(X):
+        del X
+        pass
+
+    @staticmethod
+    def load(model_path):
+        del model_path
+        pass
+
+    def fit(self, X, y):
+        self._clf.fit(X, y)
+        return self
+
+    def set_params(self, **parameters):
+        self._clf = TorchCRF()
+        self._clf.set_params(**parameters)
+        return self
+
+    def get_params(self, deep=True):
+        return self._clf.get_params()
+
+    def predict(self, X, dynamic_resource=None):
+        return self._clf.predict(X)
+
+    def predict_proba(self, examples, config, resources):
+        """
+        Args:
+            examples (list of mindmeld.core.Query): a list of queries to predict on
+            config (ModelConfig): The ModelConfig which may contain information used for feature
+                                  extraction
+            resources (dict): Resources which may be used for this model's feature extraction
+
+        Returns:
+            list of tuples of (mindmeld.core.QueryEntity): a list of predicted labels \
+             with confidence scores
+        """
+        X, _, _ = self.extract_features(examples, config, resources, in_memory=True)
+        seq = self._clf.predict(X)
+        marginals_dict = self._clf.predict_marginals(X)
+        marginal_tuples = []
+        for query_index, query_seq in enumerate(seq):
+            query_marginal_tuples = []
+            for i, tag in enumerate(query_seq):
+                query_marginal_tuples.append([tag, marginals_dict[query_index][i][tag]])
+            marginal_tuples.append(query_marginal_tuples)
+        return marginal_tuples
+
+    def predict_proba_distribution(self, examples, config, resources):
+        """
+        Args:
+            examples (list of mindmeld.core.Query): a list of queries to predict on
+            config (ModelConfig): The ModelConfig which may contain information used for feature
+                                  extraction
+            resources (dict): Resources which may be used for this model's feature extraction
+
+        Returns:
+            list of tuples of (mindmeld.core.QueryEntity): a list of predicted labels \
+             with confidence scores
+        """
+        X, _, _ = self.extract_features(examples, config, resources, in_memory=True)
+        seq = self._clf.predict(X)
+        marginals_dict = self._clf.predict_marginals(X)
+        predictions = []
+        tag_maps = []
+        for query_index, query_seq in enumerate(seq):
+            tags = []
+            preds = []
+            for i in range(len(query_seq)):
+                tags.append(list(marginals_dict[query_index][i].keys()))
+                preds.append(list(marginals_dict[query_index][i].values()))
+            tag_maps.extend(tags)
+            predictions.extend(preds)
+        return [[tag_maps, predictions]]
+
+    def extract_features(self,
+                         examples,
+                         config,
+                         resources,
+                         y=None,
+                         fit=False,
+                         in_memory=STORE_CRF_FEATURES_IN_MEMORY):
+        """Transforms a list of examples into a feature matrix.
+
+        Args:
+            examples (list of mindmeld.core.Query): a list of queries
+            config (ModelConfig): The ModelConfig which may contain information used for feature
+                                  extraction
+            resources (dict): Resources which may be used for this model's feature extraction
+
+        Returns:
+            (list of list of str): features in CRF suite format
+        """
+        # Extract features and classes
+        feats = [] if in_memory else FileBackedList()
+        for _, example in enumerate(examples):
+            feats.append(self.extract_example_features(example, config, resources))
+        X = self._preprocess_data(feats, fit)
+        return X, y, None
+
+    @staticmethod
+    def extract_example_features(example, config, resources):
+        """Extracts feature dicts for each token in an example.
+
+        Args:
+            example (mindmeld.core.Query): A query.
+            config (ModelConfig): The ModelConfig which may contain information used for feature \
+                                  extraction.
+            resources (dict): Resources which may be used for this model's feature extraction.
+
+        Returns:
+            list[dict]: Features.
+        """
+        return extract_sequence_features(
+            example, config.example_type, config.features, resources
+        )
+
+    def _preprocess_data(self, X, fit=False):
+        """Converts data into formats of CRF suite.
+
+        Args:
+            X (list of dict): features of an example
+            fit (bool, optional): True if processing data at fit time, false for predict time.
+
+        Returns:
+            (list of list of str): features in CRF suite format
+        """
+        if fit:
+            self._feat_binner.fit(X)
+
+        # We want to use a list for in-memory and a LineGenerator for disk based
+        new_X = X.__class__()
+        # Maintain append code structure to make sure it supports in-memory and FileBackedList()
+        for feat_seq in self._feat_binner.transform(X):
+            new_X.append(feat_seq)
         return new_X
 
     def setup_model(self, config):
