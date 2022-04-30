@@ -17,7 +17,6 @@ from sklearn.preprocessing import LabelEncoder
 from torch import optim
 from torch.utils.data import Dataset, DataLoader
 from torchcrf import CRF
-from tqdm import tqdm
 
 from ...exceptions import MindMeldError
 from ...path import USER_CONFIG_DIR
@@ -38,8 +37,8 @@ DEFAULT_PYTORCH_CRF_ER_CONFIG = {
 
 
 class TaggerDataset(Dataset):
-    def __init__(self, input, seq_lens, labels=None):
-        self.input = input
+    def __init__(self, inputs, seq_lens, labels=None):
+        self.inputs = inputs
         self.labels = labels
         self.seq_lens = seq_lens
         self.max_seq_length = max(seq_lens)
@@ -52,9 +51,9 @@ class TaggerDataset(Dataset):
 
         mask = torch.as_tensor(mask_list, dtype=torch.bool)
         if self.labels:
-            return self.input[index], mask, self.labels[index]
+            return self.inputs[index], mask, self.labels[index]
         else:
-            return self.input[index], mask
+            return self.inputs[index], mask
 
 
 def custom_coo_cat(tensors):
@@ -96,7 +95,7 @@ def custom_coo_cat(tensors):
 
 
 def init_weights(m):
-    if type(m) == nn.Linear:
+    if isinstance(m, nn.Linear):
         torch.nn.init.xavier_normal_(m.weight)
         m.bias.data.fill_(0.01)
 
@@ -160,9 +159,10 @@ class Encoder:
         return (feats, encoded_labels, seq_lens) if encoded_labels else (feats, seq_lens)
 
 
+# pylint: disable=too-many-instance-attributes
 class TorchCRF(nn.Module):
     def __init__(self):
-        super(TorchCRF, self).__init__()
+        super().__init__()
         self.optimizer = None
         self.encoder = None
         self.best_model_save_path = os.path.join(USER_CONFIG_DIR, "tmp", str(uuid.uuid4()), "best_crf_model.pt")
@@ -180,9 +180,9 @@ class TorchCRF(nn.Module):
         elif self.feat_type not in ["hash", "dict"]:
             raise MindMeldError(f"Feature type {self.feat_type} not supported. Supported options are ['hash', 'dict']")
         elif not 0 < self.train_dev_split < 1:
-            raise MindMeldError(f"Train-dev split should be a value between 0 and 1.")
+            raise MindMeldError("Train-dev split should be a value between 0 and 1.")
         elif not 0 <= self.drop_input < 1:
-            raise MindMeldError(f"Drop Input should be a value between 0 and 1. (inclusive)")
+            raise MindMeldError("Drop Input should be a value between 0 and 1. (inclusive)")
 
         for x, y in zip([self.feat_num, self.train_batch_size, self.patience, self.epochs],
                         ["Number of features", "Train Batch size", "Patience", "Number of epochs"]):
@@ -298,11 +298,12 @@ class TorchCRF(nn.Module):
 
         self.validate_params()
 
-        logger.debug(f"Random state is {self.random_state}")
+        logger.debug("Random state is %s", self.random_state)
         if self.feat_type == "dict" and "feat_num" in params:
             logger.warning(
                 "WARNING: Number of features is compatible with only `hash` feature type. This value is ignored with `dict` setting", )
 
+    # pylint: disable=too-many-locals
     def fit(self, X, y):
         self.set_random_states()
         self.encoder = Encoder(feature_extractor=self.feat_type, num_feats=self.feat_num)
@@ -320,10 +321,10 @@ class TorchCRF(nn.Module):
                 last_one -= 1
         train_X, dev_X, train_y, dev_y = train_test_split(X, y, test_size=self.train_dev_split,
                                                           stratify=stratify_tuples, random_state=self.random_state)
-
+        # pylint: disable=unbalanced-tuple-unpacking
         train_inputs, encoded_train_labels, train_seq_lens = self.encoder.get_tensor_data(train_X, train_y, fit=True)
         train_dataset = TaggerDataset(train_inputs, train_seq_lens, encoded_train_labels)
-
+        # pylint: disable=unbalanced-tuple-unpacking
         dev_inputs, encoded_dev_labels, dev_seq_lens = self.encoder.get_tensor_data(dev_X, dev_y, fit=False)
         dev_dataset = TaggerDataset(dev_inputs, dev_seq_lens, encoded_dev_labels)
 
@@ -344,8 +345,9 @@ class TorchCRF(nn.Module):
         for epoch in range(self.epochs):
             if _patience_counter >= self.patience:
                 break
-            self.train_one_epoch(train_dataloader, epoch)
+            self.train_one_epoch(train_dataloader)
             dev_f1_score = self.run_predictions(dev_dataloader, calc_f1=True)
+            logger.debug("Epoch %s finished. Dev F1: %s", epoch, dev_f1_score)
             dev_f1_score = np.round(dev_f1_score, decimals=3)
 
             if dev_f1_score <= best_dev_score:
@@ -354,21 +356,20 @@ class TorchCRF(nn.Module):
                 _patience_counter = 0
                 best_dev_score, best_dev_epoch = dev_f1_score, epoch
                 torch.save(self.state_dict(), self.best_model_save_path)
+                logger.debug("Model weights saved for best dev epoch %s.", best_dev_epoch)
 
-    def train_one_epoch(self, train_dataloader, epoch, verbose=False):
-        # TODO: Remove verbose option
-        pbar = tqdm(enumerate(train_dataloader), total=len(train_dataloader)) if verbose else enumerate(
-            train_dataloader)
+    def train_one_epoch(self, train_dataloader):
         self.train()
         train_loss = 0
-        for batch_idx, (inputs, mask, labels) in pbar:
+        for batch_idx, (inputs, mask, labels) in enumerate(train_dataloader):
             self.optimizer.zero_grad()
             loss = self.forward(inputs, labels, mask, drop_input=self.drop_input)
             train_loss += loss.item()
             loss.backward()
             self.optimizer.step()
-            if verbose:
-                pbar.set_description(f"Epoch:{epoch}, Batch: {batch_idx} Mean Loss:{train_loss / (batch_idx + 1)}")
+            if batch_idx % 20 == 0:
+                logger.debug("Batch: %s Mean Loss: %s", batch_idx,
+                             (train_loss / (batch_idx + 1)))
 
     def run_predictions(self, dataloader, calc_f1=False):
         self.eval()
@@ -385,7 +386,6 @@ class TorchCRF(nn.Module):
                 predictions.extend([x for lst in preds for x in lst] if calc_f1 else preds)
         if calc_f1:
             dev_score = f1_score(targets, predictions, average='weighted')
-            logger.debug(f"Weighted F-1: {dev_score}")
             return dev_score
         else:
             return predictions
