@@ -44,7 +44,7 @@ requirements = [
     # As a stop gap, we'll pin our version of markupsafe to that last 2.0 version. Longer term we need to update
     # our flask dependency, and likely move it to an extra
     "markupsafe==2.0.1",
-    'torch~=1.11.0; python_version>="3.6"',
+    'torch~=1.10.0; python_version>="3.6"',
     'pytorch-crf~=0.7.2',
 ]
 
