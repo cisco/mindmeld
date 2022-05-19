@@ -110,7 +110,7 @@ def custom_collate(sequence):
 
 
 class Encoder:
-    def __init__(self, feature_extractor="dict", num_feats=None):
+    def __init__(self, feature_extractor="hash", num_feats=50000):
 
         self.feat_extractor = DictVectorizer(dtype=np.float32) if feature_extractor == "dict" else FeatureHasher(
             n_features=num_feats, dtype=np.float32)
@@ -249,7 +249,7 @@ class TorchCRF(nn.Module):
                 i]  # (batch_size, num_tags, num_tags)
             # Sum over all possible current tags, but we're in log prob space, so a sum
             # becomes a log-sum-exp
-            score = self._log_sum_exp(score, dim=1)
+            score = torch.logsumexp(score, dim=1)
             # Set log_prob to the score if this timestep is valid (mask == 1), otherwise
             # copy the prior value
             log_prob.append(score * mask[i].unsqueeze(1) +
@@ -273,17 +273,6 @@ class TorchCRF(nn.Module):
         prob = alpha + beta - z.view(1, -1, 1)
         return torch.exp(prob).transpose(0, 1)
 
-    @staticmethod
-    def _log_sum_exp(tensor_input, dim):
-        # Find the max value along `dim`
-        offset, _ = tensor_input.max(dim)
-        # Make offset broadcastable
-        broadcast_offset = offset.unsqueeze(dim)
-        # Perform log-sum-exp safely
-        safe_log_sum_exp = torch.log(torch.sum(torch.exp(tensor_input - broadcast_offset), dim))
-        # Add offset back
-        return offset + safe_log_sum_exp
-
     def set_params(self, **params):
         self.feat_type = params.get('feat_type', DEFAULT_PYTORCH_CRF_ER_CONFIG['feat_type']).lower()
         self.feat_num = params.get('feat_num', DEFAULT_PYTORCH_CRF_ER_CONFIG['feat_num'])
@@ -294,11 +283,13 @@ class TorchCRF(nn.Module):
         self.epochs = params.get('epochs', DEFAULT_PYTORCH_CRF_ER_CONFIG['epochs'])
         self.train_dev_split = params.get('train_dev_split', DEFAULT_PYTORCH_CRF_ER_CONFIG['train_dev_split'])
         self.optimizer_type = params.get('optimizer_type', DEFAULT_PYTORCH_CRF_ER_CONFIG['optimizer_type']).lower()
+        self.verbose = (logger.getEffectiveLevel() == logging.DEBUG)
         self.random_state = params.get('random_state', randint(1, 10000001))
 
         self.validate_params()
 
-        logger.debug("Random state is %s", self.random_state)
+        if self.verbose:
+            logger.debug("Random state for torch-crf is %s", self.random_state)
         if self.feat_type == "dict" and "feat_num" in params:
             logger.warning(
                 "WARNING: Number of features is compatible with only `hash` feature type. This value is ignored with `dict` setting", )
@@ -347,8 +338,9 @@ class TorchCRF(nn.Module):
                 break
             self.train_one_epoch(train_dataloader)
             dev_f1_score = self.run_predictions(dev_dataloader, calc_f1=True)
-            logger.debug("Epoch %s finished. Dev F1: %s", epoch, dev_f1_score)
-            dev_f1_score = np.round(dev_f1_score, decimals=3)
+            if self.verbose:
+                logger.debug("Epoch %s finished. Dev F1: %s", epoch, dev_f1_score)
+            # dev_f1_score = np.round(dev_f1_score, decimals=3)
 
             if dev_f1_score <= best_dev_score:
                 _patience_counter += 1
@@ -356,7 +348,8 @@ class TorchCRF(nn.Module):
                 _patience_counter = 0
                 best_dev_score, best_dev_epoch = dev_f1_score, epoch
                 torch.save(self.state_dict(), self.best_model_save_path)
-                logger.debug("Model weights saved for best dev epoch %s.", best_dev_epoch)
+                if self.verbose:
+                    logger.debug("Model weights saved for best dev epoch %s.", best_dev_epoch)
 
     def train_one_epoch(self, train_dataloader):
         self.train()
@@ -367,7 +360,7 @@ class TorchCRF(nn.Module):
             train_loss += loss.item()
             loss.backward()
             self.optimizer.step()
-            if batch_idx % 20 == 0:
+            if batch_idx % 20 == 0 and self.verbose:
                 logger.debug("Batch: %s Mean Loss: %s", batch_idx,
                              (train_loss / (batch_idx + 1)))
 
