@@ -52,8 +52,8 @@ class TaggerDataset(Dataset):
         mask = torch.as_tensor(mask_list, dtype=torch.bool)
         if self.labels:
             return self.inputs[index], mask, self.labels[index]
-        else:
-            return self.inputs[index], mask
+
+        return self.inputs[index], mask
 
 
 def custom_coo_cat(tensors):
@@ -283,13 +283,11 @@ class TorchCRF(nn.Module):
         self.epochs = params.get('epochs', DEFAULT_PYTORCH_CRF_ER_CONFIG['epochs'])
         self.train_dev_split = params.get('train_dev_split', DEFAULT_PYTORCH_CRF_ER_CONFIG['train_dev_split'])
         self.optimizer_type = params.get('optimizer_type', DEFAULT_PYTORCH_CRF_ER_CONFIG['optimizer_type']).lower()
-        self.verbose = (logger.getEffectiveLevel() == logging.DEBUG)
         self.random_state = params.get('random_state', randint(1, 10000001))
 
         self.validate_params()
 
-        if self.verbose:
-            logger.debug("Random state for torch-crf is %s", self.random_state)
+        logger.debug("Random state for torch-crf is %s", self.random_state)
         if self.feat_type == "dict" and "feat_num" in params:
             logger.warning(
                 "WARNING: Number of features is compatible with only `hash` feature type. This value is ignored with `dict` setting", )
@@ -338,9 +336,7 @@ class TorchCRF(nn.Module):
                 break
             self.train_one_epoch(train_dataloader)
             dev_f1_score = self.run_predictions(dev_dataloader, calc_f1=True)
-            if self.verbose:
-                logger.debug("Epoch %s finished. Dev F1: %s", epoch, dev_f1_score)
-            # dev_f1_score = np.round(dev_f1_score, decimals=3)
+            logger.debug("Epoch %s finished. Dev F1: %s", epoch, dev_f1_score)
 
             if dev_f1_score <= best_dev_score:
                 _patience_counter += 1
@@ -348,8 +344,7 @@ class TorchCRF(nn.Module):
                 _patience_counter = 0
                 best_dev_score, best_dev_epoch = dev_f1_score, epoch
                 torch.save(self.state_dict(), self.best_model_save_path)
-                if self.verbose:
-                    logger.debug("Model weights saved for best dev epoch %s.", best_dev_epoch)
+                logger.debug("Model weights saved for best dev epoch %s.", best_dev_epoch)
 
     def train_one_epoch(self, train_dataloader):
         self.train()
@@ -360,7 +355,7 @@ class TorchCRF(nn.Module):
             train_loss += loss.item()
             loss.backward()
             self.optimizer.step()
-            if batch_idx % 20 == 0 and self.verbose:
+            if batch_idx % 20 == 0:
                 logger.debug("Batch: %s Mean Loss: %s", batch_idx,
                              (train_loss / (batch_idx + 1)))
 

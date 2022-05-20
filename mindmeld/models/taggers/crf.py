@@ -186,16 +186,6 @@ class ConditionalRandomFields(Tagger):
 class PyTorchCRF(Tagger):
     """A Conditional Random Fields model."""
 
-    @staticmethod
-    def _predict_proba(X):
-        del X
-        pass
-
-    @staticmethod
-    def load(model_path):
-        del model_path
-        pass
-
     def fit(self, X, y):
         self._clf.fit(X, y)
         return self
