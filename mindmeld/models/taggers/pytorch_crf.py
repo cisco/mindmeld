@@ -26,12 +26,12 @@ logger = logging.getLogger(__name__)
 DEFAULT_PYTORCH_CRF_ER_CONFIG = {
     "feat_type": "hash",  # ["hash", "dict"]
     "feat_num": 50000,
-    "stratify": True,
+    "stratify_train_val_split": True,
     "drop_input": 0.2,
     "train_batch_size": 8,
     "patience": 3,
     "epochs": 100,
-    "train_dev_split": 0.15,
+    "train_val_split": 0.15,
     "optimizer_type": "sgd",  # ["sgd", "adam"]
 }
 
@@ -56,7 +56,7 @@ class TaggerDataset(Dataset):
         return self.inputs[index], mask
 
 
-def custom_coo_cat(tensors):
+def diag_concat_coo_tensors(tensors):
     assert len(tensors) > 0
 
     rows = []
@@ -100,13 +100,13 @@ def init_weights(m):
         m.bias.data.fill_(0.01)
 
 
-def custom_collate(sequence):
+def collate_tensors_and_masks(sequence):
     if len(sequence[0]) == 3:
         sparse_mats, masks, labels = zip(*sequence)
-        return custom_coo_cat(sparse_mats), torch.stack(masks), torch.stack(labels)
+        return diag_concat_coo_tensors(sparse_mats), torch.stack(masks), torch.stack(labels)
     elif len(sequence[0]) == 2:
         sparse_mats, masks = zip(*sequence)
-        return custom_coo_cat(sparse_mats), torch.stack(masks)
+        return diag_concat_coo_tensors(sparse_mats), torch.stack(masks)
 
 
 class Encoder:
@@ -119,7 +119,7 @@ class Encoder:
         self.num_classes = None
         self.classes = None
         self.num_feats = num_feats
-        self.fit_done = False
+        self.ready = False
 
     def get_tensor_data(self, feat_dicts, labels=None, fit=False):
         if labels is None:
@@ -135,7 +135,7 @@ class Encoder:
                 self.classes = self.label_encoder.classes_
                 self.num_classes = len(self.label_encoder.classes_)
 
-            self.fit_done = True
+            self.ready = True
         feats = []
         encoded_labels = []
         seq_lens = [len(x) for x in feat_dicts]
@@ -160,7 +160,7 @@ class Encoder:
 
 
 # pylint: disable=too-many-instance-attributes
-class TorchCRF(nn.Module):
+class TorchCrfModel(nn.Module):
     def __init__(self):
         super().__init__()
         self.optimizer = None
@@ -179,7 +179,7 @@ class TorchCRF(nn.Module):
                 f"Optimizer type {self.optimizer_type} not supported. Supported options are ['sgd', 'adam']")
         elif self.feat_type not in ["hash", "dict"]:
             raise MindMeldError(f"Feature type {self.feat_type} not supported. Supported options are ['hash', 'dict']")
-        elif not 0 < self.train_dev_split < 1:
+        elif not 0 < self.train_val_split < 1:
             raise MindMeldError("Train-dev split should be a value between 0 and 1.")
         elif not 0 <= self.drop_input < 1:
             raise MindMeldError("Drop Input should be a value between 0 and 1. (inclusive)")
@@ -276,12 +276,13 @@ class TorchCRF(nn.Module):
     def set_params(self, **params):
         self.feat_type = params.get('feat_type', DEFAULT_PYTORCH_CRF_ER_CONFIG['feat_type']).lower()
         self.feat_num = params.get('feat_num', DEFAULT_PYTORCH_CRF_ER_CONFIG['feat_num'])
-        self.stratify = params.get('stratify', DEFAULT_PYTORCH_CRF_ER_CONFIG['stratify'])
+        self.stratify = params.get('stratify_train_val_split',
+                                   DEFAULT_PYTORCH_CRF_ER_CONFIG['stratify_train_val_split'])
         self.drop_input = params.get('drop_input', DEFAULT_PYTORCH_CRF_ER_CONFIG['drop_input'])
         self.train_batch_size = params.get('train_batch_size', DEFAULT_PYTORCH_CRF_ER_CONFIG['train_batch_size'])
         self.patience = params.get('patience', DEFAULT_PYTORCH_CRF_ER_CONFIG['patience'])
         self.epochs = params.get('epochs', DEFAULT_PYTORCH_CRF_ER_CONFIG['epochs'])
-        self.train_dev_split = params.get('train_dev_split', DEFAULT_PYTORCH_CRF_ER_CONFIG['train_dev_split'])
+        self.train_val_split = params.get('train_val_split', DEFAULT_PYTORCH_CRF_ER_CONFIG['train_val_split'])
         self.optimizer_type = params.get('optimizer_type', DEFAULT_PYTORCH_CRF_ER_CONFIG['optimizer_type']).lower()
         self.random_state = params.get('random_state', randint(1, 10000001))
 
@@ -308,7 +309,7 @@ class TorchCRF(nn.Module):
                 y.append(copy(y[lone_idx]))
                 X.append(copy(X[lone_idx]))
                 last_one -= 1
-        train_X, dev_X, train_y, dev_y = train_test_split(X, y, test_size=self.train_dev_split,
+        train_X, dev_X, train_y, dev_y = train_test_split(X, y, test_size=self.train_val_split,
                                                           stratify=stratify_tuples, random_state=self.random_state)
         # pylint: disable=unbalanced-tuple-unpacking
         train_inputs, encoded_train_labels, train_seq_lens = self.encoder.get_tensor_data(train_X, train_y, fit=True)
@@ -318,9 +319,9 @@ class TorchCRF(nn.Module):
         dev_dataset = TaggerDataset(dev_inputs, dev_seq_lens, encoded_dev_labels)
 
         train_dataloader = DataLoader(train_dataset, batch_size=self.train_batch_size, shuffle=True,
-                                      collate_fn=custom_collate)
+                                      collate_fn=collate_tensors_and_masks)
 
-        dev_dataloader = DataLoader(dev_dataset, batch_size=512, shuffle=True, collate_fn=custom_collate)
+        dev_dataloader = DataLoader(dev_dataset, batch_size=512, shuffle=True, collate_fn=collate_tensors_and_masks)
 
         best_dev_score, best_dev_epoch = -np.inf, -1
         _patience_counter = 0
@@ -383,7 +384,7 @@ class TorchCRF(nn.Module):
         inputs, seq_lens = self.encoder.get_tensor_data(X)
         torch_dataset = TaggerDataset(inputs, seq_lens)
 
-        dataloader = DataLoader(torch_dataset, batch_size=512, shuffle=False, collate_fn=custom_collate)
+        dataloader = DataLoader(torch_dataset, batch_size=512, shuffle=False, collate_fn=collate_tensors_and_masks)
         marginals_dict = []
         self.eval()
         with torch.no_grad():
@@ -402,6 +403,6 @@ class TorchCRF(nn.Module):
         inputs, seq_lens = self.encoder.get_tensor_data(X)
         torch_dataset = TaggerDataset(inputs, seq_lens)
 
-        dataloader = DataLoader(torch_dataset, batch_size=512, shuffle=False, collate_fn=custom_collate)
+        dataloader = DataLoader(torch_dataset, batch_size=512, shuffle=False, collate_fn=collate_tensors_and_masks)
         preds = self.run_predictions(dataloader, calc_f1=False)
         return [self.encoder.label_encoder.inverse_transform(x).tolist() for x in preds]

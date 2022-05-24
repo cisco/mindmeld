@@ -27,7 +27,7 @@ from .helpers import (
 )
 from .model import ModelConfig, Model, PytorchModel, AbstractModelFactory
 from .nn_utils import get_token_classifier_cls, TokenClassificationType
-from .taggers.crf import ConditionalRandomFields, PyTorchCRF
+from .taggers.crf import ConditionalRandomFields, TorchCrfTagger
 from .taggers.memm import MemmModel
 from ..exceptions import MindMeldError
 
@@ -132,7 +132,7 @@ class TaggerModel(Model):
             return {
                 TaggerModel.MEMM_TYPE: MemmModel,
                 TaggerModel.CRF_TYPE: ConditionalRandomFields,
-                TaggerModel.TORCH_CRF_TYPE: PyTorchCRF,
+                TaggerModel.TORCH_CRF_TYPE: TorchCrfTagger,
                 TaggerModel.LSTM_TYPE: LstmModel,
             }[classifier_type]
         except KeyError as e:
@@ -248,7 +248,7 @@ class TaggerModel(Model):
             self._current_params = params
         else:
             # run cross validation to select params
-            if self._clf.__class__ in (LstmModel, PyTorchCRF):
+            if self._clf.__class__ in (LstmModel, TorchCrfTagger):
                 raise MindMeldError(f"The {self._clf.__class__.__name__} model does not support cross-validation")
 
             _, best_params = self._fit_cv(X, y, groups)

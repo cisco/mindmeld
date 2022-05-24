@@ -23,7 +23,7 @@ from sklearn_crfsuite import CRF
 
 from .taggers import Tagger, extract_sequence_features
 from ..helpers import FileBackedList
-from .pytorch_crf import TorchCRF
+from .pytorch_crf import TorchCrfModel
 
 logger = logging.getLogger(__name__)
 
@@ -183,7 +183,7 @@ class ConditionalRandomFields(Tagger):
         self._feat_binner = FeatureBinner()
 
 
-class PyTorchCRF(Tagger):
+class TorchCrfTagger(Tagger):
     """A Conditional Random Fields model."""
 
     def fit(self, X, y):
@@ -191,7 +191,7 @@ class PyTorchCRF(Tagger):
         return self
 
     def set_params(self, **parameters):
-        self._clf = TorchCRF()
+        self._clf = TorchCrfModel()
         self._clf.set_params(**parameters)
         return self
 
