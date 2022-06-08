@@ -270,7 +270,12 @@ class TorchCrfTagger(Tagger):
             (list of list of str): features in CRF suite format
         """
         # Extract features and classes
-        feats = [] if in_memory else FileBackedList()
+        feats = []
+        # The FileBackedList now has support for indexing but it still loads the list
+        # eventually into memory cause of the scikit-learn train_test_split function.
+        if not in_memory:
+            logger.warning("PyTorch CRF does not currently support STORE_CRF_FEATURES_IN_MEMORY. This may be fixed in "
+                           "a future release.")
         for _, example in enumerate(examples):
             feats.append(self.extract_example_features(example, config, resources))
         X = self._preprocess_data(feats, fit)
@@ -297,7 +302,7 @@ class TorchCrfTagger(Tagger):
         """Converts data into formats of CRF suite.
 
         Args:
-            X (list of dict): features of an example
+            X (list of list of dict): features of an example
             fit (bool, optional): True if processing data at fit time, false for predict time.
 
         Returns:
@@ -315,6 +320,10 @@ class TorchCrfTagger(Tagger):
 
     def setup_model(self, config):
         self._feat_binner = FeatureBinner()
+
+    def dump(self, path):
+        print()
+        pass
 
 
 # Feature extraction for CRF

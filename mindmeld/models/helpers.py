@@ -18,6 +18,7 @@ import logging
 import os
 import re
 from tempfile import mkstemp
+import numpy as np
 
 import nltk
 from sklearn.metrics import make_scorer
@@ -534,6 +535,11 @@ def requires(resource):
     return add_resource
 
 
+def np_encoder(object):
+    if isinstance(object, np.generic):
+        return object.item()
+
+
 class FileBackedList:
     """
     FileBackedList implements an interface for simple list use cases
@@ -553,7 +559,7 @@ class FileBackedList:
     def append(self, line):
         if self.file_handle is None:
             self.file_handle = open(self.filename, "w")
-        self.file_handle.write(json.dumps(line))
+        self.file_handle.write(json.dumps(line, default=np_encoder))
         self.file_handle.write("\n")
         self.num_lines += 1
 

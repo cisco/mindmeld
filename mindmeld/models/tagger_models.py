@@ -79,6 +79,7 @@ class TaggerModel(Model):
     # for default model scoring types
     ACCURACY_SCORING = "accuracy"
     SEQ_ACCURACY_SCORING = "seq_accuracy"
+    # TODO: Rename torch-crf to crf implementation
     SEQUENCE_MODELS = ["crf", "torch-crf"]
 
     DEFAULT_FEATURES = {
@@ -248,8 +249,8 @@ class TaggerModel(Model):
             self._current_params = params
         else:
             # run cross validation to select params
-            if self._clf.__class__ in (LstmModel, TorchCrfTagger):
-                raise MindMeldError(f"The {self._clf.__class__.__name__} model does not support cross-validation")
+            if isinstance(self._clf, (LstmModel, TorchCrfTagger)):
+                raise MindMeldError(f"The {type(self._clf).__name__} model does not support cross-validation")
 
             _, best_params = self._fit_cv(X, y, groups)
             self._clf = self._fit(X, y, best_params)
