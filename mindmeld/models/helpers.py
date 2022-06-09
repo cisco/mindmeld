@@ -535,9 +535,9 @@ def requires(resource):
     return add_resource
 
 
-def np_encoder(object):
-    if isinstance(object, np.generic):
-        return object.item()
+def np_encoder(val):
+    if isinstance(val, np.generic):
+        return val.item()
 
 
 class FileBackedList:

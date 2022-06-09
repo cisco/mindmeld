@@ -7,6 +7,7 @@ from copy import copy
 from itertools import chain
 from random import randint
 import gc
+import shutil
 
 import numpy as np
 import torch
@@ -89,6 +90,24 @@ def init_weights(m):
         m.bias.data.fill_(0.01)
 
 
+def stratify_input(X, y):
+    def get_unique_tuple(label):
+        return tuple(sorted(list(set(label))))
+
+    stratify_tuples = [get_unique_tuple(label) for label in y]
+    # If we have a label class that is only 1 in number, duplicate it, otherwise train_test_split throws error when using stratify!
+    cnt = Counter(stratify_tuples)
+
+    for label, count in cnt.most_common()[::-1]:
+        if count > 1:
+            break
+        idx = stratify_tuples.index(label)
+        X.append(copy(X[idx]))
+        y.append(copy(y[idx]))
+        stratify_tuples.append(label)
+    return X, y, stratify_tuples
+
+
 def collate_tensors_and_masks(sequence):
     if len(sequence[0]) == 3:
         sparse_mats, masks, labels = zip(*sequence)
@@ -145,6 +164,7 @@ class Encoder:
                 self.label_encoder.fit(flattened_labels)
                 self.classes, self.num_classes = self.label_encoder.classes_, len(self.label_encoder.classes_)
 
+        # number of tokens in each example
         seq_lens = [len(x) for x in feat_dicts]
 
         encoded_tensor_inputs = self.get_padded_transformed_tensors(feat_dicts, seq_lens, is_label=False)
@@ -190,13 +210,23 @@ class TorchCrfModel(nn.Module):
         self.optimizer = None
         self.random_state = None
 
-        self.best_model_save_path = os.path.join(USER_CONFIG_DIR, "tmp", str(uuid.uuid4()), "best_crf_model.pt")
-        os.makedirs(os.path.dirname(self.best_model_save_path), exist_ok=True)
+        self.best_model_save_path = None
+        self.tmp_save_path = os.path.join(USER_CONFIG_DIR, "tmp", str(uuid.uuid4()), "best_crf_model.pt")
+        os.makedirs(os.path.dirname(self.tmp_save_path), exist_ok=True)
 
     def set_random_states(self):
         torch.manual_seed(self.random_state)
         random.seed(self.random_state + 1)
         np.random.seed(self.random_state + 2)
+
+    def save_best_weights_path(self, path):
+        self.best_model_save_path = path
+        if not os.path.exists(self.best_model_save_path):
+            best_weights = torch.load(self.tmp_save_path)
+            torch.save(best_weights, self.best_model_save_path)
+            shutil.rmtree(os.path.dirname(self.tmp_save_path))
+        # else:
+        #     raise MindMeldError("CRF weights not saved. Please re-train model from scratch.")
 
     def validate_params(self):
         if self.optimizer not in ["sgd", "adam"]:
@@ -297,9 +327,10 @@ class TorchCrfModel(nn.Module):
         prob = alpha + beta - z.view(1, -1, 1)
         return torch.exp(prob).transpose(0, 1)
 
+    # pylint: disable=too-many-arguments
     def set_params(self, feat_type="hash", feat_num=50000, stratify_train_val_split=True, drop_input=0.2, batch_size=8,
                    patience=3, number_of_epochs=100, dev_split_ratio=0.2, optimizer="sgd",
-                   random_state=randint(1, 10000001)):
+                   random_state=None):
 
         self.feat_type = feat_type  # ["hash", "dict"]
         self.feat_num = feat_num
@@ -310,7 +341,7 @@ class TorchCrfModel(nn.Module):
         self.number_of_epochs = number_of_epochs
         self.dev_split_ratio = dev_split_ratio
         self.optimizer = optimizer  # ["sgd", "adam"]
-        self.random_state = random_state
+        self.random_state = random_state or randint(1, 10000001)
 
         self.validate_params()
 
@@ -331,7 +362,7 @@ class TorchCrfModel(nn.Module):
         self.encoder = Encoder(feature_extractor=self.feat_type, num_feats=self.feat_num)
         stratify_tuples = None
         if self.stratify_train_val_split:
-            stratify_tuples = self.stratify_input(X, y)
+            X, y, stratify_tuples = stratify_input(X, y)
 
         # TODO: Rewrite our own train_test_split function to handle FileBackedList and avoid duplicating unique labels
         train_X, dev_X, train_y, dev_y = train_test_split(X, y, test_size=self.dev_split_ratio,
@@ -370,25 +401,8 @@ class TorchCrfModel(nn.Module):
             else:
                 _patience_counter = 0
                 best_dev_score, best_dev_epoch = dev_f1_score, epoch
-                torch.save(self.state_dict(), self.best_model_save_path)
+                torch.save(self.state_dict(), self.tmp_save_path)
                 logger.debug("Model weights saved for best dev epoch %s.", best_dev_epoch)
-
-    def stratify_input(self, X, y):
-        def get_unique_tuple(label):
-            return tuple(sorted(list(set(label))))
-
-        stratify_tuples = [get_unique_tuple(label) for label in y]
-        # If we have a label class that is only 1 in number, duplicate it, otherwise train_test_split throws error when using stratify!
-        cnt = Counter(stratify_tuples)
-
-        for label, count in cnt.most_common()[::-1]:
-            if count > 1:
-                break
-            idx = stratify_tuples.index(label)
-            X.append(copy(X[idx]))
-            y.append(copy(y[idx]))
-            stratify_tuples.append(label)
-        return stratify_tuples
 
     def train_one_epoch(self, train_dataloader):
         self.train()
@@ -423,8 +437,10 @@ class TorchCrfModel(nn.Module):
             return predictions
 
     def predict_marginals(self, X):
-        self.load_state_dict(torch.load(self.best_model_save_path))
-
+        if self.best_model_save_path:
+            self.load_state_dict(torch.load(self.best_model_save_path))
+        else:
+            self.load_state_dict(torch.load(self.tmp_save_path))
         dataloader = self.get_dataloader(X, None, is_train=False)
         marginals_dict = []
         self.eval()
@@ -445,7 +461,10 @@ class TorchCrfModel(nn.Module):
         return marginals_dict
 
     def predict(self, X):
-        self.load_state_dict(torch.load(self.best_model_save_path))
+        if self.best_model_save_path:
+            self.load_state_dict(torch.load(self.best_model_save_path))
+        else:
+            self.load_state_dict(torch.load(self.tmp_save_path))
         dataloader = self.get_dataloader(X, None, is_train=False)
 
         preds = self.run_predictions(dataloader, calc_f1=False)

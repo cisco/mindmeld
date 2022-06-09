@@ -273,6 +273,7 @@ class TorchCrfTagger(Tagger):
         feats = []
         # The FileBackedList now has support for indexing but it still loads the list
         # eventually into memory cause of the scikit-learn train_test_split function.
+        # Created https://github.com/cisco/mindmeld/issues/417 for this.
         if not in_memory:
             logger.warning("PyTorch CRF does not currently support STORE_CRF_FEATURES_IN_MEMORY. This may be fixed in "
                            "a future release.")
@@ -321,9 +322,13 @@ class TorchCrfTagger(Tagger):
     def setup_model(self, config):
         self._feat_binner = FeatureBinner()
 
+    @property
+    def is_serializable(self):
+        return False
+
     def dump(self, path):
-        print()
-        pass
+        best_model_save_path = os.path.join(os.path.split(path)[0], "best_crf_wts.pt")
+        self._clf.save_best_weights_path(best_model_save_path)
 
 
 # Feature extraction for CRF

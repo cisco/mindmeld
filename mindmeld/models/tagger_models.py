@@ -79,7 +79,7 @@ class TaggerModel(Model):
     # for default model scoring types
     ACCURACY_SCORING = "accuracy"
     SEQ_ACCURACY_SCORING = "seq_accuracy"
-    # TODO: Rename torch-crf to crf implementation
+    # TODO: Rename torch-crf to crf implementation. Created https://github.com/cisco/mindmeld/issues/416 for this.
     SEQUENCE_MODELS = ["crf", "torch-crf"]
 
     DEFAULT_FEATURES = {
@@ -249,7 +249,7 @@ class TaggerModel(Model):
             self._current_params = params
         else:
             # run cross validation to select params
-            if isinstance(self._clf, (LstmModel, TorchCrfTagger)):
+            if isinstance(self._clf, (TorchCrfTagger, LstmModel)):
                 raise MindMeldError(f"The {type(self._clf).__name__} model does not support cross-validation")
 
             _, best_params = self._fit_cv(X, y, groups)
@@ -395,13 +395,21 @@ class TaggerModel(Model):
             })
         else:
             # underneath tagger dump for LSTM model, returned `model_dir` is None for MEMM & CRF
-            self._clf.dump(path)
-            metadata.update({
-                "current_params": self._current_params,
-                "label_encoder": self._label_encoder,
-                "no_entities": self._no_entities,
-                "model_config": self.config
-            })
+            if isinstance(self._clf, TorchCrfTagger):
+                self._clf.dump(path)
+                metadata.update({
+                    "model": self,
+                    "model_type": "torch-crf"
+                })
+            elif isinstance(self._clf, LstmModel):
+                self._clf.dump(path)
+                metadata.update({
+                    "current_params": self._current_params,
+                    "label_encoder": self._label_encoder,
+                    "no_entities": self._no_entities,
+                    "model_config": self.config,
+                    "model_type": "lstm"
+                })
 
         # dump model metadata
         os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -424,7 +432,7 @@ class TaggerModel(Model):
 
         # If model is serializable, it can be loaded and used as-is. But if not serializable,
         #   it means we need to create an instance and load necessary details for it to be used.
-        if not is_serializable:
+        if not is_serializable and metadata.get('model_type') == 'lstm':
             model = cls(metadata["model_config"])
 
             # misc resources load
