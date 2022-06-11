@@ -38,7 +38,7 @@ requirements = [
     "pyyaml>=5.1.1",
     "spacy~=2.3,!=2.3.6",  # avoid 2.3.6 because it was yanked from PyPI
     "mypy>=0.782",
-    "marshmallow~=3.7.1",
+    "marshmallow~=3.7",
     # We currently depend on an older flask, which requires an older version of jinja, which doesn't pin its version of
     # markupsafe, and markupsafe 2.1.0 removed a deprecated function that the older jinja version depends on.
     # As a stop gap, we'll pin our version of markupsafe to that last 2.0 version. Longer term we need to update
