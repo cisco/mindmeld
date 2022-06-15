@@ -248,8 +248,9 @@ class TaggerModel(Model):
             self._clf = self._fit(X, y, params)
             self._current_params = params
         else:
+            non_supported_classes = (TorchCrfTagger, LstmModel) if LstmModel is not None else TorchCrfTagger
             # run cross validation to select params
-            if isinstance(self._clf, (TorchCrfTagger, LstmModel)):
+            if isinstance(self._clf, non_supported_classes):
                 raise MindMeldError(f"The {type(self._clf).__name__} model does not support cross-validation")
 
             _, best_params = self._fit_cv(X, y, groups)
