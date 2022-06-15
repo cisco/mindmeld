@@ -440,7 +440,7 @@ class ResourceLoader:
             json_data = {}
         else:
             try:
-                with open(file_path, "r") as json_file:
+                with open(file_path, "r", encoding='utf-8') as json_file:
                     json_data = json.load(json_file)
             except json.JSONDecodeError as e:
                 raise MindMeldError(
