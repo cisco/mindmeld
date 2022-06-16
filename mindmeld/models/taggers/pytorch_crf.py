@@ -27,6 +27,8 @@ logger = logging.getLogger(__name__)
 
 
 class TaggerDataset(Dataset):
+    """PyTorch Dataset class used to handle tagger inputs, labels and mask"""
+
     def __init__(self, inputs, seq_lens, labels=None):
         self.inputs = inputs
         self.labels = labels
@@ -47,7 +49,15 @@ class TaggerDataset(Dataset):
 
 
 def diag_concat_coo_tensors(tensors):
+    """Concatenates sparse PyTorch COO tensors diagonally so that they can processed in batches.
+
+    Args:
+        tensors (tuple of torch.Tensor): Tuple of sparse COO tensors to diagonally concatenate.
+    Returns:
+        stacked_tensor (torch.Tensor): A single sparse COO tensor that acts as a single batch.
+    """
     assert len(tensors) > 0
+    logger.debug("Concatenating %s tensors into a diagonal representation.", len(tensors))
 
     rows = []
     cols = []
@@ -84,13 +94,21 @@ def diag_concat_coo_tensors(tensors):
     return torch.sparse_coo_tensor(indices=torch.stack([row, col]), values=value, size=sparse_sizes).coalesce()
 
 
-def init_weights(m):
-    if isinstance(m, nn.Linear):
-        torch.nn.init.xavier_normal_(m.weight)
-        m.bias.data.fill_(0.01)
-
-
 def stratify_input(X, y):
+    """Gets the input and labels ready for stratification into train and dev data. Stratification is done
+    based on the presence of unique labels for each sequence. It also duplicates the unique samples across input and labels
+    to ensure that it doesn't fail with scikit-learn's train_test_split.
+
+    Args:
+        X (list): Generally a list of feature vectors, one for each training example
+        y (list): A list of classification labels (encoded by the label_encoder, NOT MindMeld
+                  entity objects)
+    Returns:
+        str_X (list): List of feature vectors, ready for stratification.
+        str_y (list): List of labels, ready for stratification.
+        stratify_tuples (list): Unique label for each example which will be the value used for stratification..
+    """
+
     def get_unique_tuple(label):
         return tuple(sorted(list(set(label))))
 
@@ -109,6 +127,13 @@ def stratify_input(X, y):
 
 
 def collate_tensors_and_masks(sequence):
+    """Custom collate function that ensures proper batching of sparse tensors, labels and masks.
+
+    Args:
+        sequence (list of tuples): Each tuple contains one input tensor, one mask tensor and one label tensor.
+    Returns:
+        Batched representation of input, label and mask sequences.
+    """
     if len(sequence[0]) == 3:
         sparse_mats, masks, labels = zip(*sequence)
         return diag_concat_coo_tensors(sparse_mats), torch.stack(masks), torch.stack(labels)
@@ -118,6 +143,16 @@ def collate_tensors_and_masks(sequence):
 
 
 class Encoder:
+    """Encoder class that is responsible for the feature extraction and label encoding for the PyTorch model.
+
+    Args:
+        X (list): Generally a list of feature vectors, one for each training example
+        y (list): A list of classification labels (encoded by the label_encoder, NOT MindMeld
+                  entity objects)
+    Returns:
+        self
+    """
+
     def __init__(self, feature_extractor="hash", num_feats=50000):
 
         if feature_extractor == "dict":
@@ -130,16 +165,16 @@ class Encoder:
         self.classes = None
         self.num_feats = num_feats
 
-    def get_input_tensors(self, feat_dicts, fit=False):
-        if fit:
-            if isinstance(self.feat_extractor, DictVectorizer):
-                comb_dict_list = [x for seq in feat_dicts for x in seq]
-                self.feat_extractor.fit(comb_dict_list)
-                self.num_feats = len(self.feat_extractor.get_feature_names())
-
-        pass
-
     def get_padded_transformed_tensors(self, inputs_or_labels, seq_lens, is_label):
+        """Returns the encoded and padded sparse tensor representations of the inputs/labels.
+
+        Args:
+            X (list): Generally a list of feature vectors, one for each training example
+            y (list): A list of classification labels (encoded by the label_encoder, NOT MindMeld
+                      entity objects)
+        Returns:
+            encoded_tensors (list of torch.Tensor): PyTorch tensor representation of padded input sequence/labels.
+        """
         if inputs_or_labels is None:
             return None
         encoded_tensors = []
@@ -154,6 +189,19 @@ class Encoder:
         return encoded_tensors
 
     def get_tensor_data(self, feat_dicts, labels=None, fit=False):
+        """Gets the feature dicts and labels transformed into padded PyTorch sparse tensor data.
+
+        Args:
+            feat_dicts (list of list of dicts): Generally a list of feature vectors, one for each training example
+            y (list of lists): A list of classification labels
+            fit (bool): Flag to whether fit the Feature Extractor or Label Encoder.
+        Returns:
+            encoded_tensor_inputs (list of torch.Tensor): list of Sparse COO tensor representation of
+            encoded padded input sequence.
+            seq_lens (list of ints): List of actual length of each sequence.
+            encoded_tensor_labels (list of torch.Tensor): list of tensors representations of encoded
+            padded label sequence.
+        """
         if fit:
             if isinstance(self.feat_extractor, DictVectorizer):
                 flattened_feat_dicts = list(chain.from_iterable(feat_dicts))
@@ -173,6 +221,16 @@ class Encoder:
         return encoded_tensor_inputs, seq_lens, encoded_tensor_labels
 
     def encode_padded_input(self, current_seq_len, max_seq_len, x):
+        """Pads the input sequence feature vectors to the max sequence length and returns the sparse
+        torch tensor representation.
+
+        Args:
+            current_seq_len (int): Number of tokens in the current example sequence.
+            max_seq_len (int): Max number of tokens in an example sequence in the current dataset.
+            x (list of dicts): List of feature vectors, one for each token in the example sequence.
+        Returns:
+            sparse_feat_tensor (torch.Tensor): Sparse COO tensor representation of padded input sequence
+        """
         padded_x = x + [{}] * (max_seq_len - current_seq_len)
         sparse_feat = self.feat_extractor.transform(padded_x).tocoo()
         sparse_feat_tensor = torch.sparse_coo_tensor(
@@ -181,6 +239,16 @@ class Encoder:
         return sparse_feat_tensor
 
     def encode_padded_label(self, current_seq_len, max_seq_len, y):
+        """Pads the label sequences to the max sequence length and returns the
+        torch tensor representation.
+
+        Args:
+            X (list): Generally a list of feature vectors, one for each training example
+            y (list): A list of classification labels (encoded by the label_encoder, NOT MindMeld
+                      entity objects)
+        Returns:
+            label_tensor (torch.Tensor): PyTorch tensor representation of padded label sequence
+        """
         transformed_label = self.label_encoder.transform(y)
         transformed_label = np.pad(transformed_label, pad_width=(0, max_seq_len - current_seq_len),
                                    constant_values=(self.num_classes - 1))
@@ -190,6 +258,8 @@ class Encoder:
 
 # pylint: disable=too-many-instance-attributes
 class TorchCrfModel(nn.Module):
+    """PyTorch Model Class for Conditional Random Fields"""
+
     def __init__(self):
         super().__init__()
         self.optim = None
@@ -211,24 +281,33 @@ class TorchCrfModel(nn.Module):
         self.random_state = None
 
         self.best_model_save_path = None
+        self.ready = False
         self.tmp_save_path = os.path.join(USER_CONFIG_DIR, "tmp", str(uuid.uuid4()), "best_crf_model.pt")
         os.makedirs(os.path.dirname(self.tmp_save_path), exist_ok=True)
 
     def set_random_states(self):
+        """Sets the random seeds across all libraries used for deterministic output."""
         torch.manual_seed(self.random_state)
         random.seed(self.random_state + 1)
         np.random.seed(self.random_state + 2)
 
     def save_best_weights_path(self, path):
+        """Saves the best weights of the model to a path in the .generated folder.
+
+        Args:
+            path (str): Path to save the best model weights.
+        """
         self.best_model_save_path = path
         if not os.path.exists(self.best_model_save_path):
-            best_weights = torch.load(self.tmp_save_path)
-            torch.save(best_weights, self.best_model_save_path)
-            shutil.rmtree(os.path.dirname(self.tmp_save_path))
-        # else:
-        #     raise MindMeldError("CRF weights not saved. Please re-train model from scratch.")
+            if os.path.exists(self.tmp_save_path):
+                best_weights = torch.load(self.tmp_save_path)
+                torch.save(best_weights, self.best_model_save_path)
+                shutil.rmtree(os.path.dirname(self.tmp_save_path))
+            else:
+                raise MindMeldError("CRF weights not saved. Please re-train model from scratch.")
 
     def validate_params(self):
+        """Validate the argument values saved into the CRF model. """
         if self.optimizer not in ["sgd", "adam"]:
             raise MindMeldError(
                 f"Optimizer type {self.optimizer_type} not supported. Supported options are ['sgd', 'adam']")
@@ -244,15 +323,32 @@ class TorchCrfModel(nn.Module):
             raise MindMeldError("Number of epochs should be am integer value.")
 
     def build_params(self, num_features, num_classes):
+        """Sets the parameters for the layers in the PyTorch CRF model. Naming convention is kept
+        consistent with the CRFSuite implementation.
+
+        Args:
+            num_features (int): Number of features to use in a FeatureHasher feature extractor.
+            num_classes (int): Number of classes in the tagging model.
+        """
         self.W = nn.Parameter(torch.nn.init.xavier_normal_(torch.empty(size=(num_features, num_classes))),
                               requires_grad=True)
         self.b = nn.Parameter(torch.nn.init.constant_(torch.empty(size=(num_classes,)), val=0.01),
                               requires_grad=True)
         self.crf_layer = CRF(num_classes, batch_first=True)
-        self.crf_layer.apply(init_weights)
         self.num_classes = num_classes
 
     def forward(self, inputs, targets, mask, drop_input=0.0):
+        """The forward pass of the PyTorch CRF model. Returns the predictions or loss depending on whether
+        labels are passed or not.
+
+        Args:
+            inputs (torch.Tensor): Batch of input tensors to pass through the model.
+            targets (torch.Tensor): Batch of label tensors.
+            mask (torch.Tensor) : Batch of mask tensors to account for padded inputs.
+            drop_input (float): Percentage of features to drop from the input.
+        Returns:
+            loss (torch.Tensor or list): Loss from training or predictions for input sequence.
+        """
         if drop_input:
             dp_mask = (torch.FloatTensor(inputs.values().size()).uniform_() > drop_input)
             inputs.values()[:] = inputs.values() * dp_mask
@@ -264,9 +360,17 @@ class TorchCrfModel(nn.Module):
         loss = - self.crf_layer(crf_input, targets, mask=mask)
         return loss
 
-    # The below implementation is borrowed from https://github.com/kmkurn/pytorch-crf/pull/37
-
     def _compute_log_alpha(self, emissions, mask, run_backwards):
+        """Function used to calculate the alpha and beta probabilities of each token/tag probability.
+        Implementation is borrowed from https://github.com/kmkurn/pytorch-crf/pull/37.
+
+        Args:
+            emissions (torch.Tensor): Emission probabilities of batched input sequence.
+            mask (torch.Tensor): Batch of mask tensors to account for padded inputs.
+            run_backwards (bool): Flag to decide whether to compute alpha or beta porbabilities
+        Returns:
+            log_prob (torch.Tensor): alpha or beta log probabilities of input batch.
+        """
         # emissions: (seq_length, batch_size, num_tags)
         # mask: (seq_length, batch_size)
 
@@ -315,6 +419,15 @@ class TorchCrfModel(nn.Module):
         return torch.stack(log_prob)
 
     def compute_marginal_probabilities(self, inputs, mask):
+        """Function used to calculate the marginal probabilities of each token per tag.
+        Implementation is borrowed from https://github.com/kmkurn/pytorch-crf/pull/37.
+
+        Args:
+            inputs (torch.Tensor): Batch of padded input tensors.
+            mask (torch.Tensor): Batch of mask tensors to account for padded inputs.
+        Returns:
+            marginal probabilities for every tag for each token for every sequence.
+        """
         # SWITCHING FOR BATCH FIRST DEFAULT
         dense_W = torch.tile(self.W, dims=(mask.shape[0], 1))
         out_1 = torch.addmm(self.b, inputs, dense_W)
@@ -329,8 +442,23 @@ class TorchCrfModel(nn.Module):
 
     # pylint: disable=too-many-arguments
     def set_params(self, feat_type="hash", feat_num=50000, stratify_train_val_split=True, drop_input=0.2, batch_size=8,
-                   patience=3, number_of_epochs=100, dev_split_ratio=0.2, optimizer="sgd",
+                   number_of_epochs=100, patience=3, dev_split_ratio=0.2, optimizer="sgd",
                    random_state=None):
+        """Set the parameters for the PyTorch CRF model and also validates the parameters.
+
+        Args:
+            feat_type (str): The type of feature extractor. Supported options are 'dict' and 'hash'.
+            feat_num (int): The number of features to be used by the FeatureHasher. Is not supported with the DictVectorizer
+            stratify_train_val_split (bool): Flag to check whether inputs should be stratified during train-dev split.
+            drop_input (float): The percentage at which to apply a dropout to the input features.
+            batch_size (int): Training batch size for the model.
+            number_of_epochs (int): The number of epochs (passes over the training data) to train the model for.
+            patience (int): Number of epochs to wait for before stopping training if dev score does not improve.
+            dev_split_ratio (float): Percentage of training data to be used for validation.
+            optimizer (str): Type of optimizer used for the model. Supported options are 'sgd' and 'adam'.
+            random_state (int): Integer value to set random seeds for deterministic output.
+
+        """
 
         self.feat_type = feat_type  # ["hash", "dict"]
         self.feat_num = feat_num
@@ -351,6 +479,17 @@ class TorchCrfModel(nn.Module):
                 "WARNING: Number of features is compatible with only `hash` feature type. This value is ignored with `dict` setting")
 
     def get_dataloader(self, X, y, is_train):
+        """Creates and returns the PyTorch dataloader instance for the training/test data.
+
+        Args:
+            X (list of list of dicts): Generally a list of feature vectors, one for each training example
+            y (list of lists or None): A list of classification labels (encoded by the label_encoder, NOT MindMeld
+                      entity objects)
+            is_train (bool): Whether the dataloader returned is going to be used for training.
+        Returns:
+            torch_dataloader (torch.utils.data.dataloader.DataLoader): returns PyTorch dataloader object that can be
+            used to iterate across the data.
+        """
         tensor_inputs, input_seq_lens, tensor_labels = self.encoder.get_tensor_data(X, y, fit=is_train)
         tensor_dataset = TaggerDataset(tensor_inputs, input_seq_lens, tensor_labels)
         torch_dataloader = DataLoader(tensor_dataset, batch_size=self.batch_size if is_train else 512, shuffle=is_train,
@@ -358,6 +497,13 @@ class TorchCrfModel(nn.Module):
         return torch_dataloader
 
     def fit(self, X, y):
+        """Trains the entire PyTorch CRF model.
+
+        Args:
+            X (list of list of dicts): Generally a list of feature vectors, one for each training example
+            y (list of lists): A list of classification labels (encoded by the label_encoder, NOT MindMeld
+                      entity objects)
+        """
         self.set_random_states()
         self.encoder = Encoder(feature_extractor=self.feat_type, num_feats=self.feat_num)
         stratify_tuples = None
@@ -383,8 +529,15 @@ class TorchCrfModel(nn.Module):
             self.optim = optim.Adam(self.parameters(), weight_decay=1e-5)
 
         self.training_loop(train_dataloader, dev_dataloader)
+        self.ready = True
 
     def training_loop(self, train_dataloader, dev_dataloader):
+        """Contains the training loop process where we train the model for specified number of epochs.
+
+        Args:
+            train_dataloader (torch.utils.data.dataloader.DataLoader): Dataloader for training data
+            dev_dataloader (torch.utils.data.dataloader.DataLoader): Dataloader for validation data
+        """
 
         best_dev_score, best_dev_epoch = -np.inf, -1
         _patience_counter = 0
@@ -405,6 +558,11 @@ class TorchCrfModel(nn.Module):
                 logger.debug("Model weights saved for best dev epoch %s.", best_dev_epoch)
 
     def train_one_epoch(self, train_dataloader):
+        """Contains the training code for one epoch.
+
+        Args:
+           train_dataloader (torch.utils.data.dataloader.DataLoader): Dataloader for training data
+        """
         self.train()
         train_loss = 0
         for batch_idx, (inputs, mask, labels) in enumerate(train_dataloader):
@@ -418,6 +576,14 @@ class TorchCrfModel(nn.Module):
                              (train_loss / (batch_idx + 1)))
 
     def run_predictions(self, dataloader, calc_f1=False):
+        """Get predictions for the data by running a inference pass of the model.
+
+        Args:
+           dataloader (torch.utils.data.dataloader.DataLoader): Dataloader for test/validation data
+            calc_f1 (bool): Flag to return dev f1 score or return predictions for each token.
+        Returns:
+            Dev F1 score or predictions for each token in a sequence.
+        """
         self.eval()
         predictions = []
         targets = []
@@ -437,10 +603,20 @@ class TorchCrfModel(nn.Module):
             return predictions
 
     def predict_marginals(self, X):
-        if self.best_model_save_path:
-            self.load_state_dict(torch.load(self.best_model_save_path))
+        """Get marginal probabilites for each tag per token for each sequence.
+
+        Args:
+            X (list of list of dicts): Feature vectors for data to predict marginal probabilities on.
+        Returns:
+            marginals_dict (list of list of dicts): Returns the probability of every tag for each token in a sequence.
+        """
+        if self.ready:
+            if self.best_model_save_path:
+                self.load_state_dict(torch.load(self.best_model_save_path))
+            else:
+                self.load_state_dict(torch.load(self.tmp_save_path))
         else:
-            self.load_state_dict(torch.load(self.tmp_save_path))
+            raise MindMeldError("PyTorch-CRF Model does not seem to be trained. Train before running predictions.")
         dataloader = self.get_dataloader(X, None, is_train=False)
         marginals_dict = []
         self.eval()
@@ -461,10 +637,20 @@ class TorchCrfModel(nn.Module):
         return marginals_dict
 
     def predict(self, X):
-        if self.best_model_save_path:
-            self.load_state_dict(torch.load(self.best_model_save_path))
+        """Gets predicted labels for the data.
+
+        Args:
+            X (list of list of dicts): Feature vectors for data to predict labels on.
+        Returns:
+            preds (list of lists): Predictions for each token in each sequence.
+        """
+        if self.ready:
+            if self.best_model_save_path:
+                self.load_state_dict(torch.load(self.best_model_save_path))
+            else:
+                self.load_state_dict(torch.load(self.tmp_save_path))
         else:
-            self.load_state_dict(torch.load(self.tmp_save_path))
+            raise MindMeldError("PyTorch-CRF Model does not seem to be trained. Train before running predictions.")
         dataloader = self.get_dataloader(X, None, is_train=False)
 
         preds = self.run_predictions(dataloader, calc_f1=False)

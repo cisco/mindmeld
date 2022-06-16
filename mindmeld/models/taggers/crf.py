@@ -190,6 +190,7 @@ class TorchCrfTagger(Tagger):
         self._clf.fit(X, y)
         return self
 
+    # TODO: Refactor to move initialization into init() or setup_model()
     def set_params(self, **parameters):
         self._clf = TorchCrfModel()
         self._clf.set_params(**parameters)
