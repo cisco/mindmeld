@@ -1,13 +1,11 @@
 import logging
 import os
 import random
-import uuid
 from collections import Counter
 from copy import copy
 from itertools import chain
 from random import randint
 import gc
-import shutil
 
 import numpy as np
 import torch
@@ -19,9 +17,9 @@ from sklearn.preprocessing import LabelEncoder
 from torch import optim
 from torch.utils.data import Dataset, DataLoader
 from torchcrf import CRF
+from tempfile import gettempdir
 
 from ...exceptions import MindMeldError
-from ...path import USER_CONFIG_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -143,15 +141,7 @@ def collate_tensors_and_masks(sequence):
 
 
 class Encoder:
-    """Encoder class that is responsible for the feature extraction and label encoding for the PyTorch model.
-
-    Args:
-        X (list): Generally a list of feature vectors, one for each training example
-        y (list): A list of classification labels (encoded by the label_encoder, NOT MindMeld
-                  entity objects)
-    Returns:
-        self
-    """
+    """Encoder class that is responsible for the feature extraction and label encoding for the PyTorch model."""
 
     def __init__(self, feature_extractor="hash", num_feats=50000):
 
@@ -169,9 +159,9 @@ class Encoder:
         """Returns the encoded and padded sparse tensor representations of the inputs/labels.
 
         Args:
-            X (list): Generally a list of feature vectors, one for each training example
-            y (list): A list of classification labels (encoded by the label_encoder, NOT MindMeld
-                      entity objects)
+            inputs_or_labels (list of list of dicts): Generally a list of feature vectors, one for each training example
+            seq_lens (list): A list of number of tokens in each sequence
+            is_label (bool): Flag to indicate whether we are encoding input features or labels.
         Returns:
             encoded_tensors (list of torch.Tensor): PyTorch tensor representation of padded input sequence/labels.
         """
@@ -243,9 +233,9 @@ class Encoder:
         torch tensor representation.
 
         Args:
-            X (list): Generally a list of feature vectors, one for each training example
-            y (list): A list of classification labels (encoded by the label_encoder, NOT MindMeld
-                      entity objects)
+            current_seq_len (int): Number of tokens in the current example sequence.
+            max_seq_len (int): Max number of tokens in an example sequence in the current dataset.
+            y (list of dicts): List of labels, one for each token in the example sequence.
         Returns:
             label_tensor (torch.Tensor): PyTorch tensor representation of padded label sequence
         """
@@ -282,8 +272,8 @@ class TorchCrfModel(nn.Module):
 
         self.best_model_save_path = None
         self.ready = False
-        self.tmp_save_path = os.path.join(USER_CONFIG_DIR, "tmp", str(uuid.uuid4()), "best_crf_model.pt")
-        os.makedirs(os.path.dirname(self.tmp_save_path), exist_ok=True)
+        self.tmp_save_path = os.path.join(gettempdir(), "best_crf_wts.pt")
+        # os.makedirs(os.path.dirname(self.tmp_save_path), exist_ok=True)
 
     def set_random_states(self):
         """Sets the random seeds across all libraries used for deterministic output."""
@@ -298,13 +288,11 @@ class TorchCrfModel(nn.Module):
             path (str): Path to save the best model weights.
         """
         self.best_model_save_path = path
-        if not os.path.exists(self.best_model_save_path):
-            if os.path.exists(self.tmp_save_path):
-                best_weights = torch.load(self.tmp_save_path)
-                torch.save(best_weights, self.best_model_save_path)
-                shutil.rmtree(os.path.dirname(self.tmp_save_path))
-            else:
-                raise MindMeldError("CRF weights not saved. Please re-train model from scratch.")
+        if os.path.exists(self.tmp_save_path):
+            best_weights = torch.load(self.tmp_save_path)
+            torch.save(best_weights, self.best_model_save_path)
+        else:
+            raise MindMeldError("CRF weights not saved. Please re-train model from scratch.")
 
     def validate_params(self):
         """Validate the argument values saved into the CRF model. """
@@ -343,7 +331,7 @@ class TorchCrfModel(nn.Module):
 
         Args:
             inputs (torch.Tensor): Batch of input tensors to pass through the model.
-            targets (torch.Tensor): Batch of label tensors.
+            targets (torch.Tensor or None): Batch of label tensors.
             mask (torch.Tensor) : Batch of mask tensors to account for padded inputs.
             drop_input (float): Percentage of features to drop from the input.
         Returns:
@@ -367,7 +355,7 @@ class TorchCrfModel(nn.Module):
         Args:
             emissions (torch.Tensor): Emission probabilities of batched input sequence.
             mask (torch.Tensor): Batch of mask tensors to account for padded inputs.
-            run_backwards (bool): Flag to decide whether to compute alpha or beta porbabilities
+            run_backwards (bool): Flag to decide whether to compute alpha or beta probabilities.
         Returns:
             log_prob (torch.Tensor): alpha or beta log probabilities of input batch.
         """
