@@ -234,7 +234,7 @@ class TorchCrfTagger(Tagger):
             resources (dict): Resources which may be used for this model's feature extraction
 
         Returns:
-            list of tuples of (mindmeld.core.QueryEntity): a list of predicted labels \
+            list of list of ((list of str) and (list of float)): a list of predicted labels \
              with confidence scores
         """
         X, _, _ = self.extract_features(examples, config, resources, in_memory=True)
