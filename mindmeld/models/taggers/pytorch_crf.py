@@ -1,3 +1,4 @@
+import gc
 import logging
 import os
 import random
@@ -5,7 +6,7 @@ from collections import Counter
 from copy import copy
 from itertools import chain
 from random import randint
-import gc
+from tempfile import gettempdir
 
 import numpy as np
 import torch
@@ -17,7 +18,6 @@ from sklearn.preprocessing import LabelEncoder
 from torch import optim
 from torch.utils.data import Dataset, DataLoader
 from torchcrf import CRF
-from tempfile import gettempdir
 
 from ...exceptions import MindMeldError
 
