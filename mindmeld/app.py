@@ -245,7 +245,7 @@ class Application:  # pylint: disable=R0902
         def _decorator(func):
             func_name = name or func.__name__
             if not callable(func):
-                raise TypeError("Invalid function type %s.", func_name)  # pylint: disable=W0715
+                raise TypeError(f"Invalid function type {func_name}.")
             self.registry.functions_registry[func_name] = func
 
         return _decorator
