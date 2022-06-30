@@ -21,6 +21,15 @@ BLUEPRINTS_URL = "https://blueprints.mindmeld.com"
 BINARIES_URL = "https://binaries.mindmeld.com"
 DUCKLING_VERSION = "20211005"
 
+EMBEDDINGS_VERSION = "6B"
+EMBEDDINGS_FILE = f"glove.{EMBEDDINGS_VERSION}.zip"
+EMBEDDINGS_URL = '/'.join([
+    BINARIES_URL,
+    "glove",
+    EMBEDDINGS_VERSION,
+    EMBEDDINGS_FILE,
+])
+
 
 # ACTIVE LEARNING CONSTANTS
 class TuneLevel(Enum):
