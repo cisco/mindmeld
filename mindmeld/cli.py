@@ -780,7 +780,7 @@ def num_parser(ctx, start, port):
                 DUCKLING_VERSION,
                 os.path.basename(exec_path),
             ]
-            url = os.path.join(*url_components)
+            url = "/".join(url_components)
             logger.info(
                 "Could not find %s binary file, downloading from %s", exec_path, url
             )

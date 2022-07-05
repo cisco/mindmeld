@@ -16,7 +16,7 @@ requirements = [
     "distro~=1.3",
     # elasticsearch-py 7.14 breaks backwards compatibility with servers prior to 7.11
     "elasticsearch>=5.0,<7.14",
-    "Flask~=1.0",
+    "Flask>=1.1.3,<2",
     "Flask-Cors~=3.0",
     "future~=0.17",
     "pycountry",  # uses calendar versioning

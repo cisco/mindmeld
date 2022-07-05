@@ -24,7 +24,6 @@ from ..containers import GloVeEmbeddingsContainer
 
 logger = logging.getLogger(__name__)
 
-GLOVE_DOWNLOAD_LINK = "http://nlp.stanford.edu/data/glove.6B.zip"
 EMBEDDING_FILE_PATH_TEMPLATE = "glove.6B.{}d.txt"
 ALLOWED_WORD_EMBEDDING_DIMENSIONS = [50, 100, 200, 300]
 

@@ -21,12 +21,10 @@ import numpy as np
 from tqdm import tqdm
 
 from ._util import _is_module_available, _get_module_or_attr as _getattr
+from ..constants import EMBEDDINGS_URL
 from ..core import Bunch
 from ..exceptions import EmbeddingDownloadError
-from ..path import (
-    EMBEDDINGS_FILE_PATH,
-    EMBEDDINGS_FOLDER_PATH,
-)
+from ..path import EMBEDDINGS_FILE_PATH, EMBEDDINGS_FOLDER_PATH
 from ..resource_loader import Hasher
 
 logger = logging.getLogger(__name__)
@@ -61,7 +59,6 @@ class GloVeEmbeddingsContainer:
     """
     CONTAINER_LOOKUP = {}
 
-    GLOVE_DOWNLOAD_LINK = "http://nlp.stanford.edu/data/glove.6B.zip"
     EMBEDDING_FILE_PATH_TEMPLATE = "glove.6B.{}d.txt"
     ALLOWED_WORD_EMBEDDING_DIMENSIONS = [50, 100, 200, 300]
 
@@ -96,34 +93,24 @@ class GloVeEmbeddingsContainer:
 
     def _download_embeddings_and_return_zip_handle(self):
 
-        logger.info("Downloading embedding from %s", GloVeEmbeddingsContainer.GLOVE_DOWNLOAD_LINK)
+        logger.info("Downloading embedding from %s", EMBEDDINGS_URL)
 
         # Make the folder that will contain the embeddings
         if not os.path.exists(EMBEDDINGS_FOLDER_PATH):
             os.makedirs(EMBEDDINGS_FOLDER_PATH)
 
-        with TqdmUpTo(
-            unit="B", unit_scale=True, miniters=1, desc=GloVeEmbeddingsContainer.GLOVE_DOWNLOAD_LINK
-        ) as t:
+        with TqdmUpTo(unit="B", unit_scale=True, miniters=1, desc=EMBEDDINGS_URL) as t:
 
             try:
-                urlretrieve(
-                    GloVeEmbeddingsContainer.GLOVE_DOWNLOAD_LINK, EMBEDDINGS_FILE_PATH,
-                    reporthook=t.update_to
-                )
+                urlretrieve(EMBEDDINGS_URL, EMBEDDINGS_FILE_PATH, reporthook=t.update_to)
 
             except ConnectionError as e:
-                logger.error(
-                    "There was an issue downloading from this "
-                    "link %s with the following error: "
-                    "%s",
-                    GloVeEmbeddingsContainer.GLOVE_DOWNLOAD_LINK,
-                    e,
-                )
+                logger.error("Error downloading from %s: %s", EMBEDDINGS_URL, e)
                 return
 
             file_name = GloVeEmbeddingsContainer.EMBEDDING_FILE_PATH_TEMPLATE.format(
-                self.token_dimension)
+                self.token_dimension
+            )
             zip_file_object = zipfile.ZipFile(EMBEDDINGS_FILE_PATH, "r")
 
             if file_name not in zip_file_object.namelist():
