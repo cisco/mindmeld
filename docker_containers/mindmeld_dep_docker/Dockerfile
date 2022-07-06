@@ -7,8 +7,8 @@
 #                                                                   #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-# Pull base image.
-FROM elasticsearch:7.17.4
+# Pull base elastisearch image
+FROM elasticsearch:7.17.5
 
 # System packages
 RUN apt-get update && \
@@ -36,8 +36,6 @@ RUN curl -o /tmp/get-pip.py https://bootstrap.pypa.io/pip/3.6/get-pip.py
 RUN python3 /tmp/get-pip.py
 
 RUN pip3 install --upgrade pip
-# Explicitly install numpy to support arm builds
-RUN pip3 install -U numpy~=1.15
 # Install spacy with mindmeld to ensure a version new enough is installed to install en_core_web_sm
 RUN pip3 install -U mindmeld spacy
 RUN pip3 install click-log==0.1.8
