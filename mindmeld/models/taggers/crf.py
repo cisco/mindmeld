@@ -245,7 +245,7 @@ class TorchCrfTagger(Tagger):
         for query_index, query_seq in enumerate(seq):
             tags = []
             preds = []
-            for i in range(len(query_seq)):
+            for i, _ in enumerate(query_seq):
                 tags.append(list(marginals_dict[query_index][i].keys()))
                 preds.append(list(marginals_dict[query_index][i].values()))
             tag_maps.extend(tags)

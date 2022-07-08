@@ -396,14 +396,13 @@ class TaggerModel(Model):
             })
         else:
             # underneath tagger dump for LSTM model, returned `model_dir` is None for MEMM & CRF
+            self._clf.dump(path)
             if isinstance(self._clf, TorchCrfTagger):
-                self._clf.dump(path)
                 metadata.update({
                     "model": self,
                     "model_type": "torch-crf"
                 })
             elif isinstance(self._clf, LstmModel):
-                self._clf.dump(path)
                 metadata.update({
                     "current_params": self._current_params,
                     "label_encoder": self._label_encoder,

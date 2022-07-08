@@ -538,8 +538,7 @@ def requires(resource):
 def np_encoder(val):
     if isinstance(val, np.generic):
         return val.item()
-    else:
-        raise TypeError(f"{type(val)} cannot be serialized by JSON.")
+    raise TypeError(f"{type(val)} cannot be serialized by JSON.")
 
 
 class FileBackedList:
