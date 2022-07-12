@@ -27,7 +27,7 @@ from .helpers import (
 )
 from .model import ModelConfig, Model, PytorchModel, AbstractModelFactory
 from .nn_utils import get_token_classifier_cls, TokenClassificationType
-from .taggers.crf import ConditionalRandomFields
+from .taggers.crf import ConditionalRandomFields, TorchCrfTagger
 from .taggers.memm import MemmModel
 from ..exceptions import MindMeldError
 
@@ -73,12 +73,14 @@ class TaggerModel(Model):
     CRF_TYPE = "crf"
     MEMM_TYPE = "memm"
     LSTM_TYPE = "lstm"
-    ALLOWED_CLASSIFIER_TYPES = [CRF_TYPE, MEMM_TYPE, LSTM_TYPE]
+    TORCH_CRF_TYPE = "torch-crf"
+    ALLOWED_CLASSIFIER_TYPES = [CRF_TYPE, MEMM_TYPE, LSTM_TYPE, TORCH_CRF_TYPE]
 
     # for default model scoring types
     ACCURACY_SCORING = "accuracy"
     SEQ_ACCURACY_SCORING = "seq_accuracy"
-    SEQUENCE_MODELS = ["crf"]
+    # TODO: Rename torch-crf to crf implementation. Created https://github.com/cisco/mindmeld/issues/416 for this.
+    SEQUENCE_MODELS = ["crf", "torch-crf"]
 
     DEFAULT_FEATURES = {
         "bag-of-words-seq": {
@@ -131,6 +133,7 @@ class TaggerModel(Model):
             return {
                 TaggerModel.MEMM_TYPE: MemmModel,
                 TaggerModel.CRF_TYPE: ConditionalRandomFields,
+                TaggerModel.TORCH_CRF_TYPE: TorchCrfTagger,
                 TaggerModel.LSTM_TYPE: LstmModel,
             }[classifier_type]
         except KeyError as e:
@@ -231,7 +234,7 @@ class TaggerModel(Model):
                 "There are no labels in this label set, so we don't fit the model."
             )
             return self
-        # Extract labels - label encoders are the same accross all entity recognition models
+        # Extract labels - label encoders are the same across all entity recognition models
         self._label_encoder = get_label_encoder(self.config)
         y = self._label_encoder.encode(labels, examples=examples)
 
@@ -245,9 +248,10 @@ class TaggerModel(Model):
             self._clf = self._fit(X, y, params)
             self._current_params = params
         else:
+            non_supported_classes = (TorchCrfTagger, LstmModel) if LstmModel is not None else TorchCrfTagger
             # run cross validation to select params
-            if self._clf.__class__ == LstmModel:
-                raise MindMeldError("The LSTM model does not support cross-validation")
+            if isinstance(self._clf, non_supported_classes):
+                raise MindMeldError(f"The {type(self._clf).__name__} model does not support cross-validation")
 
             _, best_params = self._fit_cv(X, y, groups)
             self._clf = self._fit(X, y, best_params)
@@ -393,12 +397,19 @@ class TaggerModel(Model):
         else:
             # underneath tagger dump for LSTM model, returned `model_dir` is None for MEMM & CRF
             self._clf.dump(path)
-            metadata.update({
-                "current_params": self._current_params,
-                "label_encoder": self._label_encoder,
-                "no_entities": self._no_entities,
-                "model_config": self.config
-            })
+            if isinstance(self._clf, TorchCrfTagger):
+                metadata.update({
+                    "model": self,
+                    "model_type": "torch-crf"
+                })
+            elif isinstance(self._clf, LstmModel):
+                metadata.update({
+                    "current_params": self._current_params,
+                    "label_encoder": self._label_encoder,
+                    "no_entities": self._no_entities,
+                    "model_config": self.config,
+                    "model_type": "lstm"
+                })
 
         # dump model metadata
         os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -421,7 +432,7 @@ class TaggerModel(Model):
 
         # If model is serializable, it can be loaded and used as-is. But if not serializable,
         #   it means we need to create an instance and load necessary details for it to be used.
-        if not is_serializable:
+        if not is_serializable and metadata.get('model_type') == 'lstm':
             model = cls(metadata["model_config"])
 
             # misc resources load

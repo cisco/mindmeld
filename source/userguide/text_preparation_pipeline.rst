@@ -104,6 +104,7 @@ regex pattern (str) and replacement string, respectively. For example: { "patter
 
     If :attr:`regex_norm_rules` are specified in the config they will be applied before other normalization rules. This includes the default normalization rules if normalization rules are not explicitly defined in the config.
 
+.. _preprocessing:
 
 Preprocessing
 --------------

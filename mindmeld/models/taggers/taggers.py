@@ -43,7 +43,7 @@ END_TAG = "END"
 
 class Tagger:
     """A class for all sequence tagger models implemented in house.
-    It is importent to follow this interface exactly when implementing a new model so that your
+    It is important to follow this interface exactly when implementing a new model so that your
     model is configured and trained as expected in the MindMeld pipeline. Note that this follows
     the sklearn estimator interface so that GridSearchCV can be used on our sequence models.
     """
