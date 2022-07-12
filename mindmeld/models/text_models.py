@@ -20,9 +20,9 @@ import operator
 import os
 import random
 
+import joblib
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-import joblib
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
