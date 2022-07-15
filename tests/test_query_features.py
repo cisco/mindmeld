@@ -289,7 +289,7 @@ def test_entity_query_features(
             "tag_scheme": "IOB",
             "feature_scaler": "max-abs",
         },
-        "params": {"C": 10, "penalty": "l2", "solver": "liblinear"},
+        "params": {"C": 10, "penalty": "l2"},
         "features": {
             "in-gaz-span-seq": {},
             "in-gaz-ngram-seq": {},
@@ -466,7 +466,7 @@ def test_entity_gaz_query_features(
             "tag_scheme": "IOB",
             "feature_scaler": "max-abs",
         },
-        "params": {"C": 10, "penalty": "l2", "solver": "liblinear"},
+        "params": {"C": 10, "penalty": "l2"},
         "features": {
             "in-gaz-span-seq": {},
             "in-gaz-ngram-seq": {},

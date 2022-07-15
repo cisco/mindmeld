@@ -46,7 +46,7 @@ class MemmModel(Tagger):
         return self
 
     def set_params(self, **parameters):
-        self._clf = LogisticRegression(solver="liblinear")
+        self._clf = LogisticRegression()
         self._clf.set_params(**parameters)
         return self
 

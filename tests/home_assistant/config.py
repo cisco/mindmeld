@@ -5,7 +5,6 @@ NLP_CONFIG = {"resolve_entities_using_nbest_transcripts": []}
 INTENT_MODEL_CONFIG = {
     "model_type": "text",
     "model_settings": {"classifier_type": "logreg"},
-    "params": {"solver": "liblinear"},
     "param_selection": {
         "type": "k-fold",
         "k": 5,
@@ -30,7 +29,6 @@ DOMAIN_MODEL_CONFIG = {
     "model_settings": {"classifier_type": "logreg"},
     "params": {
         "C": 10,
-        "solver": "liblinear"
     },
     "features": {
         "bag-of-words": {"lengths": [1, 2]},

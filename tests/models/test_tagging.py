@@ -271,7 +271,7 @@ def test_get_boundary_counts_sequential(
 
 @pytest.mark.parametrize(
     "model_type,params",
-    [("memm", {"penalty": "l2", "C": 10000, "solver": "liblinear"}), ("crf", {"c1": 0.01, "c2": 0.01}),
+    [("memm", {"penalty": "l2", "C": 10000}),
      ("torch-crf", {"feat_type": "dict"}),
      ("torch-crf", {"feat_type": "hash"})],
 )
@@ -312,7 +312,6 @@ def test_view_extracted_features(kwik_e_mart_nlp, model_type, params):
     "query,model_type,params",
     [
         ("Main st store hours", "memm", {"penalty": "l2", "C": 10000}),
-        ("Main st store hours", "crf", {"c1": 0.01, "c2": 0.01}),
         ("Main st store hours", "torch-crf", {"feat_type": "dict"}),
         ("Main st store hours", "torch-crf", {"feat_type": "hash"})
     ],
@@ -339,6 +338,7 @@ def test_fetch_distribution(kwik_e_mart_nlp, query, model_type, params):
             .intents["get_store_hours"]
             .entity_recognizer
     )
+    print(er.get_params())
     er.fit(**config)
     processed_query = kwik_e_mart_nlp.create_query(query)
     output_tags_probas = er._model.predict_proba(

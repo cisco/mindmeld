@@ -42,5 +42,4 @@ def test_parse(app_manager):
 
     fields = {"params", "request", "dialogue_state", "directives", "history"}
     for field in fields:
-        print(field)
         assert field in dict(response).keys()

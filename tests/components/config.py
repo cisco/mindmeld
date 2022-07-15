@@ -1,9 +1,6 @@
 INTENT_CLASSIFIER_CONFIG = {
     "model_type": "text",
     "model_settings": {"classifier_type": "logreg"},
-    "params": {
-        "solver": "liblinear",
-    },
     "param_selection": {
         "type": "k-fold",
         "k": 5,
@@ -34,7 +31,7 @@ def get_entity_recognizer_config(domain, intent):
             "tag_scheme": "IOB",
             "feature_scaler": "max-abs",
         },
-        "params": {"penalty": "l2", "C": 100, "solver": "liblinear"},
+        "params": {"penalty": "l2", "C": 100},
         "features": {
             "bag-of-words-seq": {
                 "ngram_lengths_to_start_positions": {
@@ -56,7 +53,7 @@ ENTITY_RECOGNIZER_CONFIG = {
         "tag_scheme": "IOB",
         "feature_scaler": "max-abs",
     },
-    "params": {"error": "intent", "penalty": "l2", "C": 100, "solver": "liblinear"},
+    "params": {"error": "intent", "penalty": "l2", "C": 100},
     "features": {
         "bag-of-words-seq": {
             "ngram_lengths_to_start_positions": {
