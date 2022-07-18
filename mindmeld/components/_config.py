@@ -45,7 +45,7 @@ DEFAULT_DOMAIN_CLASSIFIER_CONFIG = {
     "model_type": "text",
     "model_settings": {"classifier_type": "logreg"},
     "params": {
-      "solver": "liblinear",
+        "solver": "liblinear",
     },
     "param_selection": {
         "type": "k-fold",
@@ -59,7 +59,7 @@ DEFAULT_INTENT_CLASSIFIER_CONFIG = {
     "model_type": "text",
     "model_settings": {"classifier_type": "logreg"},
     "params": {
-      "solver": "liblinear",
+        "solver": "liblinear",
     },
     "param_selection": {
         "type": "k-fold",
@@ -87,7 +87,7 @@ DEFAULT_ENTITY_RECOGNIZER_CONFIG = {
         "feature_scaler": "max-abs",
     },
     "params": {
-      "solver": "liblinear",
+        "solver": "liblinear",
     },
     "param_selection": {
         "type": "k-fold",
@@ -114,7 +114,7 @@ DEFAULT_ENTITY_RESOLVER_CONFIG = {
     "model_type": "resolver",
     "model_settings": {"resolver_type": "text_relevance", },
     "params": {
-      "solver": "liblinear",
+        "solver": "liblinear",
     },
 }
 
@@ -561,6 +561,21 @@ class NlpConfigError(Exception):
     pass
 
 
+def merge_recursive_dict(default_dict, custom_dict):
+    "merges b into a"
+    for key in custom_dict:
+        if key in default_dict:
+            if isinstance(default_dict[key], dict) and isinstance(custom_dict[key], dict):
+                merge_recursive_dict(default_dict[key], custom_dict[key])
+            elif default_dict[key] == custom_dict[key]:
+                pass  # same leaf value
+            else:
+                default_dict[key] = custom_dict[key]
+        else:
+            default_dict[key] = custom_dict[key]
+    return default_dict
+
+
 def get_custom_action_config(app_path):
     if not app_path:
         return None
@@ -681,8 +696,8 @@ def get_system_entity_url_config(app_path):
 
     return (
         get_nlp_config(app_path)
-        .get("system_entity_recognizer", {})
-        .get("url", DEFAULT_DUCKLING_URL)
+            .get("system_entity_recognizer", {})
+            .get("url", DEFAULT_DUCKLING_URL)
     )
 
 
@@ -755,7 +770,7 @@ def get_classifier_config(
             try:
                 raw_args = {"domain": domain, "intent": intent, "entity": entity}
                 args = {k: raw_args[k] for k in func_args}
-                return copy.deepcopy(func(**args))
+                return merge_recursive_dict(_get_default_classifier_config(clf_type), copy.deepcopy(func(**args)))
             except Exception as exc:  # pylint: disable=broad-except
                 # Note: this is intentionally broad -- provider could raise any exception
                 logger.warning(
@@ -771,7 +786,8 @@ def get_classifier_config(
         "question_answering": "QUESTION_ANSWERER_CONFIG",
     }[clf_type]
     try:
-        return copy.deepcopy(getattr(module_conf, attr_name))
+        return merge_recursive_dict(_get_default_classifier_config(clf_type),
+                                    copy.deepcopy(getattr(module_conf, attr_name)))
     except AttributeError:
         try:
             result = copy.deepcopy(

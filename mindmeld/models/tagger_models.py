@@ -253,7 +253,8 @@ class TaggerModel(Model):
             if isinstance(self._clf, non_supported_classes):
                 raise MindMeldError(f"The {type(self._clf).__name__} model does not support cross-validation")
 
-            _, best_params = self._fit_cv(X, y, groups)
+            _, best_params = self._fit_cv(X, y, groups, fixed_params=params)
+
             self._clf = self._fit(X, y, best_params)
             self._current_params = best_params
 
