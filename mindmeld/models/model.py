@@ -429,7 +429,7 @@ class Model(AbstractModel):
     def _get_model_constructor(self):
         raise NotImplementedError
 
-    def _fit_cv(self, examples, labels, groups=None, selection_settings=None):
+    def _fit_cv(self, examples, labels, groups=None, selection_settings=None, fixed_params=None):
         """Called by the fit method when cross validation parameters are passed in. Runs cross
         validation and returns the best estimator and parameters.
 
@@ -463,6 +463,9 @@ class Model(AbstractModel):
 
         param_grid = self._convert_params(selection_settings["grid"], labels)
         model_class = self._get_model_constructor()
+        for key, val in fixed_params.items():
+            if key not in param_grid:
+                param_grid[key] = [val]
         estimator, param_grid = self._get_cv_estimator_and_params(
             model_class, param_grid
         )
