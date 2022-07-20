@@ -463,9 +463,16 @@ class Model(AbstractModel):
 
         param_grid = self._convert_params(selection_settings["grid"], labels)
         model_class = self._get_model_constructor()
-        for key, val in fixed_params.items():
-            if key not in param_grid:
-                param_grid[key] = [val]
+        if fixed_params:
+            for key, val in fixed_params.items():
+                if key not in param_grid:
+                    param_grid[key] = [val]
+                else:
+                    logger.info(
+                        "Found parameter %s both in params and param_selection. Proceeding with param_selection.. \
+                        (If you did not set this, it could be a Mindmeld default.)",
+                        key
+                    )
         estimator, param_grid = self._get_cv_estimator_and_params(
             model_class, param_grid
         )
