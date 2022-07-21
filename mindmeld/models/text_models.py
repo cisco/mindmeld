@@ -434,7 +434,7 @@ class TextModel(Model):
                 interfaces.
         """
         params = params or self.config.params
-        skip_param_selection = params is not None or self.config.param_selection is None
+        skip_param_selection = self.config.param_selection is None
 
         # Shuffle to prevent order effects
         indices = list(range(len(labels)))
@@ -454,7 +454,7 @@ class TextModel(Model):
             self._current_params = params
         else:
             # run cross validation to select params
-            best_clf, best_params = self._fit_cv(X, y, groups)
+            best_clf, best_params = self._fit_cv(X, y, groups, fixed_params=params)
             self._clf = best_clf
             self._current_params = best_params
 

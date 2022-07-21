@@ -217,7 +217,7 @@ class TaggerModel(Model):
             labels (ProcessedQueryList.EntitiesIterator): A list of expected labels.
             params (dict): Parameters of the classifier.
         """
-        skip_param_selection = params is not None or self.config.param_selection is None
+        skip_param_selection = self.config.param_selection is None
         params = params or self.config.params
 
         # Shuffle to prevent order effects
@@ -254,7 +254,6 @@ class TaggerModel(Model):
                 raise MindMeldError(f"The {type(self._clf).__name__} model does not support cross-validation")
 
             _, best_params = self._fit_cv(X, y, groups, fixed_params=params)
-
             self._clf = self._fit(X, y, best_params)
             self._current_params = best_params
 
