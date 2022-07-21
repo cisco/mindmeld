@@ -560,11 +560,12 @@ class NlpConfigError(Exception):
 
 def merge_param_configs(default_dict, user_defined_dict):
     new_dict = dict(user_defined_dict)
-    if "params" in default_dict:
-        if "params" in user_defined_dict:
-            new_dict["params"] = {**default_dict["params"], **user_defined_dict["params"]}
-        else:
-            new_dict["params"] = default_dict["params"]
+    if "params" not in default_dict:
+        return new_dict
+    if "params" in user_defined_dict:
+        new_dict["params"] = {**default_dict["params"], **user_defined_dict["params"]}
+    else:
+        new_dict["params"] = default_dict["params"]
     return new_dict
 
 
