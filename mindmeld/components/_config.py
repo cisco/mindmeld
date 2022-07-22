@@ -783,8 +783,8 @@ def get_classifier_config(
                                    copy.deepcopy(getattr(module_conf, attr_name)))
     except AttributeError:
         try:
-            result = copy.deepcopy(
-                getattr(module_conf, CONFIG_DEPRECATION_MAPPING[attr_name])
+            result = merge_param_configs(_get_default_classifier_config(clf_type), copy.deepcopy(
+                getattr(module_conf, CONFIG_DEPRECATION_MAPPING[attr_name]))
             )
             msg = (
                 "%s config is deprecated. Please use the equivalent %s config "

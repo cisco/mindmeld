@@ -175,7 +175,7 @@ class MemmModel(Tagger):
             predictions.append(list(prediction))
             tag_maps.append(
                 [
-                    self.class_encoder.inverse_transform(i) for i in range(len(prediction))
+                    self.class_encoder.inverse_transform([i]) for i in range(len(prediction))
                 ]
             )
         return [tag_maps, predictions]
