@@ -113,9 +113,6 @@ DEFAULT_ENTITY_RECOGNIZER_CONFIG = {
 DEFAULT_ENTITY_RESOLVER_CONFIG = {
     "model_type": "resolver",
     "model_settings": {"resolver_type": "text_relevance", },
-    "params": {
-        "solver": "liblinear",
-    },
 }
 
 DEFAULT_ROLE_CLASSIFIER_CONFIG = {

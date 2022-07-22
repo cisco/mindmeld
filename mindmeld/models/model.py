@@ -462,9 +462,6 @@ class Model(AbstractModel):
         n_jobs = selection_settings.get("n_jobs", -1)
 
         param_grid = self._convert_params(selection_settings["grid"], labels)
-        for key, val in fixed_params.items():
-            if key not in param_grid:
-                param_grid[key] = [val]
         model_class = self._get_model_constructor()
         if fixed_params:
             for key, val in fixed_params.items():

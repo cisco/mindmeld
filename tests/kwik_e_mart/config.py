@@ -81,6 +81,7 @@ ENTITY_RECOGNIZER_CONFIG = {
     },
 }
 
+
 TEST_ENTITY_RECOGNIZER_CONFIG = {
     "model_type": "tagger",
     "label_type": "entities",
