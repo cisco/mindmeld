@@ -411,12 +411,11 @@ class Classifier(ABC):
             if not loaded_config:
                 logger.warning("loaded_config is not passed in")
             model_config = loaded_config or {}
+            if 'params' in model_config and 'params' in kwargs:
+                kwargs['params'].update(model_config['params'])
+
             model_config.update(kwargs)
 
-            # If a parameter selection grid was passed in at runtime, override params set in the
-            # application specified or default config
-            if kwargs.get("param_selection") and not kwargs.get("params"):
-                model_config.pop("params", None)
         return ModelConfig(**model_config)
 
     def dump(self, model_path, incremental_model_path=None):

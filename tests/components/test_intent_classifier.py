@@ -74,3 +74,4 @@ def test_intent_classifier_random_forest(kwik_e_mart_app_path, caplog):
         mock.assert_any_call(
             "Unexpected param `fit_intercept`, dropping it from model config."
         )
+        mock.assert_any_call("Unexpected param `solver`, dropping it from model config.")
