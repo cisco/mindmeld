@@ -404,8 +404,7 @@ class Classifier(ABC):
             ModelConfig: The model configuration corresponding to the provided config name
         """
         if 'params' in loaded_config and 'params' in kwargs:
-            merged_params = {**loaded_config['params'], **kwargs['params']}
-            kwargs['params'] = merged_params
+            kwargs['params'] = {**loaded_config['params'], **kwargs['params']}
         try:
             # If all params required for model config were passed in, use kwargs
             return ModelConfig(**kwargs)
