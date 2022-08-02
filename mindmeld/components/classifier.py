@@ -403,6 +403,8 @@ class Classifier(ABC):
         Returns:
             ModelConfig: The model configuration corresponding to the provided config name
         """
+        if 'params' in loaded_config and 'params' in kwargs:
+            kwargs['params'] = {**loaded_config['params'], **kwargs['params']}
         try:
             # If all params required for model config were passed in, use kwargs
             return ModelConfig(**kwargs)
@@ -411,8 +413,6 @@ class Classifier(ABC):
             if not loaded_config:
                 logger.warning("loaded_config is not passed in")
             model_config = loaded_config or {}
-            if 'params' in model_config and 'params' in kwargs:
-                kwargs['params'].update(model_config['params'])
 
             model_config.update(kwargs)
 

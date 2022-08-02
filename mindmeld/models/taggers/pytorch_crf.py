@@ -294,8 +294,15 @@ class TorchCrfModel(nn.Module):
         else:
             raise MindMeldError("CRF weights not saved. Please re-train model from scratch.")
 
-    def validate_params(self):
+    def validate_params(self, kwargs):
         """Validate the argument values saved into the CRF model. """
+        for key in kwargs:
+            msg = (
+                "Unexpected param `{param}`, dropping it from model config.".format(
+                    param=key
+                )
+            )
+            logger.warning(msg)
         if self.optimizer not in ["sgd", "adam"]:
             raise MindMeldError(
                 f"Optimizer type {self.optimizer_type} not supported. Supported options are ['sgd', 'adam']")
@@ -431,7 +438,7 @@ class TorchCrfModel(nn.Module):
     # pylint: disable=too-many-arguments
     def set_params(self, feat_type="hash", feat_num=50000, stratify_train_val_split=True, drop_input=0.2, batch_size=8,
                    number_of_epochs=100, patience=3, dev_split_ratio=0.2, optimizer="sgd",
-                   random_state=None):
+                   random_state=None, **kwargs):
         """Set the parameters for the PyTorch CRF model and also validates the parameters.
 
         Args:
@@ -459,7 +466,7 @@ class TorchCrfModel(nn.Module):
         self.optimizer = optimizer  # ["sgd", "adam"]
         self.random_state = random_state or randint(1, 10000001)
 
-        self.validate_params()
+        self.validate_params(kwargs)
 
         logger.debug("Random state for torch-crf is %s", self.random_state)
         if self.feat_type == "dict":
