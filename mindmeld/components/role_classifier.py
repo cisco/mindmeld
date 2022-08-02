@@ -17,7 +17,7 @@ This module contains the role classifier component of the MindMeld natural langu
 import logging
 import pickle
 
-import joblib
+from sklearn.externals import joblib
 
 from ._config import get_classifier_config
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError

@@ -16,7 +16,7 @@ import logging
 import os
 import random
 
-import joblib
+from sklearn.externals import joblib
 
 from .evaluation import EntityModelEvaluation, EvaluatedExample
 from .helpers import (

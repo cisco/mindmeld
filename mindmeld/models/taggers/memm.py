@@ -150,7 +150,7 @@ class MemmModel(Tagger):
             X, _ = self._preprocess_data([features])
             prediction = self._clf.predict_proba(X)[0]
             predicted_tag = np.argmax(prediction)
-            prev_tag = self.class_encoder.inverse_transform([predicted_tag])[0]
+            prev_tag = self.class_encoder.inverse_transform(predicted_tag)
             seq_log_probs.append([prev_tag, prediction[predicted_tag]])
         return seq_log_probs
 
@@ -175,7 +175,7 @@ class MemmModel(Tagger):
             predictions.append(list(prediction))
             tag_maps.append(
                 [
-                    self.class_encoder.inverse_transform([i])[0] for i in range(len(prediction))
+                    self.class_encoder.inverse_transform(i) for i in range(len(prediction))
                 ]
             )
         return [tag_maps, predictions]
@@ -190,7 +190,7 @@ class MemmModel(Tagger):
                 given the full feature matrix, X and the class labels, y.
         """
         selector = {
-            "l1": SelectFromModel(LogisticRegression(penalty="l1", C=1, solver="liblinear")),
+            "l1": SelectFromModel(LogisticRegression(penalty="l1", C=1)),
             "f": SelectPercentile(),
         }.get(selector_type)
         return selector
