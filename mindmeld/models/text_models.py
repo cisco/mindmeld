@@ -20,9 +20,9 @@ import operator
 import os
 import random
 
+import joblib
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.externals import joblib
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
@@ -371,7 +371,7 @@ class TextModel(Model):
         else:
             selector_type = self.config.model_settings.get("feature_selector")
         selector = {
-            "l1": SelectFromModel(LogisticRegression(penalty="l1", C=1)),
+            "l1": SelectFromModel(LogisticRegression(penalty="l1", C=1, solver="liblinear")),
             "f": SelectPercentile(),
         }.get(selector_type)
         return selector
