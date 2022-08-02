@@ -303,7 +303,6 @@ class TorchCrfModel(nn.Module):
                 )
             )
             logger.warning(msg)
-
         if self.optimizer not in ["sgd", "adam"]:
             raise MindMeldError(
                 f"Optimizer type {self.optimizer_type} not supported. Supported options are ['sgd', 'adam']")

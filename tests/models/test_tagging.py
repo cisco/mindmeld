@@ -271,8 +271,7 @@ def test_get_boundary_counts_sequential(
 
 @pytest.mark.parametrize(
     "model_type,params",
-    [("memm", {"penalty": "l2", "C": 10000}),
-     ("torch-crf", {"feat_type": "dict"}),
+    [("memm", {"penalty": "l2", "C": 10000}), ("torch-crf", {"feat_type": "dict"}),
      ("torch-crf", {"feat_type": "hash"})],
 )
 def test_view_extracted_features(kwik_e_mart_nlp, model_type, params):
