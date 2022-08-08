@@ -6,7 +6,7 @@ from collections import Counter
 from copy import copy
 from itertools import chain
 from random import randint
-from tempfile import gettempdir
+from tempfile import mkdtemp
 
 import numpy as np
 import torch
@@ -272,7 +272,7 @@ class TorchCrfModel(nn.Module):
 
         self.best_model_save_path = None
         self.ready = False
-        self.tmp_save_path = os.path.join(gettempdir(), "best_crf_wts.pt")
+        self.tmp_save_path = os.path.join(mkdtemp(), "best_crf_wts.pt")
         # os.makedirs(os.path.dirname(self.tmp_save_path), exist_ok=True)
 
     def set_random_states(self):
@@ -287,7 +287,7 @@ class TorchCrfModel(nn.Module):
         Args:
             path (str): Path to save the best model weights.
         """
-        self.best_model_save_path = path
+        self.best_model_save_path = os.path.abspath(path)
         if os.path.exists(self.tmp_save_path):
             best_weights = torch.load(self.tmp_save_path)
             torch.save(best_weights, self.best_model_save_path)
