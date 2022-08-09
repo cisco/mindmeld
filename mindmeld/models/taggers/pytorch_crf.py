@@ -155,6 +155,9 @@ class Encoder:
         self.classes = None
         self.num_feats = num_feats
 
+    def get_feats_and_classes(self):
+        return self.num_feats, self.num_classes
+
     def get_padded_transformed_tensors(self, inputs_or_labels, seq_lens, is_label):
         """Returns the encoded and padded sparse tensor representations of the inputs/labels.
 
@@ -270,10 +273,15 @@ class TorchCrfModel(nn.Module):
         self.optimizer = None
         self.random_state = None
 
-        self.best_model_save_path = None
+        # self.best_model_save_path = None
         self.ready = False
         self.tmp_save_path = os.path.join(mkdtemp(), "best_crf_wts.pt")
-        # os.makedirs(os.path.dirname(self.tmp_save_path), exist_ok=True)
+
+    def get_encoder(self):
+        return self.encoder
+
+    def set_encoder(self, encoder):
+        self.encoder = encoder
 
     def set_random_states(self):
         """Sets the random seeds across all libraries used for deterministic output."""
@@ -287,10 +295,21 @@ class TorchCrfModel(nn.Module):
         Args:
             path (str): Path to save the best model weights.
         """
-        self.best_model_save_path = os.path.abspath(path)
         if os.path.exists(self.tmp_save_path):
             best_weights = torch.load(self.tmp_save_path)
-            torch.save(best_weights, self.best_model_save_path)
+            torch.save(best_weights, path)
+        else:
+            raise MindMeldError("CRF weights not saved. Please re-train model from scratch.")
+
+    def load_best_weights_path(self, path):
+        """Saves the best weights of the model to a path in the .generated folder.
+
+        Args:
+            path (str): Path to save the best model weights.
+        """
+        # self.best_model_save_path = os.path.abspath(path)
+        if os.path.exists(path):
+            self.load_state_dict(torch.load(path))
         else:
             raise MindMeldError("CRF weights not saved. Please re-train model from scratch.")
 
@@ -349,7 +368,7 @@ class TorchCrfModel(nn.Module):
             inputs.values()[:] = inputs.values() * dp_mask
         dense_W = torch.tile(self.W, dims=(mask.shape[0], 1))
         out_1 = torch.addmm(self.b, inputs, dense_W)
-        crf_input = out_1.reshape((mask.shape[0], -1, self.num_classes))
+        crf_input = out_1.reshape((mask.shape[0], -1, self.num_classes or self.encoder.num_classes))
         if targets is None:
             return self.crf_layer.decode(crf_input, mask=mask)
         loss = - self.crf_layer(crf_input, targets, mask=mask)
@@ -426,7 +445,7 @@ class TorchCrfModel(nn.Module):
         # SWITCHING FOR BATCH FIRST DEFAULT
         dense_W = torch.tile(self.W, dims=(mask.shape[0], 1))
         out_1 = torch.addmm(self.b, inputs, dense_W)
-        emissions = out_1.reshape((mask.shape[0], -1, self.num_classes))
+        emissions = out_1.reshape((mask.shape[0], -1, self.num_classes or self.encoder.num_classes))
         emissions = emissions.transpose(0, 1)
         mask = mask.transpose(0, 1)
         alpha = self._compute_log_alpha(emissions, mask, run_backwards=False)
@@ -516,7 +535,7 @@ class TorchCrfModel(nn.Module):
         del X, y, train_X, train_y, dev_X, dev_y, stratify_tuples
         gc.collect()
 
-        self.build_params(self.encoder.num_feats, self.encoder.num_classes)
+        self.build_params(*self.encoder.get_feats_and_classes())
 
         if self.optimizer == "sgd":
             self.optim = optim.SGD(self.parameters(), lr=0.01, momentum=0.9, nesterov=True, weight_decay=1e-5)
@@ -524,7 +543,7 @@ class TorchCrfModel(nn.Module):
             self.optim = optim.Adam(self.parameters(), weight_decay=1e-5)
 
         self.training_loop(train_dataloader, dev_dataloader)
-        self.ready = True
+        self.load_state_dict(torch.load(self.tmp_save_path))
 
     def training_loop(self, train_dataloader, dev_dataloader):
         """Contains the training loop process where we train the model for specified number of epochs.
@@ -605,13 +624,6 @@ class TorchCrfModel(nn.Module):
         Returns:
             marginals_dict (list of list of dicts): Returns the probability of every tag for each token in a sequence.
         """
-        if self.ready:
-            if self.best_model_save_path:
-                self.load_state_dict(torch.load(self.best_model_save_path))
-            else:
-                self.load_state_dict(torch.load(self.tmp_save_path))
-        else:
-            raise MindMeldError("PyTorch-CRF Model does not seem to be trained. Train before running predictions.")
         dataloader = self.get_dataloader(X, None, is_train=False)
         marginals_dict = []
         self.eval()
@@ -639,13 +651,6 @@ class TorchCrfModel(nn.Module):
         Returns:
             preds (list of lists): Predictions for each token in each sequence.
         """
-        if self.ready:
-            if self.best_model_save_path:
-                self.load_state_dict(torch.load(self.best_model_save_path))
-            else:
-                self.load_state_dict(torch.load(self.tmp_save_path))
-        else:
-            raise MindMeldError("PyTorch-CRF Model does not seem to be trained. Train before running predictions.")
         dataloader = self.get_dataloader(X, None, is_train=False)
 
         preds = self.run_predictions(dataloader, calc_f1=False)
