@@ -273,8 +273,6 @@ class TorchCrfModel(nn.Module):
         self.optimizer = None
         self.random_state = None
 
-        # self.best_model_save_path = None
-        self.ready = False
         self.tmp_save_path = os.path.join(mkdtemp(), "best_crf_wts.pt")
 
     def get_encoder(self):
@@ -368,7 +366,7 @@ class TorchCrfModel(nn.Module):
             inputs.values()[:] = inputs.values() * dp_mask
         dense_W = torch.tile(self.W, dims=(mask.shape[0], 1))
         out_1 = torch.addmm(self.b, inputs, dense_W)
-        crf_input = out_1.reshape((mask.shape[0], -1, self.num_classes or self.encoder.num_classes))
+        crf_input = out_1.reshape((mask.shape[0], -1, self.num_classes))
         if targets is None:
             return self.crf_layer.decode(crf_input, mask=mask)
         loss = - self.crf_layer(crf_input, targets, mask=mask)
@@ -445,7 +443,7 @@ class TorchCrfModel(nn.Module):
         # SWITCHING FOR BATCH FIRST DEFAULT
         dense_W = torch.tile(self.W, dims=(mask.shape[0], 1))
         out_1 = torch.addmm(self.b, inputs, dense_W)
-        emissions = out_1.reshape((mask.shape[0], -1, self.num_classes or self.encoder.num_classes))
+        emissions = out_1.reshape((mask.shape[0], -1, self.num_classes))
         emissions = emissions.transpose(0, 1)
         mask = mask.transpose(0, 1)
         alpha = self._compute_log_alpha(emissions, mask, run_backwards=False)
