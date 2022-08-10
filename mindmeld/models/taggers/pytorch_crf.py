@@ -293,11 +293,7 @@ class TorchCrfModel(nn.Module):
         Args:
             path (str): Path to save the best model weights.
         """
-        if os.path.exists(self.tmp_save_path):
-            best_weights = torch.load(self.tmp_save_path)
-            torch.save(best_weights, path)
-        else:
-            raise MindMeldError("CRF weights not saved. Please re-train model from scratch.")
+        torch.save(self.state_dict(), path)
 
     def load_best_weights_path(self, path):
         """Saves the best weights of the model to a path in the .generated folder.
