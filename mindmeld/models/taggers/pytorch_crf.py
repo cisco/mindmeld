@@ -23,6 +23,8 @@ from ...exceptions import MindMeldError
 
 logger = logging.getLogger(__name__)
 
+TEST_BATCH_SIZE = 512
+
 
 class TaggerDataset(Dataset):
     """PyTorch Dataset class used to handle tagger inputs, labels and mask"""
@@ -301,7 +303,6 @@ class TorchCrfModel(nn.Module):
         Args:
             path (str): Path to save the best model weights.
         """
-        # self.best_model_save_path = os.path.abspath(path)
         if os.path.exists(path):
             self.load_state_dict(torch.load(path))
         else:
@@ -500,8 +501,8 @@ class TorchCrfModel(nn.Module):
         """
         tensor_inputs, input_seq_lens, tensor_labels = self._encoder.get_tensor_data(X, y, fit=is_train)
         tensor_dataset = TaggerDataset(tensor_inputs, input_seq_lens, tensor_labels)
-        torch_dataloader = DataLoader(tensor_dataset, batch_size=self.batch_size if is_train else 512, shuffle=is_train,
-                                      collate_fn=collate_tensors_and_masks)
+        torch_dataloader = DataLoader(tensor_dataset, batch_size=self.batch_size if is_train else TEST_BATCH_SIZE,
+                                      shuffle=is_train, collate_fn=collate_tensors_and_masks)
         return torch_dataloader
 
     def fit(self, X, y):
@@ -534,7 +535,7 @@ class TorchCrfModel(nn.Module):
         if self.optimizer == "sgd":
             self.optim = optim.SGD(self.parameters(), lr=0.01, momentum=0.9, nesterov=True, weight_decay=1e-5)
         if self.optimizer == "adam":
-            self.optim = optim.Adam(self.parameters(), weight_decay=1e-5)
+            self.optim = optim.Adam(self.parameters(), lr=0.001, weight_decay=1e-5)
 
         self.training_loop(train_dataloader, dev_dataloader)
         self.load_state_dict(torch.load(self.tmp_save_path))
