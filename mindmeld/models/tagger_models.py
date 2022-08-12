@@ -399,7 +399,8 @@ class TaggerModel(Model):
             self._clf.dump(path)
             if isinstance(self._clf, TorchCrfTagger):
                 metadata.update({
-                    "model": self,
+                    "model_config": self.config,
+                    "feature_and_label_encoder": self._clf.get_torch_encoder(),
                     "model_type": "torch-crf"
                 })
             elif isinstance(self._clf, LstmModel):
@@ -432,25 +433,31 @@ class TaggerModel(Model):
 
         # If model is serializable, it can be loaded and used as-is. But if not serializable,
         #   it means we need to create an instance and load necessary details for it to be used.
-        if not is_serializable and metadata.get('model_type') == 'lstm':
+        if not is_serializable:
             model = cls(metadata["model_config"])
+            if metadata.get('model_type') == 'lstm':
 
-            # misc resources load
-            try:
-                model._current_params = metadata["current_params"]
-                model._label_encoder = metadata["label_encoder"]
-                model._no_entities = metadata["no_entities"]
-            except KeyError:  # backwards compatability
-                model_dir = metadata["model"]
-                tagger_vars = joblib.load(model_dir, ".tagger_vars")
-                model._current_params = tagger_vars["current_params"]
-                model._label_encoder = tagger_vars["label_encoder"]
-                model._no_entities = tagger_vars["no_entities"]
+                # misc resources load
+                try:
+                    model._current_params = metadata["current_params"]
+                    model._label_encoder = metadata["label_encoder"]
+                    model._no_entities = metadata["no_entities"]
+                except KeyError:  # backwards compatability
+                    model_dir = metadata["model"]
+                    tagger_vars = joblib.load(model_dir, ".tagger_vars")
+                    model._current_params = tagger_vars["current_params"]
+                    model._label_encoder = tagger_vars["label_encoder"]
+                    model._no_entities = tagger_vars["no_entities"]
 
-            # underneath tagger load
-            model._clf.load(model_dir)
+                # underneath tagger load
+                model._clf.load(model_dir)
 
-            # replace model dump directory with actual model
+                # replace model dump directory with actual model
+            elif metadata.get('model_type') == 'torch-crf':
+                model._clf.set_params(**metadata["model_config"].params)
+                model._clf.set_torch_encoder(metadata['feature_and_label_encoder'])
+                model._clf.load(path)
+
             metadata["model"] = model
 
         return metadata["model"]

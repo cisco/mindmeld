@@ -331,6 +331,17 @@ class TorchCrfTagger(Tagger):
         best_model_save_path = os.path.join(os.path.split(path)[0], "best_crf_wts.pt")
         self._clf.save_best_weights_path(best_model_save_path)
 
+    def load(self, path):
+        best_model_save_path = os.path.join(os.path.split(path)[0], "best_crf_wts.pt")
+        self._clf.build_params(*self.get_torch_encoder().get_feats_and_classes())
+        self._clf.load_best_weights_path(best_model_save_path)
+
+    def get_torch_encoder(self):
+        return self._clf.get_encoder()
+
+    def set_torch_encoder(self, encoder):
+        self._clf.set_encoder(encoder)
+
 
 # Feature extraction for CRF
 
