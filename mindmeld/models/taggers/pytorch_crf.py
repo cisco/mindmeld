@@ -274,6 +274,7 @@ class TorchCrfModel(nn.Module):
         self.dev_split_ratio = None
         self.optimizer = None
         self.random_state = None
+        self.keep_validation_fixed = None
 
         self.tmp_save_path = os.path.join(mkdtemp(), "best_crf_wts.pt")
 
@@ -317,7 +318,7 @@ class TorchCrfModel(nn.Module):
                 )
             )
             logger.warning(msg)
-        if self.optimizer not in ["sgd", "adam"]:
+        if self.optimizer not in ["sgd", "adam", "lbfgs"]:
             raise MindMeldError(
                 f"Optimizer type {self.optimizer_type} not supported. Supported options are ['sgd', 'adam']")
         if self.feat_type not in ["hash", "dict"]:
@@ -451,7 +452,7 @@ class TorchCrfModel(nn.Module):
 
     # pylint: disable=too-many-arguments
     def set_params(self, feat_type="hash", feat_num=50000, stratify_train_val_split=True, drop_input=0.2, batch_size=8,
-                   number_of_epochs=100, patience=3, dev_split_ratio=0.2, optimizer="sgd",
+                   number_of_epochs=100, patience=3, dev_split_ratio=0.2, optimizer="sgd", keep_validation_fixed=True,
                    random_state=None, **kwargs):
         """Set the parameters for the PyTorch CRF model and also validates the parameters.
 
@@ -477,7 +478,8 @@ class TorchCrfModel(nn.Module):
         self.patience = patience
         self.number_of_epochs = number_of_epochs
         self.dev_split_ratio = dev_split_ratio
-        self.optimizer = optimizer  # ["sgd", "adam"]
+        self.optimizer = optimizer  # ["sgd", "adam", "lbfgs"]
+        self.keep_validation_fixed = keep_validation_fixed
         self.random_state = random_state or randint(1, 10000001)
 
         self.validate_params(kwargs)
@@ -520,11 +522,14 @@ class TorchCrfModel(nn.Module):
             X, y, stratify_tuples = stratify_input(X, y)
 
         # TODO: Rewrite our own train_test_split function to handle FileBackedList and avoid duplicating unique labels
-        train_X, dev_X, train_y, dev_y = train_test_split(X, y, test_size=self.dev_split_ratio,
-                                                          stratify=stratify_tuples, random_state=self.random_state)
+        if self.keep_validation_fixed:
+            train_X, dev_X, train_y, dev_y = train_test_split(X, y, test_size=self.dev_split_ratio,
+                                                              stratify=stratify_tuples, random_state=self.random_state)
+        else:
+            train_X, dev_X, train_y, dev_y = X, None, y, None
 
         train_dataloader = self.get_dataloader(train_X, train_y, is_train=True)
-        dev_dataloader = self.get_dataloader(dev_X, dev_y, is_train=False)
+        dev_dataloader = self.get_dataloader(dev_X, dev_y, is_train=False) if dev_X else None
 
         # desperate attempt to save some memory
         del X, y, train_X, train_y, dev_X, dev_y, stratify_tuples
@@ -536,6 +541,8 @@ class TorchCrfModel(nn.Module):
             self.optim = optim.SGD(self.parameters(), lr=0.01, momentum=0.9, nesterov=True, weight_decay=1e-5)
         if self.optimizer == "adam":
             self.optim = optim.Adam(self.parameters(), lr=0.001, weight_decay=1e-5)
+        if self.optimizer == "lbfgs":
+            self.optim = optim.LBFGS(self.parameters(), lr=1, line_search_fn="strong_wolfe")
 
         self.training_loop(train_dataloader, dev_dataloader)
         self.load_state_dict(torch.load(self.tmp_save_path))
@@ -550,13 +557,15 @@ class TorchCrfModel(nn.Module):
 
         best_dev_score, best_dev_epoch = -np.inf, -1
         _patience_counter = 0
+        if not self.keep_validation_fixed:
+            dev_dataloader = train_dataloader
 
         for epoch in range(self.number_of_epochs):
             if _patience_counter >= self.patience:
                 break
             self.train_one_epoch(train_dataloader)
             dev_f1_score = self.run_predictions(dev_dataloader, calc_f1=True)
-            logger.debug("Epoch %s finished. Dev F1: %s", epoch, dev_f1_score)
+            logger.info("Epoch %s finished. Dev F1: %s", epoch, dev_f1_score)
 
             if dev_f1_score <= best_dev_score:
                 _patience_counter += 1
@@ -575,11 +584,19 @@ class TorchCrfModel(nn.Module):
         self.train()
         train_loss = 0
         for batch_idx, (inputs, mask, labels) in enumerate(train_dataloader):
-            self.optim.zero_grad()
-            loss = self.forward(inputs, labels, mask, drop_input=self.drop_input)
-            train_loss += loss.item()
-            loss.backward()
-            self.optim.step()
+            def closure():
+                nonlocal train_loss
+                self.optim.zero_grad()
+                loss = self.forward(inputs, labels, mask, drop_input=self.drop_input)
+                train_loss += loss.item()
+                loss.backward()
+                return loss
+
+            if self.optimizer == "lbfgs":
+                self.optim.step(closure)
+            else:
+                closure()
+                self.optim.step()
             if batch_idx % 20 == 0:
                 logger.debug("Batch: %s Mean Loss: %s", batch_idx,
                              (train_loss / (batch_idx + 1)))
@@ -596,6 +613,8 @@ class TorchCrfModel(nn.Module):
         self.eval()
         predictions = []
         targets = []
+        num_val_samples = 0
+        reqd_num_val_samples = int(self.dev_split_ratio * len(dataloader.dataset))
         with torch.no_grad():
             for inputs, *mask_and_labels in dataloader:
                 if calc_f1:
@@ -605,6 +624,10 @@ class TorchCrfModel(nn.Module):
                     mask = mask_and_labels.pop()
                 preds = self.forward(inputs, None, mask)
                 predictions.extend([x for lst in preds for x in lst] if calc_f1 else preds)
+                if not self.keep_validation_fixed:
+                    num_val_samples += len(preds)
+                    if num_val_samples >= reqd_num_val_samples:
+                        break
         if calc_f1:
             dev_score = f1_score(targets, predictions, average='weighted')
             return dev_score
