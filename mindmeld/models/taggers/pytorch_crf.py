@@ -258,6 +258,7 @@ class TorchCrfModel(nn.Module):
     def __init__(self):
         super().__init__()
         self.optim = None
+        self.scheduler = None
         self._encoder = None
         self.W = None
         self.b = None
@@ -273,6 +274,7 @@ class TorchCrfModel(nn.Module):
         self.number_of_epochs = None
         self.dev_split_ratio = None
         self.optimizer = None
+        self.reg_weight = None
         self.random_state = None
 
         self.tmp_save_path = os.path.join(mkdtemp(), "best_crf_wts.pt")
@@ -457,7 +459,7 @@ class TorchCrfModel(nn.Module):
 
     # pylint: disable=too-many-arguments
     def set_params(self, feat_type="hash", feat_num=50000, stratify_train_val_split=True, drop_input=0.2, batch_size=8,
-                   number_of_epochs=100, patience=3, dev_split_ratio=0.2, optimizer="sgd",
+                   number_of_epochs=100, patience=3, dev_split_ratio=0.2, optimizer="sgd", reg_weight=0,
                    random_state=None, **kwargs):
         """Set the parameters for the PyTorch CRF model and also validates the parameters.
 
@@ -484,6 +486,7 @@ class TorchCrfModel(nn.Module):
         self.number_of_epochs = number_of_epochs
         self.dev_split_ratio = dev_split_ratio
         self.optimizer = optimizer  # ["sgd", "adam"]
+        self.reg_weight = reg_weight
         self.random_state = random_state or randint(1, 10000001)
 
         self.validate_params(kwargs)
@@ -539,9 +542,13 @@ class TorchCrfModel(nn.Module):
         self.build_params(*self._encoder.get_feats_and_classes())
 
         if self.optimizer == "sgd":
-            self.optim = optim.SGD(self.parameters(), lr=0.01, momentum=0.9, nesterov=True, weight_decay=0.01)
+            self.optim = optim.SGD(self.parameters(), lr=0.01, momentum=0.9, nesterov=True,
+                                   weight_decay=self.reg_weight)
         if self.optimizer == "adam":
-            self.optim = optim.Adam(self.parameters(), lr=0.001, weight_decay=0.01)
+            self.optim = optim.Adam(self.parameters(), lr=0.001, weight_decay=self.reg_weight)
+
+        self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(self.optim, mode='max', patience=self.patience - 2,
+                                                              factor=0.5)
 
         self.training_loop(train_dataloader, dev_dataloader)
         self.load_state_dict(torch.load(self.tmp_save_path))
@@ -563,6 +570,7 @@ class TorchCrfModel(nn.Module):
             self.train_one_epoch(train_dataloader)
             dev_f1_score = self.run_predictions(dev_dataloader, calc_f1=True)
             logger.info("Epoch %s finished. Dev F1: %s", epoch, dev_f1_score)
+            self.scheduler.step(dev_f1_score)
 
             if dev_f1_score <= best_dev_score:
                 _patience_counter += 1
@@ -583,82 +591,85 @@ class TorchCrfModel(nn.Module):
         for batch_idx, (inputs, mask, labels) in enumerate(train_dataloader):
             self.optim.zero_grad()
             loss = self.forward(inputs, labels, mask, drop_input=self.drop_input)
+            if self.reg_weight > 0:
+                l1_parameters = []
+                for parameter in self.parameters():
+                    l1_parameters.append(parameter.view(-1))
+                l1 = self.reg_weight * self.compute_l1_loss(torch.cat(l1_parameters))
+                loss += l1
             train_loss += loss.item()
-            l1_weight = 0.01
-            l1_parameters = []
-            for parameter in self.parameters():
-                l1_parameters.append(parameter.view(-1))
-            l1 = l1_weight * self.compute_l1_loss(torch.cat(l1_parameters))
-            loss += l1
             loss.backward()
             self.optim.step()
             if batch_idx % 20 == 0:
                 logger.debug("Batch: %s Mean Loss: %s", batch_idx,
                              (train_loss / (batch_idx + 1)))
 
-    def run_predictions(self, dataloader, calc_f1=False):
-        """Get predictions for the data by running a inference pass of the model.
 
-        Args:
-           dataloader (torch.utils.data.dataloader.DataLoader): Dataloader for test/validation data
-            calc_f1 (bool): Flag to return dev f1 score or return predictions for each token.
-        Returns:
-            Dev F1 score or predictions for each token in a sequence.
-        """
-        self.eval()
-        predictions = []
-        targets = []
-        with torch.no_grad():
-            for inputs, *mask_and_labels in dataloader:
-                if calc_f1:
-                    mask, labels = mask_and_labels
-                    targets.extend(torch.masked_select(labels, mask).tolist())
-                else:
-                    mask = mask_and_labels.pop()
-                preds = self.forward(inputs, None, mask)
-                predictions.extend([x for lst in preds for x in lst] if calc_f1 else preds)
-        if calc_f1:
-            dev_score = f1_score(targets, predictions, average='weighted')
-            return dev_score
-        else:
-            return predictions
+def run_predictions(self, dataloader, calc_f1=False):
+    """Get predictions for the data by running a inference pass of the model.
 
-    def predict_marginals(self, X):
-        """Get marginal probabilites for each tag per token for each sequence.
+    Args:
+       dataloader (torch.utils.data.dataloader.DataLoader): Dataloader for test/validation data
+        calc_f1 (bool): Flag to return dev f1 score or return predictions for each token.
+    Returns:
+        Dev F1 score or predictions for each token in a sequence.
+    """
+    self.eval()
+    predictions = []
+    targets = []
+    with torch.no_grad():
+        for inputs, *mask_and_labels in dataloader:
+            if calc_f1:
+                mask, labels = mask_and_labels
+                targets.extend(torch.masked_select(labels, mask).tolist())
+            else:
+                mask = mask_and_labels.pop()
+            preds = self.forward(inputs, None, mask)
+            predictions.extend([x for lst in preds for x in lst] if calc_f1 else preds)
+    if calc_f1:
+        dev_score = f1_score(targets, predictions, average='weighted')
+        return dev_score
+    else:
+        return predictions
 
-        Args:
-            X (list of list of dicts): Feature vectors for data to predict marginal probabilities on.
-        Returns:
-            marginals_dict (list of list of dicts): Returns the probability of every tag for each token in a sequence.
-        """
-        dataloader = self.get_dataloader(X, None, is_train=False)
-        marginals_dict = []
-        self.eval()
-        with torch.no_grad():
-            for inputs, mask in dataloader:
-                probs = self.compute_marginal_probabilities(inputs, mask).tolist()
-                mask = mask.tolist()
 
-                # This is basically to create a nested list-dict structure in which we have the probability values
-                # for each token for each sequence.
-                for seq, mask_seq in zip(probs, mask):
-                    one_seq_list = []
-                    for (token_probs, valid_token) in zip(seq, mask_seq):
-                        if valid_token:
-                            one_seq_list.append(dict(zip(self._encoder.classes, token_probs)))
-                    marginals_dict.append(one_seq_list)
+def predict_marginals(self, X):
+    """Get marginal probabilites for each tag per token for each sequence.
 
-        return marginals_dict
+    Args:
+        X (list of list of dicts): Feature vectors for data to predict marginal probabilities on.
+    Returns:
+        marginals_dict (list of list of dicts): Returns the probability of every tag for each token in a sequence.
+    """
+    dataloader = self.get_dataloader(X, None, is_train=False)
+    marginals_dict = []
+    self.eval()
+    with torch.no_grad():
+        for inputs, mask in dataloader:
+            probs = self.compute_marginal_probabilities(inputs, mask).tolist()
+            mask = mask.tolist()
 
-    def predict(self, X):
-        """Gets predicted labels for the data.
+            # This is basically to create a nested list-dict structure in which we have the probability values
+            # for each token for each sequence.
+            for seq, mask_seq in zip(probs, mask):
+                one_seq_list = []
+                for (token_probs, valid_token) in zip(seq, mask_seq):
+                    if valid_token:
+                        one_seq_list.append(dict(zip(self._encoder.classes, token_probs)))
+                marginals_dict.append(one_seq_list)
 
-        Args:
-            X (list of list of dicts): Feature vectors for data to predict labels on.
-        Returns:
-            preds (list of lists): Predictions for each token in each sequence.
-        """
-        dataloader = self.get_dataloader(X, None, is_train=False)
+    return marginals_dict
 
-        preds = self.run_predictions(dataloader, calc_f1=False)
-        return [self._encoder.label_encoder.inverse_transform(x).tolist() for x in preds]
+
+def predict(self, X):
+    """Gets predicted labels for the data.
+
+    Args:
+        X (list of list of dicts): Feature vectors for data to predict labels on.
+    Returns:
+        preds (list of lists): Predictions for each token in each sequence.
+    """
+    dataloader = self.get_dataloader(X, None, is_train=False)
+
+    preds = self.run_predictions(dataloader, calc_f1=False)
+    return [self._encoder.label_encoder.inverse_transform(x).tolist() for x in preds]
