@@ -319,9 +319,9 @@ class TorchCrfModel(nn.Module):
                 )
             )
             logger.warning(msg)
-        if self.optimizer not in ["sgd", "adam"]:
+        if self.optimizer not in ["sgd", "adam", "lbfgs"]:
             raise MindMeldError(
-                f"Optimizer type {self.optimizer_type} not supported. Supported options are ['sgd', 'adam']")
+                f"Optimizer type {self.optimizer_type} not supported. Supported options are ['sgd', 'adam', 'lbfgs']")
         if self.feat_type not in ["hash", "dict"]:
             raise MindMeldError(f"Feature type {self.feat_type} not supported. Supported options are ['hash', 'dict']")
         if not 0 < self.dev_split_ratio < 1:
@@ -368,14 +368,24 @@ class TorchCrfModel(nn.Module):
         crf_input = out_1.reshape((mask.shape[0], -1, self.num_classes))
         if targets is None:
             return self.crf_layer.decode(crf_input, mask=mask)
-        loss = - self.crf_layer(crf_input, targets, mask=mask)
+        loss = - self.crf_layer(crf_input, targets, mask=mask, reduction='mean')
         return loss
 
-    def compute_l1_loss(self, w):
+    def compute_l1_params(self, w):
         return torch.abs(w).sum()
 
-    def compute_l2_loss(self, w):
+    def compute_l2_params(self, w):
         return torch.square(w).sum()
+
+    def compute_regularized_loss(self, l1):
+        model_parameters = []
+        for parameter in self.parameters():
+            model_parameters.append(parameter.view(-1))
+        if l1:
+            reg_loss = self.reg_weight * self.compute_l1_params(torch.cat(model_parameters))
+        else:
+            reg_loss = self.reg_weight * self.compute_l2_params(torch.cat(model_parameters))
+        return reg_loss
 
     def _compute_log_alpha(self, emissions, mask, run_backwards):
         """Function used to calculate the alpha and beta probabilities of each token/tag probability.
@@ -508,6 +518,8 @@ class TorchCrfModel(nn.Module):
             torch_dataloader (torch.utils.data.dataloader.DataLoader): returns PyTorch dataloader object that can be
             used to iterate across the data.
         """
+        if self.optimizer == "lbfgs" and is_train:
+            self.batch_size = len(X)
         tensor_inputs, input_seq_lens, tensor_labels = self._encoder.get_tensor_data(X, y, fit=is_train)
         tensor_dataset = TaggerDataset(tensor_inputs, input_seq_lens, tensor_labels)
         torch_dataloader = DataLoader(tensor_dataset, batch_size=self.batch_size if is_train else TEST_BATCH_SIZE,
@@ -547,7 +559,12 @@ class TorchCrfModel(nn.Module):
         if self.optimizer == "adam":
             self.optim = optim.Adam(self.parameters(), lr=0.001, weight_decay=self.reg_weight)
 
-        self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(self.optim, mode='max', patience=self.patience - 2,
+        if self.optimizer == "lbfgs":
+            self.optim = optim.LBFGS(self.parameters(), lr=1, max_iter=100, history_size=6,
+                                     line_search_fn="strong_wolfe")
+
+        self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(self.optim, mode='max',
+                                                              patience=max(self.patience - 2, 1),
                                                               factor=0.5)
 
         self.training_loop(train_dataloader, dev_dataloader)
@@ -589,21 +606,24 @@ class TorchCrfModel(nn.Module):
         self.train()
         train_loss = 0
         for batch_idx, (inputs, mask, labels) in enumerate(train_dataloader):
-            self.optim.zero_grad()
-            loss = self.forward(inputs, labels, mask, drop_input=self.drop_input)
-            if self.reg_weight > 0:
-                l1_parameters = []
-                for parameter in self.parameters():
-                    l1_parameters.append(parameter.view(-1))
-                l1 = self.reg_weight * self.compute_l1_loss(torch.cat(l1_parameters))
-                loss += l1
-            train_loss += loss.item()
-            loss.backward()
-            self.optim.step()
+            def closure():
+                nonlocal train_loss
+                self.optim.zero_grad()
+                loss = self.forward(inputs, labels, mask, drop_input=self.drop_input)
+                if self.reg_weight > 0:
+                    loss += (self.compute_regularized_loss(l1=True) + self.compute_regularized_loss(l1=False))
+                train_loss += loss.item()
+                loss.backward()
+                return loss
+
+            if self.optimizer == "lbfgs":
+                self.optim.step(closure)
+            else:
+                closure()
+                self.optim.step()
             if batch_idx % 20 == 0:
                 logger.debug("Batch: %s Mean Loss: %s", batch_idx,
                              (train_loss / (batch_idx + 1)))
-
 
     def run_predictions(self, dataloader, calc_f1=False):
         """Get predictions for the data by running a inference pass of the model.
@@ -632,7 +652,6 @@ class TorchCrfModel(nn.Module):
         else:
             return predictions
 
-
     def predict_marginals(self, X):
         """Get marginal probabilites for each tag per token for each sequence.
 
@@ -659,7 +678,6 @@ class TorchCrfModel(nn.Module):
                     marginals_dict.append(one_seq_list)
 
         return marginals_dict
-
 
     def predict(self, X):
         """Gets predicted labels for the data.
