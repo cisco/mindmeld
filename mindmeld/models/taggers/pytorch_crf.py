@@ -605,71 +605,71 @@ class TorchCrfModel(nn.Module):
                              (train_loss / (batch_idx + 1)))
 
 
-def run_predictions(self, dataloader, calc_f1=False):
-    """Get predictions for the data by running a inference pass of the model.
+    def run_predictions(self, dataloader, calc_f1=False):
+        """Get predictions for the data by running a inference pass of the model.
 
-    Args:
-       dataloader (torch.utils.data.dataloader.DataLoader): Dataloader for test/validation data
-        calc_f1 (bool): Flag to return dev f1 score or return predictions for each token.
-    Returns:
-        Dev F1 score or predictions for each token in a sequence.
-    """
-    self.eval()
-    predictions = []
-    targets = []
-    with torch.no_grad():
-        for inputs, *mask_and_labels in dataloader:
-            if calc_f1:
-                mask, labels = mask_and_labels
-                targets.extend(torch.masked_select(labels, mask).tolist())
-            else:
-                mask = mask_and_labels.pop()
-            preds = self.forward(inputs, None, mask)
-            predictions.extend([x for lst in preds for x in lst] if calc_f1 else preds)
-    if calc_f1:
-        dev_score = f1_score(targets, predictions, average='weighted')
-        return dev_score
-    else:
-        return predictions
-
-
-def predict_marginals(self, X):
-    """Get marginal probabilites for each tag per token for each sequence.
-
-    Args:
-        X (list of list of dicts): Feature vectors for data to predict marginal probabilities on.
-    Returns:
-        marginals_dict (list of list of dicts): Returns the probability of every tag for each token in a sequence.
-    """
-    dataloader = self.get_dataloader(X, None, is_train=False)
-    marginals_dict = []
-    self.eval()
-    with torch.no_grad():
-        for inputs, mask in dataloader:
-            probs = self.compute_marginal_probabilities(inputs, mask).tolist()
-            mask = mask.tolist()
-
-            # This is basically to create a nested list-dict structure in which we have the probability values
-            # for each token for each sequence.
-            for seq, mask_seq in zip(probs, mask):
-                one_seq_list = []
-                for (token_probs, valid_token) in zip(seq, mask_seq):
-                    if valid_token:
-                        one_seq_list.append(dict(zip(self._encoder.classes, token_probs)))
-                marginals_dict.append(one_seq_list)
-
-    return marginals_dict
+        Args:
+           dataloader (torch.utils.data.dataloader.DataLoader): Dataloader for test/validation data
+            calc_f1 (bool): Flag to return dev f1 score or return predictions for each token.
+        Returns:
+            Dev F1 score or predictions for each token in a sequence.
+        """
+        self.eval()
+        predictions = []
+        targets = []
+        with torch.no_grad():
+            for inputs, *mask_and_labels in dataloader:
+                if calc_f1:
+                    mask, labels = mask_and_labels
+                    targets.extend(torch.masked_select(labels, mask).tolist())
+                else:
+                    mask = mask_and_labels.pop()
+                preds = self.forward(inputs, None, mask)
+                predictions.extend([x for lst in preds for x in lst] if calc_f1 else preds)
+        if calc_f1:
+            dev_score = f1_score(targets, predictions, average='weighted')
+            return dev_score
+        else:
+            return predictions
 
 
-def predict(self, X):
-    """Gets predicted labels for the data.
+    def predict_marginals(self, X):
+        """Get marginal probabilites for each tag per token for each sequence.
 
-    Args:
-        X (list of list of dicts): Feature vectors for data to predict labels on.
-    Returns:
-        preds (list of lists): Predictions for each token in each sequence.
-    """
-    dataloader = self.get_dataloader(X, None, is_train=False)
+        Args:
+            X (list of list of dicts): Feature vectors for data to predict marginal probabilities on.
+        Returns:
+            marginals_dict (list of list of dicts): Returns the probability of every tag for each token in a sequence.
+        """
+        dataloader = self.get_dataloader(X, None, is_train=False)
+        marginals_dict = []
+        self.eval()
+        with torch.no_grad():
+            for inputs, mask in dataloader:
+                probs = self.compute_marginal_probabilities(inputs, mask).tolist()
+                mask = mask.tolist()
 
-    preds = self.run_predictions(dataloader, calc_f1=False)
-    return [self._encoder.label_encoder.inverse_transform(x).tolist() for x in preds]
+                # This is basically to create a nested list-dict structure in which we have the probability values
+                # for each token for each sequence.
+                for seq, mask_seq in zip(probs, mask):
+                    one_seq_list = []
+                    for (token_probs, valid_token) in zip(seq, mask_seq):
+                        if valid_token:
+                            one_seq_list.append(dict(zip(self._encoder.classes, token_probs)))
+                    marginals_dict.append(one_seq_list)
+
+        return marginals_dict
+
+
+    def predict(self, X):
+        """Gets predicted labels for the data.
+
+        Args:
+            X (list of list of dicts): Feature vectors for data to predict labels on.
+        Returns:
+            preds (list of lists): Predictions for each token in each sequence.
+        """
+        dataloader = self.get_dataloader(X, None, is_train=False)
+
+        preds = self.run_predictions(dataloader, calc_f1=False)
+        return [self._encoder.label_encoder.inverse_transform(x).tolist() for x in preds]
