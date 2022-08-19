@@ -611,7 +611,9 @@ class TorchCrfModel(nn.Module):
                 self.optim.zero_grad()
                 loss = self.forward(inputs, labels, mask, drop_input=self.drop_input)
                 if self.reg_weight > 0:
-                    loss += (self.compute_regularized_loss(l1=True) + self.compute_regularized_loss(l1=False))
+                    if self.optimizer == "lbfgs":
+                        loss += self.compute_regularized_loss(l1=False)
+                    loss += self.compute_regularized_loss(l1=True)
                 train_loss += loss.item()
                 loss.backward()
                 return loss
