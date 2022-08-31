@@ -251,6 +251,14 @@ class Encoder:
         return label_tensor
 
 
+def compute_l1_params(w):
+    return torch.abs(w).sum()
+
+
+def compute_l2_params(w):
+    return torch.square(w).sum()
+
+
 # pylint: disable=too-many-instance-attributes
 class TorchCrfModel(nn.Module):
     """PyTorch Model Class for Conditional Random Fields"""
@@ -371,20 +379,14 @@ class TorchCrfModel(nn.Module):
         loss = - self.crf_layer(crf_input, targets, mask=mask, reduction='mean')
         return loss
 
-    def compute_l1_params(self, w):
-        return torch.abs(w).sum()
-
-    def compute_l2_params(self, w):
-        return torch.square(w).sum()
-
     def compute_regularized_loss(self, l1):
         model_parameters = []
         for parameter in self.parameters():
             model_parameters.append(parameter.view(-1))
         if l1:
-            reg_loss = self.reg_weight * self.compute_l1_params(torch.cat(model_parameters))
+            reg_loss = self.reg_weight * compute_l1_params(torch.cat(model_parameters))
         else:
-            reg_loss = self.reg_weight * self.compute_l2_params(torch.cat(model_parameters))
+            reg_loss = self.reg_weight * compute_l2_params(torch.cat(model_parameters))
         return reg_loss
 
     def _compute_log_alpha(self, emissions, mask, run_backwards):
@@ -609,6 +611,7 @@ class TorchCrfModel(nn.Module):
             def closure():
                 nonlocal train_loss
                 self.optim.zero_grad()
+                # pylint: disable=cell-var-from-loop
                 loss = self.forward(inputs, labels, mask, drop_input=self.drop_input)
                 if self.reg_weight > 0:
                     if self.optimizer == "lbfgs":
