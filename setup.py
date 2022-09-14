@@ -46,6 +46,7 @@ requirements = [
     "markupsafe==2.0.1",
     'torch~=1.10.0; python_version>="3.6"',
     'pytorch-crf~=0.7.2',
+    "protobuf~=3.19.4"
 ]
 
 setup_requirements = ["pytest-runner~=2.11", "setuptools>=36"]
