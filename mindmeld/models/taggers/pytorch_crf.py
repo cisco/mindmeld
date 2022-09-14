@@ -201,7 +201,7 @@ class Encoder:
             if isinstance(self.feat_extractor, DictVectorizer):
                 flattened_feat_dicts = list(chain.from_iterable(feat_dicts))
                 self.feat_extractor.fit(flattened_feat_dicts)
-                self.num_feats = len(self.feat_extractor.get_feature_names())
+                self.num_feats = len(self.feat_extractor.get_feature_names_out())
             if labels is not None:
                 flattened_labels = list(chain.from_iterable(labels))
                 self.label_encoder.fit(flattened_labels)

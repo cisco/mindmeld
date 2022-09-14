@@ -413,7 +413,6 @@ class Classifier(ABC):
             if not loaded_config:
                 logger.warning("loaded_config is not passed in")
             model_config = loaded_config or {}
-
             model_config.update(kwargs)
 
         return ModelConfig(**model_config)
