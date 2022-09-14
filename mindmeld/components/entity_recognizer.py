@@ -17,7 +17,7 @@ This module contains the entity recognizer component of the MindMeld natural lan
 import logging
 import pickle
 
-from sklearn.externals import joblib
+import joblib
 
 from ._config import get_classifier_config
 from .classifier import Classifier, ClassifierConfig, ClassifierLoadError

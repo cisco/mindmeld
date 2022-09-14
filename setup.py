@@ -28,7 +28,7 @@ requirements = [
     "pytz",  # uses calendar versioning
     "scipy>=0.13.3,<2.0",
     'scikit-learn>=0.18.1,<0.20; python_version < "3.7"',
-    'scikit-learn>=0.19.2,<0.20; python_version >= "3.7"',
+    'scikit-learn~=1.0.2; python_version >= "3.7"',
     "requests>=2.20.1,<3.0",
     "tqdm~=4.15",
     'python-crfsuite~=0.9; python_version < "3.7"',
@@ -46,6 +46,7 @@ requirements = [
     "markupsafe==2.0.1",
     'torch~=1.10.0; python_version>="3.6"',
     'pytorch-crf~=0.7.2',
+    "protobuf~=3.19.4"
 ]
 
 setup_requirements = ["pytest-runner~=2.11", "setuptools>=36"]
@@ -61,7 +62,7 @@ test_requirements = [
 
 setup(
     name="mindmeld",
-    version="4.6.2",
+    version="4.7.0rc1",
     description="A Conversational AI platform.",
     long_description=readme,
     long_description_content_type="text/markdown",
