@@ -282,7 +282,8 @@ class TorchCrfModel(nn.Module):
         self.number_of_epochs = None
         self.dev_split_ratio = None
         self.optimizer = None
-        self.reg_weight = None
+        self.l1_weight = None
+        self.l2_weight = None
         self.random_state = None
 
         self.tmp_save_path = os.path.join(mkdtemp(), "best_crf_wts.pt")
@@ -384,9 +385,9 @@ class TorchCrfModel(nn.Module):
         for parameter in self.parameters():
             model_parameters.append(parameter.view(-1))
         if l1:
-            reg_loss = self.reg_weight * compute_l1_params(torch.cat(model_parameters))
+            reg_loss = self.l1_weight * compute_l1_params(torch.cat(model_parameters))
         else:
-            reg_loss = self.reg_weight * compute_l2_params(torch.cat(model_parameters))
+            reg_loss = self.l2_weight * compute_l2_params(torch.cat(model_parameters))
         return reg_loss
 
     def _compute_log_alpha(self, emissions, mask, run_backwards):
@@ -471,7 +472,7 @@ class TorchCrfModel(nn.Module):
 
     # pylint: disable=too-many-arguments
     def set_params(self, feat_type="hash", feat_num=50000, stratify_train_val_split=True, drop_input=0.2, batch_size=8,
-                   number_of_epochs=100, patience=3, dev_split_ratio=0.2, optimizer="sgd", reg_weight=0,
+                   number_of_epochs=100, patience=3, dev_split_ratio=0.2, optimizer="sgd", l1_weight=0, l2_weight=0,
                    random_state=None, **kwargs):
         """Set the parameters for the PyTorch CRF model and also validates the parameters.
 
@@ -498,7 +499,8 @@ class TorchCrfModel(nn.Module):
         self.number_of_epochs = number_of_epochs
         self.dev_split_ratio = dev_split_ratio
         self.optimizer = optimizer  # ["sgd", "adam"]
-        self.reg_weight = reg_weight
+        self.l1_weight = l1_weight
+        self.l2_weight = l2_weight
         self.random_state = random_state or randint(1, 10000001)
 
         self.validate_params(kwargs)
@@ -557,9 +559,9 @@ class TorchCrfModel(nn.Module):
 
         if self.optimizer == "sgd":
             self.optim = optim.SGD(self.parameters(), lr=0.01, momentum=0.9, nesterov=True,
-                                   weight_decay=self.reg_weight)
+                                   weight_decay=self.l2_weight)
         if self.optimizer == "adam":
-            self.optim = optim.Adam(self.parameters(), lr=0.001, weight_decay=self.reg_weight)
+            self.optim = optim.Adam(self.parameters(), lr=0.001, weight_decay=self.l2_weight)
 
         if self.optimizer == "lbfgs":
             self.optim = optim.LBFGS(self.parameters(), lr=1, max_iter=100, history_size=6,
@@ -613,9 +615,9 @@ class TorchCrfModel(nn.Module):
                 self.optim.zero_grad()
                 # pylint: disable=cell-var-from-loop
                 loss = self.forward(inputs, labels, mask, drop_input=self.drop_input)
-                if self.reg_weight > 0:
-                    if self.optimizer == "lbfgs":
-                        loss += self.compute_regularized_loss(l1=False)
+                if self.l2_weight > 0 and self.optimizer == "lbfgs":
+                    loss += self.compute_regularized_loss(l1=False)
+                if self.l1_weight > 0:
                     loss += self.compute_regularized_loss(l1=True)
                 train_loss += loss.item()
                 loss.backward()
