@@ -251,6 +251,14 @@ class Encoder:
         return label_tensor
 
 
+def compute_l1_params(w):
+    return torch.abs(w).sum()
+
+
+def compute_l2_params(w):
+    return torch.square(w).sum()
+
+
 # pylint: disable=too-many-instance-attributes
 class TorchCrfModel(nn.Module):
     """PyTorch Model Class for Conditional Random Fields"""
@@ -258,6 +266,7 @@ class TorchCrfModel(nn.Module):
     def __init__(self):
         super().__init__()
         self.optim = None
+        self.scheduler = None
         self._encoder = None
         self.W = None
         self.b = None
@@ -273,6 +282,8 @@ class TorchCrfModel(nn.Module):
         self.number_of_epochs = None
         self.dev_split_ratio = None
         self.optimizer = None
+        self.l1_weight = None
+        self.l2_weight = None
         self.random_state = None
 
         self.tmp_save_path = os.path.join(mkdtemp(), "best_crf_wts.pt")
@@ -317,9 +328,9 @@ class TorchCrfModel(nn.Module):
                 )
             )
             logger.warning(msg)
-        if self.optimizer not in ["sgd", "adam"]:
+        if self.optimizer not in ["sgd", "adam", "lbfgs"]:
             raise MindMeldError(
-                f"Optimizer type {self.optimizer_type} not supported. Supported options are ['sgd', 'adam']")
+                f"Optimizer type {self.optimizer_type} not supported. Supported options are ['sgd', 'adam', 'lbfgs']")
         if self.feat_type not in ["hash", "dict"]:
             raise MindMeldError(f"Feature type {self.feat_type} not supported. Supported options are ['hash', 'dict']")
         if not 0 < self.dev_split_ratio < 1:
@@ -366,8 +377,18 @@ class TorchCrfModel(nn.Module):
         crf_input = out_1.reshape((mask.shape[0], -1, self.num_classes))
         if targets is None:
             return self.crf_layer.decode(crf_input, mask=mask)
-        loss = - self.crf_layer(crf_input, targets, mask=mask)
+        loss = - self.crf_layer(crf_input, targets, mask=mask, reduction='mean')
         return loss
+
+    def compute_regularized_loss(self, l1):
+        model_parameters = []
+        for parameter in self.parameters():
+            model_parameters.append(parameter.view(-1))
+        if l1:
+            reg_loss = self.l1_weight * compute_l1_params(torch.cat(model_parameters))
+        else:
+            reg_loss = self.l2_weight * compute_l2_params(torch.cat(model_parameters))
+        return reg_loss
 
     def _compute_log_alpha(self, emissions, mask, run_backwards):
         """Function used to calculate the alpha and beta probabilities of each token/tag probability.
@@ -451,7 +472,7 @@ class TorchCrfModel(nn.Module):
 
     # pylint: disable=too-many-arguments
     def set_params(self, feat_type="hash", feat_num=50000, stratify_train_val_split=True, drop_input=0.2, batch_size=8,
-                   number_of_epochs=100, patience=3, dev_split_ratio=0.2, optimizer="sgd",
+                   number_of_epochs=100, patience=3, dev_split_ratio=0.2, optimizer="sgd", l1_weight=0, l2_weight=0,
                    random_state=None, **kwargs):
         """Set the parameters for the PyTorch CRF model and also validates the parameters.
 
@@ -478,6 +499,8 @@ class TorchCrfModel(nn.Module):
         self.number_of_epochs = number_of_epochs
         self.dev_split_ratio = dev_split_ratio
         self.optimizer = optimizer  # ["sgd", "adam"]
+        self.l1_weight = l1_weight
+        self.l2_weight = l2_weight
         self.random_state = random_state or randint(1, 10000001)
 
         self.validate_params(kwargs)
@@ -499,6 +522,8 @@ class TorchCrfModel(nn.Module):
             torch_dataloader (torch.utils.data.dataloader.DataLoader): returns PyTorch dataloader object that can be
             used to iterate across the data.
         """
+        if self.optimizer == "lbfgs" and is_train:
+            self.batch_size = len(X)
         tensor_inputs, input_seq_lens, tensor_labels = self._encoder.get_tensor_data(X, y, fit=is_train)
         tensor_dataset = TaggerDataset(tensor_inputs, input_seq_lens, tensor_labels)
         torch_dataloader = DataLoader(tensor_dataset, batch_size=self.batch_size if is_train else TEST_BATCH_SIZE,
@@ -533,9 +558,18 @@ class TorchCrfModel(nn.Module):
         self.build_params(*self._encoder.get_feats_and_classes())
 
         if self.optimizer == "sgd":
-            self.optim = optim.SGD(self.parameters(), lr=0.01, momentum=0.9, nesterov=True, weight_decay=1e-5)
+            self.optim = optim.SGD(self.parameters(), lr=0.01, momentum=0.9, nesterov=True,
+                                   weight_decay=self.l2_weight)
         if self.optimizer == "adam":
-            self.optim = optim.Adam(self.parameters(), lr=0.001, weight_decay=1e-5)
+            self.optim = optim.Adam(self.parameters(), lr=0.001, weight_decay=self.l2_weight)
+
+        if self.optimizer == "lbfgs":
+            self.optim = optim.LBFGS(self.parameters(), lr=1, max_iter=100, history_size=6,
+                                     line_search_fn="strong_wolfe")
+
+        self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(self.optim, mode='max',
+                                                              patience=max(self.patience - 2, 1),
+                                                              factor=0.5)
 
         self.training_loop(train_dataloader, dev_dataloader)
         self.load_state_dict(torch.load(self.tmp_save_path))
@@ -556,7 +590,8 @@ class TorchCrfModel(nn.Module):
                 break
             self.train_one_epoch(train_dataloader)
             dev_f1_score = self.run_predictions(dev_dataloader, calc_f1=True)
-            logger.debug("Epoch %s finished. Dev F1: %s", epoch, dev_f1_score)
+            logger.info("Epoch %s finished. Dev F1: %s", epoch, dev_f1_score)
+            self.scheduler.step(dev_f1_score)
 
             if dev_f1_score <= best_dev_score:
                 _patience_counter += 1
@@ -575,11 +610,24 @@ class TorchCrfModel(nn.Module):
         self.train()
         train_loss = 0
         for batch_idx, (inputs, mask, labels) in enumerate(train_dataloader):
-            self.optim.zero_grad()
-            loss = self.forward(inputs, labels, mask, drop_input=self.drop_input)
-            train_loss += loss.item()
-            loss.backward()
-            self.optim.step()
+            def closure():
+                nonlocal train_loss
+                self.optim.zero_grad()
+                # pylint: disable=cell-var-from-loop
+                loss = self.forward(inputs, labels, mask, drop_input=self.drop_input)
+                if self.l2_weight > 0 and self.optimizer == "lbfgs":
+                    loss += self.compute_regularized_loss(l1=False)
+                if self.l1_weight > 0:
+                    loss += self.compute_regularized_loss(l1=True)
+                train_loss += loss.item()
+                loss.backward()
+                return loss
+
+            if self.optimizer == "lbfgs":
+                self.optim.step(closure)
+            else:
+                closure()
+                self.optim.step()
             if batch_idx % 20 == 0:
                 logger.debug("Batch: %s Mean Loss: %s", batch_idx,
                              (train_loss / (batch_idx + 1)))
