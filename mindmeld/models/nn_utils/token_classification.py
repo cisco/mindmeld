@@ -32,12 +32,9 @@ from .layers import (
 )
 from ..containers import HuggingfaceTransformersContainer
 
-try:
-    import torch
-    import torch.nn as nn
-    from torch.nn.utils.rnn import pad_sequence
-except ImportError:
-    pass
+import torch
+import torch.nn as nn
+from torch.nn.utils.rnn import pad_sequence
 
 try:
     from torchcrf import CRF

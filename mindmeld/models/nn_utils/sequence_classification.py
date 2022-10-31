@@ -30,12 +30,9 @@ from .layers import (
 )
 from ..containers import HuggingfaceTransformersContainer
 
-try:
-    import torch
-    import torch.nn as nn
-    import torch.nn.functional as F
-except ImportError:
-    pass
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
 logger = logging.getLogger(__name__)
 

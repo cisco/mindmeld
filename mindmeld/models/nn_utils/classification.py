@@ -30,6 +30,8 @@ import numpy as np
 from sklearn.metrics import accuracy_score, f1_score
 from sklearn.model_selection import train_test_split
 from tqdm import tqdm
+import torch
+import torch.nn as nn
 
 from .helpers import (
     BatchData,
@@ -51,14 +53,7 @@ from ..containers import GloVeEmbeddingsContainer
 from ...core import Bunch
 from ...path import USER_CONFIG_DIR
 
-try:
-    import torch
-    import torch.nn as nn
-
-    nn_module = _get_module_or_attr("torch.nn", "Module")
-except ImportError:
-    nn_module = object
-    pass
+nn_module = _get_module_or_attr("torch.nn", "Module")
 
 logger = logging.getLogger(__name__)
 
