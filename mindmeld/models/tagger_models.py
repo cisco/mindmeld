@@ -27,7 +27,7 @@ from .helpers import (
 )
 from .model import ModelConfig, Model, PytorchModel, AbstractModelFactory
 from .nn_utils import get_token_classifier_cls, TokenClassificationType
-from .taggers.crf import ConditionalRandomFields, TorchCrfTagger
+from .taggers.crf import ConditionalRandomFields, CRFTagger
 from .taggers.memm import MemmModel
 from ..exceptions import MindMeldError
 
@@ -73,14 +73,12 @@ class TaggerModel(Model):
     CRF_TYPE = "crf"
     MEMM_TYPE = "memm"
     LSTM_TYPE = "lstm"
-    TORCH_CRF_TYPE = "torch-crf"
-    ALLOWED_CLASSIFIER_TYPES = [CRF_TYPE, MEMM_TYPE, LSTM_TYPE, TORCH_CRF_TYPE]
+    ALLOWED_CLASSIFIER_TYPES = [CRF_TYPE, MEMM_TYPE, LSTM_TYPE]
 
     # for default model scoring types
     ACCURACY_SCORING = "accuracy"
     SEQ_ACCURACY_SCORING = "seq_accuracy"
-    # TODO: Rename torch-crf to crf implementation. Created https://github.com/cisco/mindmeld/issues/416 for this.
-    SEQUENCE_MODELS = ["crf", "torch-crf"]
+    SEQUENCE_MODELS = ["crf"]
 
     DEFAULT_FEATURES = {
         "bag-of-words-seq": {
@@ -132,8 +130,7 @@ class TaggerModel(Model):
                 raise ValueError(msg.format(self.__class__.__name__, classifier_type))
             return {
                 TaggerModel.MEMM_TYPE: MemmModel,
-                TaggerModel.CRF_TYPE: ConditionalRandomFields,
-                TaggerModel.TORCH_CRF_TYPE: TorchCrfTagger,
+                TaggerModel.CRF_TYPE: CRFTagger,
                 TaggerModel.LSTM_TYPE: LstmModel,
             }[classifier_type]
         except KeyError as e:
@@ -248,7 +245,7 @@ class TaggerModel(Model):
             self._clf = self._fit(X, y, params)
             self._current_params = params
         else:
-            non_supported_classes = (TorchCrfTagger, LstmModel) if LstmModel is not None else TorchCrfTagger
+            non_supported_classes = (CRFTagger, LstmModel) if LstmModel is not None else CRFTagger
             # run cross validation to select params
             if isinstance(self._clf, non_supported_classes):
                 raise MindMeldError(f"The {type(self._clf).__name__} model does not support cross-validation")
@@ -397,11 +394,11 @@ class TaggerModel(Model):
         else:
             # underneath tagger dump for LSTM model, returned `model_dir` is None for MEMM & CRF
             self._clf.dump(path)
-            if isinstance(self._clf, TorchCrfTagger):
+            if isinstance(self._clf, CRFTagger):
                 metadata.update({
                     "model_config": self.config,
                     "feature_and_label_encoder": self._clf.get_torch_encoder(),
-                    "model_type": "torch-crf"
+                    "model_type": "crf"
                 })
             elif isinstance(self._clf, LstmModel):
                 metadata.update({
@@ -453,7 +450,7 @@ class TaggerModel(Model):
                 model._clf.load(model_dir)
 
                 # replace model dump directory with actual model
-            elif metadata.get('model_type') == 'torch-crf':
+            elif metadata.get('model_type') == 'crf':
                 model._clf.set_params(**metadata["model_config"].params)
                 model._clf.set_torch_encoder(metadata['feature_and_label_encoder'])
                 model._clf.load(path)
