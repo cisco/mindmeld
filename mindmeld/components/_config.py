@@ -44,6 +44,9 @@ CONFIG_DEPRECATION_MAPPING = {
 DEFAULT_DOMAIN_CLASSIFIER_CONFIG = {
     "model_type": "text",
     "model_settings": {"classifier_type": "logreg"},
+    "params": {
+        "solver": "liblinear",
+    },
     "param_selection": {
         "type": "k-fold",
         "k": 10,
@@ -55,6 +58,9 @@ DEFAULT_DOMAIN_CLASSIFIER_CONFIG = {
 DEFAULT_INTENT_CLASSIFIER_CONFIG = {
     "model_type": "text",
     "model_settings": {"classifier_type": "logreg"},
+    "params": {
+        "solver": "liblinear",
+    },
     "param_selection": {
         "type": "k-fold",
         "k": 10,
@@ -79,6 +85,9 @@ DEFAULT_ENTITY_RECOGNIZER_CONFIG = {
         "classifier_type": "memm",
         "tag_scheme": "IOB",
         "feature_scaler": "max-abs",
+    },
+    "params": {
+        "solver": "liblinear",
     },
     "param_selection": {
         "type": "k-fold",
@@ -109,7 +118,7 @@ DEFAULT_ENTITY_RESOLVER_CONFIG = {
 DEFAULT_ROLE_CLASSIFIER_CONFIG = {
     "model_type": "text",
     "model_settings": {"classifier_type": "logreg"},
-    "params": {"C": 100, "penalty": "l1"},
+    "params": {"C": 100, "penalty": "l1", "solver": "liblinear"},
     "features": {
         "bag-of-words-before": {
             "ngram_lengths_to_start_positions": {1: [-2, -1], 2: [-2, -1]}
@@ -549,6 +558,17 @@ class NlpConfigError(Exception):
     pass
 
 
+def merge_param_configs(default_dict, user_defined_dict):
+    new_dict = dict(user_defined_dict)
+    if "params" not in default_dict:
+        return new_dict
+    if "params" in user_defined_dict:
+        new_dict["params"] = {**default_dict["params"], **user_defined_dict["params"]}
+    else:
+        new_dict["params"] = default_dict["params"]
+    return new_dict
+
+
 def get_custom_action_config(app_path):
     if not app_path:
         return None
@@ -669,8 +689,8 @@ def get_system_entity_url_config(app_path):
 
     return (
         get_nlp_config(app_path)
-        .get("system_entity_recognizer", {})
-        .get("url", DEFAULT_DUCKLING_URL)
+            .get("system_entity_recognizer", {})
+            .get("url", DEFAULT_DUCKLING_URL)
     )
 
 
@@ -743,7 +763,7 @@ def get_classifier_config(
             try:
                 raw_args = {"domain": domain, "intent": intent, "entity": entity}
                 args = {k: raw_args[k] for k in func_args}
-                return copy.deepcopy(func(**args))
+                return merge_param_configs(_get_default_classifier_config(clf_type), copy.deepcopy(func(**args)))
             except Exception as exc:  # pylint: disable=broad-except
                 # Note: this is intentionally broad -- provider could raise any exception
                 logger.warning(
@@ -759,11 +779,12 @@ def get_classifier_config(
         "question_answering": "QUESTION_ANSWERER_CONFIG",
     }[clf_type]
     try:
-        return copy.deepcopy(getattr(module_conf, attr_name))
+        return merge_param_configs(_get_default_classifier_config(clf_type),
+                                   copy.deepcopy(getattr(module_conf, attr_name)))
     except AttributeError:
         try:
-            result = copy.deepcopy(
-                getattr(module_conf, CONFIG_DEPRECATION_MAPPING[attr_name])
+            result = merge_param_configs(_get_default_classifier_config(clf_type), copy.deepcopy(
+                getattr(module_conf, CONFIG_DEPRECATION_MAPPING[attr_name]))
             )
             msg = (
                 "%s config is deprecated. Please use the equivalent %s config "

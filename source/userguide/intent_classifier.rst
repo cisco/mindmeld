@@ -1,6 +1,8 @@
 Working with the Intent Classifier
 ==================================
 
+.. _intent_classification:
+
 The :ref:`Intent Classifier <arch_intent_model>`
 
  - is run as the second step in the :ref:`natural language processing pipeline <arch_nlp>`
@@ -110,6 +112,8 @@ Using default settings is the recommended (and quickest) way to get started with
 
 Classifier configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. _intent_classifier_configuration:
 
 Use the :attr:`config` attribute of a trained classifier to view the :ref:`configuration <config>` that the classifier is using. Here’s an example where we view the configuration of a baseline intent classifier trained using default settings:
 
@@ -388,12 +392,12 @@ Let's take a look at the allowed values for each setting in an intent classifier
   |                       | Examples:                                                                                                  |
   |                       |                                                                                                            |
   |                       | ``{'analyzer': 'composite'}``                                                                              |
-  |                       | - extracts a single feature representing the sentiment normalized to be between -1 (extreme negative) to   |
-  |                       |   +1 (extreme positive).                                                                                   |
+  |                       |  - extracts a single feature representing the sentiment normalized to be between -1 (extreme negative) to  |
+  |                       |    +1 (extreme positive).                                                                                  |
   |                       |                                                                                                            |
   |                       | ``{'analyzer': 'discrete'}``                                                                               |
-  |                       | - extracts three separate features measuring the ratio for each sentiment (positive, neutral and negative) |
-  |                       |   such that their values add up to 1.                                                                      |
+  |                       |  - extracts three separate features measuring the ratio for each sentiment (positive, neutral and negative)|
+  |                       |    such that their values add up to 1.                                                                     |
   +-----------------------+------------------------------------------------------------------------------------------------------------+
 
 .. note::
@@ -504,6 +508,8 @@ Here's an example of a ``config.py`` file where custom settings optimized for th
    }
 
 Settings defined in :data:`INTENT_CLASSIFIER_CONFIG` apply to intent classifiers across all domains in your application. For finer-grained control, you can implement the :meth:`get_intent_classifier_config` function in ``config.py`` to specify suitable configurations for each domain. This gives you the flexibility to modify models and features based on the domain.
+
+.. _get_intent_classifier_config:
 
 .. code-block:: python
 
@@ -1128,3 +1134,10 @@ You can load the saved model anytime using the :meth:`IntentClassifier.load` met
 .. code-block:: console
 
    Loading intent classifier: domain='times_and_dates'
+
+Using Deep Neural Models for Intent Classification
+--------------------------------------------------
+
+MindMeld supports using deep neural models for intent classification. Refer to :ref:`Deep Neural Networks in MindMeld <dnns_sequence_classification>` section for details on the different configurable parameters. Assign a sequence classification config dictionary to :data:`INTENT_CLASSIFIER_CONFIG` and start using deep neural models for intent classification. Note that viewing features extracted for classification is not available with deep neural models.
+
+If you wish to use deep neural models only for selected domains, you can implement the :ref:`get_intent_classifier_config() <get_intent_classifier_config>` function in ``config.py`` for finer-grained control for each domain.

@@ -23,7 +23,7 @@ from abc import ABC, abstractmethod
 from inspect import signature
 from typing import Union, Type, Dict, Any, Tuple, List, Pattern, Set
 
-from sklearn.externals import joblib
+import joblib
 from sklearn.model_selection import (
     GridSearchCV,
     GroupKFold,
@@ -429,7 +429,7 @@ class Model(AbstractModel):
     def _get_model_constructor(self):
         raise NotImplementedError
 
-    def _fit_cv(self, examples, labels, groups=None, selection_settings=None):
+    def _fit_cv(self, examples, labels, groups=None, selection_settings=None, fixed_params=None):
         """Called by the fit method when cross validation parameters are passed in. Runs cross
         validation and returns the best estimator and parameters.
 
@@ -463,6 +463,16 @@ class Model(AbstractModel):
 
         param_grid = self._convert_params(selection_settings["grid"], labels)
         model_class = self._get_model_constructor()
+        if fixed_params:
+            for key, val in fixed_params.items():
+                if key not in param_grid:
+                    param_grid[key] = [val]
+                else:
+                    logger.info(
+                        "Found parameter %s both in params and param_selection. Proceeding with param_selection.. \
+                        (If you did not set this, it could be a Mindmeld default.)",
+                        key
+                    )
         estimator, param_grid = self._get_cv_estimator_and_params(
             model_class, param_grid
         )
@@ -476,7 +486,7 @@ class Model(AbstractModel):
             n_jobs=n_jobs,
             return_train_score=False,
         )
-        model = grid_cv.fit(examples, labels, groups)
+        model = grid_cv.fit(examples, y=labels, groups=groups)
 
         for idx, params in enumerate(model.cv_results_["params"]):
             logger.debug("Candidate parameters: %s", params)
@@ -798,11 +808,11 @@ class PytorchModel(AbstractModel):
             # this condition is satisfied during loading of models
             return
 
-        # While the key '_query_text_type' in config params allows for end-users to configure the
+        # While the key 'query_text_type' in config params allows for end-users to configure the
         # choice of text_type to be used, it also needs the user to have knowledge about different
-        # text types in a Query object. Hence, this key is _underscored_ and is kept mainly for
-        # developer/benchmarking puposes.
-        query_text_type = params.get("_query_text_type", default) if params else default
+        # text types in a Query object. Three values are available as of now-
+        # ["text", "processed_text", "normalized_text"].
+        query_text_type = params.get("query_text_type", default) if params else default
 
         # consider raw text for pretrained transformer models
         if not query_text_type:
@@ -838,6 +848,7 @@ class PytorchModel(AbstractModel):
             msg = "The instance attribute '_query_text_type' must be set by calling " \
                   "_set_query_text_type() method before calling the " \
                   "_get_texts_from_examples() method."
+            logger.debug(msg)
             raise ValueError(msg)
         return [getattr(example, self._query_text_type) for example in examples]
 

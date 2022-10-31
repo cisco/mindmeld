@@ -106,12 +106,10 @@ Contents
    userguide/getting_started
    userguide/architecture
    userguide/optional_dependency
-   userguide/preprocessor
    userguide/nlp
    userguide/domain_classifier
    userguide/intent_classifier
    userguide/entity_recognizer
-   userguide/lstm
    userguide/role_classifier
    userguide/entity_resolver
    userguide/parser
@@ -119,11 +117,11 @@ Contents
    userguide/kb
    userguide/dm
    userguide/text_preparation_pipeline
-   userguide/active_learning
-   userguide/augmentation
    userguide/auto_annotator
    userguide/custom_action
-   userguide/tokenizer
+   userguide/active_learning
+   userguide/augmentation
+   userguide/deep_neural_nets
    userguide/internationalization
    userguide/voice
    userguide/dvc

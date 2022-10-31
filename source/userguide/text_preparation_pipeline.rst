@@ -86,7 +86,7 @@ on the language of the application, if they are not explicitly defined in the co
 
 Let's define the parameters in the TextPreparationPipeline config:
 
-``'preprocessors'`` (:class:`List[str]`): The preprocessor class to use. (Mindmeld does not currently offer default preprocessors.) 
+``'preprocessors'`` (:class:`List[str]`): The preprocessor class to use. (Mindmeld does not currently offer default preprocessors.)
 
 ``'tokenizer'`` (:class:`str`): The tokenization method to split raw queries.
 
@@ -104,6 +104,7 @@ regex pattern (str) and replacement string, respectively. For example: { "patter
 
     If :attr:`regex_norm_rules` are specified in the config they will be applied before other normalization rules. This includes the default normalization rules if normalization rules are not explicitly defined in the config.
 
+.. _preprocessing:
 
 Preprocessing
 --------------
@@ -124,13 +125,13 @@ Automatic Speech Recognition systems. A custom preprocessor must extend from Min
     class Preprocessor(ABC):
         """
         Base class for Preprocessor object
-        """    
+        """
         @abstractmethod
         def process(self, text):
             """
             Args:
                 text (str)
-    
+
             Returns:
                 (str)
             """
@@ -154,9 +155,12 @@ with the intended name, "prasanth reddy".
 This would transform the transcript "Let's start the meeting with croissant ready." to "Let's start the meeting with Prasanth Reddy."
 The steps to use a custom Preprocessor in your application are explained :ref:`here <custom-pipeline>`.
 
+.. _tokenization:
 
 Tokenization
 -------------
+
+.. _tokenization_text_preparation_pipeline:
 
 Tokenization is the process of splitting the text of a query into smaller chunks. MindMeld offers a number of ready-made tokenizers that you can use
 for your application. MindMeld supports the development of custom tokenizers as well.
@@ -169,7 +173,7 @@ The :attr:`WhiteSpaceTokenizer` splits up a sentence by whitespace characters. F
 .. code:: python
 
     from mindmeld.text_preparation.tokenizers import WhiteSpaceTokenizer
-    
+
     sentence = "MindMeld is a Conversational AI Platform."
     white_space_tokenizer = WhiteSpaceTokenizer()
     tokens = white_space_tokenizer.tokenize(sentence)
@@ -189,7 +193,7 @@ The :attr:`CharacterTokenizer` splits up a sentence by the individual characters
 .. code:: python
 
     from mindmeld.text_preparation.tokenizers import CharacterTokenizer
-    
+
     sentence_ja = "背の高い男性"
     character_tokenizer = CharacterTokenizer()
     tokens = character_tokenizer.tokenize(sentence_ja)
@@ -207,7 +211,7 @@ Letter Tokenizer
 The :attr:`LetterTokenizer` splits text into a separate token if the character proceeds a space, is a
 non-latin character, or is a different unicode category than the previous character.
 
-This can be helpful to keep characters of the same type together. Let's look at an example with numbers in a Japanese sentence, "1年は365日". This sentence translates to "One year has 365 days". 
+This can be helpful to keep characters of the same type together. Let's look at an example with numbers in a Japanese sentence, "1年は365日". This sentence translates to "One year has 365 days".
 
 .. code:: python
 
@@ -229,13 +233,13 @@ Spacy Tokenizer
 ^^^^^^^^^^^^^^^
 The :attr:`SpacyTokenizer` splits up a sentence using `Spacy's language models <https://spacy.io/models>`_.
 Supported languages include English (en), Spanish (es), French (fr), German (de), Danish (da), Greek (el), Portuguese (pt), Lithuanian (lt), Norwegian Bokmal (nb), Romanian (ro), Polish (pl), Italian (it), Japanese (ja), Chinese (zh), Dutch (nl).
-If the required Spacy model is not already present it will automatically downloaded during runtime. 
-Let's use the :attr:`SpacyTokenizer` to tokenize the Japanese translation of "The gentleman is gone, no one knows why it happened!": 
+If the required Spacy model is not already present it will automatically downloaded during runtime.
+Let's use the :attr:`SpacyTokenizer` to tokenize the Japanese translation of "The gentleman is gone, no one knows why it happened!":
 
 .. code:: python
 
     from mindmeld.text_preparation.tokenizers import SpacyTokenizer
-    
+
     sentence_ja = "背の高い男性"
     spacy_tokenizer_ja = SpacyTokenizer(language="ja", spacy_model_size="sm")
     tokens = spacy_tokenizer_ja.tokenize(sentence_ja)
@@ -367,7 +371,7 @@ The :attr:`Lowercase` normalizer converts every character in a string to its low
 .. code:: python
 
     from mindmeld.text_preparation.normalizers import Lowercase
-    
+
     sentence = "I Like to Run!"
     lowercase_normalizer = Lowercase()
     normalized_text = lowercase_normalizer.normalize(sentence)
@@ -389,7 +393,7 @@ For example, we can normalize the following Spanish sentence with several accent
 .. code:: python
 
     from mindmeld.text_preparation.normalizers import ASCIIFold
-    
+
     sentence_es = "Ha pasado un caballero, ¡quién sabe por qué pasó!"
     ascii_fold_normalizer = ASCIIFold()
     normalized_text = ascii_fold_normalizer.normalize(sentence_es)
@@ -428,7 +432,7 @@ Interestingly, we find that the normalized text looks identical with the origina
 We can print the character values for each of the texts and observe the the normalization has actually changed the representaation for :attr:`é`.
 
 .. code:: python
-    
+
     >>> print([ord(c) for c in text])
     >>> [113, 117, 105, 233, 110]
     >>> print([ord(c) for c in normalized_text])
@@ -569,19 +573,19 @@ Let's create a stemmer that uses Spacy's lemmatization functionality to use lemm
     from mindmeld.text_preparation.stemmers import Stemmer
 
     class SpacyLemmatizer(Stemmer):
-    
+
         def __init__(self):
             self.nlp = spacy.load('en_core_web_sm')
-    
+
         def stem_word(self, word):
             """
             Args:
                 word (str): The word to stem
-    
+
             Returns:
                 stemmed_word (str): A lemmatized version of the word
             """
-    
+
             doc = self.nlp(word)
             return " ".join([token.lemma_ for token in doc])
 
@@ -601,11 +605,11 @@ Let's first take a look at an example of an ``__init.py__`` file before a custom
 
 .. code:: python
     :caption: root/__init__.py (Without a Custom Pipeline)
-  
+
     from mindmeld import Application
-  
+
     app = Application(__name__)
-  
+
     @app.handle(intent='greet')
     def welcome(request, responder):
         responder.reply('Hello')
@@ -616,12 +620,12 @@ To isolate the logic and functionality of our custom :attr:`TextPreparationPipel
 
 .. code:: python
     :caption: root/__init__.py (With a Custom Pipeline)
-    
+
     from mindmeld import Application
     from .text_preparation_pipeline import get_text_preparation_pipeline
-    
+
     app = Application(__name__, text_preparation_pipeline=get_text_preparation_pipeline())
-    
+
     @app.handle(intent='greet')
     def welcome(request, responder):
         responder.reply('Hello')

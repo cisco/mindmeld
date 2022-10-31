@@ -403,6 +403,8 @@ class Classifier(ABC):
         Returns:
             ModelConfig: The model configuration corresponding to the provided config name
         """
+        if 'params' in loaded_config and 'params' in kwargs:
+            kwargs['params'] = {**loaded_config['params'], **kwargs['params']}
         try:
             # If all params required for model config were passed in, use kwargs
             return ModelConfig(**kwargs)
@@ -413,10 +415,6 @@ class Classifier(ABC):
             model_config = loaded_config or {}
             model_config.update(kwargs)
 
-            # If a parameter selection grid was passed in at runtime, override params set in the
-            # application specified or default config
-            if kwargs.get("param_selection") and not kwargs.get("params"):
-                model_config.pop("params", None)
         return ModelConfig(**model_config)
 
     def dump(self, model_path, incremental_model_path=None):

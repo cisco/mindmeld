@@ -16,7 +16,7 @@ requirements = [
     "distro~=1.3",
     # elasticsearch-py 7.14 breaks backwards compatibility with servers prior to 7.11
     "elasticsearch>=5.0,<7.14",
-    "Flask~=1.0",
+    "Flask>=1.1.3,<2",
     "Flask-Cors~=3.0",
     "future~=0.17",
     "pycountry",  # uses calendar versioning
@@ -28,7 +28,7 @@ requirements = [
     "pytz",  # uses calendar versioning
     "scipy>=0.13.3,<2.0",
     'scikit-learn>=0.18.1,<0.20; python_version < "3.7"',
-    'scikit-learn>=0.19.2,<0.20; python_version >= "3.7"',
+    'scikit-learn~=1.0.2; python_version >= "3.7"',
     "requests>=2.20.1,<3.0",
     "tqdm~=4.15",
     'python-crfsuite~=0.9; python_version < "3.7"',
@@ -44,6 +44,9 @@ requirements = [
     # As a stop gap, we'll pin our version of markupsafe to that last 2.0 version. Longer term we need to update
     # our flask dependency, and likely move it to an extra
     "markupsafe==2.0.1",
+    'torch~=1.10.0; python_version>="3.6"',
+    'pytorch-crf~=0.7.2',
+    "protobuf~=3.19.4"
 ]
 
 setup_requirements = ["pytest-runner~=2.11", "setuptools>=36"]
@@ -59,7 +62,7 @@ test_requirements = [
 
 setup(
     name="mindmeld",
-    version="4.5.0rc1",
+    version="4.7.0rc1",
     description="A Conversational AI platform.",
     long_description=readme,
     long_description_content_type="text/markdown",
@@ -96,7 +99,7 @@ setup(
             'tensorflow>=1.13.1,<2.0; python_version >= "3.7"',
         ],
         "bert": [  # sentence-transformers
-            'torch~=1.7.0; python_version>="3.6"',
+            'torch~=1.10.0; python_version>="3.6"',
             'transformers~=4.15.0; python_version>="3.6"',
             'sentence-transformers~=0.3; python_version>="3.6"',
             # elasticsearch-py 7.14 breaks backwards compatibility with servers prior to 7.11
@@ -106,7 +109,7 @@ setup(
             'connexion>=2.7.0; python_version>="3.6"',
         ],
         "augment": [
-            'torch~=1.7.0; python_version>="3.6"',
+            'torch~=1.10.0; python_version>="3.6"',
             'transformers~=4.15.0; python_version>="3.6"',
             'sentencepiece==0.1.91'
         ],
@@ -123,10 +126,6 @@ setup(
         "dvc": [
             'pygit2>=1.5.0,<1.7; python_version < "3.7"',
             "dvc>=1.8.1"
-        ],
-        "torch": [
-            'torch~=1.7.0; python_version>="3.6"',
-            'pytorch-crf~=0.7.2'
         ],
         "transformers": [  # huggingface-transformers
             'transformers~=4.15.0; python_version>="3.6"',

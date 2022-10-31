@@ -22,6 +22,7 @@ import sys
 from functools import wraps
 from importlib.machinery import SourceFileLoader
 
+from .constants import EMBEDDINGS_FILE
 from .exceptions import MindMeldImportError
 
 MINDMELD_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -129,7 +130,7 @@ DUCKLING_PATH_TO_SHA_MAPPINGS = {
 }
 
 EMBEDDINGS_FOLDER_PATH = os.path.join(MINDMELD_ROOT, "data")
-EMBEDDINGS_FILE_PATH = os.path.join(EMBEDDINGS_FOLDER_PATH, "glove.6B.zip")
+EMBEDDINGS_FILE_PATH = os.path.join(EMBEDDINGS_FOLDER_PATH, EMBEDDINGS_FILE)
 PREVIOUSLY_USED_CHAR_EMBEDDINGS_FILE_PATH = os.path.join(
     EMBEDDINGS_FOLDER_PATH, "previously_used_char_embeddings.pkl"
 )

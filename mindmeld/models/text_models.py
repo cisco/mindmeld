@@ -20,9 +20,9 @@ import operator
 import os
 import random
 
+import joblib
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.externals import joblib
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import SelectFromModel, SelectPercentile
 from sklearn.linear_model import LogisticRegression
@@ -371,7 +371,7 @@ class TextModel(Model):
         else:
             selector_type = self.config.model_settings.get("feature_selector")
         selector = {
-            "l1": SelectFromModel(LogisticRegression(penalty="l1", C=1)),
+            "l1": SelectFromModel(LogisticRegression(penalty="l1", C=1, solver="liblinear")),
             "f": SelectPercentile(),
         }.get(selector_type)
         return selector
@@ -434,7 +434,7 @@ class TextModel(Model):
                 interfaces.
         """
         params = params or self.config.params
-        skip_param_selection = params is not None or self.config.param_selection is None
+        skip_param_selection = self.config.param_selection is None
 
         # Shuffle to prevent order effects
         indices = list(range(len(labels)))
@@ -454,7 +454,7 @@ class TextModel(Model):
             self._current_params = params
         else:
             # run cross validation to select params
-            best_clf, best_params = self._fit_cv(X, y, groups)
+            best_clf, best_params = self._fit_cv(X, y, groups, fixed_params=params)
             self._clf = best_clf
             self._current_params = best_params
 

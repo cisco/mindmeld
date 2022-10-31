@@ -267,11 +267,21 @@ class PoolingLayer(nn_module):
             last_seq_idxs = torch.LongTensor([x - 1 for x in lengths])
             outputs = padded_token_embs[range(padded_token_embs.shape[0]), last_seq_idxs, :]
         else:
-            mask = pad_sequence(
-                [torch.as_tensor([1] * length_) for length_ in lengths],
-                batch_first=True,
-                padding_value=0.0,
-            ).unsqueeze(-1).expand(padded_token_embs.size()).float().to(padded_token_embs.device)
+            try:
+                target_device = padded_token_embs.device
+                mask = pad_sequence(
+                    [torch.as_tensor([1] * length_) for length_ in lengths],
+                    batch_first=True,
+                    padding_value=0.0,
+                ).unsqueeze(-1).expand(padded_token_embs.size()).float().to(target_device)
+            except RuntimeError as e:
+                msg = f"Unable to create a mask for '{self.pooling_type}' pooling operation in " \
+                      f"{self.__class__.__name__}. It is possible that your choice of tokenizer " \
+                      f"does not split input text at whitespace (eg. robert-base tokenizer), due " \
+                      f"to which tokenization of a word is different between with and without " \
+                      f"context. If working with a transformers model, consider changing the " \
+                      f"pretrained model name and restart training."
+                raise ValueError(msg) from e
             if self.pooling_type == "max":
                 padded_token_embs[mask == 0] = -1e9  # set to a large negative value
                 outputs, _ = torch.max(padded_token_embs, dim=1)

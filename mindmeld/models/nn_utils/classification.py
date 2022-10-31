@@ -19,6 +19,7 @@ sequence or token classification
 import json
 import logging
 import os
+import random
 import shutil
 import uuid
 from abc import abstractmethod
@@ -39,6 +40,7 @@ from .helpers import (
     EmbedderType,
     ValidationMetricType,
     TRAIN_DEV_SPLIT_SEED,
+    SHUFFLE_TRAINING_SEED,
     LABEL_PAD_TOKEN_IDX,
     DEFAULT_EMB_DIM,
     DEFAULT_TOKENIZER
@@ -75,7 +77,10 @@ class BaseClassification(nn_module):
 
         self.name = self.__class__.__name__
         self.params = Bunch()
-        self.params["name"] = self.name
+        self.params.update({
+            "name": self.name,
+            "classification_type": self.classification_type,
+        })
         self.encoder = None
 
         self.ready = False  # True when .fit() is called or loaded from a checkpoint, else False
@@ -87,7 +92,7 @@ class BaseClassification(nn_module):
         return f"<{self.name}> ready:{self.ready} dirty:{self.dirty}"
 
     def get_default_params(self) -> Dict:
-        return get_default_params(self.__class__.__name__)
+        return get_default_params(self.name)
 
     def log_and_return_model_info(self, verbose: bool = False) -> str:
         """
@@ -150,6 +155,7 @@ class BaseClassification(nn_module):
 
         # obtain and validate all parameters required to fit the model
         params = {
+            **self.params,
             **self.get_default_params(),
             **params  # overwrite keys of default params that are passed-in
         }
@@ -171,6 +177,12 @@ class BaseClassification(nn_module):
             num_labels = len(set(chain.from_iterable(labels)))
         params.update({"num_labels": num_labels})
 
+        # split input data into train & dev splits, and get data loaders
+        train_examples, dev_examples, train_labels, dev_labels = train_test_split(
+            examples, labels, test_size=params["dev_split_ratio"],
+            random_state=TRAIN_DEV_SPLIT_SEED
+        )
+
         # update self.params which will be used throughout the following modeling code
         self.params.update(params)
 
@@ -183,12 +195,6 @@ class BaseClassification(nn_module):
         temp_folder = os.path.join(USER_CONFIG_DIR, "tmp", "pytorch_models", str(uuid.uuid4()))
         temp_weights_save_path = os.path.join(temp_folder, "pytorch_model.bin")
         os.makedirs(temp_folder, exist_ok=True)
-
-        # split input data into train & dev splits, and get data loaders
-        train_examples, dev_examples, train_labels, dev_labels = train_test_split(
-            examples, labels, test_size=self.params.dev_split_ratio,
-            random_state=TRAIN_DEV_SPLIT_SEED
-        )
 
         # create an optimizer and attach all model params to it
         num_training_steps = int(
@@ -205,6 +211,7 @@ class BaseClassification(nn_module):
         self.log_and_return_model_info(_verbose)
 
         # training w/ validation
+        random.seed(SHUFFLE_TRAINING_SEED)
         best_dev_score, best_dev_epoch = -np.inf, -1
         msg = f"Beginning to train for {self.params.number_of_epochs} number of epochs"
         logger.info(msg)
@@ -221,6 +228,10 @@ class BaseClassification(nn_module):
             self.train()
             optimizer.zero_grad()
             train_loss, train_batches = 0.0, 0.0
+            indices = list(range(len(train_examples)))
+            random.shuffle(indices)
+            train_examples = [train_examples[ii] for ii in indices]
+            train_labels = [train_labels[ii] for ii in indices]
             t = tqdm(range(0, len(train_examples), self.params.batch_size), disable=not _verbose)
             for start_idx in t:
                 batch_examples = train_examples[start_idx:start_idx + self.params.batch_size]
@@ -228,7 +239,8 @@ class BaseClassification(nn_module):
                 batch_data = self.encoder.batch_encode(
                     examples=batch_examples,
                     padding_length=self.params.padding_length,
-                    add_terminals=self.params.add_terminals,
+                    **({'add_terminals': self.params.add_terminals}
+                       if self.params.add_terminals is not None else {})
                 )
                 batch_data.update({
                     "_labels": self._prepare_labels(  # `_` 'cause this key is for intermediate use
@@ -239,6 +251,7 @@ class BaseClassification(nn_module):
                 })
                 batch_data = self.forward(batch_data)
                 loss = batch_data["loss"]
+                # .cpu() returns copy of tensor in CPU memory
                 train_loss += loss.cpu().detach().numpy()
                 train_batches += 1
                 # find gradients
@@ -339,9 +352,7 @@ class BaseClassification(nn_module):
 
         # populate few required key-values (ensures the key-values are populated if not inputted)
         params.update({
-            "add_terminals": params.get("add_terminals"),  # some encoders need this to be True
-            # (e.g. pretrained huggingface encoder) while some others don't; better not to set a
-            # boolean value as default to avoid raising errors unexpectedly
+            "add_terminals": params.get("add_terminals", True),
             "padding_length": params.get("padding_length"),  # explicitly obtained for more
             # transparent param dictionary
             "tokenizer_type": params.get("tokenizer_type", DEFAULT_TOKENIZER),
@@ -518,7 +529,7 @@ class BaseClassification(nn_module):
         # load encoder's state
         module.params.update(dict(all_params))
         module.encoder = InputEncoderFactory.get_encoder_cls(
-            tokenizer_type=all_params["tokenizer_type"])(**all_params)
+            tokenizer_type=all_params["tokenizer_type"])(**module.params)
         module.encoder.load(path)
 
         # load weights
@@ -526,7 +537,7 @@ class BaseClassification(nn_module):
         device = "cuda" if torch.cuda.is_available() else "cpu"
         if device != module.params.device:
             msg = f"Model was dumped when on the device:{module.params.device} " \
-                  f"but is not being loaded on device:{device}"
+                  f"but is now being loaded on device:{device}"
             logger.warning(msg)
             module.params.device = device
         bin_path = os.path.join(path, "model.bin")
@@ -582,4 +593,8 @@ class BaseClassification(nn_module):
             examples (List[str]): The list of examples for which class prediction probabilities
                 are computed and returned.
         """
+        raise NotImplementedError
+
+    @property
+    def classification_type(self) -> str:
         raise NotImplementedError

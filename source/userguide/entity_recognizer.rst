@@ -1,6 +1,8 @@
 Working with the Entity Recognizer
 ==================================
 
+.. _entity_recognition:
+
 The :ref:`Entity Recognizer <arch_entity_model>`
 
  - is run as the third step in the :ref:`natural language processing pipeline <instantiate_nlp>`
@@ -148,6 +150,8 @@ Using default settings is the recommended (and quickest) way to get started with
 Classifier configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. _entity_recognizer_configuration:
+
 Use the :attr:`config` attribute of a trained classifier to view the :ref:`configuration <config>` that the classifier is using. Here's an example where we view the configuration of an entity recognizer trained using default settings:
 
 .. code-block:: python
@@ -211,7 +215,7 @@ Let's take a look at the allowed values for each setting in an entity recognizer
   =============== ============================================================================================ ==========================================
   ``'memm'``      `Maximum Entropy Markov Model <https://en.wikipedia.org/wiki/Maximum-entropy_Markov_model>`_ :sk_api:`sklearn.linear_model.LogisticRegression <sklearn.linear_model.LogisticRegression.html>`
   ``'crf'``       `Conditional Random Field <https://en.wikipedia.org/wiki/Conditional_random_field>`_         `sklearn-crfsuite <https://sklearn-crfsuite.readthedocs.io/en/latest/api.html>`_
-  ``'lstm'``      `Long Short-Term Memory <https://en.wikipedia.org/wiki/Long_short-term_memory>`_             :doc:`lstm API <../userguide/lstm>`
+  ``'lstm'``      `Long Short-Term Memory <https://en.wikipedia.org/wiki/Long_short-term_memory>`_             :ref:`lstm API <deep_ner>`
   =============== ============================================================================================ ==========================================
 
   Tagger models allow you to specify the additional model settings shown below.
@@ -513,6 +517,8 @@ Here's an example of a ``config.py`` file where custom settings optimized for th
    }
 
 Settings defined in :data:`ENTITY_RECOGNIZER_CONFIG` apply to entity recognizers across all domains and intents in your application. For finer-grained control, you can implement the :meth:`get_entity_recognizer_config` function in ``config.py`` to specify suitable configurations for each intent. This gives you the flexibility to modify models and features based on the domain and intent.
+
+.. _get_entity_recognizer_config:
 
 .. code-block:: python
 
@@ -1319,3 +1325,10 @@ To switch off system entity detection, specify an empty dictionary for the ``'sy
    }
 
 
+
+Using Deep Neural Models for Entity Recognition
+-----------------------------------------------
+
+MindMeld supports using deep neural models for entity recognition. Refer to :ref:`Deep Neural Networks in MindMeld <dnns_token_classification>` section for details on the different configurable parameters. Assign a token classification config dictionary to :data:`ENTITY_RECOGNIZER_CONFIG` and start using deep neural models for entity recognition. Note that viewing features extracted for entity recognition is not available with deep neural models.
+
+If you wish to use deep neural models only for selected intents, you can implement the :ref:`get_entity_recognizer_config() <get_entity_recognizer_config>` function in ``config.py`` for finer-grained control for each intent.
