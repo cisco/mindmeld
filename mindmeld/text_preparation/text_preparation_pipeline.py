@@ -375,7 +375,7 @@ class TextPreparationPipeline:  # pylint: disable=R0904
             )
             prev_entity_end = entity_end
 
-        # Append a span from the end of last entity to the end of the text (if it exists) 
+        # Append a span from the end of last entity to the end of the text (if it exists)
         if prev_entity_end < len(text):
             unannotated_spans.append((prev_entity_end, len(text)))
 

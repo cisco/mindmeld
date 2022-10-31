@@ -87,6 +87,8 @@ class SpacyModelFactory:
         """
         logger.info("Loading Spacy model %s.", spacy_model_name)
         try:
+            if len(spacy_model_name) == 2:
+                return spacy.blank(spacy_model_name)
             return spacy.load(spacy_model_name, disable=disable)
         except OSError:
             logger.warning(
@@ -107,6 +109,8 @@ class SpacyModelFactory:
         Returns:
             spacy_model_name (str): Name of the Spacy NER model (Ex: "en_core_web_sm")
         """
+        if spacy_model_size == 'blank':
+            return language
         model_type = "web" if language in SPACY_WEB_TRAINED_LANGUAGES else "news"
         return f"{language}_core_{model_type}_{spacy_model_size}"
 

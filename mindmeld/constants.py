@@ -88,7 +88,7 @@ SPACY_NEWS_TRAINED_LANGUAGES = [
 ]
 SPACY_SUPPORTED_LANGUAGES = SPACY_WEB_TRAINED_LANGUAGES + SPACY_NEWS_TRAINED_LANGUAGES
 
-SPACY_MODEL_SIZES = ["sm", "md", "lg"]
+SPACY_MODEL_SIZES = ["blank", "sm", "md", "lg"]
 
 UNANNOTATE_ALL_RULE = [
     {"domains": ".*", "intents": ".*", "files": ".*", "entities": ".*",}

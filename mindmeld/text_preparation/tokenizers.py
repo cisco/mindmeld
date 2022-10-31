@@ -268,7 +268,7 @@ class TokenizerFactory:
 
     @staticmethod
     def get_tokenizer(
-        tokenizer: str, language=ENGLISH_LANGUAGE_CODE, spacy_model_size="sm"
+        tokenizer: str, language=ENGLISH_LANGUAGE_CODE, spacy_model_size="blank"
     ):
         """A static method to get a tokenizer
 
