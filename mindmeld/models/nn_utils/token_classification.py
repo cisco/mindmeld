@@ -20,6 +20,10 @@ from abc import abstractmethod
 from collections import OrderedDict
 from typing import List
 
+import torch
+import torch.nn as nn
+from torch.nn.utils.rnn import pad_sequence
+
 from .classification import BaseClassification
 from .helpers import TokenClassificationType
 from .helpers import TokenizerType, EmbedderType
@@ -31,10 +35,6 @@ from .layers import (
     SplittingAndPoolingLayer
 )
 from ..containers import HuggingfaceTransformersContainer
-
-import torch
-import torch.nn as nn
-from torch.nn.utils.rnn import pad_sequence
 
 try:
     from torchcrf import CRF

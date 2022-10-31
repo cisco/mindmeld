@@ -16,12 +16,12 @@ from typing import List, Union, Dict
 
 import numpy as np
 
-from .._util import _get_module_or_attr
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence, pad_sequence
+
+from .._util import _get_module_or_attr
 
 nn_module = _get_module_or_attr("torch.nn", "Module")
 
