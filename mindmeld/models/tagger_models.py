@@ -27,7 +27,7 @@ from .helpers import (
 )
 from .model import ModelConfig, Model, PytorchModel, AbstractModelFactory
 from .nn_utils import get_token_classifier_cls, TokenClassificationType
-from .taggers.crf import ConditionalRandomFields, CRFTagger
+from .taggers.crf import CRFTagger
 from .taggers.memm import MemmModel
 from ..exceptions import MindMeldError
 
