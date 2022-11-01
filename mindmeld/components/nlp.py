@@ -510,9 +510,11 @@ class NaturalLanguageProcessor(Processor):
         model_path, incremental_model_path = path.get_domain_model_paths(
             app_path=self._app_path, timestamp=incremental_timestamp
         )
+        incremental_model_path_exist = os.path.exists(
+            incremental_model_path) if incremental_model_path is not None else False
 
         self.domain_classifier.load(
-            incremental_model_path if incremental_timestamp else model_path
+            incremental_model_path if incremental_model_path_exist else model_path
         )
 
     def _evaluate(self, print_stats, label_set=None):
@@ -880,9 +882,11 @@ class DomainProcessor(Processor):
         model_path, incremental_model_path = path.get_intent_model_paths(
             app_path=self._app_path, domain=self.name, timestamp=incremental_timestamp
         )
+        incremental_model_path_exist = os.path.exists(
+            incremental_model_path) if incremental_model_path is not None else False
 
         self.intent_classifier.load(
-            incremental_model_path if incremental_timestamp else model_path
+            incremental_model_path if incremental_model_path_exist else model_path
         )
 
     def _evaluate(self, print_stats, label_set="test"):
@@ -1209,8 +1213,10 @@ class IntentProcessor(Processor):
         model_path, incremental_model_path = path.get_entity_model_paths(
             self._app_path, self.domain, self.name, timestamp=incremental_timestamp
         )
+        incremental_model_path_exist = os.path.exists(
+            incremental_model_path) if incremental_model_path is not None else False
         self.entity_recognizer.load(
-            incremental_model_path if incremental_timestamp else model_path
+            incremental_model_path if incremental_model_path_exist else model_path
         )
 
         # Create the entity processors
@@ -1708,8 +1714,11 @@ class EntityProcessor(Processor):
             self.type,
             timestamp=incremental_timestamp,
         )
+        incremental_model_path_exist = os.path.exists(
+            incremental_model_path) if incremental_model_path is not None else False
+
         self.role_classifier.load(
-            incremental_model_path if incremental_timestamp else model_path
+            incremental_model_path if incremental_model_path_exist else model_path
         )
         model_path, incremental_model_path = path.get_resolver_model_path(
             self._app_path,
@@ -1718,9 +1727,12 @@ class EntityProcessor(Processor):
             self.type,
             timestamp=incremental_timestamp,
         )
+        incremental_model_path_exist = os.path.exists(
+            incremental_model_path) if incremental_model_path is not None else False
+
         try:
             self.entity_resolver.load(
-                incremental_model_path if incremental_timestamp else model_path
+                incremental_model_path if incremental_model_path_exist else model_path
             )
         except FileNotFoundError as e:
             logger.error(e)

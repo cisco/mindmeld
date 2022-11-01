@@ -74,12 +74,10 @@ def test_model_cache_files_present_after_second_incremental_build(kwik_e_mart_ap
     assert os.path.exists(model_cache_path) is False
     nlp = NaturalLanguageProcessor(kwik_e_mart_app_path)
     nlp.build(incremental=True)
-    nlp.dump()
     initial_timestamp = nlp.incremental_timestamp
 
     nlp = NaturalLanguageProcessor(kwik_e_mart_app_path)
     nlp.build(incremental=True)
-    nlp.dump()
     new_timestamp = nlp.incremental_timestamp
 
     nlp.load(initial_timestamp)
