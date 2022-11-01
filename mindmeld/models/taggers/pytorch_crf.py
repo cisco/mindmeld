@@ -6,7 +6,7 @@ from collections import Counter
 from copy import copy
 from itertools import chain
 from random import randint
-from tempfile import mkdtemp
+from tempfile import NamedTemporaryFile
 
 import numpy as np
 import torch
@@ -286,8 +286,6 @@ class TorchCrfModel(nn.Module):
         self.l2_weight = None
         self.random_state = None
 
-        self.tmp_save_path = os.path.join(mkdtemp(), "best_crf_wts.pt")
-
     def get_encoder(self):
         return self._encoder
 
@@ -487,6 +485,8 @@ class TorchCrfModel(nn.Module):
             dev_split_ratio (float): Percentage of training data to be used for validation.
             optimizer (str): Type of optimizer used for the model. Supported options are 'sgd' and 'adam'.
             random_state (int): Integer value to set random seeds for deterministic output.
+            l1_weight (float): Regularization weight for L1-penalty
+            l2_weight (float): Regularization weight for L2-penalty
 
         """
 
@@ -509,6 +509,25 @@ class TorchCrfModel(nn.Module):
         if self.feat_type == "dict":
             logger.warning(
                 "WARNING: Number of features is compatible with only `hash` feature type. This value is ignored with `dict` setting")
+
+    def get_params(self):
+        """
+        Get the parameters for the PyTorch CRF model.
+        """
+        return {
+            "feat_type": self.feat_type,
+            "feat_num": self.feat_num,
+            "stratify_train_val_split": self.stratify_train_val_split,
+            "drop_input": self.drop_input,
+            "batch_size": self.batch_size,
+            "patience": self.patience,
+            "number_of_epochs": self.number_of_epochs,
+            "dev_split_ratio": self.dev_split_ratio,
+            "optimizer": self.optimizer,
+            "l1_weight": self.l1_weight,
+            "l2_weight": self.l2_weight,
+            "random_state": self.random_state
+        }
 
     def get_dataloader(self, X, y, is_train):
         """Creates and returns the PyTorch dataloader instance for the training/test data.
@@ -570,11 +589,11 @@ class TorchCrfModel(nn.Module):
         self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(self.optim, mode='max',
                                                               patience=max(self.patience - 2, 1),
                                                               factor=0.5)
+        with NamedTemporaryFile(suffix=".pt", prefix="best_crf_wts") as tmp_file:
+            self.training_loop(train_dataloader, dev_dataloader, tmp_file.name)
+            self.load_state_dict(torch.load(tmp_file.name))
 
-        self.training_loop(train_dataloader, dev_dataloader)
-        self.load_state_dict(torch.load(self.tmp_save_path))
-
-    def training_loop(self, train_dataloader, dev_dataloader):
+    def training_loop(self, train_dataloader, dev_dataloader, tmp_save_path):
         """Contains the training loop process where we train the model for specified number of epochs.
 
         Args:
@@ -598,7 +617,7 @@ class TorchCrfModel(nn.Module):
             else:
                 _patience_counter = 0
                 best_dev_score, best_dev_epoch = dev_f1_score, epoch
-                torch.save(self.state_dict(), self.tmp_save_path)
+                torch.save(self.state_dict(), tmp_save_path)
                 logger.debug("Model weights saved for best dev epoch %s.", best_dev_epoch)
 
     def train_one_epoch(self, train_dataloader):

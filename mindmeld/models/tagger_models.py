@@ -455,6 +455,7 @@ class TaggerModel(Model):
                 # replace model dump directory with actual model
             elif metadata.get('model_type') == 'torch-crf':
                 model._clf.set_params(**metadata["model_config"].params)
+                model._current_params = model._clf.get_params()
                 model._clf.set_torch_encoder(metadata['feature_and_label_encoder'])
                 model._clf.load(path)
 
