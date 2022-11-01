@@ -20,6 +20,10 @@ from abc import abstractmethod
 from collections import OrderedDict
 from typing import List
 
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
 from .classification import BaseClassification
 from .helpers import BatchData, EmbedderType, SequenceClassificationType
 from .layers import (
@@ -29,13 +33,6 @@ from .layers import (
     PoolingLayer
 )
 from ..containers import HuggingfaceTransformersContainer
-
-try:
-    import torch
-    import torch.nn as nn
-    import torch.nn.functional as F
-except ImportError:
-    pass
 
 logger = logging.getLogger(__name__)
 

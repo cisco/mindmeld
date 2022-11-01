@@ -20,6 +20,11 @@ from abc import abstractmethod
 from collections import OrderedDict
 from typing import List
 
+import torch
+import torch.nn as nn
+from torch.nn.utils.rnn import pad_sequence
+from torchcrf import CRF
+
 from .classification import BaseClassification
 from .helpers import TokenClassificationType
 from .helpers import TokenizerType, EmbedderType
@@ -32,20 +37,7 @@ from .layers import (
 )
 from ..containers import HuggingfaceTransformersContainer
 
-try:
-    import torch
-    import torch.nn as nn
-    from torch.nn.utils.rnn import pad_sequence
-except ImportError:
-    pass
 
-try:
-    from torchcrf import CRF
-
-    TORCHCRF_AVAILABLE = True
-except ImportError:
-    TORCHCRF_AVAILABLE = False
-    pass
 
 logger = logging.getLogger(__name__)
 
@@ -108,8 +100,6 @@ class BaseTokenClassification(BaseClassification):
         )
         if self.params.use_crf_layer:
             self.classifier_head = nn.Linear(self.out_dim, self.params.num_labels)
-            if not TORCHCRF_AVAILABLE:
-                raise ImportError("pip install torchcrf")
             self.crf_layer = CRF(self.params.num_labels, batch_first=True)
         else:
             if self.params.num_labels >= 2:

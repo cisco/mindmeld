@@ -260,7 +260,7 @@ def compute_l2_params(w):
 
 
 # pylint: disable=too-many-instance-attributes
-class TorchCrfModel(nn.Module):
+class CRFModel(nn.Module):
     """PyTorch Model Class for Conditional Random Fields"""
 
     def __init__(self):

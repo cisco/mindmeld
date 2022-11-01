@@ -271,8 +271,8 @@ def test_get_boundary_counts_sequential(
 
 @pytest.mark.parametrize(
     "model_type,params",
-    [("memm", {"penalty": "l2", "C": 10000}), ("torch-crf", {"feat_type": "dict"}),
-     ("torch-crf", {"feat_type": "hash"})],
+    [("memm", {"penalty": "l2", "C": 10000}), ("crf", {"feat_type": "dict"}),
+     ("crf", {"feat_type": "hash"})],
 )
 def test_view_extracted_features(kwik_e_mart_nlp, model_type, params):
     config = {
@@ -311,8 +311,8 @@ def test_view_extracted_features(kwik_e_mart_nlp, model_type, params):
     "query,model_type,params",
     [
         ("Main st store hours", "memm", {"penalty": "l2", "C": 10000}),
-        ("Main st store hours", "torch-crf", {"feat_type": "dict"}),
-        ("Main st store hours", "torch-crf", {"feat_type": "hash"})
+        ("Main st store hours", "crf", {"feat_type": "dict"}),
+        ("Main st store hours", "crf", {"feat_type": "hash"})
     ],
 )
 def test_fetch_distribution(kwik_e_mart_nlp, query, model_type, params):

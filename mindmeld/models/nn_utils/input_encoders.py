@@ -20,15 +20,11 @@ import os
 from abc import abstractmethod, ABC
 from itertools import chain
 from typing import Dict, List, Union, Any, Tuple
+import torch
 
 from .helpers import BatchData, TokenizerType, ClassificationType
 from .._util import _get_module_or_attr
 from ..containers import HuggingfaceTransformersContainer
-
-try:
-    import torch
-except ImportError:
-    pass
 
 try:
     from tokenizers import normalizers

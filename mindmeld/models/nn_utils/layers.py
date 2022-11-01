@@ -16,18 +16,14 @@ from typing import List, Union, Dict
 
 import numpy as np
 
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence, pad_sequence
+
 from .._util import _get_module_or_attr
 
-try:
-    import torch
-    import torch.nn as nn
-    import torch.nn.functional as F
-    from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence, pad_sequence
-
-    nn_module = _get_module_or_attr("torch.nn", "Module")
-except ImportError:
-    nn_module = object
-    pass
+nn_module = _get_module_or_attr("torch.nn", "Module")
 
 logger = logging.getLogger(__name__)
 
