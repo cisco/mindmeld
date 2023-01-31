@@ -108,7 +108,7 @@ setup(
         "augment": [
             'torch~=1.10.0; python_version>="3.6"',
             'transformers~=4.15.0; python_version>="3.6"',
-            'sentencepiece==0.1.97'
+            'sentencepiece==0.1.91'
         ],
         "language_annotator": [
             "google-cloud-translate>=3.0.1",
