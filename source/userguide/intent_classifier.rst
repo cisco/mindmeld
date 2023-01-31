@@ -1,7 +1,7 @@
 Working with the Intent Classifier
 ==================================
 
-.. _intent_classification:
+.. _intent_classifier:
 
 The :ref:`Intent Classifier <arch_intent_model>`
 

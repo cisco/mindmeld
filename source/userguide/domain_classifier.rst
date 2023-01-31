@@ -1,7 +1,7 @@
 Working with the Domain Classifier
 ==================================
 
-.. _domain_classification:
+.. _domain_classifier:
 
 The Domain Classifier
 

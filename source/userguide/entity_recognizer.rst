@@ -1,7 +1,7 @@
 Working with the Entity Recognizer
 ==================================
 
-.. _entity_recognition:
+.. _entity_recognizer:
 
 The :ref:`Entity Recognizer <arch_entity_model>`
 
