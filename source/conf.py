@@ -114,7 +114,7 @@ master_doc = "index"
 
 # General information about the project.
 project = u"The Conversational AI Playbook"
-copyright = u"2019, Cisco Systems"
+copyright = u"2023, Cisco Systems"
 author = u"Cisco Systems."
 
 # The version info for the project you're documenting, acts as replacement for

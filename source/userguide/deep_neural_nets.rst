@@ -3,7 +3,7 @@ Deep Neural Networks in MindMeld
 
 Conversational AI and Natural Language Processing more generally have seen a boost in performance at a variety of tasks through the use of `Deep learning <https://en.wikipedia.org/wiki/Deep_learning>`_. In particular, deep neural models based on :wiki_api:`Convolutional neural networks (CNNs) <Convolutional_neural_network#Natural_language_processing>`, :wiki_api:`Long short-term memory networks (LSTM) <Long_short-term_memory>` and :wiki_api:`Transformers <Transformer_(machine_learning_model)>` architectures have been widely adopted over more traditional approaches to NLP to great success. MindMeld now extends its suite of traditional machine learning models (e.g. :sk_guide:`Logistic regression <linear_model.html#logistic-regression>`, :sk_guide:`Decision tree <tree.html#tree>`, etc.) with a variety of deep neural models and an array of configurable parameters.
 
-Users can now train and use deep neural models for :ref:`domain classification <domain_classification>` and :ref:`intent classification <intent_classification>` (aka. sequence classification) as well as for :ref:`entity recognition <entity_recognition>` (or token classification) tasks.
+Users can now train and use deep neural models for :ref:`domain classification <domain_classifier>` and :ref:`intent classification <intent_classifier>` (aka. sequence classification) as well as for :ref:`entity recognition <entity_recognizer>` (or token classification) tasks.
 
 .. note::
 
