@@ -145,7 +145,7 @@ function check_os_and_execute_deps() {
 			if [[ ($command == "elasticsearch") && ($is_200_ok == 0) ]]; then
 				echo no
 				echo "   " starting elasticsearch ...
-				sudo docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.8.0
+				sudo docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.16.2
 			else
 				echo yes
 			fi
@@ -197,8 +197,8 @@ function check_os_and_execute_deps() {
 				elif [[ $command == "pip" ]]; then
 					sudo apt install python-pip
 			  elif [[ $command == "elasticsearch" && NEEDS_ES_DEP_INSTALL == 1 ]]; then
-			    sudo docker pull docker.elastic.co/elasticsearch/elasticsearch:7.8.0
-					sudo docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.8.0
+			    sudo docker pull docker.elastic.co/elasticsearch/elasticsearch:7.16.2
+					sudo docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.16.2
 			  elif [[ $command == "virtualenv" ]]; then
 			    sudo apt install virtualenv
 				fi

@@ -17,7 +17,7 @@ jobs:
       matrix:
         python-version: [3.7]
         mm-extras: ["true", "false"]
-        es_version: [5.6.16, 6.8.10, 7.7.1]
+        es_version: [5.6.16, 6.8.22, 7.16.2]
 
     steps:
     - uses: actions/checkout@v2
