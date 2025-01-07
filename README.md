@@ -52,23 +52,6 @@ python -m home_assistant converse
 
 For detailed installation instructions, see [Getting Started](http://www.mindmeld.com/docs/userguide/getting_started.html). To start with pre-built sample applications, see [MindMeld Blueprints](http://www.mindmeld.com/docs/blueprints/overview.html).
 
-## MindMeld UI
-
-![MindMeld UI](https://www.mindmeld.com/docs/_images/mindmeld_ui.png)
-
-You can use our sample web-based chat client interface to interact with any MindMeld application. This web UI also serves as a debugging tool to step through the various stages of query processing by the MindMeld pipeline.
-
-```
-git clone git@github.com:cisco/mindmeld.git
-cd mindmeld/mindmeld-ui
-npm install
-npm start
-```
-
-For detailed installation instructions, see [Getting Started for UI](https://www.mindmeld.com/docs/mindmeld_ui/mindmeld_ui.html).
-
-Note: this web client only works on Chrome browser.
-
 ## How to contribute to the MindMeld platform:
 
 We are very happy to receive your contributions. We maintain a list of [open issues](https://github.com/cisco/mindmeld/issues) on our GitHub project.
