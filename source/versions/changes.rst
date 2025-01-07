@@ -1,6 +1,17 @@
 Recent Changes
 ==============
 
+MindMeld 4.6
+-------------
+.. warning::
+
+   This release includes breaking changes.
+
+**3. Removal of Mindmeld UI**
+
+The Mindmeld UI has been removed due to security concerns on 4.6.3.
+
+
 MindMeld 4.5
 -------------
 .. warning::
