@@ -1,6 +1,6 @@
 # READ THIS FIRST
 
-The MindMeld SDK is **no longer maintained**. Though once a state-of-the-art conversational AI platform, MindMeld has long since been surpassed by technologies enabled by LLMs. If you are currently using the MindMeld library, we advise you to evaluate alternatives. MindMeld hasn't had a release since August of 2012, and will not have any future releases.
+The MindMeld SDK is **no longer maintained**. Though once a state-of-the-art conversational AI platform, MindMeld has long since been surpassed by technologies enabled by LLMs. If you are currently using the MindMeld library, we advise you to evaluate alternatives. MindMeld hasn't had a release since November of 2012, and will not have any future releases.
 
 Thank you to all our users and contributors.
 
