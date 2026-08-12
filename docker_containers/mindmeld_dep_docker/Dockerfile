@@ -10,12 +10,12 @@
 # Pull base image.
 FROM ubuntu:18.04
 
-ENV ES_PKG_NAME elasticsearch-7.8.0-linux-x86_64
-ENV ES_FOLDER_NAME elasticsearch-7.8.0
+ENV ES_PKG_NAME elasticsearch-7.17.8-linux-x86_64
+ENV ES_FOLDER_NAME elasticsearch-7.17.8
 
 # System packages
 RUN apt-get update && \
-    apt-get -y install software-properties-common curl vim
+    apt-get -y install software-properties-common curl vim wget
 
 # Create directories
 RUN mkdir /root/.pip /root/.mindmeld /data
@@ -24,18 +24,9 @@ RUN mkdir /root/.pip /root/.mindmeld /data
 RUN apt-get -y install python-pip python3-pip python-dev build-essential && \
     apt-get -y install software-properties-common
 
-# Install Java
-RUN apt update
-RUN apt-get update
-RUN apt-get install -y wget
-RUN apt install openjdk-8-jdk -y
-
 # Install duckling dependency
 RUN apt-get -y update && \
     DEBIAN_FRONTEND="noninteractive" apt-get -y upgrade tzdata
-
-# set JAVA_HOME
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 
 # Install Elasticsearch.
 RUN \
@@ -48,7 +39,6 @@ RUN \
 RUN useradd -ms /bin/bash mindmeld
 RUN mkdir /elasticsearch/log
 RUN chown -R mindmeld:mindmeld /elasticsearch /data /var/log
-
 
 # Add Config Files
 COPY ./conf/elasticsearch.yml /elasticsearch/config/elasticsearch.yml
